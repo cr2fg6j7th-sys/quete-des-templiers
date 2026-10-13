@@ -1,0 +1,8 @@
+{
+  "voice": "Gemini 3.8 Flash Lite TTS, voix Algenib",
+  "clips": {
+    "test/nom-lea": "https://v3b.fal.media/files/b/0aae3e90/uLwkr1tBZf3LEZZDl6Con_gemini_tts_output.wav",
+    "test/eglise": "https://v3b.fal.media/files/b/0aae3e90/m4s35B-5nSlYSVC1FBPSh_gemini_tts_output.wav",
+    "test/eglise-complete": "https://v3b.fal.media/files/b/0aae3e90/ECDHnvzKjgK_QouitDLxO_gemini_tts_output.wav"
+  }
+}

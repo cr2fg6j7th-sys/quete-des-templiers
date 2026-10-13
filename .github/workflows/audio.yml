@@ -1,0 +1,54 @@
+# Downloads the Grand Master voice clips listed in audio/manifest.json,
+# converts them to small MP3 files and commits them to the repository,
+# so the app serves its own audio from GitHub Pages.
+name: Voix du Grand Maître
+
+on:
+  push:
+    paths:
+      - "audio/manifest.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: audio
+  cancel-in-progress: false
+
+jobs:
+  fetch-audio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer ffmpeg
+        run: which ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+
+      - name: Télécharger et convertir les clips manquants
+        run: |
+          python3 - <<'EOF'
+          import json, os, subprocess, urllib.request
+          manifest = json.load(open("audio/manifest.json", encoding="utf-8"))
+          done = 0
+          for key, url in manifest["clips"].items():
+              out = os.path.join("audio", key + ".mp3")
+              if os.path.exists(out):
+                  continue
+              os.makedirs(os.path.dirname(out), exist_ok=True)
+              tmp = "/tmp/clip.wav"
+              urllib.request.urlretrieve(url, tmp)
+              # trim leading/trailing silence, mono, 56 kbps
+              subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", tmp,
+                              "-af", "silenceremove=start_periods=1:start_threshold=-50dB:stop_periods=-1:stop_duration=0.6:stop_threshold=-50dB",
+                              "-ac", "1", "-b:a", "56k", out], check=True)
+              done += 1
+          print(f"{done} clip(s) ajouté(s)")
+          EOF
+
+      - name: Enregistrer les clips
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add audio
+          git diff --cached --quiet || (git commit -m "Ajout des clips de voix" && git push)
