@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>La Quête des Templiers</title>
+<meta name="description" content="Une quête d'anniversaire au prénom de votre enfant, générée en deux minutes autour de chez vous.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Alegreya+Sans+SC:wght@500;700&display=swap">
+<style>
+/* Layout: one narrow column held by the adult guide; six shields track the quest. */
+:root{
+  --stone:#eef0f5;--card:#ffffff;--ink:#1b2547;--muted:#5b6482;--rose:#b8505c;--rose-soft:#f6e3e5;--or:#a87a1f;--line:#d9dce8;--ok:#2f7a4f;
+  --display:"UnifrakturMaguntia","Old English Text MT",Georgia,serif;
+  --body:"Alegreya Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --label:"Alegreya Sans SC","Alegreya Sans",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;color-scheme:dark}}
+:root[data-theme="dark"]{--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;color-scheme:dark}
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--stone);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:flex;flex-direction:column;gap:18px}
+h1,h2{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:2.4rem}h2{font-size:1.8rem}
+h3{font-family:var(--label);font-size:1rem;letter-spacing:.06em;margin:0;color:var(--rose)}
+p{margin:0}
+a{color:var(--rose)}
+.lead{color:var(--muted)}
+.eyebrow{font-family:var(--label);font-size:.85rem;letter-spacing:.12em;color:var(--or);text-transform:lowercase}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.adult{border-left:4px solid var(--or)}
+.voice{background:var(--rose-soft);border:none}
+.voice p{font-style:italic}
+label{font-family:var(--label);letter-spacing:.05em;font-size:.95rem;display:flex;flex-direction:column;gap:6px}
+input[type=text],input[type=number],input[type=search],select{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink);width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1 1 140px;min-width:0}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;border:0;border-radius:0;background:transparent;color:var(--ink);padding:10px;font:inherit;font-family:var(--label)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--stone)}
+button{cursor:pointer}
+.btn{font:inherit;font-family:var(--label);letter-spacing:.05em;font-size:1.05rem;padding:12px 16px;border-radius:12px;border:0;background:var(--rose);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.gold{background:var(--or);color:#fff}
+.btn:focus-visible,.seg button:focus-visible,.choice:focus-visible,input:focus-visible,select:focus-visible,.result:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stats div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 4px}
+.stats b{display:block;font-size:1.35rem;font-variant-numeric:tabular-nums}
+.stats span{font-family:var(--label);font-size:.8rem;color:var(--muted);letter-spacing:.05em}
+.teasers{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.teasers li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px dashed var(--line);border-radius:10px}
+.teasers .n{font-family:var(--label);color:var(--or);min-width:1.4em}
+.lock{color:var(--muted);font-size:.85rem;font-family:var(--label);letter-spacing:.05em}
+.shields{display:flex;gap:6px;justify-content:space-between}
+.shield{flex:1;max-width:52px}
+.shield svg{width:100%;height:auto;display:block}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{font:inherit;text-align:left;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink)}
+.choice.wrong{border-color:var(--rose);background:var(--rose-soft)}
+.choice.right{border-color:var(--ok);color:var(--ok);font-weight:700}
+.result{font:inherit;text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink)}
+.hint{font-size:.95rem;color:var(--muted);white-space:pre-line}
+.ok{color:var(--ok);font-weight:700}
+.note{font-size:.85rem;color:var(--muted)}
+.letter{font-family:var(--display);font-size:3.2rem;color:var(--rose);line-height:1;text-align:center;letter-spacing:.15em}
+.diploma{border:3px double var(--or);border-radius:6px;padding:22px 18px;text-align:center;gap:10px;background:var(--card)}
+.diploma .name{font-family:var(--display);font-size:2.4rem;color:var(--rose)}
+.timer{font-size:2.2rem;font-variant-numeric:tabular-nums;text-align:center;font-weight:700}
+.map{width:100%;height:auto;display:block;border-radius:12px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.linkish{background:none;border:0;color:var(--muted);font:inherit;font-size:.9rem;text-decoration:underline;padding:4px;align-self:flex-start}
+ul.rules{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+.spinner{width:42px;height:42px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--rose);margin:0 auto}
+footer{font-size:.78rem;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion:no-preference){.pop{animation:pop .5s ease-out}@keyframes pop{from{transform:scale(.6);opacity:.3}to{transform:none;opacity:1}}.spinner{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* ENGINE-START
+   Quest generator: OpenStreetMap places around a start point -> a 4 to 6 step quest.
+   Pure functions only (no DOM), so it runs in the browser and in Node for tests. */
+
+const QuestEngine = (() => {
+  const SEARCH_RADIUS = 700;     // metres around the start point
+  const MAX_WALK = 1600;         // metres of walking for the whole quest
+  const WALK_FACTOR = 1.3;       // straight line -> real walking distance
+  const MIN_GAP = 60;            // two stops closer than this feel like one place
+
+  function overpassQuery(lat, lon, r = SEARCH_RADIUS) {
+    const a = `(around:${r},${lat.toFixed(6)},${lon.toFixed(6)})`;
+    return `[out:json][timeout:25];(
+nwr${a}["amenity"="place_of_worship"];
+nwr${a}["amenity"~"^(fountain|townhall)$"];
+nwr${a}["man_made"="water_well"];
+nwr${a}["historic"~"^(city_gate|castle|tower|ruins|fort|manor|monument|memorial|archaeological_site)$"];
+nwr${a}["leisure"~"^(park|playground|garden)$"];
+nwr${a}["place"="square"];
+nwr${a}["tourism"~"^(artwork|viewpoint)$"];
+);out center tags;`;
+  }
+
+  function dist(a, b) {
+    const R = 6371000, r = x => x * Math.PI / 180;
+    const dLat = r(b.lat - a.lat), dLon = r(b.lon - a.lon);
+    const q = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(q));
+  }
+  function bearing(a, b) {
+    const r = x => x * Math.PI / 180;
+    const y = Math.sin(r(b.lon - a.lon)) * Math.cos(r(b.lat));
+    const x = Math.cos(r(a.lat)) * Math.sin(r(b.lat)) - Math.sin(r(a.lat)) * Math.cos(r(b.lat)) * Math.cos(r(b.lon - a.lon));
+    const deg = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    return ["le nord", "le nord-est", "l'est", "le sud-est", "le sud", "le sud-ouest", "l'ouest", "le nord-ouest"][Math.round(deg / 45) % 8];
+  }
+
+  // ---- 1. classify OSM elements into kid-friendly categories ----
+  const BASE = { gate: 9, castle: 9, ruins: 8, tower: 8, church: 8, well: 8, fountain: 7, viewpoint: 6,
+    townhall: 6, square: 6, park: 6, statue: 6, memorial: 5, artwork: 5, playground: 4 };
+
+  function classify(el) {
+    const t = el.tags || {};
+    if (t.access === "private" || t.access === "no") return null;
+    const lat = el.lat ?? el.center?.lat, lon = el.lon ?? el.center?.lon;
+    if (lat == null || lon == null) return null;
+    let cat = null;
+    if (t.historic === "city_gate") cat = "gate";
+    else if (["castle", "fort", "manor"].includes(t.historic)) cat = "castle";
+    else if (t.historic === "ruins" || t.historic === "archaeological_site") cat = t.name ? "ruins" : null;
+    else if (t.historic === "tower" || t.man_made === "tower") cat = "tower";
+    else if (t.amenity === "place_of_worship") cat = (!t.religion || t.religion === "christian") ? "church" : null;
+    else if (t.man_made === "water_well") cat = "well";
+    else if (t.amenity === "fountain") cat = "fountain";
+    else if (t.amenity === "townhall") cat = (!t.townhall || t.townhall === "city") ? "townhall" : null;
+    else if (t.historic === "memorial") {
+      const m = t.memorial || "";
+      if (["plaque", "stolperstein", "blue_plaque", "bench", "stone"].includes(m)) cat = null;
+      else if (m === "war_memorial" || /morts|guerre/i.test(t.name || "")) cat = "memorial";
+      else if (m === "statue" || m === "bust") cat = "statue";
+      else cat = t.name ? "statue" : null;
+    }
+    else if (t.historic === "monument") cat = "statue";
+    else if (t.place === "square") cat = t.name ? "square" : null;
+    else if (t.leisure === "park" || t.leisure === "garden") cat = (t.access === "private" || t.garden === "private") ? null : "park";
+    else if (t.leisure === "playground") cat = "playground";
+    else if (t.tourism === "viewpoint") cat = "viewpoint";
+    else if (t.tourism === "artwork") cat = (t.artwork_type === "statue" || t.artwork_type === "sculpture") ? "statue" : (t.name ? "artwork" : null);
+    if (!cat) return null;
+    let score = BASE[cat] + (t.name ? 2 : 0) + (t.historic ? 1 : 0) + (t.wikidata || t.wikipedia ? 1 : 0);
+    return { id: `${el.type}/${el.id}`, cat, lat, lon, name: t.name || "", score, tags: t };
+  }
+
+  // ---- 2. merge duplicates (church as a point and as a building, etc.) ----
+  function dedupe(list) {
+    const out = [];
+    for (const p of list.sort((a, b) => b.score - a.score)) {
+      const twin = out.find(q => dist(p, q) < (q.cat === p.cat ? 70 : 25));
+      if (!twin) out.push(p);
+    }
+    return out;
+  }
+
+  // ---- 3. choose and order the stops ----
+  const LIMIT = { church: 2, park: 2, fountain: 2, statue: 2, square: 1, playground: 1, memorial: 1,
+    townhall: 1, gate: 2, tower: 2, castle: 1, ruins: 1, well: 1, artwork: 1, viewpoint: 1 };
+
+  function pathLength(start, stops) {
+    let d = 0, cur = start;
+    for (const s of stops) { d += dist(cur, s); cur = s; }
+    return d * WALK_FACTOR;
+  }
+
+  function greedyFrom(start, cands, first, n) {
+    const chosen = [first], used = { [first.cat]: 1 };
+    let cur = first;
+    while (chosen.length < n) {
+      let best = null, bestV = -Infinity;
+      for (const c of cands) {
+        if (chosen.includes(c)) continue;
+        if ((used[c.cat] || 0) >= (LIMIT[c.cat] || 1)) continue;
+        if (chosen.some(s => dist(s, c) < MIN_GAP)) continue;
+        const v = c.score - 0.03 * dist(cur, c) - 2.5 * (used[c.cat] || 0);
+        if (v > bestV) { bestV = v; best = c; }
+      }
+      if (!best) break;
+      chosen.push(best); used[best.cat] = (used[best.cat] || 0) + 1; cur = best;
+    }
+    return chosen;
+  }
+
+  function twoOpt(start, stops) {
+    let best = stops.slice(), improved = true;
+    while (improved) {
+      improved = false;
+      for (let i = 0; i < best.length - 1; i++) {
+        for (let k = i + 1; k < best.length; k++) {
+          const cand = best.slice(0, i).concat(best.slice(i, k + 1).reverse(), best.slice(k + 1));
+          if (pathLength(start, cand) + 1e-6 < pathLength(start, best)) { best = cand; improved = true; }
+        }
+      }
+    }
+    return best;
+  }
+
+  function choose(start, places, want = 6) {
+    const cands = places.filter(p => dist(start, p) <= SEARCH_RADIUS + 50);
+    let best = null, bestV = -Infinity;
+    const firsts = cands.slice().sort((a, b) => (b.score - 0.02 * dist(start, b)) - (a.score - 0.02 * dist(start, a))).slice(0, 10);
+    for (const f of firsts) {
+      for (const n of [want, want - 1, want - 2]) {
+        if (n < 4) continue;
+        let stops = twoOpt(start, greedyFrom(start, cands, f, n));
+        while (stops.length > 4 && pathLength(start, stops) > MAX_WALK) {
+          // drop the stop whose removal saves the most walking
+          let drop = 0, save = -1;
+          stops.forEach((_, i) => { const s = pathLength(start, stops) - pathLength(start, stops.filter((__, j) => j !== i)); if (s > save) { save = s; drop = i; } });
+          stops = twoOpt(start, stops.filter((_, j) => j !== drop));
+        }
+        if (stops.length < 4 || pathLength(start, stops) > MAX_WALK) continue;
+        const last = stops[stops.length - 1];
+        const endBonus = ["park", "square", "playground", "gate", "castle"].includes(last.cat) ? 3 : 0;
+        const v = stops.reduce((s, p) => s + p.score, 0) + stops.length * 4 - 0.006 * pathLength(start, stops) + endBonus;
+        if (v > bestV) { bestV = v; best = stops; }
+      }
+    }
+    return best;
+  }
+
+  // ---- 4. words and texts ----
+  const WORDS = {
+    6: { word: "FIDELE", say: "FIDÈLE", hint: "un vrai [[chevalier|chevalière]] l'est toujours envers ses amis", meaning: "Un [[chevalier|chevalière]] est fidèle à ses amis et à sa parole." },
+    5: { word: "BRAVE", say: "BRAVE", hint: "un [[chevalier|chevalière]] n'a pas peur : [[il|elle]] est…", meaning: "Un [[chevalier|chevalière]] est brave : [[il|elle]] avance même quand c'est difficile." },
+    4: { word: "EPEE", say: "ÉPÉE", hint: "c'est l'arme du [[chevalier|chevalière]]", meaning: "L'épée du [[chevalier|chevalière]] protège les plus faibles." }
+  };
+
+  function rng(seed) { let s = seed >>> 0 || 1; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; }
+  function scramble(word, rand) {
+    const idx = [...word].map((_, i) => i);
+    for (let tries = 0; tries < 20; tries++) {
+      for (let i = idx.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+      const s = idx.map(i => word[i]).join("");
+      if (s !== word) return s;
+    }
+    return word.split("").reverse().join("");
+  }
+
+  const T = {
+    church: [{
+      teaser: "Une tour où dorment des cloches.",
+      generic: "l'église",
+      clue: "Levez les yeux : cherchez un clocher qui dépasse des toits. La prochaine lettre s'y cache.",
+      story: "Bravo, {N}. Te voici devant {P}. Au Moyen Âge, les chevaliers venaient prier avant de partir en voyage. Les cloches annonçaient les fêtes, les dangers et l'heure de la journée.",
+      defi: "Restez à l'extérieur. En silence, comme des chevaliers en mission, comptez les fenêtres de la façade. Chacun murmure son nombre à l'oreille du Grand Maître.",
+      defiIn: "Chaque chevalier fait sonner une cloche imaginaire : « Dong ! » Le Grand Maître choisit la cloche la plus grave et la plus rigolote.",
+      q: "Comment s'appelle la tour d'une église où se trouvent les cloches ?", choices: ["Le clocher", "Le donjon", "La cheminée"], answer: 0,
+      fact: "Le clocher abrite les cloches qui sonnent les heures et les fêtes.",
+      hints: ["Elle « cloche »… elle sonne !", "Le mot ressemble à « cloche ».", "Le clocher."],
+      adult: "Restez à l'extérieur. Si une cérémonie a lieu, parlez bas et faites le défi plus loin."
+    }, {
+      teaser: "Un lieu de pierre où l'on chuchote.",
+      generic: "la chapelle",
+      clue: "Cherchez un bâtiment surmonté d'une croix. Les chevaliers y venaient avant chaque grande aventure.",
+      story: "Te voici devant {P}, {N}. Avant d'être [[nommé|nommée]] chevalier, un jeune écuyer passait toute une nuit à veiller dans une église ou une chapelle, sans dormir. On appelait cela la veillée d'armes.",
+      defi: "La veillée d'armes : tout le monde ferme les yeux et reste parfaitement silencieux pendant quinze secondes, comme un écuyer qui veille.",
+      defiIn: "La veillée d'armes : tout le monde ferme les yeux et reste parfaitement silencieux pendant quinze secondes, comme un écuyer qui veille.",
+      timer: 15,
+      q: "Comment s'appelait le jeune garçon qui aidait un chevalier avant d'en devenir un ?", choices: ["Un écuyer", "Un pompier", "Un pirate"], answer: 0,
+      fact: "L'écuyer portait le bouclier du chevalier et s'occupait de son cheval.",
+      hints: ["Il portait l'écu, c'est-à-dire le bouclier.", "Écu… écu…", "Un écuyer."],
+      adult: "Restez à l'extérieur, à voix basse."
+    }],
+    gate: [{
+      teaser: "Une porte qui gardait la ville.",
+      generic: "la porte de la ville",
+      clue: "Au Moyen Âge, les villes avaient des portes dans leurs murailles. Cherchez une tour sous laquelle on peut passer.",
+      story: "Voici {P}. Ces portes étaient les gardiennes de la ville. Le soir, on les fermait, et des gardes surveillaient qui voulait entrer. Le Templier, lui, connaissait le mot de passe…",
+      defi: "Devenez les gardes de la porte : tout le monde se tient droit comme une lance, sans bouger ni rire, pendant vingt secondes.",
+      defiIn: "Devenez les gardes du château : tout le monde se tient droit comme une lance, sans bouger ni rire, pendant vingt secondes.",
+      timer: 20,
+      q: "À quoi servaient les portes d'une ville fortifiée ?", choices: ["À protéger la ville et surveiller qui entrait", "À faire joli pour les touristes", "À ranger les chevaux"], answer: 0,
+      fact: "Le soir, on fermait les portes pour protéger les habitants.",
+      hints: ["Pensez aux murailles autour de la ville.", "Les gardes n'étaient pas là pour décorer.", "Elles servaient à protéger."],
+      adult: "Restez sur le trottoir : des voitures peuvent passer sous la porte."
+    }, {
+      teaser: "Une deuxième porte, gardée depuis des siècles.",
+      generic: "la vieille porte",
+      clue: "Une autre porte de l'ancienne muraille vous attend. Cherchez des pierres très anciennes au-dessus de la rue.",
+      story: "Encore une porte, {N} ! {P} faisait partie des remparts. Les habitants payaient parfois une petite taxe pour faire entrer leurs marchandises en ville : on l'appelait l'octroi.",
+      defi: "Le péage des chevaliers : pour passer, chaque chevalier doit donner au Grand Maître un mot qui commence par la première lettre de son prénom.",
+      defiIn: "Le péage des chevaliers : pour passer, chaque chevalier doit donner au Grand Maître un mot qui commence par la première lettre de son prénom.",
+      q: "Comment appelle-t-on le grand mur qui entourait une ville au Moyen Âge ?", choices: ["Les remparts", "La haie", "Le grillage"], answer: 0,
+      fact: "Les remparts protégeaient la ville des attaques.",
+      hints: ["On pouvait marcher dessus pour surveiller.", "Ça commence par « rem… ».", "Les remparts."],
+      adult: "Restez sur le trottoir : des voitures peuvent passer sous la porte."
+    }],
+    tower: [{
+      teaser: "Une tour d'où l'on voyait arriver les ennemis.",
+      generic: "la tour",
+      clue: "Cherchez une tour en pierre plus haute que les maisons autour. C'est un poste de guet parfait.",
+      story: "Voici {P}, {N}. Du haut des tours, les guetteurs surveillaient l'horizon. S'ils voyaient arriver des ennemis, ils donnaient l'alerte.",
+      defi: "Les guetteurs : chacun cherche autour de lui quelque chose de rouge, quelque chose de vert et un toit pointu. Le premier qui a trouvé les trois crie « Alerte ! ».",
+      defiIn: "Les guetteurs : chacun cherche dans la pièce quelque chose de rouge, quelque chose de vert et un objet pointu. Le premier qui a trouvé les trois crie « Alerte ! ».",
+      q: "Comment s'appelait le soldat qui surveillait l'horizon du haut d'une tour ?", choices: ["Le guetteur", "Le cuisinier", "Le jardinier"], answer: 0,
+      fact: "Le guetteur faisait le guet, jour et nuit.",
+      hints: ["Il faisait le « guet ».", "Ça commence par « guet… ».", "Le guetteur."],
+      adult: "Restez sur le trottoir, groupe rassemblé."
+    }],
+    castle: [{
+      teaser: "Une demeure de seigneur, solide comme un roc.",
+      generic: "le château",
+      clue: "Cherchez la demeure la plus fortifiée du coin : de gros murs, peut-être une tour. Un seigneur y vivait.",
+      story: "Te voici devant {P}. Les seigneurs vivaient derrière d'épais murs de pierre. Les chevaliers les servaient et défendaient le château.",
+      defi: "Le siège du château : la moitié de l'équipe forme un mur en se tenant par les bras, l'autre moitié doit trouver le mot magique pour passer. Le Grand Maître décide quand le mur s'ouvre.",
+      defiIn: "Le siège du château : construisez en deux minutes une forteresse de coussins assez grande pour cacher toute l'équipe.",
+      q: "Comment s'appelle la plus grande tour d'un château fort ?", choices: ["Le donjon", "Le grenier", "Le garage"], answer: 0,
+      fact: "Le donjon était la tour la plus haute et la plus solide.",
+      hints: ["C'était le dernier refuge en cas d'attaque.", "Ça commence par « don… ».", "Le donjon."],
+      adult: "Restez à l'extérieur si le lieu est privé ou fermé."
+    }],
+    ruins: [{
+      teaser: "Des pierres qui racontent une histoire très ancienne.",
+      generic: "les ruines",
+      clue: "Cherchez de vieilles pierres, des murs à moitié écroulés. Le temps a laissé un indice.",
+      story: "Voici {P}. Ces pierres sont restées debout pendant des siècles. Les archéologues étudient ce genre de lieu pour comprendre comment on vivait autrefois.",
+      defi: "Les archéologues : chacun cherche du regard, sans rien déplacer, la pierre la plus ancienne et la plus abîmée. Le Grand Maître choisit la gagnante.",
+      defiIn: "Les archéologues : le Grand Maître cache une petite pièce dans la pièce, les chevaliers ont une minute pour la retrouver.",
+      q: "Comment s'appelle le métier de ceux qui étudient les vestiges du passé ?", choices: ["Archéologue", "Astronaute", "Boulanger"], answer: 0,
+      fact: "Les archéologues fouillent la terre avec beaucoup de patience.",
+      hints: ["Ils fouillent la terre avec des pinceaux.", "Ça commence par « archéo… ».", "Archéologue."],
+      adult: "Ne grimpez pas sur les ruines."
+    }],
+    well: [{
+      teaser: "Un trou très profond qui cache un trésor liquide.",
+      generic: "le puits",
+      clue: "Avant l'eau du robinet, chaque quartier avait son point d'eau. Cherchez un puits en pierre.",
+      story: "Bravo, {N}. Voici {P}. Avant l'eau du robinet, les habitants venaient y remplir leurs seaux, chaque jour, même en hiver.",
+      defi: "Relais du puits : chaque chevalier mime à son tour de remonter un seau très lourd, puis le passe au suivant sans en renverser une goutte.",
+      defiIn: "Relais du puits : faites passer un gobelet en plastique rempli d'eau de chevalier en chevalier, au-dessus d'une serviette, sans en renverser une goutte.",
+      q: "À quoi servait un puits ?", choices: ["À puiser de l'eau sous la terre", "À cacher des trésors", "À faire peur aux voleurs"], answer: 0,
+      fact: "L'eau était remontée avec un seau et une corde.",
+      hints: ["On y descend un seau avec une corde.", "Ce qu'on boit tous les jours.", "À puiser de l'eau."],
+      adult: "Personne ne monte sur le puits."
+    }],
+    fountain: [{
+      teaser: "Un lieu où l'eau chante.",
+      generic: "la fontaine",
+      clue: "Tendez l'oreille : cherchez un endroit où l'eau coule ou jaillit.",
+      story: "Te voici près de {P}, {N}. Avant l'eau du robinet, les fontaines servaient à tout le village : on y remplissait les cruches et on y faisait boire les chevaux.",
+      defi: "Les porteurs d'eau : chaque chevalier mime de porter une cruche pleine sur sa tête, en marchant trois pas sans la faire tomber.",
+      defiIn: "Les porteurs d'eau : chaque chevalier marche dix pas avec un livre posé sur la tête, sans le faire tomber.",
+      q: "À quoi servaient les fontaines avant l'eau du robinet ?", choices: ["À remplir les cruches et faire boire les animaux", "À prendre son bain", "À rien du tout"], answer: 0,
+      fact: "La fontaine était le point de rencontre du village.",
+      hints: ["Les chevaux avaient soif aussi.", "On y venait avec des cruches.", "À remplir les cruches et abreuver les animaux."],
+      adult: "On ne grimpe pas sur la fontaine."
+    }, {
+      teaser: "Une autre source d'eau, plus discrète.",
+      generic: "la fontaine",
+      clue: "Encore de l'eau ! Cherchez une deuxième fontaine, plus discrète que la première.",
+      story: "Une deuxième fontaine, {N} ! Au Moyen Âge, on disait que certaines sources avaient des pouvoirs. Celle-ci garde une lettre du Templier.",
+      defi: "Le vœu du chevalier : chacun fait un vœu en silence pour l'anniversaire de {N}, puis le Grand Maître compte jusqu'à trois et tout le monde crie « Joyeux anniversaire ! ».",
+      defiIn: "Le vœu du chevalier : chacun fait un vœu en silence pour l'anniversaire de {N}, puis tout le monde crie « Joyeux anniversaire ! ».",
+      q: "Que faut-il pour qu'une fontaine coule ?", choices: ["De l'eau qui arrive d'une source ou d'un tuyau", "Du vent", "Du soleil"], answer: 0,
+      fact: "L'eau des fontaines vient souvent d'une source dans les collines.",
+      hints: ["Ce n'est pas la météo.", "Elle arrive par un tuyau ou une source.", "De l'eau qui arrive d'une source."],
+      adult: "On ne grimpe pas sur la fontaine."
+    }],
+    townhall: [{
+      teaser: "La maison où l'on décide pour toute la ville.",
+      generic: "la mairie",
+      clue: "Cherchez le bâtiment avec un drapeau bleu, blanc, rouge. C'est là qu'on prend les décisions pour la ville.",
+      story: "Voici {P}, {N}. C'est ici que se réunit le conseil de la ville pour prendre les décisions. Au Moyen Âge, certaines villes avaient déjà leur propre conseil.",
+      defi: "Le conseil des chevaliers : formez un cercle, et chacun propose une loi rigolote pour la ville. L'équipe vote à main levée pour la meilleure.",
+      defiIn: "Le conseil des chevaliers : formez un cercle, et chacun propose une loi rigolote pour la maison. L'équipe vote à main levée pour la meilleure.",
+      q: "Qui dirige la mairie ?", choices: ["Le maire", "Le roi", "Le boulanger"], answer: 0,
+      fact: "Le maire est élu par les habitants.",
+      hints: ["On l'élit tous les six ans.", "Mairie… m…", "Le maire."],
+      adult: "Restez sur le trottoir ou sur la place."
+    }],
+    memorial: [{
+      teaser: "Un lieu où l'on se souvient.",
+      generic: "le monument aux morts",
+      clue: "Cherchez un monument de pierre avec beaucoup de noms gravés. C'est un lieu calme et important.",
+      story: "Ici, {N}, on se souvient des habitants morts pendant les guerres. Les chevaliers respectaient toujours les lieux de mémoire.",
+      defi: "Un chevalier sait être sérieux : toute l'équipe garde le silence pendant dix secondes, la main sur le cœur.",
+      defiIn: "Un chevalier sait être sérieux : toute l'équipe garde le silence pendant dix secondes, la main sur le cœur.",
+      timer: 10,
+      q: "À quoi sert un monument aux morts ?", choices: ["À se souvenir des personnes mortes pendant les guerres", "À indiquer la route", "À jouer à cache-cache"], answer: 0,
+      fact: "Chaque année, on y organise des cérémonies du souvenir.",
+      hints: ["Il y a des noms gravés dessus.", "On y vient pour se souvenir.", "À se souvenir."],
+      adult: "Lieu de mémoire : on ne grimpe pas, on parle doucement."
+    }],
+    statue: [{
+      teaser: "Quelqu'un qui ne bouge jamais.",
+      generic: "la statue",
+      clue: "Cherchez quelqu'un qui reste parfaitement immobile, jour et nuit, beau temps mauvais temps.",
+      story: "Voici {P}, {N}. Les statues sont faites pour qu'on n'oublie pas une personne ou une histoire. Le Templier aimait les gardiens immobiles.",
+      defi: "Les statues de chevaliers : tout le monde se fige dans la pose la plus héroïque possible pendant quinze secondes. Celui qui bouge rit en premier !",
+      defiIn: "Les statues de chevaliers : tout le monde se fige dans la pose la plus héroïque possible pendant quinze secondes.",
+      timer: 15,
+      q: "Comment appelle-t-on la personne qui fabrique des statues ?", choices: ["Un sculpteur", "Un boulanger", "Un plombier"], answer: 0,
+      fact: "Le sculpteur taille la pierre ou fond le métal.",
+      hints: ["Il sculpte.", "Ça commence par « sculp… ».", "Un sculpteur."],
+      adult: "On ne grimpe pas sur le monument."
+    }, {
+      teaser: "Un deuxième gardien de pierre ou de métal.",
+      generic: "le monument",
+      clue: "Cherchez un autre monument, un autre gardien immobile qui veille sur la ville.",
+      story: "Encore un gardien, {N} ! {P} veille ici depuis longtemps. Les chevaliers saluaient toujours ceux qui montent la garde.",
+      defi: "Le salut des chevaliers : tout le monde salue le monument en posant le poing sur le cœur, puis fait une révérence.",
+      defiIn: "Le salut des chevaliers : tout le monde salue le Grand Maître en posant le poing sur le cœur, puis fait une révérence.",
+      q: "Quel geste faisait un chevalier devant un roi ?", choices: ["Il mettait un genou à terre", "Il tirait la langue", "Il sautait à cloche-pied"], answer: 0,
+      fact: "Mettre un genou à terre montrait le respect.",
+      hints: ["C'est un geste de respect.", "Le genou touche le sol.", "Un genou à terre."],
+      adult: "On ne grimpe pas sur le monument."
+    }],
+    artwork: [{
+      teaser: "Une œuvre qu'un artiste a laissée pour tout le monde.",
+      generic: "l'œuvre d'art",
+      clue: "Cherchez une œuvre d'art en plein air. Un artiste l'a placée là pour qu'on la regarde.",
+      story: "Voici {P}, {N}. Au Moyen Âge, les artistes décoraient les églises et les châteaux. Aujourd'hui, ils décorent aussi les rues.",
+      defi: "L'atelier des artistes : chacun invente le titre le plus rigolo possible pour cette œuvre. Le Grand Maître choisit le meilleur.",
+      defiIn: "L'atelier des artistes : chacun dessine en une minute le blason de l'équipe sur une feuille.",
+      q: "Comment appelle-t-on le dessin sur le bouclier d'un chevalier ?", choices: ["Un blason", "Une affiche", "Un tag"], answer: 0,
+      fact: "Le blason permettait de reconnaître un chevalier sous son armure.",
+      hints: ["On le voyait de loin, sur le bouclier.", "Ça commence par « bla… ».", "Un blason."],
+      adult: "On regarde sans toucher."
+    }],
+    square: [{
+      teaser: "Un grand espace où se tenaient les fêtes.",
+      generic: "la place",
+      clue: "Cherchez une grande place, là où les gens se retrouvent les jours de marché et de fête.",
+      story: "Te voici sur {P}, {N}. Au Moyen Âge, les places accueillaient les marchés, les fêtes et les annonces importantes, criées à voix haute.",
+      defi: "Le crieur public : chaque chevalier annonce à voix haute, comme un crieur d'autrefois : « Oyez, oyez ! Aujourd'hui, c'est l'anniversaire de {N} ! »",
+      defiIn: "Le crieur public : chaque chevalier annonce à voix haute : « Oyez, oyez ! Aujourd'hui, c'est l'anniversaire de {N} ! »",
+      q: "Que trouvait-on souvent sur la place d'un village au Moyen Âge ?", choices: ["Le marché", "Une piscine", "Un aéroport"], answer: 0,
+      fact: "Le marché réunissait paysans, artisans et marchands.",
+      hints: ["On y achetait à manger.", "Il a souvent lieu une fois par semaine.", "Le marché."],
+      adult: "Gardez le groupe sur la place, loin des voitures."
+    }],
+    park: [{
+      teaser: "Un coin de verdure pour s'entraîner.",
+      generic: "le parc",
+      clue: "Les chevaliers s'entraînaient en plein air. Cherchez de l'herbe et des arbres.",
+      story: "Bravo, {N}. Te voici dans {P}. Les futurs chevaliers s'entraînaient chaque jour en plein air : course, équilibre et maniement de l'épée en bois.",
+      defi: "L'entraînement : course au galop sur place pendant dix secondes, puis chacun tient en équilibre sur un pied en comptant jusqu'à dix.",
+      defiIn: "L'entraînement : course au galop sur place pendant dix secondes, puis chacun tient en équilibre sur un pied en comptant jusqu'à dix.",
+      q: "Au Moyen Âge, quel animal portait les chevaliers ?", choices: ["Le cheval", "La vache", "Le chien"], answer: 0,
+      fact: "Le cheval d'un chevalier s'appelait souvent un destrier.",
+      hints: ["Le mot « chevalier » vient de lui.", "Cheval… ier.", "Le cheval."],
+      adult: "Restez dans le parc, tous les enfants à vue."
+    }, {
+      teaser: "Un jardin où se cache une lettre.",
+      generic: "le jardin",
+      clue: "Cherchez un autre coin de verdure, avec des arbres ou des fleurs.",
+      story: "Un nouveau coin de verdure, {N}. Dans les châteaux, on cultivait des jardins de plantes médicinales pour soigner les blessés.",
+      defi: "La cueillette : chaque chevalier trouve, sans rien arracher, trois feuilles différentes tombées au sol et les montre au Grand Maître.",
+      defiIn: "La cueillette : chaque chevalier trouve dans la maison trois objets de couleurs différentes et les montre au Grand Maître.",
+      q: "À quoi servaient certaines plantes dans les jardins du Moyen Âge ?", choices: ["À soigner les malades", "À fabriquer des téléphones", "À faire du plastique"], answer: 0,
+      fact: "On les appelait les simples, les plantes qui soignent.",
+      hints: ["Il n'y avait pas de pharmacie comme aujourd'hui.", "Pour les blessés…", "À soigner."],
+      adult: "Restez dans le jardin, tous les enfants à vue."
+    }],
+    playground: [{
+      teaser: "Un terrain d'entraînement pour jeunes écuyers.",
+      generic: "l'aire de jeux",
+      clue: "Cherchez un terrain d'entraînement idéal pour de jeunes écuyers : des toboggans, des balançoires…",
+      story: "Te voici sur le terrain d'entraînement, {N} ! Les jeunes écuyers apprenaient l'agilité avant de monter à cheval.",
+      defi: "Le parcours de l'écuyer : chacun traverse l'aire de jeux à sa façon, sans pousser personne, puis revient saluer le Grand Maître.",
+      defiIn: "Le parcours de l'écuyer : passer sous une table, sauter par-dessus un coussin, et revenir saluer le Grand Maître.",
+      q: "Comment s'appelle le combat à cheval avec des lances ?", choices: ["La joute", "Le foot", "La pêche"], answer: 0,
+      fact: "Pendant les tournois, les chevaliers s'affrontaient lors de joutes.",
+      hints: ["Ça se passait pendant les tournois.", "Ça rime avec « route ».", "La joute."],
+      adult: "Laissez la place aux autres enfants qui jouent."
+    }],
+    viewpoint: [{
+      teaser: "Un endroit d'où l'on voit loin.",
+      generic: "le point de vue",
+      clue: "Cherchez un endroit d'où l'on voit loin, au-dessus des toits.",
+      story: "Regarde au loin, {N}. Les seigneurs construisaient leurs châteaux en hauteur pour voir arriver les visiteurs… et les ennemis.",
+      defi: "Les guetteurs : chacun trouve au loin quelque chose de rouge, quelque chose de vert et un toit pointu.",
+      defiIn: "Les guetteurs : chacun regarde par la fenêtre et trouve quelque chose de rouge, de vert et un toit pointu.",
+      q: "Pourquoi construisait-on les châteaux en hauteur ?", choices: ["Pour voir arriver les ennemis", "Pour avoir moins froid", "Pour être près des nuages"], answer: 0,
+      fact: "En hauteur, on voit loin et on se défend mieux.",
+      hints: ["Pensez aux guetteurs.", "Pour surveiller.", "Pour voir arriver les ennemis."],
+      adult: "Restez derrière les barrières."
+    }]
+  };
+
+  function variant(cat, n) { const list = T[cat]; return list[Math.min(n, list.length - 1)]; }
+
+  // "Église Saint-Martin" -> "l'église Saint-Martin"; "Saint-Martin" (church) -> "l'église Saint-Martin"
+  const NOUNS = [["hôtel de ville", "l'"], ["aire de jeux", "l'"], ["monument", "le "], ["église", "l'"], ["chapelle", "la "],
+    ["cathédrale", "la "], ["basilique", "la "], ["temple", "le "], ["parc", "le "], ["jardin", "le "], ["square", "le "],
+    ["place", "la "], ["fontaine", "la "], ["puits", "le "], ["porte", "la "], ["tour", "la "], ["château", "le "],
+    ["fort", "le "], ["manoir", "le "], ["statue", "la "], ["mairie", "la "], ["maison", "la "], ["ruines", "les "],
+    ["belvédère", "le "], ["calvaire", "le "], ["lavoir", "le "], ["stèle", "la "], ["buste", "le "]];
+  function articleize(name, generic) {
+    if (!name) return generic;
+    const low = name.toLowerCase();
+    for (const [noun, art] of NOUNS) {
+      if (low.startsWith(noun + " ") || low === noun) return art + name.charAt(0).toLowerCase() + name.slice(1);
+    }
+    if (/^(le|la|les|l')\s?/i.test(name)) return name.charAt(0).toLowerCase() + name.slice(1);
+    return `${generic} « ${name} »`.replace(/^(l'église|la chapelle) « (Saint[^»]*) »$/, "$1 $2");
+  }
+
+  // ---- 5. build the quest ----
+  function build(elements, start, opts = {}) {
+    const places = dedupe(elements.map(classify).filter(Boolean));
+    const stops = choose(start, places, 6);
+    if (!stops) return { ok: false, reason: "few", found: places.length };
+    const W = WORDS[stops.length];
+    const rand = rng(Math.round(start.lat * 1e5) ^ Math.round(start.lon * 1e5));
+    const scrambled = scramble(W.word, rand);
+    const seen = {};
+    let prev = start;
+    const steps = stops.map((s, i) => {
+      const n = seen[s.cat] || 0; seen[s.cat] = n + 1;
+      const tpl = variant(s.cat, n);
+      const placeName = articleize(s.name, tpl.generic);
+      const legM = Math.round(dist(prev, s) * WALK_FACTOR / 10) * 10;
+      const step = Object.assign({}, tpl, {
+        cat: s.cat, letter: scrambled[i], lat: s.lat, lon: s.lon, name: s.name,
+        P: placeName, legM, dir: bearing(prev, s), osm: s.id
+      });
+      prev = s;
+      return step;
+    });
+    return {
+      ok: true, start, steps, word: W.word, say: W.say, hint: W.hint, meaning: W.meaning, scrambled,
+      walkM: Math.round(pathLength(start, stops) / 10) * 10,
+      minutes: 10 + steps.length * 9,
+      centroid: { lat: stops.reduce((a, s) => a + s.lat, 0) / stops.length, lon: stops.reduce((a, s) => a + s.lon, 0) / stops.length }
+    };
+  }
+
+  return { overpassQuery, classify, dedupe, choose, build, dist, bearing, articleize, T, WORDS, SEARCH_RADIUS, MAX_WALK };
+})();
+if (typeof module !== "undefined") module.exports = QuestEngine;
+/* ENGINE-END */
+
+</script>
+<script>
+(function(){
+"use strict";
+const E=QuestEngine;
+const STORE="quete-templiers-v2";
+const PRICE="24,90 €";
+const OVERPASS="https://overpass-api.de/api/interpreter";
+const NOMINATIM="https://nominatim.openstreetmap.org";
+
+/* ---------- State ---------- */
+const defaults={name:"",hero:"m",kids:8,indoor:false,unlocked:false,screen:"setup",start:null,town:"",quest:null,step:0,phase:"travel",solved:[],hint:0,voice:""};
+let S=Object.assign({},defaults);
+try{const raw=localStorage.getItem(STORE);if(raw)S=Object.assign({},defaults,JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
+
+function fill(t,extra){
+  let s=String(t).replaceAll("{N}",S.name||"jeune chevalier").replaceAll("{V}",S.town||"la ville");
+  if(extra&&extra.P!=null)s=s.replaceAll("{P}",extra.P);
+  s=s.replace(/\[\[([^|\]]*)\|([^\]]*)\]\]/g,(m,a,b)=>S.hero==="f"?b:a);
+  return s.replace(/(^|[.!?]\s+|«\s)([a-zàâäéèêëîïôöùûüç])/g,(m,a,b)=>a+b.toUpperCase());
+}
+const g=(m,f)=>S.hero==="f"?f:m;
+
+/* ---------- Voice: old Grand Master ---------- */
+let frVoices=[],frVoice=null;
+const MALE=/thomas|henri|paul|r[ée]my|daniel|nicolas|jacques|gr[ée]goire|antoine|claude|denis|male|homme|frd|frb/i;
+const FEMALE=/am[ée]lie|audrey|aur[ée]lie|marie|julie|c[ée]line|virginie|denise|hortense|female|femme|frc|fre/i;
+function pickVoice(){try{
+  frVoices=speechSynthesis.getVoices().filter(x=>/^fr/i.test(x.lang));
+  const chosen=S.voice&&frVoices.find(x=>x.name===S.voice);
+  const fr=frVoices.filter(x=>/^fr(-|_)FR/i.test(x.lang));
+  frVoice=chosen||fr.find(x=>MALE.test(x.name)&&!FEMALE.test(x.name))||frVoices.find(x=>MALE.test(x.name)&&!FEMALE.test(x.name))||fr[0]||frVoices[0]||null;
+}catch(e){}}
+if("speechSynthesis" in window){pickVoice();try{speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}}
+let speakRun=0;
+function speak(text){
+  if(!("speechSynthesis" in window))return false;
+  try{speechSynthesis.cancel();const run=++speakRun;
+    const parts=(text.match(/[^.!?…]+(?:[.!?…]+(?:\s*»)?)?\s*/g)||[text]).filter(p=>p.trim()&&p.trim()!=="»");
+    let k=0;const next=()=>{if(run!==speakRun||k>=parts.length)return;
+      const u=new SpeechSynthesisUtterance(parts[k++].trim());u.lang="fr-FR";if(frVoice)u.voice=frVoice;
+      u.rate=.78;u.pitch=.55;u.volume=.9;u.onend=()=>setTimeout(next,450);speechSynthesis.speak(u);};
+    next();return true;}catch(e){return false;}
+}
+function stopVoice(){try{speechSynthesis.cancel();speakRun++;}catch(e){}}
+
+/* ---------- DOM helpers ---------- */
+const app=document.getElementById("app");
+function h(tag,attrs,...kids){const el=document.createElement(tag);
+  if(attrs)for(const[k,v]of Object.entries(attrs)){if(k==="class")el.className=v;else if(k==="text")el.textContent=v;else if(k.startsWith("on"))el.addEventListener(k.slice(2),v);else if(v!==false&&v!=null)el.setAttribute(k,v===true?"":v);}
+  for(const k of kids.flat()){if(k==null||k===false)continue;el.append(k.nodeType?k:document.createTextNode(k));}
+  return el;}
+function go(patch){Object.assign(S,patch);save();render();window.scrollTo({top:0,behavior:"auto"});}
+const note=h("p",{class:"note",role:"status"});
+
+function playIcon(){const s=document.createElementNS("http://www.w3.org/2000/svg","svg");s.setAttribute("viewBox","0 0 24 24");s.setAttribute("width","18");s.setAttribute("height","18");s.setAttribute("aria-hidden","true");s.innerHTML='<path fill="currentColor" d="M8 5v14l11-7z"/>';return s;}
+function voiceCard(text,label,extra){
+  const t=fill(text,extra);
+  return h("div",{class:"card voice"},h("h3",{text:label||"Message du Grand Maître"}),h("p",{text:t}),
+    h("button",{class:"btn ghost",type:"button",onclick:()=>{if(!speak(t))note.textContent="La voix n'est pas disponible sur ce téléphone : lisez le message à voix haute.";}},playIcon()," Écouter le Grand Maître"));
+}
+function voiceSelect(){
+  if(!("speechSynthesis" in window)||!frVoices.length)return null;
+  const sel=h("select",{id:"voice-pick"});
+  frVoices.forEach(v=>{const o=h("option",{value:v.name,text:v.name.replace(/Microsoft |Google | Online \(Natural\)|\s-\s.*$/g,"")});if(frVoice&&v.name===frVoice.name)o.selected=true;sel.append(o);});
+  sel.addEventListener("change",()=>{S.voice=sel.value;save();pickVoice();speak("Approche, jeune chevalier. Je suis le Grand Maître.");});
+  return h("label",{for:"voice-pick"},"Voix du Grand Maître (selon votre téléphone)",sel);
+}
+function shieldRow(){
+  const q=S.quest;const row=h("div",{class:"shields",role:"img","aria-label":`${S.solved.length} lettres sur ${q.steps.length} retrouvées`});
+  q.steps.forEach((st,i)=>{const got=S.solved.includes(i);const w=h("div",{class:"shield"+(got&&S.lastSolved===i?" pop":"")});
+    w.innerHTML=`<svg viewBox="0 0 40 46"><path d="M3 3h34v16c0 13-8 20-17 24C11 39 3 32 3 19z" fill="${got?"var(--rose)":"var(--card)"}" stroke="var(--or)" stroke-width="2.5"/>`+
+      (got?`<text x="20" y="27" text-anchor="middle" font-family="UnifrakturMaguntia, Georgia, serif" font-size="20" fill="#fff">${st.letter}</text>`:`<text x="20" y="27" text-anchor="middle" font-family="Alegreya Sans SC, sans-serif" font-size="13" fill="var(--muted)">${i+1}</text>`)+`</svg>`;
+    row.append(w);});
+  return row;
+}
+function footer(){return h("footer",null,"Lieux : © contributeurs OpenStreetMap (licence ODbL). Recherche d'adresse : Nominatim.");}
+
+/* ---------- Network ---------- */
+async function getJSON(url,opts,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||20000);
+  try{const r=await fetch(url,Object.assign({signal:c.signal},opts||{}));if(!r.ok)throw new Error("HTTP "+r.status);return await r.json();}finally{clearTimeout(t);}}
+function townOf(a){a=a||{};return a.village||a.town||a.city||a.municipality||a.hamlet||"";}
+async function searchPlaces(q){return getJSON(`${NOMINATIM}/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=fr&accept-language=fr&q=${encodeURIComponent(q)}`);}
+async function reverseTown(lat,lon){try{const r=await getJSON(`${NOMINATIM}/reverse?format=jsonv2&zoom=14&accept-language=fr&lat=${lat}&lon=${lon}`,null,10000);return townOf(r.address);}catch(e){return "";}}
+async function fetchPlaces(lat,lon){const r=await getJSON(OVERPASS,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(E.overpassQuery(lat,lon))},30000);return r.elements||[];}
+
+/* ---------- Indoor quest (works anywhere, no map needed) ---------- */
+function indoorQuest(){
+  const cats=["church","gate","well","castle","square","park"];
+  const W=E.WORDS[6];const scrambled="ELFIED";
+  return {ok:true,indoorOnly:true,steps:cats.map((c,i)=>Object.assign({},E.T[c][0],{cat:c,letter:scrambled[i],P:E.T[c][0].generic,legM:0,dir:"",lat:null,lon:null})),
+    word:W.word,say:W.say,hint:W.hint,meaning:W.meaning,scrambled,walkM:0,minutes:60};
+}
+
+/* ---------- Screens ---------- */
+function setupScreen(){
+  const nameIn=h("input",{type:"text",id:"hero-name",value:S.name,maxlength:"24",autocomplete:"off",placeholder:"Ex. : Léo"});
+  nameIn.addEventListener("input",()=>{S.name=nameIn.value.trim();save();});
+  const kidsIn=h("input",{type:"number",id:"kids",min:"2",max:"15",value:String(S.kids)});
+  kidsIn.addEventListener("input",()=>{S.kids=Math.max(2,Math.min(15,parseInt(kidsIn.value||"8",10)));save();});
+  const seg=h("div",{class:"seg",role:"group","aria-label":"Héros ou héroïne"},
+    h("button",{type:"button","aria-pressed":String(S.hero==="m"),onclick:()=>{S.hero="m";save();seg.querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-pressed",String(i===0)));}},"Chevalier"),
+    h("button",{type:"button","aria-pressed":String(S.hero==="f"),onclick:()=>{S.hero="f";save();seg.querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-pressed",String(i===1)));}},"Chevalière"));
+  const q=h("input",{type:"search",id:"start-q",placeholder:"Ex. : place de l'église, Rosheim",autocomplete:"off"});
+  const results=h("div",{class:"choices"});
+  const doSearch=async()=>{
+    const v=q.value.trim();if(v.length<3){note.textContent="Tapez une adresse, un parc ou une ville.";return;}
+    note.textContent="Recherche…";results.replaceChildren();
+    try{const r=await searchPlaces(v);note.textContent=r.length?"Choisissez le point de départ :":"Aucun lieu trouvé. Essayez avec le nom de la ville.";
+      r.forEach(x=>results.append(h("button",{class:"result",type:"button",text:x.display_name,onclick:()=>startFrom(+x.lat,+x.lon,townOf(x.address)||x.name||"")})));}
+    catch(e){note.textContent="La recherche d'adresse ne répond pas. Vérifiez la connexion et réessayez.";}
+  };
+  q.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doSearch();}});
+  const here=()=>{
+    if(!("geolocation" in navigator)){note.textContent="La position n'est pas disponible : cherchez une adresse.";return;}
+    note.textContent="Recherche de votre position…";
+    navigator.geolocation.getCurrentPosition(async p=>{const lat=p.coords.latitude,lon=p.coords.longitude;startFrom(lat,lon,await reverseTown(lat,lon));},
+      ()=>{note.textContent="Position refusée ou indisponible : cherchez plutôt une adresse.";},{enableHighAccuracy:true,timeout:10000});
+  };
+  return [
+    h("div",null,h("p",{class:"eyebrow",text:"anniversaire · 7 à 10 ans"}),h("h1",{text:"La Quête des Templiers"})),
+    h("p",{class:"lead",text:"Une quête au prénom de votre enfant, créée en deux minutes avec les vrais lieux autour de chez vous : église, fontaine, parc, vieille porte… L'adulte guide avec son téléphone, les enfants relèvent les défis."}),
+    h("div",{class:"card"},h("h3",{text:"Pour qui est la quête ?"}),
+      h("div",{class:"row"},h("label",{for:"hero-name"},"Prénom",nameIn),h("label",{for:"kids"},"Nombre d'enfants",kidsIn)),
+      h("label",null,"Le héros de la fête",seg)),
+    h("div",{class:"card"},h("h3",{text:"Où commence la quête ?"}),
+      h("p",{class:"note",text:"Choisissez un point central : la place de l'église, la mairie, un parc. La quête se construit dans un rayon d'environ 700 mètres."}),
+      h("button",{class:"btn ghost",type:"button",onclick:here},"Partir d'ici (ma position)"),
+      h("label",{for:"start-q"},"Ou chercher une adresse",q),
+      h("button",{class:"btn",type:"button",onclick:doSearch},"Chercher"),
+      results),
+    note,
+    h("button",{class:"linkish",type:"button",onclick:()=>go({quest:indoorQuest(),town:S.town||"",start:null,screen:"preview",indoor:true,unlocked:false,solved:[],step:0})},"Il pleut ? Créer une quête à jouer à la maison"),
+    footer()
+  ];
+}
+
+async function startFrom(lat,lon,town){
+  if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}
+  go({screen:"loading",start:{lat,lon},town:town||""});
+  try{
+    const els=await fetchPlaces(lat,lon);
+    const q=E.build(els,{lat,lon});
+    if(!q.ok){go({screen:"few",found:q.found});return;}
+    go({quest:q,screen:"preview",indoor:false,unlocked:false,solved:[],step:0,phase:"travel"});
+  }catch(e){go({screen:"neterr"});}
+}
+
+function loadingScreen(){return [h("div",{class:"card",style:"text-align:center"},h("div",{class:"spinner"}),
+  h("p",{text:`Le Grand Maître explore ${S.town||"les environs"} à la recherche des meilleurs lieux…`}),h("p",{class:"note",text:"Cela prend en général moins de 30 secondes."}))];}
+function fewScreen(){return [h("h2",{text:"Pas assez de lieux ici"}),
+  h("p",{text:`Nous n'avons trouvé que ${S.found||0} lieu${(S.found||0)>1?"x":""} adapté${(S.found||0)>1?"s":""} autour de ce point. Une quête a besoin d'au moins quatre étapes.`}),
+  h("p",{class:"lead",text:"Essayez un point de départ plus central (la place de l'église, la mairie), ou jouez la quête à la maison."}),
+  h("button",{class:"btn",type:"button",onclick:()=>go({screen:"setup"})},"Choisir un autre point de départ"),
+  h("button",{class:"btn ghost",type:"button",onclick:()=>go({quest:indoorQuest(),screen:"preview",indoor:true,unlocked:false,solved:[],step:0})},"Jouer à la maison"),footer()];}
+function netErrScreen(){return [h("h2",{text:"Les cartes ne répondent pas"}),
+  h("p",{text:"Le service de cartes n'a pas répondu. C'est souvent passager."}),
+  h("button",{class:"btn",type:"button",onclick:()=>startFrom(S.start.lat,S.start.lon,S.town)},"Réessayer"),
+  h("button",{class:"btn ghost",type:"button",onclick:()=>go({screen:"setup"})},"Changer de point de départ")];}
+
+function mapTeaser(){
+  const box=h("div");
+  box.innerHTML=`<svg class="map" viewBox="0 0 320 200" role="img" aria-label="Zone de la quête, floutée jusqu'au départ">
+   <defs><filter id="fog"><feGaussianBlur stdDeviation="9"/></filter>
+   <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><line x1="0" y1="0" x2="0" y2="8" stroke="var(--line)" stroke-width="3"/></pattern></defs>
+   <rect width="320" height="200" fill="var(--card)"/><rect width="320" height="200" fill="url(#hatch)" opacity=".7"/>
+   <path d="M0 150 C80 120 140 170 220 130 S300 90 320 100" fill="none" stroke="var(--line)" stroke-width="2"/>
+   <path d="M0 60 C70 80 120 40 200 60 S290 50 320 30" fill="none" stroke="var(--line)" stroke-width="2"/>
+   <ellipse cx="165" cy="102" rx="112" ry="52" fill="var(--rose)" opacity=".38" filter="url(#fog)"/>
+   <ellipse cx="165" cy="102" rx="70" ry="30" fill="var(--rose)" opacity=".35" filter="url(#fog)"/>
+   <g transform="translate(286 34)"><circle r="16" fill="var(--card)" stroke="var(--or)" stroke-width="1.5"/><path d="M0-12 L4 0 L0 12 L-4 0z" fill="var(--or)"/></g>
+   <text x="165" y="186" text-anchor="middle" font-family="Alegreya Sans SC, sans-serif" font-size="11" fill="var(--muted)" letter-spacing="1">les étapes restent dans l'ombre jusqu'au départ</text></svg>`;
+  const t=box.querySelector("svg");const tx=document.createElementNS("http://www.w3.org/2000/svg","text");
+  tx.setAttribute("x","165");tx.setAttribute("y","108");tx.setAttribute("text-anchor","middle");tx.setAttribute("font-family","UnifrakturMaguntia, Georgia, serif");tx.setAttribute("font-size","22");tx.setAttribute("fill","var(--ink)");
+  tx.textContent=S.quest.indoorOnly?"À la maison":(S.town||"Votre quartier");t.append(tx);
+  return box;
+}
+function prologueText(){
+  return S.quest.indoorOnly
+    ?`Approche, {N}. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple cacha un sceau magique et dispersa les ${S.quest.steps.length} lettres du mot secret qui permet de l'ouvrir. Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'${g("un chevalier courageux","une chevalière courageuse")}. Je vais te raconter les lieux où il est passé, et tu relèveras mes défis sans quitter la maison. Es-tu ${g("prêt","prête")} ?`
+    :`Approche, {N}. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple traversa {V}. Avant de repartir, il cacha un sceau magique et dispersa les ${S.quest.steps.length} lettres du mot secret qui permet de l'ouvrir. Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'${g("un chevalier courageux","une chevalière courageuse")}. Avec tes compagnons, suis les indices, relève mes défis, et rapporte-moi les lettres. Es-tu ${g("prêt","prête")} ?`;
+}
+function previewScreen(){
+  const q=S.quest;
+  return [
+    h("div",null,h("p",{class:"eyebrow",text:q.indoorOnly?"quête à la maison":"votre quête est prête"}),h("h2",{text:`La quête de ${S.name||"votre chevalier"}`})),
+    mapTeaser(),
+    h("div",{class:"stats"},
+      h("div",null,h("b",{text:String(q.steps.length)}),h("span",{text:"étapes"})),
+      h("div",null,h("b",{text:q.indoorOnly?"0 km":`≈ ${(q.walkM/1000).toFixed(1).replace(".",",")} km`}),h("span",{text:"à pied"})),
+      h("div",null,h("b",{text:`≈ ${q.minutes} min`}),h("span",{text:"de jeu"}))),
+    h("div",{class:"card"},h("h3",{text:"Ce qui vous attend"}),
+      h("ul",{class:"teasers"},q.steps.map((s,i)=>h("li",null,h("span",{class:"n",text:String(i+1)}),h("span",{text:s.teaser})))),
+      h("p",{class:"lock",text:"Les lieux exacts se révèlent un par un pendant la partie."})),
+    voiceCard(prologueText(),"Prologue gratuit · à écouter dès maintenant"),
+    voiceSelect(),note,
+    h("button",{class:"btn",type:"button",onclick:()=>go({unlocked:true,screen:"guide"})},`Débloquer la quête · ${PRICE}`),
+    h("p",{class:"note",text:"Version de test : aucun paiement, le bouton débloque la quête directement."}),
+    h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"setup",quest:null})},"Changer de point de départ"),
+    footer()
+  ];
+}
+function guideScreen(){
+  const ratio=Math.ceil((S.kids||8)/5);const q=S.quest;
+  return [
+    h("div",null,h("p",{class:"eyebrow",text:"avant de partir"}),h("h2",{text:"Le guide du Grand Maître"})),
+    h("p",{class:"lead",text:"Ces consignes sont pour vous, l'adulte. Les enfants n'ont pas besoin de regarder l'écran."}),
+    h("div",{class:"card adult"},h("h3",{text:"Le groupe"}),h("ul",{class:"rules"},
+      h("li",{text:`Pour ${S.kids} enfants, prévoyez au moins ${ratio} adulte${ratio>1?"s":""} (un pour cinq enfants environ).`}),
+      h("li",{text:"Les étapes sont des lieux publics : église (on reste dehors), fontaine, parc, place, monument. Les défis se font sur le trottoir, une place ou dans un parc."}),
+      h("li",{text:"Le téléphone reste dans les mains d'un adulte. Pour chaque étape, vous voyez le lieu exact et un lien d'itinéraire à pied."}))),
+    h("div",{class:"card adult"},h("h3",{text:"Le trésor"}),h("ul",{class:"rules"},
+      h("li",{text:"Gardez dans votre sac un petit coffre ou un sachet : bonbons, pièces en chocolat, médailles."}),
+      h("li",{text:"Vous le remettrez à la fin, quand les enfants auront trouvé le mot secret. Rien à cacher dans la rue."}))),
+    !q.indoorOnly&&h("div",{class:"card adult"},h("h3",{text:"Où jouer ?"}),
+      h("div",{class:"seg",role:"group","aria-label":"Mode de jeu"},
+        h("button",{type:"button","aria-pressed":String(!S.indoor),onclick:()=>go({indoor:false})},"Dehors"),
+        h("button",{type:"button","aria-pressed":String(S.indoor),onclick:()=>go({indoor:true})},"À la maison")),
+      h("p",{class:"note",text:S.indoor?"Même histoire, mêmes énigmes : le Grand Maître raconte chaque lieu, et les défis se font dans la maison.":"Chaque étape se valide en arrivant sur place. Si un lieu est fermé ou inaccessible, vous pourrez passer l'étape."})),
+    h("button",{class:"btn",type:"button",onclick:()=>go({screen:"intro"})},"Commencer la quête")
+  ];
+}
+function introScreen(){
+  const n=S.quest.steps.length;
+  const t=`{N}, [[chevalier|chevalière]] de l'Ordre, la quête commence ! À chaque lieu, tu gagneras une lettre. Les ${n} lettres arrivent dans le désordre : à toi de retrouver le mot secret à la fin. ${S.indoor?"Aujourd'hui, nous voyageons par la pensée : écoute bien mes récits.":"Suis les indices, reste toujours près des adultes, et ouvre grand les yeux."}`;
+  return [h("div",null,h("p",{class:"eyebrow",text:"la quête commence"}),h("h2",{text:`En route, ${S.name||"jeune chevalier"} !`})),
+    voiceCard(t),note,
+    h("button",{class:"btn",type:"button",onclick:()=>go({screen:"step",step:0,phase:S.indoor?"arrived":"travel",hint:0})},"Première étape")];
+}
+
+function routeLinks(st){
+  if(st.lat==null)return null;
+  const gm=`https://www.google.com/maps/dir/?api=1&destination=${st.lat},${st.lon}&travelmode=walking`;
+  const osm=`https://www.openstreetmap.org/?mlat=${st.lat}&mlon=${st.lon}#map=18/${st.lat}/${st.lon}`;
+  return h("div",{class:"row"},h("a",{class:"btn ghost",href:gm,target:"_blank",rel:"noopener"},"Itinéraire à pied"),h("a",{class:"btn ghost",href:osm,target:"_blank",rel:"noopener"},"Voir la carte"));
+}
+function checkArrival(st,out){
+  if(st.lat==null||!("geolocation" in navigator)){out.textContent="Position indisponible : validez avec « Nous y sommes ».";return;}
+  out.textContent="Recherche de votre position…";
+  navigator.geolocation.getCurrentPosition(p=>{
+    const d=E.dist({lat:p.coords.latitude,lon:p.coords.longitude},st);
+    if(d<=50){go({phase:"arrived",hint:0});}
+    else out.textContent=`Encore environ ${Math.round(d/10)*10} m. Vous pouvez aussi valider avec « Nous y sommes ».`;
+  },()=>{out.textContent="Position refusée ou indisponible : validez avec « Nous y sommes ».";},{enableHighAccuracy:true,timeout:9000,maximumAge:10000});
+}
+function timerBlock(sec){
+  const disp=h("div",{class:"timer",text:String(sec)});let t=null;
+  const b=h("button",{class:"btn gold",type:"button",onclick:()=>{if(t)return;let n=sec;disp.textContent=String(n);
+    t=setInterval(()=>{n--;disp.textContent=String(Math.max(n,0));if(n<=0){clearInterval(t);t=null;disp.textContent="Bravo, chevaliers !";}},1000);}},"Lancer le compte à rebours");
+  return h("div",{style:"display:flex;flex-direction:column;gap:8px"},disp,b);
+}
+function stepScreen(){
+  const q=S.quest,i=S.step,st=q.steps[i],n=q.steps.length,P={P:st.P};
+  const title=(S.indoor||S.phase!=="travel")?fill("{P}",P):"Où aller ?";
+  const head=[shieldRow(),h("div",null,h("p",{class:"eyebrow",text:`étape ${i+1} sur ${n}`}),h("h2",{text:title}))];
+  if(S.phase==="travel"){
+    const out=h("p",{class:"note",role:"status"});
+    return [...head,voiceCard(`Écoute bien, {N}. ${st.clue}`,"L'indice pour les enfants"),note,
+      h("div",{class:"card adult"},h("h3",{text:"Pour l'adulte"}),
+        h("p",null,h("b",{text:fill("{P}",P)})),
+        st.legM?h("p",{class:"note",text:`Environ ${st.legM} m à pied, vers ${st.dir}.`}):null,
+        h("p",{class:"note",text:st.adult}),routeLinks(st)),
+      h("div",{class:"row"},
+        h("button",{class:"btn ghost",type:"button",onclick:()=>checkArrival(st,out)},"Vérifier ma position"),
+        h("button",{class:"btn",type:"button",onclick:()=>go({phase:"arrived",hint:0})},"Nous y sommes")),
+      out,
+      h("button",{class:"linkish",type:"button",onclick:()=>solve(i)},"Lieu fermé ou inaccessible ? Passer cette étape")];
+  }
+  if(S.phase==="arrived"){
+    return [...head,voiceCard(st.story,null,P),note,
+      h("div",{class:"card"},h("h3",{text:"Le défi des chevaliers"}),h("p",{text:fill(S.indoor?st.defiIn:st.defi,P)}),st.timer?timerBlock(st.timer):null),
+      !S.indoor&&h("p",{class:"note",text:"Pour l'adulte : "+st.adult}),
+      h("button",{class:"btn",type:"button",onclick:()=>go({phase:"question"})},"Défi réussi : à l'énigme !")];
+  }
+  if(S.phase==="question"){
+    const fb=h("p",{role:"status"});const box=h("div",{class:"choices"});
+    st.choices.forEach((c,ci)=>{const b=h("button",{class:"choice",type:"button",text:c});
+      b.addEventListener("click",()=>{if(ci===st.answer){b.classList.add("right");fb.className="ok";fb.textContent="Bonne réponse ! "+st.fact;box.querySelectorAll("button").forEach(x=>x.disabled=true);setTimeout(()=>solve(i),1400);}
+        else{b.classList.add("wrong");fb.className="hint";fb.textContent="Pas tout à fait… essayez encore, ou demandez un indice.";}});
+      box.append(b);});
+    return [...head,h("div",{class:"card"},h("h3",{text:"L'énigme"}),h("p",null,h("b",{text:st.q})),box,fb,
+      h("p",{class:"hint",text:S.hint>0?st.hints.slice(0,S.hint).map((x,k)=>`Indice ${k+1} : ${x}`).join("\n"):""}),
+      S.hint<3&&h("button",{class:"btn ghost",type:"button",onclick:()=>go({hint:S.hint+1})},`Demander un indice (${S.hint+1}/3)`))];
+  }
+  if(S.phase==="letter"){
+    const last=i===n-1;
+    return [...head,h("div",{class:"card",style:"text-align:center"},h("h3",{text:"Lettre gagnée"}),h("div",{class:"letter pop",text:st.letter}),
+        h("p",{class:"note",text:"Le gardien de cette lettre la répète trois fois à voix haute. Ensuite, il doit s'en souvenir jusqu'à la fin de la quête."}),
+        h("p",{text:`Lettres retrouvées : ${S.solved.map(k=>q.steps[k].letter).join(" ")}`})),
+      voiceCard(last
+        ?`Voici la dernière lettre : ${st.letter}. Choisissez son gardien. Tu as maintenant toutes les lettres, {N}, mais elles sont dans le désordre… Retrouve le mot secret. Un indice : ${q.hint}.`
+        :`Bien joué, {N}. Voici la lettre ${st.letter}. Choisissez un gardien de la lettre, un chevalier qui ne l'a pas encore été. Il devra s'en souvenir jusqu'à la fin de la quête.`),note,
+      h("button",{class:"btn",type:"button",onclick:()=>last?go({screen:"final"}):go({step:i+1,phase:S.indoor?"arrived":"travel",hint:0})},last?"Trouver le mot secret":"Étape suivante")];
+  }
+  return [];
+}
+function solve(i){const solved=S.solved.includes(i)?S.solved:[...S.solved,i];go({solved,lastSolved:i,phase:"letter"});}
+
+function finalScreen(){
+  const q=S.quest;const letters=S.solved.map(k=>q.steps[k].letter).join(" ");
+  const inp=h("input",{type:"text",id:"secret",autocomplete:"off",placeholder:"Le mot secret"});const fb=h("p",{role:"status",class:"hint"});
+  const check=()=>{const v=inp.value.normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().trim();
+    if(v===q.word)go({screen:"diploma"});else fb.textContent=`Ce n'est pas encore ça. Il commence par ${q.word[0]}.`;};
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")check();});
+  return [shieldRow(),h("div",null,h("p",{class:"eyebrow",text:"le sceau du temple"}),h("h2",{text:"Le mot secret"})),
+    h("div",{class:"card adult"},h("h3",{text:"Pour l'adulte"}),
+      h("p",{text:"Appelez les gardiens des lettres et alignez-les face à vous. Chacun crie sa lettre. Les chevaliers changent de place jusqu'à former le mot secret. Puis tapez le mot ci-dessous."})),
+    h("div",{class:"card",style:"text-align:center"},h("p",{text:"Si un gardien a oublié sa lettre, les voici, dans le désordre :"}),h("div",{class:"letter",text:letters})),
+    h("div",{class:"card"},h("label",{for:"secret"},"L'adulte tape le mot trouvé par les enfants",inp),h("button",{class:"btn",type:"button",onclick:check},"Ouvrir le Sceau"),fb)];
+}
+function diplomaScreen(){
+  const q=S.quest;
+  const end=`{N}, tu as retrouvé le mot secret : ${q.say}. ${q.meaning} Le Sceau du Temple est ouvert ! Grand Maître, remets le trésor aux chevaliers. Et toi, {N}, je te nomme [[Chevalier|Chevalière]] de l'Ordre des Gardiens du Temple. Joyeux anniversaire !`;
+  const today=new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});
+  return [h("div",null,h("p",{class:"eyebrow",text:"quête accomplie"}),h("h2",{text:"Le trésor est à vous !"})),
+    voiceCard(end,"Le dernier message du Grand Maître"),note,
+    h("div",{class:"card adult"},h("h3",{text:"Pour l'adulte"}),h("p",{text:"C'est le moment de sortir le trésor de votre sac et de le remettre aux chevaliers."})),
+    h("div",{class:"card diploma"},h("p",{class:"eyebrow",text:"ordre des gardiens du temple"}),h("p",{text:"Par ce diplôme, le Grand Maître nomme"}),
+      h("div",{class:"name",text:S.name||"Jeune chevalier"}),h("p",null,h("b",{text:g("Chevalier","Chevalière")+" de l'Ordre des Gardiens du Temple"})),
+      h("p",{class:"note",text:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`})),
+    h("p",{class:"note",text:"Faites une capture d'écran du diplôme pour le garder en souvenir."}),
+    h("button",{class:"btn ghost",type:"button",onclick:()=>go(Object.assign({},defaults,{name:S.name,hero:S.hero,kids:S.kids,voice:S.voice}))},"Créer une nouvelle quête")];
+}
+
+function topbar(){
+  if(["setup","loading","few","neterr","preview"].includes(S.screen))return null;
+  return h("div",{class:"topbar"},h("span",{class:"eyebrow",text:"la quête des templiers"}),
+    h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"preview"})},"Aperçu"));
+}
+function render(){
+  note.textContent="";stopVoice();app.replaceChildren();
+  let screen=S.screen;
+  if(!S.quest&&!["setup","loading","few","neterr"].includes(screen))screen="setup";
+  if(S.quest&&!S.unlocked&&!["setup","preview","loading","few","neterr"].includes(screen))screen="preview";
+  const map={setup:setupScreen,loading:loadingScreen,few:fewScreen,neterr:netErrScreen,preview:previewScreen,guide:guideScreen,intro:introScreen,step:stepScreen,final:finalScreen,diploma:diplomaScreen};
+  const tb=topbar();if(tb)app.append(tb);
+  (map[screen]||setupScreen)().forEach(n=>{if(n)app.append(n);});
+}
+// A reload in the middle of loading goes back to setup; everything else resumes where it was.
+if(S.screen==="loading")S.screen="setup";
+render();
+})();
+</script>
+</body>
+</html>
