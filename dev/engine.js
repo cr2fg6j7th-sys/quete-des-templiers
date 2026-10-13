@@ -149,9 +149,9 @@ nwr${a}["tourism"~"^(artwork|viewpoint)$"];
 
   // ---- 4. words and texts ----
   const WORDS = {
-    6: { word: "FIDELE", say: "FIDÈLE", hint: "un vrai [[chevalier|chevalière]] l'est toujours envers ses amis", meaning: "Un [[chevalier|chevalière]] est fidèle à ses amis et à sa parole." },
-    5: { word: "BRAVE", say: "BRAVE", hint: "un [[chevalier|chevalière]] n'a pas peur : [[il|elle]] est…", meaning: "Un [[chevalier|chevalière]] est brave : [[il|elle]] avance même quand c'est difficile." },
-    4: { word: "EPEE", say: "ÉPÉE", hint: "c'est l'arme du [[chevalier|chevalière]]", meaning: "L'épée du [[chevalier|chevalière]] protège les plus faibles." }
+    6: { word: "FIDELE", say: "FIDÈLE", hint: "[[un vrai chevalier|une vraie chevalière]] l'est toujours envers ses amis", meaning: "[[Un chevalier|Une chevalière]] est fidèle à ses amis et à sa parole." },
+    5: { word: "BRAVE", say: "BRAVE", hint: "[[un chevalier|une chevalière]] n'a pas peur : [[il|elle]] est…", meaning: "[[Un chevalier|Une chevalière]] est brave : [[il|elle]] avance même quand c'est difficile." },
+    4: { word: "EPEE", say: "ÉPÉE", hint: "c'est l'arme [[du chevalier|de la chevalière]]", meaning: "L'épée [[du chevalier|de la chevalière]] protège les plus faibles." }
   };
 
   function rng(seed) { let s = seed >>> 0 || 1; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; }
@@ -181,7 +181,7 @@ nwr${a}["tourism"~"^(artwork|viewpoint)$"];
       teaser: "Un lieu de pierre où l'on chuchote.",
       generic: "la chapelle",
       clue: "Cherchez un bâtiment surmonté d'une croix. Les chevaliers y venaient avant chaque grande aventure.",
-      story: "Te voici devant {P}, {N}. Avant d'être [[nommé|nommée]] chevalier, un jeune écuyer passait toute une nuit à veiller dans une église ou une chapelle, sans dormir. On appelait cela la veillée d'armes.",
+      story: "Te voici devant {P}, {N}. Avant d'être nommé chevalier, un jeune écuyer passait toute une nuit à veiller dans une église ou une chapelle, sans dormir. On appelait cela la veillée d'armes.",
       defi: "La veillée d'armes : tout le monde ferme les yeux et reste parfaitement silencieux pendant quinze secondes, comme un écuyer qui veille.",
       defiIn: "La veillée d'armes : tout le monde ferme les yeux et reste parfaitement silencieux pendant quinze secondes, comme un écuyer qui veille.",
       timer: 15,
@@ -409,6 +409,12 @@ nwr${a}["tourism"~"^(artwork|viewpoint)$"];
 
   function variant(cat, n) { const list = T[cat]; return list[Math.min(n, list.length - 1)]; }
 
+  // What the voice says instead of the place name (the exact name stays on the adult's screen).
+  const HERE = { church: ["cette église", "ce lieu de prière"], gate: ["cette porte", "cette vieille porte"], tower: ["cette tour"],
+    castle: ["ce château"], ruins: ["ces ruines"], well: ["ce puits"], fountain: ["cette fontaine", "cette fontaine"],
+    townhall: ["cette mairie"], memorial: ["ce monument"], statue: ["cette statue", "ce monument"], artwork: ["cette œuvre"],
+    square: ["cette place"], park: ["ce parc", "ce jardin"], playground: ["cette aire de jeux"], viewpoint: ["ce point de vue"] };
+
   // "Église Saint-Martin" -> "l'église Saint-Martin"; "Saint-Martin" (church) -> "l'église Saint-Martin"
   const NOUNS = [["hôtel de ville", "l'"], ["aire de jeux", "l'"], ["monument", "le "], ["église", "l'"], ["chapelle", "la "],
     ["cathédrale", "la "], ["basilique", "la "], ["temple", "le "], ["parc", "le "], ["jardin", "le "], ["square", "le "],
@@ -441,7 +447,7 @@ nwr${a}["tourism"~"^(artwork|viewpoint)$"];
       const placeName = articleize(s.name, tpl.generic);
       const legM = Math.round(dist(prev, s) * WALK_FACTOR / 10) * 10;
       const step = Object.assign({}, tpl, {
-        cat: s.cat, letter: scrambled[i], lat: s.lat, lon: s.lon, name: s.name,
+        cat: s.cat, v: Math.min(n, T[s.cat].length - 1), letter: scrambled[i], lat: s.lat, lon: s.lon, name: s.name,
         P: placeName, legM, dir: bearing(prev, s), osm: s.id
       });
       prev = s;
@@ -455,7 +461,7 @@ nwr${a}["tourism"~"^(artwork|viewpoint)$"];
     };
   }
 
-  return { overpassQuery, classify, dedupe, choose, build, dist, bearing, articleize, T, WORDS, SEARCH_RADIUS, MAX_WALK };
+  return { overpassQuery, classify, dedupe, choose, build, dist, bearing, articleize, T, HERE, WORDS, SEARCH_RADIUS, MAX_WALK };
 })();
 if (typeof module !== "undefined") module.exports = QuestEngine;
 /* ENGINE-END */

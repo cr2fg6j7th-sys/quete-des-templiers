@@ -1,0 +1,68 @@
+/* VOICE-START
+   The Grand Master's recorded voice: every line is generated once (Gemini TTS, voice Algenib)
+   and reused for every customer. A message is a list of clip keys played in a row;
+   "@name" stands for the child's first-name clip ("Léa,"), or "Jeune chevalier," when the
+   name is not in the library. Place names are never spoken: they stay on the adult's screen. */
+
+const QuestVoice = (() => {
+  const E = (typeof QuestEngine !== "undefined") ? QuestEngine : require("./engine.js");
+  const STYLE = "Un très vieil homme sage, Grand Maître d'un ordre de chevaliers, qui parle à un enfant. Voix grave, chaleureuse, un peu voilée par l'âge. Il parle lentement et doucement, avec de petites pauses, comme s'il confiait un secret au coin du feu. Français de France, sans accent.";
+  const VOICE = "Algenib";
+  const LETTERS = ["F", "I", "D", "E", "L", "B", "R", "A", "V", "P"];
+
+  const gender = (t, g) => t.replace(/\[\[([^|\]]*)\|([^\]]*)\]\]/g, (m, a, b) => g === "f" ? b : a);
+  const cap = s => s.replace(/(^|[.!?…]\s+|«\s)([a-zàâäéèêëîïôöùûüç])/g, (m, a, b) => a + b.toUpperCase());
+
+  const LINES = {};
+  function add(key, text) {
+    if (/\[\[/.test(text)) { LINES[key + "-m"] = cap(gender(text, "m")); LINES[key + "-f"] = cap(gender(text, "f")); }
+    else LINES[key] = cap(text);
+  }
+  function key(base, g) { return LINES[base] ? base : `${base}-${g === "f" ? "f" : "m"}`; }
+
+  // Story text without the child's name (the name clip plays first) and without the place name.
+  function spokenStory(t, here) {
+    return t.replace(/,\s*\{N\}/g, "").replace(/\{N\},\s*/g, "").replace(/\{N\}/g, "jeune [[chevalier|chevalière]]")
+      .replaceAll("{P}", here).replace(/\s+/g, " ").trim();
+  }
+
+  add("vocatif", "jeune [[chevalier|chevalière]],");
+  add("prologue-dehors", "approche. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple passa par ici. Avant de repartir, il cacha un sceau magique et dispersa les lettres du mot secret qui permet de l'ouvrir. Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'[[un chevalier courageux|une chevalière courageuse]]. Avec tes compagnons, suis les indices, relève mes défis, et rapporte-moi les lettres. Es-tu [[prêt|prête]] ?");
+  add("prologue-maison", "approche. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple cacha un sceau magique et dispersa les lettres du mot secret qui permet de l'ouvrir. Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'[[un chevalier courageux|une chevalière courageuse]]. Je vais te raconter les lieux où il est passé, et tu relèveras mes défis sans quitter la maison. Es-tu [[prêt|prête]] ?");
+  add("intro-dehors", "[[chevalier|chevalière]] de l'Ordre, la quête commence ! À chaque lieu, tu gagneras une lettre. Les lettres arrivent dans le désordre : à toi de retrouver le mot secret à la fin. Suis les indices, reste toujours près des adultes, et ouvre grand les yeux.");
+  add("intro-maison", "[[chevalier|chevalière]] de l'Ordre, la quête commence ! À chaque lieu, tu gagneras une lettre. Les lettres arrivent dans le désordre : à toi de retrouver le mot secret à la fin. Aujourd'hui, nous voyageons par la pensée : écoute bien mes récits.");
+  for (const [cat, list] of Object.entries(E.T)) list.forEach((t, v) => {
+    add(`indice-${cat}-${v}`, "Écoute bien. " + t.clue);
+    add(`recit-${cat}-${v}`, spokenStory(t.story, E.HERE[cat][v]));
+  });
+  for (const L of LETTERS) {
+    add(`lettre-${L}`, `Bien joué ! Voici la lettre ${L}.`);
+    add(`derniere-${L}`, `Et voici la dernière lettre : ${L}. Choisissez son gardien.`);
+  }
+  add("gardien", "Choisissez un gardien de la lettre, un chevalier qui ne l'a pas encore été. Il devra s'en souvenir jusqu'à la fin de la quête.");
+  for (const W of Object.values(E.WORDS)) {
+    add(`mot-${W.word}`, `Tu as maintenant toutes les lettres, mais elles sont dans le désordre. Retrouve le mot secret. Un indice : ${W.hint}${/…$/.test(W.hint) ? "" : "."}`);
+    add(`fin-${W.word}`, `tu as retrouvé le mot secret : ${W.say}. ${W.meaning} Le Sceau du Temple est ouvert ! Grand Maître, remets le trésor aux chevaliers. Et toi,`);
+  }
+  add("nomme", "je te nomme [[Chevalier|Chevalière]] de l'Ordre des Gardiens du Temple. Joyeux anniversaire !");
+
+  const slug = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  // Clip keys for one message. ctx: { g: "m"|"f", indoor, cat, v, letter, last, word }
+  function message(kind, ctx) {
+    const g = ctx.g, N = "@name", where = ctx.indoor ? "maison" : "dehors";
+    switch (kind) {
+      case "prologue": return [N, key(`prologue-${where}`, g)];
+      case "intro": return [N, key(`intro-${where}`, g)];
+      case "indice": return [key(`indice-${ctx.cat}-${ctx.v}`, g)];
+      case "recit": return [N, key(`recit-${ctx.cat}-${ctx.v}`, g)];
+      case "lettre": return ctx.last ? [key(`derniere-${ctx.letter}`, g), key(`mot-${ctx.word}`, g)] : [key(`lettre-${ctx.letter}`, g), "gardien"];
+      case "fin": return [N, key(`fin-${ctx.word}`, g), N, key("nomme", g)];
+    }
+    return [];
+  }
+
+  return { STYLE, VOICE, LINES, message, slug, key };
+})();
+if (typeof module !== "undefined") module.exports = QuestVoice;
+/* VOICE-END */

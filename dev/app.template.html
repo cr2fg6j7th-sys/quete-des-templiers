@@ -374,7 +374,7 @@ function stepScreen(){
         h("p",{class:"note",text:"Le gardien de cette lettre la répète trois fois à voix haute. Ensuite, il doit s'en souvenir jusqu'à la fin de la quête."}),
         h("p",{text:`Lettres retrouvées : ${S.solved.map(k=>q.steps[k].letter).join(" ")}`})),
       voiceCard(last
-        ?`Voici la dernière lettre : ${st.letter}. Choisissez son gardien. Tu as maintenant toutes les lettres, {N}, mais elles sont dans le désordre… Retrouve le mot secret. Un indice : ${q.hint}.`
+        ?`Voici la dernière lettre : ${st.letter}. Choisissez son gardien. Tu as maintenant toutes les lettres, {N}, mais elles sont dans le désordre… Retrouve le mot secret. Un indice : ${q.hint}${/…$/.test(q.hint)?"":"."}`
         :`Bien joué, {N}. Voici la lettre ${st.letter}. Choisissez un gardien de la lettre, un chevalier qui ne l'a pas encore été. Il devra s'en souvenir jusqu'à la fin de la quête.`),note,
       h("button",{class:"btn",type:"button",onclick:()=>last?go({screen:"final"}):go({step:i+1,phase:S.indoor?"arrived":"travel",hint:0})},last?"Trouver le mot secret":"Étape suivante")];
   }

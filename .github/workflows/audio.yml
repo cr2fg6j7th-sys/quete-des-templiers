@@ -29,22 +29,70 @@ jobs:
       - name: Télécharger et convertir les clips manquants
         run: |
           python3 - <<'EOF'
-          import json, os, subprocess, urllib.request
+          import json, os, re, subprocess, urllib.request
+          FILTER = "loudnorm=I=-18:TP=-2:LRA=11"
+          TRIM = "silenceremove=start_periods=1:start_threshold=-50dB:stop_periods=-1:stop_duration=0.6:stop_threshold=-50dB,"
+          def mp3(src, out, extra=None):
+              os.makedirs(os.path.dirname(out), exist_ok=True)
+              cmd = ["ffmpeg", "-loglevel", "error", "-y"] + (extra or []) + ["-i", src, "-af", TRIM + FILTER, "-ac", "1", "-b:a", "56k", out]
+              subprocess.run(cmd, check=True)
           manifest = json.load(open("audio/manifest.json", encoding="utf-8"))
           done = 0
-          for key, url in manifest["clips"].items():
+          for key, url in manifest.get("clips", {}).items():
               out = os.path.join("audio", key + ".mp3")
               if os.path.exists(out):
                   continue
-              os.makedirs(os.path.dirname(out), exist_ok=True)
-              tmp = "/tmp/clip.wav"
-              urllib.request.urlretrieve(url, tmp)
-              # trim silence, even out loudness between clips, mono, 56 kbps
-              subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", tmp,
-                              "-af", "silenceremove=start_periods=1:start_threshold=-50dB:stop_periods=-1:stop_duration=0.6:stop_threshold=-50dB,loudnorm=I=-18:TP=-2:LRA=11",
-                              "-ac", "1", "-b:a", "56k", out], check=True)
+              urllib.request.urlretrieve(url, "/tmp/clip.wav")
+              mp3("/tmp/clip.wav", out)
               done += 1
           print(f"{done} clip(s) ajouté(s)")
+
+          # First-name batches: one recording holds many names separated by silences.
+          def speech_spans(path, noise, dur):
+              r = subprocess.run(["ffmpeg", "-i", path, "-af", f"silencedetect=noise={noise}dB:d={dur}", "-f", "null", "-"],
+                                 capture_output=True, text=True)
+              total = float(re.search(r"Duration: (\d+):(\d+):([\d.]+)", r.stderr).groups()[2]) + \
+                      60 * float(re.search(r"Duration: (\d+):(\d+):([\d.]+)", r.stderr).groups()[1])
+              starts = [float(x) for x in re.findall(r"silence_start: ([\d.]+)", r.stderr)]
+              ends = [float(x) for x in re.findall(r"silence_end: ([\d.]+)", r.stderr)]
+              spans, cur = [], 0.0
+              for s, e in zip(starts, ends + [total]):
+                  if s - cur > 0.15:
+                      spans.append((cur, s))
+                  cur = e
+              if total - cur > 0.15:
+                  spans.append((cur, total))
+              return spans
+          report = {}
+          for b in manifest.get("batches", []):
+              names = b["names"]
+              if all(os.path.exists(f"audio/noms/{n}.mp3") for n in names):
+                  continue
+              urllib.request.urlretrieve(b["url"], "/tmp/batch.wav")
+              found = None
+              for noise in (-40, -35, -45, -30):
+                  for dur in (0.6, 0.45, 0.8, 0.35, 1.0):
+                      spans = speech_spans("/tmp/batch.wav", noise, dur)
+                      if len(spans) == len(names):
+                          found = spans
+                          break
+                  if found:
+                      break
+              if not found:
+                  report[b["id"]] = f"{len(spans)} segments pour {len(names)} prénoms"
+                  continue
+              for n, (s, e) in zip(names, found):
+                  mp3("/tmp/batch.wav", f"audio/noms/{n}.mp3", ["-ss", f"{max(s - 0.05, 0):.2f}", "-to", f"{e + 0.08:.2f}"])
+              report[b["id"]] = "ok"
+          if report:
+              old = {}
+              if os.path.exists("audio/rapport-noms.json"):
+                  old = json.load(open("audio/rapport-noms.json", encoding="utf-8"))
+              old.update(report)
+              json.dump(old, open("audio/rapport-noms.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+              print(report)
+          names = sorted(f[:-4] for f in os.listdir("audio/noms")) if os.path.isdir("audio/noms") else []
+          json.dump(names, open("audio/noms.json", "w"), separators=(",", ":"))
           EOF
 
       - name: Enregistrer les clips
