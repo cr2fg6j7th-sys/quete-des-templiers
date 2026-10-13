@@ -5,10 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>La Quête des Templiers</title>
 <meta name="description" content="Une quête d'anniversaire au prénom de votre enfant, générée en deux minutes autour de chez vous.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Alegreya+Sans+SC:wght@500;700&display=swap">
 <style>
+/* Fonts served by the site itself (SIL Open Font License, see fonts/), so no visitor data goes to a font service. */
+@font-face{font-family:"UnifrakturMaguntia";src:url(fonts/UnifrakturMaguntia-Book.woff) format("woff");font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(fonts/AlegreyaSans-Regular.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(fonts/AlegreyaSans-Italic.woff) format("woff");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(fonts/AlegreyaSans-Medium.woff) format("woff");font-weight:500;font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(fonts/AlegreyaSans-Bold.woff) format("woff");font-weight:700;font-display:swap}
+@font-face{font-family:"Alegreya Sans SC";src:url(fonts/AlegreyaSansSC-Medium.woff) format("woff");font-weight:500;font-display:swap}
+@font-face{font-family:"Alegreya Sans SC";src:url(fonts/AlegreyaSansSC-Bold.woff) format("woff");font-weight:700;font-display:swap}
 /* Layout: one narrow column held by the adult guide; six shields track the quest. */
 :root{
   --stone:#eef0f5;--card:#ffffff;--ink:#1b2547;--muted:#5b6482;--rose:#b8505c;--rose-soft:#f6e3e5;--or:#a87a1f;--line:#d9dce8;--ok:#2f7a4f;
@@ -76,11 +81,17 @@ button{cursor:pointer}
 ul.rules{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
 .spinner{width:42px;height:42px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--rose);margin:0 auto}
 footer{font-size:.78rem;color:var(--muted);text-align:center}
+footer a{color:var(--muted)}
+.consent{flex-direction:row;align-items:flex-start;gap:12px;font-family:var(--body);letter-spacing:0;font-size:.95rem;line-height:1.4}
+.consent input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--rose)}
 @media (prefers-reduced-motion:no-preference){.pop{animation:pop .5s ease-out}@keyframes pop{from{transform:scale(.6);opacity:.3}to{transform:none;opacity:1}}.spinner{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
+<script>
+/*GEO*/
+</script>
 <script>
 /*ENGINE*/
 </script>
@@ -90,14 +101,20 @@ footer{font-size:.78rem;color:var(--muted);text-align:center}
 <script>
 (function(){
 "use strict";
-const E=QuestEngine;
-const STORE="quete-templiers-v2";
-const PRICE="24,90 €";
+// Paid build: the server chooses the places and unlocks the quest after payment.
+// Demo build (GitHub Pages): everything runs in the phone, the unlock button is free.
+const PAID=/*PAID*/false;
+const E=(typeof QuestEngine!=="undefined")?QuestEngine:null;
+const G=QuestGeo;
+const STORE="quete-templiers-v3";
+let PRICE="24,90 €";
 const OVERPASS="https://overpass-api.de/api/interpreter";
 const NOMINATIM="https://nominatim.openstreetmap.org";
 
 /* ---------- State ---------- */
-const defaults={name:"",hero:"m",kids:8,indoor:false,unlocked:false,screen:"setup",start:null,town:"",quest:null,step:0,phase:"travel",solved:[],hint:0,voice:""};
+// preview: what is shown before paying; token: the sealed quest (paid build); quest: the full quest once unlocked;
+// paid: the Stripe session that unlocked it (also the key of the reopen link).
+const defaults={name:"",hero:"m",kids:8,indoor:false,unlocked:false,screen:"setup",start:null,town:"",preview:null,token:"",quest:null,paid:"",step:0,phase:"travel",solved:[],hint:0,voice:""};
 let S=Object.assign({},defaults);
 try{const raw=localStorage.getItem(STORE);if(raw)S=Object.assign({},defaults,JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
@@ -187,7 +204,8 @@ function shieldRow(){
     row.append(w);});
   return row;
 }
-function footer(){return h("footer",null,"Lieux : © contributeurs OpenStreetMap (licence ODbL). Recherche d'adresse : Nominatim.");}
+function footer(){return h("footer",null,"Lieux : © contributeurs OpenStreetMap (licence ODbL). Recherche d'adresse : Nominatim.",h("br"),
+  h("a",{href:"legal/cgv.html"},"Conditions de vente")," · ",h("a",{href:"legal/mentions-legales.html"},"Mentions légales")," · ",h("a",{href:"legal/confidentialite.html"},"Confidentialité"));}
 
 /* ---------- Network ---------- */
 async function getJSON(url,opts,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||20000);
@@ -195,14 +213,30 @@ async function getJSON(url,opts,ms){const c=new AbortController();const t=setTim
 function townOf(a){a=a||{};return a.village||a.town||a.city||a.municipality||a.hamlet||"";}
 async function searchPlaces(q){return getJSON(`${NOMINATIM}/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=fr&accept-language=fr&q=${encodeURIComponent(q)}`);}
 async function reverseTown(lat,lon){try{const r=await getJSON(`${NOMINATIM}/reverse?format=jsonv2&zoom=14&accept-language=fr&lat=${lat}&lon=${lon}`,null,10000);return townOf(r.address);}catch(e){return "";}}
-async function fetchPlaces(lat,lon){const r=await getJSON(OVERPASS,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(E.overpassQuery(lat,lon))},30000);return r.elements||[];}
+async function fetchPlaces(lat,lon){const r=await getJSON(OVERPASS,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(G.overpassQuery(lat,lon))},30000);return r.elements||[];}
+// Our own server: answers JSON even for refusals (unpaid, bad request), throws only when unreachable.
+async function api(path,body,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||25000);
+  try{const r=await fetch(path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body),signal:c.signal});
+    const j=await r.json().catch(()=>null);if(!j)throw new Error("HTTP "+r.status);return j;}finally{clearTimeout(t);}}
+function previewOf(q){return {ok:true,indoorOnly:!!q.indoorOnly,count:q.steps.length,walkM:q.walkM,minutes:q.minutes,teasers:q.steps.map(s=>s.teaser)};}
+// Free preview of a quest. body: {start, elements} or {indoor:true}.
+async function makePreview(body){
+  if(!PAID){const q=body.indoor?E.assemble(null,E.indoorStops()):E.build(body.elements,body.start);
+    return q.ok?{ok:true,preview:previewOf(q),quest:q,token:""}:q;}
+  const r=await api("api/preview",body,30000);
+  if(!r.ok)return r;
+  if(r.price)PRICE=r.price;
+  return {ok:true,preview:{ok:true,indoorOnly:r.indoorOnly,count:r.count,walkM:r.walkM,minutes:r.minutes,teasers:r.teasers,price:r.price},quest:null,token:r.token};
+}
 
-/* ---------- Indoor quest (works anywhere, no map needed) ---------- */
-function indoorQuest(){
-  const cats=["church","gate","well","castle","square","park"];
-  const W=E.WORDS[6];const scrambled="ELFIED";
-  return {ok:true,indoorOnly:true,steps:cats.map((c,i)=>Object.assign({},E.T[c][0],{cat:c,v:0,letter:scrambled[i],P:E.T[c][0].generic,legM:0,dir:"",lat:null,lon:null})),
-    word:W.word,say:W.say,hint:W.hint,meaning:W.meaning,scrambled,walkM:0,minutes:60};
+/* ---------- New quest ---------- */
+const fresh={unlocked:false,paid:"",solved:[],step:0,phase:"travel",hint:0};
+async function startIndoor(){
+  go({screen:"loading",start:null});
+  try{const p=await makePreview({indoor:true});
+    if(!p.ok)throw new Error(p.reason);
+    go(Object.assign({},fresh,{preview:p.preview,quest:p.quest,token:p.token,screen:"preview",indoor:true}));}
+  catch(e){go({screen:"neterr"});}
 }
 
 /* ---------- Screens ---------- */
@@ -243,7 +277,7 @@ function setupScreen(){
       h("button",{class:"btn",type:"button",onclick:doSearch},"Chercher"),
       results),
     note,
-    h("button",{class:"linkish",type:"button",onclick:()=>go({quest:indoorQuest(),town:S.town||"",start:null,screen:"preview",indoor:true,unlocked:false,solved:[],step:0})},"Il pleut ? Créer une quête à jouer à la maison"),
+    h("button",{class:"linkish",type:"button",onclick:()=>{if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}startIndoor();}},"Il pleut ? Créer une quête à jouer à la maison"),
     footer()
   ];
 }
@@ -252,23 +286,34 @@ async function startFrom(lat,lon,town){
   if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}
   go({screen:"loading",start:{lat,lon},town:town||""});
   try{
-    const els=await fetchPlaces(lat,lon);
-    const q=E.build(els,{lat,lon});
-    if(!q.ok){go({screen:"few",found:q.found});return;}
-    go({quest:q,screen:"preview",indoor:false,unlocked:false,solved:[],step:0,phase:"travel"});
+    const els=G.slim(await fetchPlaces(lat,lon));
+    const p=await makePreview({start:{lat,lon},elements:els});
+    if(!p.ok){if(p.reason==="few"){go({screen:"few",found:p.found});return;}throw new Error(p.reason);}
+    go(Object.assign({},fresh,{preview:p.preview,quest:p.quest,token:p.token,screen:"preview",indoor:false}));
   }catch(e){go({screen:"neterr"});}
 }
 
 function loadingScreen(){return [h("div",{class:"card",style:"text-align:center"},h("div",{class:"spinner"}),
-  h("p",{text:`Le Grand Maître explore ${S.town||"les environs"} à la recherche des meilleurs lieux…`}),h("p",{class:"note",text:"Cela prend en général moins de 30 secondes."}))];}
+  h("p",{text:S.start?`Le Grand Maître explore ${S.town||"les environs"} à la recherche des meilleurs lieux…`:"Le Grand Maître prépare votre quête…"}),h("p",{class:"note",text:"Cela prend en général moins de 30 secondes."}))];}
+function unlockingScreen(){return [h("div",{class:"card",style:"text-align:center"},h("div",{class:"spinner"}),
+  h("p",{text:"Le Grand Maître ouvre votre quête…"}))];}
+function unlockErrScreen(){
+  const msg=S.unlockErr==="unpaid"?"Le paiement n'est pas encore confirmé. Patientez quelques secondes puis réessayez."
+    :S.unlockErr==="net"?"Le serveur ne répond pas. Vérifiez la connexion et réessayez."
+    :"Ce lien de quête n'est pas valable. Vérifiez qu'il est complet.";
+  return [h("h2",{text:"La quête n'a pas pu s'ouvrir"}),h("p",{text:msg}),
+    S.pending&&S.unlockErr!=="bad"&&h("button",{class:"btn",type:"button",onclick:()=>unlockWith(S.pending)},"Réessayer"),
+    h("button",{class:"btn ghost",type:"button",onclick:()=>go({screen:S.preview?"preview":"setup"})},"Retour"),
+    h("p",{class:"note",text:"Un souci de paiement ? Écrivez-nous (adresse dans les conditions de vente) : nous vous répondons vite."}),footer()];
+}
 function fewScreen(){return [h("h2",{text:"Pas assez de lieux ici"}),
   h("p",{text:`Nous n'avons trouvé que ${S.found||0} lieu${(S.found||0)>1?"x":""} adapté${(S.found||0)>1?"s":""} autour de ce point. Une quête a besoin d'au moins quatre étapes.`}),
   h("p",{class:"lead",text:"Essayez un point de départ plus central (la place de l'église, la mairie), ou jouez la quête à la maison."}),
   h("button",{class:"btn",type:"button",onclick:()=>go({screen:"setup"})},"Choisir un autre point de départ"),
-  h("button",{class:"btn ghost",type:"button",onclick:()=>go({quest:indoorQuest(),screen:"preview",indoor:true,unlocked:false,solved:[],step:0})},"Jouer à la maison"),footer()];}
+  h("button",{class:"btn ghost",type:"button",onclick:startIndoor},"Jouer à la maison"),footer()];}
 function netErrScreen(){return [h("h2",{text:"Les cartes ne répondent pas"}),
   h("p",{text:"Le service de cartes n'a pas répondu. C'est souvent passager."}),
-  h("button",{class:"btn",type:"button",onclick:()=>startFrom(S.start.lat,S.start.lon,S.town)},"Réessayer"),
+  h("button",{class:"btn",type:"button",onclick:()=>S.start?startFrom(S.start.lat,S.start.lon,S.town):startIndoor()},"Réessayer"),
   h("button",{class:"btn ghost",type:"button",onclick:()=>go({screen:"setup"})},"Changer de point de départ")];}
 
 function mapTeaser(){
@@ -285,33 +330,54 @@ function mapTeaser(){
    <text x="165" y="186" text-anchor="middle" font-family="Alegreya Sans SC, sans-serif" font-size="11" fill="var(--muted)" letter-spacing="1">les étapes restent dans l'ombre jusqu'au départ</text></svg>`;
   const t=box.querySelector("svg");const tx=document.createElementNS("http://www.w3.org/2000/svg","text");
   tx.setAttribute("x","165");tx.setAttribute("y","108");tx.setAttribute("text-anchor","middle");tx.setAttribute("font-family","UnifrakturMaguntia, Georgia, serif");tx.setAttribute("font-size","22");tx.setAttribute("fill","var(--ink)");
-  tx.textContent=S.quest.indoorOnly?"À la maison":(S.town||"Votre quartier");t.append(tx);
+  tx.textContent=S.preview.indoorOnly?"À la maison":(S.town||"Votre quartier");t.append(tx);
   return box;
 }
 function prologueText(){
-  return S.quest.indoorOnly
-    ?`Approche, {N}. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple cacha un sceau magique et dispersa les ${S.quest.steps.length} lettres du mot secret qui permet de l'ouvrir. Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'${g("un chevalier courageux","une chevalière courageuse")}. Je vais te raconter les lieux où il est passé, et tu relèveras mes défis sans quitter la maison. Es-tu ${g("prêt","prête")} ?`
-    :`Approche, {N}. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple traversa {V}. Avant de repartir, il cacha un sceau magique et dispersa les ${S.quest.steps.length} lettres du mot secret qui permet de l'ouvrir. Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'${g("un chevalier courageux","une chevalière courageuse")}. Avec tes compagnons, suis les indices, relève mes défis, et rapporte-moi les lettres. Es-tu ${g("prêt","prête")} ?`;
+  return S.preview.indoorOnly
+    ?`Approche, {N}. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple cacha un sceau magique et dispersa les ${S.preview.count} lettres du mot secret qui permet de l'ouvrir. Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'${g("un chevalier courageux","une chevalière courageuse")}. Je vais te raconter les lieux où il est passé, et tu relèveras mes défis sans quitter la maison. Es-tu ${g("prêt","prête")} ?`
+    :`Approche, {N}. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple traversa {V}. Avant de repartir, il cacha un sceau magique et dispersa les ${S.preview.count} lettres du mot secret qui permet de l'ouvrir. Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'${g("un chevalier courageux","une chevalière courageuse")}. Avec tes compagnons, suis les indices, relève mes défis, et rapporte-moi les lettres. Es-tu ${g("prêt","prête")} ?`;
 }
 function previewScreen(){
-  const q=S.quest;
+  const q=S.preview;
   return [
     h("div",null,h("p",{class:"eyebrow",text:q.indoorOnly?"quête à la maison":"votre quête est prête"}),h("h2",{text:`La quête de ${S.name||"votre chevalier"}`})),
     mapTeaser(),
     h("div",{class:"stats"},
-      h("div",null,h("b",{text:String(q.steps.length)}),h("span",{text:"étapes"})),
+      h("div",null,h("b",{text:String(q.count)}),h("span",{text:"étapes"})),
       h("div",null,h("b",{text:q.indoorOnly?"0 km":`≈ ${(q.walkM/1000).toFixed(1).replace(".",",")} km`}),h("span",{text:"à pied"})),
       h("div",null,h("b",{text:`≈ ${q.minutes} min`}),h("span",{text:"de jeu"}))),
     h("div",{class:"card"},h("h3",{text:"Ce qui vous attend"}),
-      h("ul",{class:"teasers"},q.steps.map((s,i)=>h("li",null,h("span",{class:"n",text:String(i+1)}),h("span",{text:s.teaser})))),
+      h("ul",{class:"teasers"},q.teasers.map((t,i)=>h("li",null,h("span",{class:"n",text:String(i+1)}),h("span",{text:t})))),
       h("p",{class:"lock",text:"Les lieux exacts se révèlent un par un pendant la partie."})),
-    voiceCard(prologueText(),"Prologue gratuit · à écouter dès maintenant",null,V.message("prologue",{g:S.hero,indoor:!!S.quest.indoorOnly})),
-    note,
-    h("button",{class:"btn",type:"button",onclick:()=>go({unlocked:true,screen:"guide"})},`Débloquer la quête · ${PRICE}`),
-    h("p",{class:"note",text:"Version de test : aucun paiement, le bouton débloque la quête directement."}),
-    h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"setup",quest:null})},"Changer de point de départ"),
+    voiceCard(prologueText(),"Prologue gratuit · à écouter dès maintenant",null,V.message("prologue",{g:S.hero,indoor:!!q.indoorOnly})),
+    ...unlockBlock(),
+    h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"setup"})},"Changer de point de départ"),
     footer()
   ];
+}
+// Unlock: free in the demo build; consent + Stripe payment in the paid build.
+function unlockBlock(){
+  if(S.unlocked&&S.quest)return [note,h("button",{class:"btn",type:"button",onclick:()=>go({screen:"guide"})},"Reprendre la quête")];
+  if(!PAID)return [note,
+    h("button",{class:"btn",type:"button",onclick:()=>go({unlocked:true,screen:"guide"})},`Débloquer la quête · ${PRICE}`),
+    h("p",{class:"note",text:"Version de test : aucun paiement, le bouton débloque la quête directement."})];
+  const box=h("input",{type:"checkbox",id:"consent"});
+  const pay=async()=>{
+    if(!box.checked){note.textContent="Cochez d'abord la case ci-dessus pour accéder à la quête dès le paiement.";return;}
+    btn.disabled=true;note.textContent="Ouverture du paiement sécurisé…";
+    try{const r=await api("api/checkout",{token:S.token,consent:true,name:S.name,hero:S.hero,kids:S.kids,town:S.town});
+      if(r.ok&&r.url){location.href=r.url;return;}
+      note.textContent=r.reason==="token"?"Cette quête a expiré : créez-la à nouveau depuis le point de départ.":"Le paiement n'a pas pu s'ouvrir. Réessayez dans un instant.";}
+    catch(e){note.textContent="Le serveur ne répond pas. Vérifiez la connexion et réessayez.";}
+    btn.disabled=false;
+  };
+  const btn=h("button",{class:"btn",type:"button",onclick:pay},`Débloquer la quête · ${S.preview.price||PRICE}`);
+  return [
+    h("label",{class:"consent",for:"consent"},box,h("span",null,"J'accepte les ",h("a",{href:"legal/cgv.html",target:"_blank",rel:"noopener"},"conditions de vente"),
+      ". Je demande l'accès à la quête dès le paiement et je renonce ainsi à mon droit de rétractation.")),
+    note,btn,
+    h("p",{class:"note",text:"Paiement sécurisé par Stripe : carte, Apple Pay ou Google Pay. Garantie : quête réussie ou remboursée."})];
 }
 function guideScreen(){
   const ratio=Math.ceil((S.kids||8)/5);const q=S.quest;
@@ -330,8 +396,21 @@ function guideScreen(){
         h("button",{type:"button","aria-pressed":String(!S.indoor),onclick:()=>go({indoor:false})},"Dehors"),
         h("button",{type:"button","aria-pressed":String(S.indoor),onclick:()=>go({indoor:true})},"À la maison")),
       h("p",{class:"note",text:S.indoor?"Même histoire, mêmes énigmes : le Grand Maître raconte chaque lieu, et les défis se font dans la maison.":"Chaque étape se valide en arrivant sur place. Si un lieu est fermé ou inaccessible, vous pourrez passer l'étape."})),
+    PAID&&S.paid&&linkCard(),
     h("button",{class:"btn",type:"button",onclick:()=>go({screen:"intro"})},"Commencer la quête")
   ];
+}
+// The reopen link works on any phone, e.g. another adult's on the day of the party.
+function linkCard(){
+  const url=location.origin+location.pathname+"?quete="+encodeURIComponent(S.paid);
+  const out=h("p",{class:"note",role:"status"});
+  const share=async()=>{
+    try{if(navigator.share){await navigator.share({title:"La Quête des Templiers",text:`La quête de ${S.name}`,url});return;}}catch(e){if(e&&e.name==="AbortError")return;}
+    try{await navigator.clipboard.writeText(url);out.textContent="Lien copié.";}catch(e){out.textContent=url;}
+  };
+  return h("div",{class:"card adult"},h("h3",{text:"Votre lien de quête"}),
+    h("p",{class:"note",text:"Gardez ce lien : il rouvre la quête sur n'importe quel téléphone, par exemple celui d'un autre adulte le jour de la fête."}),
+    h("button",{class:"btn ghost",type:"button",onclick:share},"Partager ou copier le lien"),out);
 }
 function introScreen(){
   const n=S.quest.steps.length;
@@ -351,7 +430,7 @@ function checkArrival(st,out){
   if(st.lat==null||!("geolocation" in navigator)){out.textContent="Position indisponible : validez avec « Nous y sommes ».";return;}
   out.textContent="Recherche de votre position…";
   navigator.geolocation.getCurrentPosition(p=>{
-    const d=E.dist({lat:p.coords.latitude,lon:p.coords.longitude},st);
+    const d=G.dist({lat:p.coords.latitude,lon:p.coords.longitude},st);
     if(d<=50){go({phase:"arrived",hint:0});}
     else out.textContent=`Encore environ ${Math.round(d/10)*10} m. Vous pouvez aussi valider avec « Nous y sommes ».`;
   },()=>{out.textContent="Position refusée ou indisponible : validez avec « Nous y sommes ».";},{enableHighAccuracy:true,timeout:9000,maximumAge:10000});
@@ -433,26 +512,47 @@ function diplomaScreen(){
       h("div",{class:"name",text:S.name||"Jeune chevalier"}),h("p",null,h("b",{text:g("Chevalier","Chevalière")+" de l'Ordre des Gardiens du Temple"})),
       h("p",{class:"note",text:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`})),
     h("p",{class:"note",text:"Faites une capture d'écran du diplôme pour le garder en souvenir."}),
-    h("button",{class:"btn ghost",type:"button",onclick:()=>go(Object.assign({},defaults,{name:S.name,hero:S.hero,kids:S.kids,voice:S.voice}))},"Créer une nouvelle quête")];
+    h("button",{class:"btn ghost",type:"button",onclick:()=>go(Object.assign({},defaults,{name:S.name,hero:S.hero,kids:S.kids,voice:S.voice,town:S.town}))},"Créer une nouvelle quête")];
 }
 
 function topbar(){
-  if(["setup","loading","few","neterr","preview"].includes(S.screen))return null;
+  if(["setup","loading","few","neterr","preview","unlocking","unlockerr"].includes(S.screen))return null;
   return h("div",{class:"topbar"},h("span",{class:"eyebrow",text:"la quête des templiers"}),
     h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"preview"})},"Aperçu"));
 }
+const OPEN=["setup","loading","few","neterr","unlocking","unlockerr"];
 function render(){
   note.textContent="";stopVoice();app.replaceChildren();
   let screen=S.screen;
-  if(!S.quest&&!["setup","loading","few","neterr"].includes(screen))screen="setup";
-  if(S.quest&&!S.unlocked&&!["setup","preview","loading","few","neterr"].includes(screen))screen="preview";
-  const map={setup:setupScreen,loading:loadingScreen,few:fewScreen,neterr:netErrScreen,preview:previewScreen,guide:guideScreen,intro:introScreen,step:stepScreen,final:finalScreen,diploma:diplomaScreen};
+  if(!S.preview&&!OPEN.includes(screen))screen="setup";
+  else if(!(S.unlocked&&S.quest)&&!OPEN.includes(screen)&&screen!=="preview")screen="preview";
+  const map={setup:setupScreen,loading:loadingScreen,few:fewScreen,neterr:netErrScreen,preview:previewScreen,unlocking:unlockingScreen,unlockerr:unlockErrScreen,
+    guide:guideScreen,intro:introScreen,step:stepScreen,final:finalScreen,diploma:diplomaScreen};
   const tb=topbar();if(tb)app.append(tb);
   (map[screen]||setupScreen)().forEach(n=>{if(n)app.append(n);});
 }
-// A reload in the middle of loading goes back to setup; everything else resumes where it was.
-if(S.screen==="loading")S.screen="setup";
-render();
+
+/* ---------- Back from Stripe, or a reopen link ---------- */
+async function unlockWith(sid){
+  const was=S.screen;
+  go({screen:"unlocking",pending:sid});
+  let r;
+  try{r=await api("api/unlock",{session:sid});}catch(e){go({screen:"unlockerr",unlockErr:"net"});return;}
+  if(!r.ok){go({screen:"unlockerr",unlockErr:r.reason==="unpaid"?"unpaid":r.reason==="bad"||r.reason==="unknown"?"bad":"net"});return;}
+  const same=S.paid===sid&&S.quest;  // same quest on the same phone: keep the progress
+  go(Object.assign(same?{}:Object.assign({},fresh,{screen:"guide"}),{
+    quest:r.quest,preview:previewOf(r.quest),token:"",unlocked:true,paid:sid,pending:"",
+    name:r.name||S.name,hero:r.hero,kids:r.kids||S.kids,town:r.town,start:r.quest.start,indoor:same?S.indoor:!!r.quest.indoorOnly},
+    same?{screen:OPEN.includes(was)||was==="preview"?"guide":was}:{}));
+}
+
+// A reload in the middle of loading goes back to where it was; everything else resumes.
+if(S.screen==="loading"||S.screen==="unlocking")S.screen=S.preview?"preview":"setup";
+const qs=new URLSearchParams(location.search);
+const sid=qs.get("paid")||qs.get("quete");
+if(PAID&&sid){history.replaceState(null,"",location.pathname);unlockWith(sid);}
+else if(qs.has("annule")){history.replaceState(null,"",location.pathname);if(S.preview)S.screen="preview";render();note.textContent="Paiement annulé : rien n'a été débité.";}
+else render();
 })();
 </script>
 </body>

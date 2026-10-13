@@ -1,0 +1,20 @@
+# Cloudflare deployment of the paid app. Deployed by .github/workflows/deploy.yml;
+# the files come from: python3 dev/build.py --audio
+name = "quete-des-templiers"
+main = "dist/worker.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+# The site (page, voice, fonts, legal pages). Requests for a file are served directly;
+# everything else (the /api/ routes) goes to the worker.
+[assets]
+directory = "./site"
+binding = "ASSETS"
+
+[vars]
+PRICE_CENTS = "2490"
+
+[observability]
+enabled = true
+
+# Secrets, set by the deploy workflow: STRIPE_SECRET_KEY (from GitHub), QUEST_KEY (generated once).

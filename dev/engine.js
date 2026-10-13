@@ -1,39 +1,14 @@
 /* ENGINE-START
    Quest generator: OpenStreetMap places around a start point -> a 4 to 6 step quest.
-   Pure functions only (no DOM), so it runs in the browser and in Node for tests. */
+   Pure functions only (no DOM): runs on the server (Cloudflare), in Node for tests,
+   and in the browser for the free demo build. */
 
 const QuestEngine = (() => {
-  const SEARCH_RADIUS = 700;     // metres around the start point
+  const G = (typeof QuestGeo !== "undefined") ? QuestGeo : require("./geo.js");
+  const { SEARCH_RADIUS, overpassQuery, dist, bearing } = G;
   const MAX_WALK = 1600;         // metres of walking for the whole quest
   const WALK_FACTOR = 1.3;       // straight line -> real walking distance
   const MIN_GAP = 60;            // two stops closer than this feel like one place
-
-  function overpassQuery(lat, lon, r = SEARCH_RADIUS) {
-    const a = `(around:${r},${lat.toFixed(6)},${lon.toFixed(6)})`;
-    return `[out:json][timeout:25];(
-nwr${a}["amenity"="place_of_worship"];
-nwr${a}["amenity"~"^(fountain|townhall)$"];
-nwr${a}["man_made"="water_well"];
-nwr${a}["historic"~"^(city_gate|castle|tower|ruins|fort|manor|monument|memorial|archaeological_site)$"];
-nwr${a}["leisure"~"^(park|playground|garden)$"];
-nwr${a}["place"="square"];
-nwr${a}["tourism"~"^(artwork|viewpoint)$"];
-);out center tags;`;
-  }
-
-  function dist(a, b) {
-    const R = 6371000, r = x => x * Math.PI / 180;
-    const dLat = r(b.lat - a.lat), dLon = r(b.lon - a.lon);
-    const q = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLon / 2) ** 2;
-    return 2 * R * Math.asin(Math.sqrt(q));
-  }
-  function bearing(a, b) {
-    const r = x => x * Math.PI / 180;
-    const y = Math.sin(r(b.lon - a.lon)) * Math.cos(r(b.lat));
-    const x = Math.cos(r(a.lat)) * Math.sin(r(b.lat)) - Math.sin(r(a.lat)) * Math.cos(r(b.lat)) * Math.cos(r(b.lon - a.lon));
-    const deg = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-    return ["le nord", "le nord-est", "l'est", "le sud-est", "le sud", "le sud-ouest", "l'ouest", "le nord-ouest"][Math.round(deg / 45) % 8];
-  }
 
   // ---- 1. classify OSM elements into kid-friendly categories ----
   const BASE = { gate: 9, castle: 9, ruins: 8, tower: 8, church: 8, well: 8, fountain: 7, viewpoint: 6,
@@ -407,7 +382,6 @@ nwr${a}["tourism"~"^(artwork|viewpoint)$"];
     }]
   };
 
-  function variant(cat, n) { const list = T[cat]; return list[Math.min(n, list.length - 1)]; }
 
   // What the voice says instead of the place name (the exact name stays on the adult's screen).
   const HERE = { church: ["cette église", "ce lieu de prière"], gate: ["cette porte", "cette vieille porte"], tower: ["cette tour"],
@@ -432,36 +406,58 @@ nwr${a}["tourism"~"^(artwork|viewpoint)$"];
   }
 
   // ---- 5. build the quest ----
-  function build(elements, start, opts = {}) {
+  // The places chosen for a quest, in walking order. This is what a paid quest stores.
+  function select(elements, start) {
     const places = dedupe(elements.map(classify).filter(Boolean));
     const stops = choose(start, places, 6);
     if (!stops) return { ok: false, reason: "few", found: places.length };
+    return { ok: true, stops: stops.map(s => ({ cat: s.cat, lat: s.lat, lon: s.lon, name: s.name, id: s.id })) };
+  }
+
+  // The quest at home works anywhere: same story, no map.
+  const INDOOR = ["church", "gate", "well", "castle", "square", "park"];
+  function indoorStops() { return INDOOR.map(cat => ({ cat })); }
+
+  // Full quest (texts, letters, distances) from chosen stops. start is null for the quest at home.
+  function assemble(start, stops) {
+    const indoor = !start;
     const W = WORDS[stops.length];
-    const rand = rng(Math.round(start.lat * 1e5) ^ Math.round(start.lon * 1e5));
-    const scrambled = scramble(W.word, rand);
+    const scrambled = indoor ? "ELFIED" : scramble(W.word, rng(Math.round(start.lat * 1e5) ^ Math.round(start.lon * 1e5)));
     const seen = {};
     let prev = start;
     const steps = stops.map((s, i) => {
       const n = seen[s.cat] || 0; seen[s.cat] = n + 1;
-      const tpl = variant(s.cat, n);
-      const placeName = articleize(s.name, tpl.generic);
-      const legM = Math.round(dist(prev, s) * WALK_FACTOR / 10) * 10;
+      const v = indoor ? 0 : Math.min(n, T[s.cat].length - 1);
+      const tpl = T[s.cat][v];
       const step = Object.assign({}, tpl, {
-        cat: s.cat, v: Math.min(n, T[s.cat].length - 1), letter: scrambled[i], lat: s.lat, lon: s.lon, name: s.name,
-        P: placeName, legM, dir: bearing(prev, s), osm: s.id
+        cat: s.cat, v, letter: scrambled[i], name: s.name || "",
+        lat: indoor ? null : s.lat, lon: indoor ? null : s.lon,
+        P: indoor ? tpl.generic : articleize(s.name, tpl.generic),
+        legM: indoor ? 0 : Math.round(dist(prev, s) * WALK_FACTOR / 10) * 10,
+        dir: indoor ? "" : bearing(prev, s), osm: s.id || null
       });
-      prev = s;
+      if (!indoor) prev = s;
       return step;
     });
-    return {
-      ok: true, start, steps, word: W.word, say: W.say, hint: W.hint, meaning: W.meaning, scrambled,
-      walkM: Math.round(pathLength(start, stops) / 10) * 10,
-      minutes: 10 + steps.length * 9,
-      centroid: { lat: stops.reduce((a, s) => a + s.lat, 0) / stops.length, lon: stops.reduce((a, s) => a + s.lon, 0) / stops.length }
-    };
+    const q = { ok: true, start: start || null, steps, word: W.word, say: W.say, hint: W.hint, meaning: W.meaning, scrambled,
+      walkM: indoor ? 0 : Math.round(pathLength(start, stops) / 10) * 10,
+      minutes: indoor ? 60 : 10 + steps.length * 9 };
+    if (indoor) q.indoorOnly = true;
+    else q.centroid = { lat: stops.reduce((a, s) => a + s.lat, 0) / stops.length, lon: stops.reduce((a, s) => a + s.lon, 0) / stops.length };
+    return q;
   }
 
-  return { overpassQuery, classify, dedupe, choose, build, dist, bearing, articleize, T, HERE, WORDS, SEARCH_RADIUS, MAX_WALK };
+  function build(elements, start) {
+    const s = select(elements, start);
+    return s.ok ? assemble(start, s.stops) : s;
+  }
+
+  // What anyone sees before paying: no place, no position, no answer.
+  function preview(q) {
+    return { ok: true, indoorOnly: !!q.indoorOnly, count: q.steps.length, walkM: q.walkM, minutes: q.minutes, teasers: q.steps.map(s => s.teaser) };
+  }
+
+  return { overpassQuery, classify, dedupe, choose, select, assemble, indoorStops, build, preview, dist, bearing, articleize, T, HERE, WORDS, SEARCH_RADIUS, MAX_WALK };
 })();
 if (typeof module !== "undefined") module.exports = QuestEngine;
 /* ENGINE-END */

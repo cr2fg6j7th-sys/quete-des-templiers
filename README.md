@@ -1,15 +1,29 @@
 # La Quête des Templiers
 
-Une quête d'anniversaire pour enfants de 7 à 10 ans, au prénom de l'enfant, générée en deux minutes avec les vrais lieux autour d'une adresse en France (église, fontaine, vieille porte, parc…). L'adulte guide avec son téléphone, les enfants relèvent les défis et retrouvent les lettres du mot secret.
+Une quête d'anniversaire pour enfants de 7 à 10 ans, au prénom de l'enfant, générée en deux minutes avec les vrais lieux autour d'une adresse en France (église, fontaine, vieille porte, parc…). L'adulte guide avec son téléphone, les enfants relèvent les défis et retrouvent les lettres du mot secret. La voix du Grand Maître est enregistrée (Gemini TTS, voix Algenib).
 
-Version de test : aucun paiement, les étapes sont générées dans le navigateur.
+## Deux versions
+
+- **Démo gratuite** (`index.html`, GitHub Pages) : tout tourne dans le téléphone, le bouton de déblocage est gratuit. À retirer le jour du lancement.
+- **Version payante** (Cloudflare) : le téléphone cherche les lieux publics, le serveur choisit les étapes et ne renvoie qu'un aperçu et un jeton chiffré. Après paiement Stripe, le serveur ouvre la quête. Le lien `?quete=…` rouvre la quête sur n'importe quel téléphone.
 
 ## Fichiers
 
-- `index.html` : l'appli complète, prête à être servie par GitHub Pages.
-- `dev/engine.js` : le moteur qui choisit et ordonne les étapes à partir des données OpenStreetMap.
-- `dev/test.js` : tests du moteur (`node dev/test.js`).
-- `dev/app.template.html` + `dev/build.py` : source de l'interface ; `python3 dev/build.py` reconstruit `index.html`.
+- `dev/geo.js` : requête OpenStreetMap et distances (téléphone et serveur).
+- `dev/engine.js` : choix et ordre des étapes, textes de la quête.
+- `dev/voice.js` : phrases enregistrées du Grand Maître et prénoms.
+- `dev/worker.js` : serveur Cloudflare (`/api/preview`, `/api/checkout`, `/api/unlock`).
+- `dev/app.template.html` : l'interface.
+- `dev/legal/` : conditions de vente, mentions légales, confidentialité ; l'identité du vendeur se remplit une seule fois dans `dev/legal/identite.json`.
+- `dev/build.py` : construit `index.html` (démo), `site/` (version payante), `legal/` et `dist/worker.js`.
+- `dev/test.js` : tests du moteur ; `dev/serve.mjs` + `dev/e2e_paid.py` : test complet de la version payante avec un faux Stripe.
+- `audio/` : voix et prénoms, produits par l'action « Voix du Grand Maître » à partir de `audio/manifest.json`.
+- `fonts/` : polices (licence SIL OFL), servies par le site.
+- `wrangler.toml` + `.github/workflows/deploy.yml` : mise en ligne sur Cloudflare.
+
+## Mise en ligne
+
+L'action « Mise en ligne (Cloudflare) » publie la version payante à chaque modification. Elle attend trois secrets du dépôt : `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` et `STRIPE_SECRET_KEY` (clé de test d'abord, clé réelle au lancement). La clé de chiffrement des quêtes (`QUEST_KEY`) est créée une fois chez Cloudflare et ne doit jamais changer.
 
 ## Données
 

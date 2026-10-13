@@ -67,4 +67,14 @@ console.log("\nArticles :", ["Église Saints-Pierre-et-Paul", "Saint-Étienne", 
 for (const [cat, list] of Object.entries(E.T)) for (const t of list)
   for (const k of ["teaser", "generic", "clue", "story", "defi", "defiIn", "q", "choices", "fact", "hints", "adult"])
     assert(t[k] !== undefined && (k !== "hints" || t.hints.length === 3), `template ${cat} missing ${k}`);
+// The paid quest stores only the chosen stops: rebuilding from them gives the same quest,
+// and the free preview gives away no place, position or answer.
+const sel = E.select(dense, C);
+assert(sel.ok && sel.stops.length >= 4, "select must choose stops");
+const full = E.build(dense, C), again = E.assemble(C, JSON.parse(JSON.stringify(sel.stops)));
+assert.deepStrictEqual(again, full, "assemble(select) must equal build");
+const pv = JSON.stringify(E.preview(full));
+for (const s of full.steps) assert(!pv.includes(s.name) && !pv.includes(String(s.lat).slice(0, 7)) && !pv.includes(s.choices[s.answer]), "preview leaks " + s.name);
+const home = E.assemble(null, E.indoorStops());
+assert(home.indoorOnly && home.steps.length === 6 && home.scrambled === "ELFIED" && home.steps.every(s => s.lat === null && s.v === 0), "indoor quest");
 console.log("\nTous les tests passent.");

@@ -1,0 +1,80 @@
+# Puts the paid app online on Cloudflare at each push to main (and after new voice clips).
+# Needs three repository secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, STRIPE_SECRET_KEY.
+# Until they exist, the workflow stops politely without failing.
+name: Mise en ligne (Cloudflare)
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["Voix du Grand Maître"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  WRANGLER: wrangler@4.148.0
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier que les comptes sont branchés
+        id: ready
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          STRIPE: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: |
+          missing=""
+          [ -n "$CF_TOKEN" ] || missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -n "$CF_ACCOUNT" ] || missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -n "$STRIPE" ] || missing="$missing STRIPE_SECRET_KEY"
+          if [ -n "$missing" ]; then
+            echo "::notice::Mise en ligne en attente : secrets manquants :$missing"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.ready.outputs.ok == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.ready.outputs.ok == 'true'
+        with:
+          node-version: 22
+
+      - name: Construire le site et le serveur
+        if: steps.ready.outputs.ok == 'true'
+        run: |
+          python3 dev/build.py --audio
+          node dev/test.js
+
+      - name: Envoyer sur Cloudflare
+        if: steps.ready.outputs.ok == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes $WRANGLER deploy
+
+      - name: Clés du serveur
+        if: steps.ready.outputs.ok == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: |
+          printf '%s' "$STRIPE_SECRET_KEY" | npx --yes $WRANGLER secret put STRIPE_SECRET_KEY
+          # The quest encryption key is created once and never leaves Cloudflare. It must never
+          # change: paid quests are reopened with it. If the list cannot be read, the step fails.
+          list=$(npx --yes $WRANGLER secret list --format json)
+          if ! printf '%s' "$list" | grep -q QUEST_KEY; then
+            openssl rand -base64 32 | tr -d '\n' | npx --yes $WRANGLER secret put QUEST_KEY
+          fi
