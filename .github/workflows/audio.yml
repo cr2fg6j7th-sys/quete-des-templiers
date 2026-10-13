@@ -7,6 +7,7 @@ on:
   push:
     paths:
       - "audio/manifest.json"
+      - ".github/workflows/audio.yml"
   workflow_dispatch:
 
 permissions:
@@ -38,9 +39,9 @@ jobs:
               os.makedirs(os.path.dirname(out), exist_ok=True)
               tmp = "/tmp/clip.wav"
               urllib.request.urlretrieve(url, tmp)
-              # trim leading/trailing silence, mono, 56 kbps
+              # trim silence, even out loudness between clips, mono, 56 kbps
               subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", tmp,
-                              "-af", "silenceremove=start_periods=1:start_threshold=-50dB:stop_periods=-1:stop_duration=0.6:stop_threshold=-50dB",
+                              "-af", "silenceremove=start_periods=1:start_threshold=-50dB:stop_periods=-1:stop_duration=0.6:stop_threshold=-50dB,loudnorm=I=-18:TP=-2:LRA=11",
                               "-ac", "1", "-b:a", "56k", out], check=True)
               done += 1
           print(f"{done} clip(s) ajouté(s)")
