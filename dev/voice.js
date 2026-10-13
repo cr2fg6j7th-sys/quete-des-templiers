@@ -47,6 +47,17 @@ const QuestVoice = (() => {
   add("nomme", "je te nomme [[Chevalier|Chevalière]] de l'Ordre des Gardiens du Temple. Joyeux anniversaire !");
 
   const slug = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  // Spelling variants that sound the same in French share one recording (Michael -> Mickaël, Lyna -> Lina).
+  const sound = s => s.replace(/chael/g, "kael").replace(/sh/g, "ch").replace(/ck/g, "k").replace(/ph/g, "f").replace(/th/g, "t").replace(/rh/g, "r")
+    .replace(/([aeiouy])h$/, "$1").replace(/(?!^)y/g, "i").replace(/([bcdfgklmnprtvz])\1/g, "$1");
+  // Recorded clip for a typed first name, or null. names: the recorded slugs.
+  function nameClip(name, names) {
+    const s = slug(name);
+    if (!s || !names) return null;
+    if (names.has(s)) return s;
+    if (!names._sound) { names._sound = new Map(); for (const n of names) if (!names._sound.has(sound(n))) names._sound.set(sound(n), n); }
+    return names._sound.get(sound(s)) || null;
+  }
 
   // Clip keys for one message. ctx: { g: "m"|"f", indoor, cat, v, letter, last, word }
   function message(kind, ctx) {
@@ -62,7 +73,7 @@ const QuestVoice = (() => {
     return [];
   }
 
-  return { STYLE, VOICE, LINES, message, slug, key };
+  return { STYLE, VOICE, LINES, message, slug, key, sound, nameClip };
 })();
 if (typeof module !== "undefined") module.exports = QuestVoice;
 /* VOICE-END */

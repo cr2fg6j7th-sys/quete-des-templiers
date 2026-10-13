@@ -135,10 +135,9 @@ function speak(text){
 const V=QuestVoice;
 let nameSet=null;
 try{fetch("audio/noms.json").then(r=>r.ok?r.json():[]).then(a=>{nameSet=new Set(a);}).catch(()=>{nameSet=new Set();});}catch(e){nameSet=new Set();}
-function nameKnown(){const s=V.slug(S.name);return !!(s&&nameSet&&nameSet.has(s));}
 // "@name" = the child's name, or "Jeune chevalier," when unknown; "@name?" = the name only when it is recorded.
 function clipUrl(k){
-  if(k==="@name"||k==="@name?"){if(nameKnown())return `audio/noms/${V.slug(S.name)}.mp3`;return k==="@name"?`audio/voix/${V.key("vocatif",S.hero)}.mp3`:null;}
+  if(k==="@name"||k==="@name?"){const c=V.nameClip(S.name,nameSet);if(c)return `audio/noms/${c}.mp3`;return k==="@name"?`audio/voix/${V.key("vocatif",S.hero)}.mp3`:null;}
   return `audio/voix/${k}.mp3`;
 }
 let playRun=0,curAudio=null;
