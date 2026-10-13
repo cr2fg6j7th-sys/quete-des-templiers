@@ -135,14 +135,16 @@ function speak(text){
 const V=QuestVoice;
 let nameSet=null;
 try{fetch("audio/noms.json").then(r=>r.ok?r.json():[]).then(a=>{nameSet=new Set(a);}).catch(()=>{nameSet=new Set();});}catch(e){nameSet=new Set();}
+function nameKnown(){const s=V.slug(S.name);return !!(s&&nameSet&&nameSet.has(s));}
+// "@name" = the child's name, or "Jeune chevalier," when unknown; "@name?" = the name only when it is recorded.
 function clipUrl(k){
-  if(k==="@name"){const s=V.slug(S.name);return (s&&nameSet&&nameSet.has(s))?`audio/noms/${s}.mp3`:`audio/voix/${V.key("vocatif",S.hero)}.mp3`;}
+  if(k==="@name"||k==="@name?"){if(nameKnown())return `audio/noms/${V.slug(S.name)}.mp3`;return k==="@name"?`audio/voix/${V.key("vocatif",S.hero)}.mp3`:null;}
   return `audio/voix/${k}.mp3`;
 }
 let playRun=0,curAudio=null;
 function playKeys(keys,fallbackText){
   stopVoice();const run=++playRun;
-  const clips=keys.map(k=>{const a=new Audio(clipUrl(k));a.preload="auto";return a;});
+  const clips=keys.map(clipUrl).filter(Boolean).map(u=>{const a=new Audio(u);a.preload="auto";return a;});
   let i=0;
   const fail=()=>{if(run!==playRun)return;playRun++;if(!speak(fallbackText))note.textContent="La voix n'est pas disponible : lisez le message à voix haute.";};
   const next=()=>{

@@ -2,7 +2,7 @@
    The Grand Master's recorded voice: every line is generated once (Gemini TTS, voice Algenib)
    and reused for every customer. A message is a list of clip keys played in a row;
    "@name" stands for the child's first-name clip ("Léa,"), or "Jeune chevalier," when the
-   name is not in the library. Place names are never spoken: they stay on the adult's screen. */
+   name is not in the library; "@name?" plays the name only when it is recorded. Place names are never spoken: they stay on the adult's screen. */
 
 const QuestVoice = (() => {
   const E = (typeof QuestEngine !== "undefined") ? QuestEngine : require("./engine.js");
@@ -53,7 +53,7 @@ const QuestVoice = (() => {
     const g = ctx.g, N = "@name", where = ctx.indoor ? "maison" : "dehors";
     switch (kind) {
       case "prologue": return [N, key(`prologue-${where}`, g)];
-      case "intro": return [N, key(`intro-${where}`, g)];
+      case "intro": return ["@name?", key(`intro-${where}`, g)]; // no "Jeune chevalier, chevalier de l'Ordre"
       case "indice": return [key(`indice-${ctx.cat}-${ctx.v}`, g)];
       case "recit": return [N, key(`recit-${ctx.cat}-${ctx.v}`, g)];
       case "lettre": return ctx.last ? [key(`derniere-${ctx.letter}`, g), key(`mot-${ctx.word}`, g)] : [key(`lettre-${ctx.letter}`, g), "gardien"];

@@ -556,7 +556,7 @@ if (typeof module !== "undefined") module.exports = QuestEngine;
    The Grand Master's recorded voice: every line is generated once (Gemini TTS, voice Algenib)
    and reused for every customer. A message is a list of clip keys played in a row;
    "@name" stands for the child's first-name clip ("Léa,"), or "Jeune chevalier," when the
-   name is not in the library. Place names are never spoken: they stay on the adult's screen. */
+   name is not in the library; "@name?" plays the name only when it is recorded. Place names are never spoken: they stay on the adult's screen. */
 
 const QuestVoice = (() => {
   const E = (typeof QuestEngine !== "undefined") ? QuestEngine : require("./engine.js");
@@ -607,7 +607,7 @@ const QuestVoice = (() => {
     const g = ctx.g, N = "@name", where = ctx.indoor ? "maison" : "dehors";
     switch (kind) {
       case "prologue": return [N, key(`prologue-${where}`, g)];
-      case "intro": return [N, key(`intro-${where}`, g)];
+      case "intro": return ["@name?", key(`intro-${where}`, g)]; // no "Jeune chevalier, chevalier de l'Ordre"
       case "indice": return [key(`indice-${ctx.cat}-${ctx.v}`, g)];
       case "recit": return [N, key(`recit-${ctx.cat}-${ctx.v}`, g)];
       case "lettre": return ctx.last ? [key(`derniere-${ctx.letter}`, g), key(`mot-${ctx.word}`, g)] : [key(`lettre-${ctx.letter}`, g), "gardien"];
@@ -670,14 +670,16 @@ function speak(text){
 const V=QuestVoice;
 let nameSet=null;
 try{fetch("audio/noms.json").then(r=>r.ok?r.json():[]).then(a=>{nameSet=new Set(a);}).catch(()=>{nameSet=new Set();});}catch(e){nameSet=new Set();}
+function nameKnown(){const s=V.slug(S.name);return !!(s&&nameSet&&nameSet.has(s));}
+// "@name" = the child's name, or "Jeune chevalier," when unknown; "@name?" = the name only when it is recorded.
 function clipUrl(k){
-  if(k==="@name"){const s=V.slug(S.name);return (s&&nameSet&&nameSet.has(s))?`audio/noms/${s}.mp3`:`audio/voix/${V.key("vocatif",S.hero)}.mp3`;}
+  if(k==="@name"||k==="@name?"){if(nameKnown())return `audio/noms/${V.slug(S.name)}.mp3`;return k==="@name"?`audio/voix/${V.key("vocatif",S.hero)}.mp3`:null;}
   return `audio/voix/${k}.mp3`;
 }
 let playRun=0,curAudio=null;
 function playKeys(keys,fallbackText){
   stopVoice();const run=++playRun;
-  const clips=keys.map(k=>{const a=new Audio(clipUrl(k));a.preload="auto";return a;});
+  const clips=keys.map(clipUrl).filter(Boolean).map(u=>{const a=new Audio(u);a.preload="auto";return a;});
   let i=0;
   const fail=()=>{if(run!==playRun)return;playRun++;if(!speak(fallbackText))note.textContent="La voix n'est pas disponible : lisez le message à voix haute.";};
   const next=()=>{
