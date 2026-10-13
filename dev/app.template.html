@@ -85,6 +85,9 @@ footer{font-size:.78rem;color:var(--muted);text-align:center}
 /*ENGINE*/
 </script>
 <script>
+/*VOICE*/
+</script>
+<script>
 (function(){
 "use strict";
 const E=QuestEngine;
@@ -128,7 +131,29 @@ function speak(text){
       u.rate=.78;u.pitch=.55;u.volume=.9;u.onend=()=>setTimeout(next,450);speechSynthesis.speak(u);};
     next();return true;}catch(e){return false;}
 }
-function stopVoice(){try{speechSynthesis.cancel();speakRun++;}catch(e){}}
+/* Recorded voice (Gemini TTS, voice Algenib), served from the audio/ folder; phone voice only as a fallback. */
+const V=QuestVoice;
+let nameSet=null;
+try{fetch("audio/noms.json").then(r=>r.ok?r.json():[]).then(a=>{nameSet=new Set(a);}).catch(()=>{nameSet=new Set();});}catch(e){nameSet=new Set();}
+function clipUrl(k){
+  if(k==="@name"){const s=V.slug(S.name);return (s&&nameSet&&nameSet.has(s))?`audio/noms/${s}.mp3`:`audio/voix/${V.key("vocatif",S.hero)}.mp3`;}
+  return `audio/voix/${k}.mp3`;
+}
+let playRun=0,curAudio=null;
+function playKeys(keys,fallbackText){
+  stopVoice();const run=++playRun;
+  const clips=keys.map(k=>{const a=new Audio(clipUrl(k));a.preload="auto";return a;});
+  let i=0;
+  const fail=()=>{if(run!==playRun)return;playRun++;if(!speak(fallbackText))note.textContent="La voix n'est pas disponible : lisez le message à voix haute.";};
+  const next=()=>{
+    if(run!==playRun||i>=clips.length)return;
+    const a=clips[i++];curAudio=a;
+    a.onended=()=>setTimeout(next,220);a.onerror=fail;
+    const p=a.play();if(p&&p.catch)p.catch(fail);
+  };
+  next();
+}
+function stopVoice(){try{speechSynthesis.cancel();speakRun++;}catch(e){}playRun++;try{if(curAudio){curAudio.pause();curAudio=null;}}catch(e){}}
 
 /* ---------- DOM helpers ---------- */
 const app=document.getElementById("app");
@@ -140,10 +165,11 @@ function go(patch){Object.assign(S,patch);save();render();window.scrollTo({top:0
 const note=h("p",{class:"note",role:"status"});
 
 function playIcon(){const s=document.createElementNS("http://www.w3.org/2000/svg","svg");s.setAttribute("viewBox","0 0 24 24");s.setAttribute("width","18");s.setAttribute("height","18");s.setAttribute("aria-hidden","true");s.innerHTML='<path fill="currentColor" d="M8 5v14l11-7z"/>';return s;}
-function voiceCard(text,label,extra){
+function voiceCard(text,label,extra,keys){
   const t=fill(text,extra);
+  const play=()=>{if(keys&&keys.length)playKeys(keys,t);else if(!speak(t))note.textContent="La voix n'est pas disponible sur ce téléphone : lisez le message à voix haute.";};
   return h("div",{class:"card voice"},h("h3",{text:label||"Message du Grand Maître"}),h("p",{text:t}),
-    h("button",{class:"btn ghost",type:"button",onclick:()=>{if(!speak(t))note.textContent="La voix n'est pas disponible sur ce téléphone : lisez le message à voix haute.";}},playIcon()," Écouter le Grand Maître"));
+    h("button",{class:"btn ghost",type:"button",onclick:play},playIcon()," Écouter le Grand Maître"));
 }
 function voiceSelect(){
   if(!("speechSynthesis" in window)||!frVoices.length)return null;
@@ -174,7 +200,7 @@ async function fetchPlaces(lat,lon){const r=await getJSON(OVERPASS,{method:"POST
 function indoorQuest(){
   const cats=["church","gate","well","castle","square","park"];
   const W=E.WORDS[6];const scrambled="ELFIED";
-  return {ok:true,indoorOnly:true,steps:cats.map((c,i)=>Object.assign({},E.T[c][0],{cat:c,letter:scrambled[i],P:E.T[c][0].generic,legM:0,dir:"",lat:null,lon:null})),
+  return {ok:true,indoorOnly:true,steps:cats.map((c,i)=>Object.assign({},E.T[c][0],{cat:c,v:0,letter:scrambled[i],P:E.T[c][0].generic,legM:0,dir:"",lat:null,lon:null})),
     word:W.word,say:W.say,hint:W.hint,meaning:W.meaning,scrambled,walkM:0,minutes:60};
 }
 
@@ -278,8 +304,8 @@ function previewScreen(){
     h("div",{class:"card"},h("h3",{text:"Ce qui vous attend"}),
       h("ul",{class:"teasers"},q.steps.map((s,i)=>h("li",null,h("span",{class:"n",text:String(i+1)}),h("span",{text:s.teaser})))),
       h("p",{class:"lock",text:"Les lieux exacts se révèlent un par un pendant la partie."})),
-    voiceCard(prologueText(),"Prologue gratuit · à écouter dès maintenant"),
-    voiceSelect(),note,
+    voiceCard(prologueText(),"Prologue gratuit · à écouter dès maintenant",null,V.message("prologue",{g:S.hero,indoor:!!S.quest.indoorOnly})),
+    note,
     h("button",{class:"btn",type:"button",onclick:()=>go({unlocked:true,screen:"guide"})},`Débloquer la quête · ${PRICE}`),
     h("p",{class:"note",text:"Version de test : aucun paiement, le bouton débloque la quête directement."}),
     h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"setup",quest:null})},"Changer de point de départ"),
@@ -310,7 +336,7 @@ function introScreen(){
   const n=S.quest.steps.length;
   const t=`{N}, [[chevalier|chevalière]] de l'Ordre, la quête commence ! À chaque lieu, tu gagneras une lettre. Les ${n} lettres arrivent dans le désordre : à toi de retrouver le mot secret à la fin. ${S.indoor?"Aujourd'hui, nous voyageons par la pensée : écoute bien mes récits.":"Suis les indices, reste toujours près des adultes, et ouvre grand les yeux."}`;
   return [h("div",null,h("p",{class:"eyebrow",text:"la quête commence"}),h("h2",{text:`En route, ${S.name||"jeune chevalier"} !`})),
-    voiceCard(t),note,
+    voiceCard(t,null,null,V.message("intro",{g:S.hero,indoor:S.indoor})),note,
     h("button",{class:"btn",type:"button",onclick:()=>go({screen:"step",step:0,phase:S.indoor?"arrived":"travel",hint:0})},"Première étape")];
 }
 
@@ -341,7 +367,7 @@ function stepScreen(){
   const head=[shieldRow(),h("div",null,h("p",{class:"eyebrow",text:`étape ${i+1} sur ${n}`}),h("h2",{text:title}))];
   if(S.phase==="travel"){
     const out=h("p",{class:"note",role:"status"});
-    return [...head,voiceCard(`Écoute bien, {N}. ${st.clue}`,"L'indice pour les enfants"),note,
+    return [...head,voiceCard(`Écoute bien, {N}. ${st.clue}`,"L'indice pour les enfants",null,V.message("indice",{g:S.hero,cat:st.cat,v:st.v||0})),note,
       h("div",{class:"card adult"},h("h3",{text:"Pour l'adulte"}),
         h("p",null,h("b",{text:fill("{P}",P)})),
         st.legM?h("p",{class:"note",text:`Environ ${st.legM} m à pied, vers ${st.dir}.`}):null,
@@ -353,7 +379,7 @@ function stepScreen(){
       h("button",{class:"linkish",type:"button",onclick:()=>solve(i)},"Lieu fermé ou inaccessible ? Passer cette étape")];
   }
   if(S.phase==="arrived"){
-    return [...head,voiceCard(st.story,null,P),note,
+    return [...head,voiceCard(st.story,null,P,V.message("recit",{g:S.hero,cat:st.cat,v:st.v||0})),note,
       h("div",{class:"card"},h("h3",{text:"Le défi des chevaliers"}),h("p",{text:fill(S.indoor?st.defiIn:st.defi,P)}),st.timer?timerBlock(st.timer):null),
       !S.indoor&&h("p",{class:"note",text:"Pour l'adulte : "+st.adult}),
       h("button",{class:"btn",type:"button",onclick:()=>go({phase:"question"})},"Défi réussi : à l'énigme !")];
@@ -375,7 +401,8 @@ function stepScreen(){
         h("p",{text:`Lettres retrouvées : ${S.solved.map(k=>q.steps[k].letter).join(" ")}`})),
       voiceCard(last
         ?`Voici la dernière lettre : ${st.letter}. Choisissez son gardien. Tu as maintenant toutes les lettres, {N}, mais elles sont dans le désordre… Retrouve le mot secret. Un indice : ${q.hint}${/…$/.test(q.hint)?"":"."}`
-        :`Bien joué, {N}. Voici la lettre ${st.letter}. Choisissez un gardien de la lettre, un chevalier qui ne l'a pas encore été. Il devra s'en souvenir jusqu'à la fin de la quête.`),note,
+        :`Bien joué, {N}. Voici la lettre ${st.letter}. Choisissez un gardien de la lettre, un chevalier qui ne l'a pas encore été. Il devra s'en souvenir jusqu'à la fin de la quête.`,
+        null,null,V.message("lettre",{g:S.hero,letter:st.letter,last,word:q.word})),note,
       h("button",{class:"btn",type:"button",onclick:()=>last?go({screen:"final"}):go({step:i+1,phase:S.indoor?"arrived":"travel",hint:0})},last?"Trouver le mot secret":"Étape suivante")];
   }
   return [];
@@ -399,7 +426,7 @@ function diplomaScreen(){
   const end=`{N}, tu as retrouvé le mot secret : ${q.say}. ${q.meaning} Le Sceau du Temple est ouvert ! Grand Maître, remets le trésor aux chevaliers. Et toi, {N}, je te nomme [[Chevalier|Chevalière]] de l'Ordre des Gardiens du Temple. Joyeux anniversaire !`;
   const today=new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});
   return [h("div",null,h("p",{class:"eyebrow",text:"quête accomplie"}),h("h2",{text:"Le trésor est à vous !"})),
-    voiceCard(end,"Le dernier message du Grand Maître"),note,
+    voiceCard(end,"Le dernier message du Grand Maître",null,V.message("fin",{g:S.hero,word:q.word})),note,
     h("div",{class:"card adult"},h("h3",{text:"Pour l'adulte"}),h("p",{text:"C'est le moment de sortir le trésor de votre sac et de le remettre aux chevaliers."})),
     h("div",{class:"card diploma"},h("p",{class:"eyebrow",text:"ordre des gardiens du temple"}),h("p",{text:"Par ce diplôme, le Grand Maître nomme"}),
       h("div",{class:"name",text:S.name||"Jeune chevalier"}),h("p",null,h("b",{text:g("Chevalier","Chevalière")+" de l'Ordre des Gardiens du Temple"})),
