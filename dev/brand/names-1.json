@@ -1,0 +1,69 @@
+[
+ {
+  "name": "Ma Grande Quête",
+  "tm": [
+   "grande quete"
+  ],
+  "slugs": [
+   "magrandequete",
+   "lagrandequete"
+  ]
+ },
+ {
+  "name": "Mon Épopée",
+  "tm": [
+   "epopee"
+  ],
+  "slugs": [
+   "monepopee"
+  ]
+ },
+ {
+  "name": "Le Héros du Jour",
+  "tm": [
+   "heros du jour"
+  ],
+  "slugs": [
+   "herosdujour",
+   "leherosdujour"
+  ]
+ },
+ {
+  "name": "Quêtes & Légendes",
+  "tm": [
+   "quetes et legendes",
+   "quetes & legendes",
+   "quete et legende"
+  ],
+  "slugs": [
+   "quetesetlegendes"
+  ]
+ },
+ {
+  "name": "Héroïka",
+  "tm": [
+   "heroika"
+  ],
+  "slugs": [
+   "heroika"
+  ]
+ },
+ {
+  "name": "Anniversaire Légendaire",
+  "tm": [
+   "anniversaire legendaire"
+  ],
+  "slugs": [
+   "anniversairelegendaire"
+  ]
+ },
+ {
+  "name": "Ma Quête de Chevalier",
+  "tm": [
+   "quete de chevalier"
+  ],
+  "slugs": [
+   "maquetedechevalier"
+  ]
+ }
+]

@@ -2,15 +2,10 @@
 // (RDAP), and Instagram / TikTok / Pinterest accounts. Public lookups only: a "free" here means
 // "nothing found", to be confirmed by hand before buying or filing anything.
 //   node dev/brand/check.mjs > marketing/noms/verification.json   (run by .github/workflows/noms.yml)
-const NAMES = [
-  { name: "Ma Grande Quête", tm: ["grande quete"], slugs: ["magrandequete", "lagrandequete"] },
-  { name: "Mon Épopée", tm: ["epopee"], slugs: ["monepopee"] },
-  { name: "Le Héros du Jour", tm: ["heros du jour"], slugs: ["herosdujour", "leherosdujour"] },
-  { name: "Quêtes & Légendes", tm: ["quetes et legendes", "quetes & legendes", "quete et legende"], slugs: ["quetesetlegendes"] },
-  { name: "Héroïka", tm: ["heroika"], slugs: ["heroika"] },
-  { name: "Anniversaire Légendaire", tm: ["anniversaire legendaire"], slugs: ["anniversairelegendaire"] },
-  { name: "Ma Quête de Chevalier", tm: ["quete de chevalier"], slugs: ["maquetedechevalier"] }
-];
+// Candidates: dev/brand/names-<lot>.json, lot given as the first argument (default 1).
+import fs from "node:fs";
+const LOT = process.argv[2] || "1";
+const NAMES = JSON.parse(fs.readFileSync(new URL(`./names-${LOT}.json`, import.meta.url), "utf8"));
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
 const get = (url, headers = {}) => fetch(url, { headers: Object.assign({ "user-agent": UA, "accept-language": "fr-FR,fr;q=0.9" }, headers), redirect: "follow", signal: AbortSignal.timeout(20000) });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -47,7 +42,11 @@ async function pinterest(h) {
     const t = await r.text();
     if (/"username"\s*:\s*"/.test(t) && r.status === 200) return "pris";
     if (r.status === 404 || /"status"\s*:\s*"failure"|"code"\s*:\s*30\b/.test(t)) return "libre";
-    return `? (HTTP ${r.status})`;
+    const page = await get(`https://www.pinterest.com/${h}/`);
+    const html = await page.text();
+    if (page.status === 404) return "libre";
+    if (page.status === 200 && new RegExp(`"username"\\s*:\\s*"${h}"`, "i").test(html)) return "pris";
+    return `? (HTTP ${r.status}/${page.status})`;
   } catch (e) { return "? (" + e.name + ")"; }
 }
 

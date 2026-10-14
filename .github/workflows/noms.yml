@@ -4,6 +4,10 @@ name: Vérification des noms
 
 on:
   workflow_dispatch:
+    inputs:
+      lot:
+        description: "Lot de noms (dev/brand/names-<lot>.json)"
+        default: "1"
 
 permissions:
   contents: write
@@ -19,7 +23,7 @@ jobs:
       - name: Vérifier
         run: |
           mkdir -p marketing/noms
-          node dev/brand/check.mjs > marketing/noms/verification.json
+          node dev/brand/check.mjs "${{ inputs.lot }}" > "marketing/noms/verification-${{ inputs.lot }}.json"
       - name: Enregistrer
         run: |
           git config user.name "github-actions[bot]"

@@ -1,0 +1,68 @@
+[
+ {
+  "name": "Ma Quête Légendaire",
+  "tm": [
+   "quete legendaire"
+  ],
+  "slugs": [
+   "maquetelegendaire"
+  ]
+ },
+ {
+  "name": "Héros d'un Jour",
+  "tm": [
+   "heros d un jour",
+   "heros d'un jour"
+  ],
+  "slugs": [
+   "herosdunjour"
+  ]
+ },
+ {
+  "name": "Ma Quête Magique",
+  "tm": [
+   "quete magique"
+  ],
+  "slugs": [
+   "maquetemagique"
+  ]
+ },
+ {
+  "name": "Mission Héros",
+  "tm": [
+   "mission heros"
+  ],
+  "slugs": [
+   "missionheros"
+  ]
+ },
+ {
+  "name": "La Quête du Héros",
+  "tm": [
+   "quete du heros"
+  ],
+  "slugs": [
+   "laqueteduheros"
+  ]
+ },
+ {
+  "name": "Anniv'Aventure",
+  "tm": [
+   "anniv aventure",
+   "anniversaire aventure"
+  ],
+  "slugs": [
+   "annivaventure"
+  ]
+ },
+ {
+  "name": "Ma Grande Quête (vérifications complémentaires)",
+  "tm": [
+   "grande quete"
+  ],
+  "slugs": [
+   "lagrandequete",
+   "magrandequete"
+  ]
+ }
+]
