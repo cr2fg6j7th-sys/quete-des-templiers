@@ -7,6 +7,7 @@
 #   sw.js               keeps a bought quest playable without network (both builds)
 #   og.png, icons       link preview image and icons (dev/static/, made by dev/video/og.py)
 #   robots.txt, sitemap.xml   for search engines (paid site only; the demo is marked noindex)
+#   home.static.html    the home screen copied into the page for robots without JavaScript (dev/snapshot.py)
 # The audio folder is copied into site/ by the deploy workflow (or with --audio).
 import hashlib, json, re, shutil, subprocess, sys
 from pathlib import Path
@@ -22,12 +23,20 @@ SITE = PLACES_SITE = "https://ma-quete-de-chevalier.pv6ggk8t2v.workers.dev"
 audio_files = [root / "audio" / "manifest.json", root / "audio" / "noms.json"]
 VOICE_VERSION = hashlib.sha256(b"".join(f.read_bytes() for f in audio_files if f.exists())).hexdigest()[:10]
 
+# For robots that do not run JavaScript (the AI assistants' crawlers): the home screen as drawn
+# (dev/home.static.html, made by dev/snapshot.py) and the FAQ as structured data.
+home_static = (d / "home.static.html").read_text(encoding="utf-8").strip() if (d / "home.static.html").exists() else ""
+faq = json.loads(re.search(r"const FAQ=(\[.*?\n\]);", t, re.S).group(1))
+faq_ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+    {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]}, ensure_ascii=False) + "</script>"
+
 def page(engine_part, paid):
     return (t.replace("/*GEO*/", geo).replace("/*ENGINE*/", engine_part).replace("/*VOICE*/", voice)
              .replace("const PAID=/*PAID*/false;", f"const PAID={'true' if paid else 'false'};")
              .replace("/*PLACES_SITE*/", "" if paid else PLACES_SITE)
              .replace("{{SITE}}", SITE).replace("/*VOICE_VERSION*/", VOICE_VERSION)
-             .replace("<!--ROBOTS-->", "" if paid else '<meta name="robots" content="noindex">'))
+             .replace("<!--ROBOTS-->", "" if paid else '<meta name="robots" content="noindex">')
+             .replace("<!--FAQ-->", faq_ld).replace("/*HOME*/", home_static))
 sw = read("sw.js").replace("/*VOICE_VERSION*/", VOICE_VERSION)
 
 (root / "index.html").write_text(page(eng, False), encoding="utf-8")

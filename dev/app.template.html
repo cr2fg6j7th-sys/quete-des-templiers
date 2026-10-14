@@ -19,6 +19,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!--ROBOTS-->
+<!--FAQ-->
 <meta name="theme-color" content="#1b2547">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Ma Quête de Chevalier","description":"Quête d'anniversaire numérique pour enfants de 7 à 10 ans : 4 à 6 étapes dans les lieux publics autour d'un point de départ en France, au prénom de l'enfant, avec la voix enregistrée du Grand Maître.","offers":{"@type":"Offer","price":"24.90","priceCurrency":"EUR","availability":"https://schema.org/InStock"}}</script>
 <style>
@@ -138,7 +139,9 @@ footer a{color:var(--muted)}
 </style>
 </head>
 <body>
-<div class="wrap" id="app"><noscript><h1>Ma Quête de Chevalier</h1><p>La chasse au trésor de chevaliers dans les rues de votre ville, au prénom de votre enfant, pour les anniversaires des 7 à 10 ans. Activez JavaScript pour créer votre quête.</p></noscript></div>
+<noscript><p class="note center">Activez JavaScript pour créer votre quête.</p></noscript>
+<!-- The home screen is copied here at build time (dev/home.static.html, made by dev/snapshot.py) for robots that do not run JavaScript, such as the AI assistants' crawlers; render() replaces it. -->
+<div class="wrap" id="app">/*HOME*/</div>
 <script>
 /*GEO*/
 </script>
