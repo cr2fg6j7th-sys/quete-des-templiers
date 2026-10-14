@@ -159,5 +159,5 @@ jobs:
         env:
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
         run: |
-          sleep 10
+          sleep 30
           node dev/smoke.mjs "${{ steps.deploy.outputs.url }}"

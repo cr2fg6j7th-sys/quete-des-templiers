@@ -20,7 +20,8 @@ try {
   const missing = [];
   for (const f of files) {
     let r = await fetch(site + f, { method: "HEAD" });
-    if (!r.ok) r = await fetch(site + f);   // second try with GET, and say what came back
+    // a file added by this deploy can take a few seconds to reach every Cloudflare server
+    for (let i = 0; i < 3 && !r.ok; i++) { await new Promise(res => setTimeout(res, 10000)); r = await fetch(site + f); }
     if (!r.ok) missing.push(`${f} (HTTP ${r.status} ${r.headers.get("content-type") || ""})`);
   }
   missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, prénoms, polices, pages, image des liens, hors ligne)`);
