@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>La Quête des Templiers : anniversaire chevalier pour les 7 à 10 ans</title>
-<meta name="description" content="Une quête de chevaliers dans les rues de votre ville, au prénom de votre enfant, avec la voix du Grand Maître. Prête en deux minutes, aperçu gratuit.">
+<title>Anniversaire chevalier 7-10 ans : la chasse au trésor dans votre ville | Ma Quête de Chevalier</title>
+<meta name="description" content="Un anniversaire chevalier clé en main : une chasse au trésor dans les rues de votre ville, au prénom de votre enfant, avec la voix du Grand Maître. Prête en deux minutes, rien à imprimer, aperçu gratuit.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
-<meta property="og:title" content="La Quête des Templiers">
-<meta property="og:description" content="Une quête de chevaliers dans les rues de votre ville, au prénom de votre enfant. Prête en deux minutes, sans rien préparer ni imprimer.">
+<meta property="og:title" content="Ma Quête de Chevalier">
+<meta property="og:description" content="La chasse au trésor de chevaliers dans les rues de votre ville, au prénom de votre enfant. Prête en deux minutes, sans rien préparer ni imprimer.">
 <meta name="theme-color" content="#1b2547">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"La Quête des Templiers","description":"Quête d'anniversaire numérique pour enfants de 7 à 10 ans : 4 à 6 étapes dans les lieux publics autour d'un point de départ en France, au prénom de l'enfant, avec la voix enregistrée du Grand Maître.","offers":{"@type":"Offer","price":"24.90","priceCurrency":"EUR","availability":"https://schema.org/InStock"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Ma Quête de Chevalier","description":"Quête d'anniversaire numérique pour enfants de 7 à 10 ans : 4 à 6 étapes dans les lieux publics autour d'un point de départ en France, au prénom de l'enfant, avec la voix enregistrée du Grand Maître.","offers":{"@type":"Offer","price":"24.90","priceCurrency":"EUR","availability":"https://schema.org/InStock"}}</script>
 <style>
 /* Fonts served by the site itself (SIL Open Font License, see fonts/), so no visitor data goes to a font service. */
 @font-face{font-family:"UnifrakturMaguntia";src:url(fonts/UnifrakturMaguntia-Book.woff) format("woff");font-display:swap}
@@ -120,7 +120,7 @@ footer a{color:var(--muted)}
 </style>
 </head>
 <body>
-<div class="wrap" id="app"><noscript><h1>La Quête des Templiers</h1><p>Une quête de chevaliers dans les rues de votre ville, au prénom de votre enfant, pour les anniversaires des 7 à 10 ans. Activez JavaScript pour créer votre quête.</p></noscript></div>
+<div class="wrap" id="app"><noscript><h1>Ma Quête de Chevalier</h1><p>La chasse au trésor de chevaliers dans les rues de votre ville, au prénom de votre enfant, pour les anniversaires des 7 à 10 ans. Activez JavaScript pour créer votre quête.</p></noscript></div>
 <script>
 /*GEO*/
 </script>
@@ -313,8 +313,8 @@ function homeScreen(){
   setTimeout(checkName,0);
   return [
     h("header",{class:"hero"},
-      h("h1",{text:"La Quête des Templiers"}),
-      h("p",{class:"promise",text:"Une quête de chevaliers dans les rues de votre ville, au prénom de votre enfant. Prête en deux minutes, sans rien préparer ni imprimer."})),
+      h("h1",{text:"Ma Quête de Chevalier"}),
+      h("p",{class:"promise",text:"La chasse au trésor de chevaliers dans les rues de votre ville, au prénom de votre enfant. Prête en deux minutes, sans rien préparer ni imprimer."})),
     (()=>{const c=h("section",{class:"card missive","aria-label":"Écouter le Grand Maître"});c.innerHTML=SEAL;
       c.append(h("h3",{text:"Le Grand Maître a un message pour votre enfant"}),
         h("label",{for:"demo-name"},"Prénom de l'enfant",nameIn),seg,known,listen,words);return c;})(),
@@ -514,7 +514,7 @@ function linkCard(){
   const url=location.origin+location.pathname+"?quete="+encodeURIComponent(S.paid);
   const out=h("p",{class:"note",role:"status"});
   const share=async()=>{
-    try{if(navigator.share){await navigator.share({title:"La Quête des Templiers",text:`La quête de ${S.name}`,url});return;}}catch(e){if(e&&e.name==="AbortError")return;}
+    try{if(navigator.share){await navigator.share({title:"Ma Quête de Chevalier",text:`La quête de ${S.name}`,url});return;}}catch(e){if(e&&e.name==="AbortError")return;}
     try{await navigator.clipboard.writeText(url);out.textContent="Lien copié.";}catch(e){out.textContent=url;}
   };
   return h("div",{class:"card adult"},h("h3",{text:"Votre lien de quête"}),
@@ -630,8 +630,8 @@ function shareCard(){
   const url=location.origin+location.pathname+"?ref=fete";
   const out=h("p",{class:"note",role:"status"});
   const share=async()=>{
-    const text="Nous avons fêté un anniversaire avec La Quête des Templiers : une quête de chevaliers dans notre ville, au prénom de l'enfant.";
-    try{if(navigator.share){await navigator.share({title:"La Quête des Templiers",text,url});return;}}catch(e){if(e&&e.name==="AbortError")return;}
+    const text="Nous avons fêté un anniversaire avec Ma Quête de Chevalier : une chasse au trésor de chevaliers dans notre ville, au prénom de l'enfant.";
+    try{if(navigator.share){await navigator.share({title:"Ma Quête de Chevalier",text,url});return;}}catch(e){if(e&&e.name==="AbortError")return;}
     try{await navigator.clipboard.writeText(url);out.textContent="Lien copié.";}catch(e){out.textContent=url;}
   };
   return h("div",{class:"card adult"},h("h3",{text:"Les compagnons ont aimé ?"}),
@@ -640,7 +640,7 @@ function shareCard(){
 }
 function topbar(){
   if(["home","setup","loading","few","neterr","preview","unlocking","unlockerr"].includes(S.screen))return null;
-  return h("div",{class:"topbar"},h("span",{class:"eyebrow",text:"la quête des templiers"}),
+  return h("div",{class:"topbar"},h("span",{class:"eyebrow",text:"ma quête de chevalier"}),
     h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"preview"})},"Aperçu"));
 }
 const OPEN=["home","setup","loading","few","neterr","unlocking","unlockerr"];

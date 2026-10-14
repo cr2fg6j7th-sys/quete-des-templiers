@@ -1,4 +1,4 @@
-# La Quête des Templiers
+# Ma Quête de Chevalier
 
 Une quête d'anniversaire pour enfants de 7 à 10 ans, au prénom de l'enfant, générée en deux minutes avec les vrais lieux autour d'une adresse en France (église, fontaine, vieille porte, parc…). L'adulte guide avec son téléphone, les enfants relèvent les défis et retrouvent les lettres du mot secret. La voix du Grand Maître est enregistrée (Gemini TTS, voix Algenib).
 

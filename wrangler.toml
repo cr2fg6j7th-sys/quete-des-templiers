@@ -1,6 +1,6 @@
 # Cloudflare deployment of the paid app. Deployed by .github/workflows/deploy.yml;
 # the files come from: python3 dev/build.py --audio
-name = "quete-des-templiers"
+name = "ma-quete-de-chevalier"
 main = "dist/worker.js"
 compatibility_date = "2025-09-01"
 workers_dev = true

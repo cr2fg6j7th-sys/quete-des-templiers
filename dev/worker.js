@@ -107,7 +107,7 @@ async function checkout(request, env) {
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": "eur",
     "line_items[0][price_data][unit_amount]": String(priceCents(env)),
-    "line_items[0][price_data][product_data][name]": "La Quête des Templiers",
+    "line_items[0][price_data][product_data][name]": "Ma Quête de Chevalier",
     "line_items[0][price_data][product_data][description]":
       `Quête d'anniversaire de ${name || "votre enfant"} : ${quest.steps.length} étapes${quest.indoorOnly ? " à la maison" : town ? " à " + town : ""}. Accès immédiat.`,
     success_url: origin + "/?paid={CHECKOUT_SESSION_ID}",
