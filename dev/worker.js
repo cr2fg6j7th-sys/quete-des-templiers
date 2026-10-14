@@ -77,11 +77,11 @@ async function readJSON(request) {
   try { return await request.json(); } catch (e) { return null; }
 }
 
-async function stripe(env, method, path, params) {
+async function stripe(env, method, path, params, extraHeaders) {
   const base = env.STRIPE_API || "https://api.stripe.com";
   const r = await fetch(base + path, {
     method,
-    headers: { authorization: "Bearer " + env.STRIPE_SECRET_KEY, "content-type": "application/x-www-form-urlencoded" },
+    headers: Object.assign({ authorization: "Bearer " + env.STRIPE_SECRET_KEY, "content-type": "application/x-www-form-urlencoded" }, extraHeaders || {}),
     body: params ? new URLSearchParams(params).toString() : undefined
   });
   const body = await r.json().catch(() => ({}));
@@ -196,11 +196,24 @@ async function checkout(request, env, ctx) {
     "metadata[consent]": new Date().toISOString(), "metadata[ref]": refOf(b)
   };
   for (let i = 0; i * 490 < token.length; i++) params[`metadata[t${i}]`] = token.slice(i * 490, (i + 1) * 490);
+  // The brand on the payment page, set here so it is the same in Stripe's test and live modes
+  // (a sandbox does not share the Dashboard's branding). Needs API version 2025-09-30.clover or later;
+  // if Stripe refuses it, the payment page opens with the Dashboard's branding instead.
+  const brand = {
+    "branding_settings[display_name]": "Ma Quête Légendaire",
+    "branding_settings[background_color]": "#1b2547",
+    "branding_settings[button_color]": "#b8505c",
+    "branding_settings[border_style]": "rounded",
+    "branding_settings[icon][type]": "url", "branding_settings[icon][url]": origin + "/stripe-icon.png",
+    "branding_settings[logo][type]": "url", "branding_settings[logo][url]": origin + "/stripe-logo.png"
+  };
   try {
-    const s = await stripe(env, "POST", "/v1/checkout/sessions", params);
-    log("checkout", { ref: refOf(b) });
+    let s, branding = "ok";
+    try { s = await stripe(env, "POST", "/v1/checkout/sessions", Object.assign({}, params, brand), { "stripe-version": "2025-09-30.clover" }); }
+    catch (e) { branding = String(e.message || e).slice(0, 200); console.log("branding refused: " + branding); s = await stripe(env, "POST", "/v1/checkout/sessions", params); }
+    log("checkout", { ref: refOf(b), branding: branding === "ok" });
     count(env, ctx, "checkout", refOf(b));
-    return reply({ ok: true, url: s.url });
+    return reply({ ok: true, url: s.url, branding });
   } catch (e) {
     console.log(String(e));
     // Stripe's own message (for example a missing account setting) helps fix the setup; it holds no secret.

@@ -98,6 +98,8 @@ async def main():
             sessions = json.loads(urllib.request.urlopen(BASE + "/__sessions").read())
             meta = sessions[-1]["metadata"]
             check(meta.get("n") == "Michael" and meta.get("consent") and meta.get("t0") and not any(x in json.dumps(meta) for x in PLACES), "Stripe : prénom, accord daté, lieux chiffrés")
+            prm = sessions[-1]["params"]
+            check(prm.get("branding_settings[display_name]") == "Ma Quête Légendaire" and prm.get("branding_settings[logo][url]", "").endswith("/stripe-logo.png"), "Stripe : page de paiement aux couleurs de la marque")
             # cancel, then pay
             await pg.click("#cancel")
             await pg.wait_for_selector("text=Paiement annulé", timeout=5000)

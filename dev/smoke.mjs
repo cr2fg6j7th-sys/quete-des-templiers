@@ -16,7 +16,7 @@ try {
   const html = await home.text();
   home.ok && html.includes("Ma Quête Légendaire") && html.includes("QUEST_VOICE_KEYS") ? ok("page d'accueil") : ko(`page d'accueil (HTTP ${home.status})`);
   const files = ["/audio/voix/prologue-dehors-m.mp3", "/audio/noms/lea.mp3", "/audio/noms.json", "/fonts/AlegreyaSans-Regular.woff", "/legal/cgv.html", "/anniversaire-chevalier.html",
-    "/sw.js", "/og.png", "/icon.svg", "/favicon.ico", "/apple-touch-icon.png", "/robots.txt", "/sitemap.xml"];
+    "/sw.js", "/og.png", "/icon.svg", "/favicon.ico", "/apple-touch-icon.png", "/stripe-icon.png", "/stripe-logo.png", "/robots.txt", "/sitemap.xml"];
   const missing = [];
   for (const f of files) {
     let r = await fetch(site + f, { method: "HEAD" });
@@ -87,6 +87,7 @@ try {
   if (testKey && token) {
     const c = await post("/api/checkout", { token, consent: true, name: "Test", hero: "m", kids: 8, town: "Rosheim", ref: "smoke" });
     c.json && c.json.ok && /^https:\/\/checkout\.stripe\.com\//.test(c.json.url) ? ok("page de paiement Stripe (mode test) créée") : ko(`paiement Stripe (HTTP ${c.status} ${JSON.stringify(c.json)})`);
+    if (c.json && c.json.ok) c.json.branding === "ok" ? ok("page de paiement aux couleurs de Ma Quête Légendaire") : console.log(`::warning::Image de marque refusée par Stripe : ${c.json.branding}`);
   } else if (!testKey) console.log("::notice::Clé Stripe réelle : pas de page de paiement créée par le test");
 } catch (e) {
   ko(String(e));
