@@ -15,10 +15,22 @@ try {
   const home = await fetch(site + "/");
   const html = await home.text();
   home.ok && html.includes("Ma Quête de Chevalier") && html.includes("QUEST_VOICE_KEYS") ? ok("page d'accueil") : ko(`page d'accueil (HTTP ${home.status})`);
-  for (const f of ["/audio/voix/prologue-dehors-m.mp3", "/audio/noms/lea.mp3", "/audio/noms.json", "/fonts/AlegreyaSans-Regular.woff", "/legal/cgv.html", "/anniversaire-chevalier.html"]) {
-    const r = await fetch(site + f, { method: "HEAD" });
-    r.ok ? ok(f) : ko(`${f} (HTTP ${r.status})`);
+  const files = ["/audio/voix/prologue-dehors-m.mp3", "/audio/noms/lea.mp3", "/audio/noms.json", "/fonts/AlegreyaSans-Regular.woff", "/legal/cgv.html", "/anniversaire-chevalier.html"];
+  const missing = [];
+  for (const f of files) { const r = await fetch(site + f, { method: "HEAD" }); if (!r.ok) missing.push(`${f} (HTTP ${r.status})`); }
+  missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, prénoms, polices, pages)`);
+
+  // The phone fetches places from these servers itself: they must answer and allow it (CORS).
+  const mirrors = [];
+  for (const url of ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"]) {
+    try {
+      const t0 = Date.now();
+      const r = await fetch(url, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", origin: site },
+        body: "data=" + encodeURIComponent('[out:json][timeout:10];node(48.4983,7.4703,48.4993,7.4713);out 1;'), signal: AbortSignal.timeout(20000) });
+      mirrors.push(`${new URL(url).host} ${r.status} ${r.headers.get("access-control-allow-origin") ? "CORS ok" : "SANS CORS"} ${Date.now() - t0} ms`);
+    } catch (e) { mirrors.push(`${new URL(url).host} injoignable`); }
   }
+  console.log("::notice::Serveurs de carte : " + mirrors.join(" ; "));
 
   // A real quest around the church square of Rosheim, places fetched like the phone does.
   const start = { lat: 48.4983, lon: 7.4703 };

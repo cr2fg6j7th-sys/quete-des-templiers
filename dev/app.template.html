@@ -140,7 +140,8 @@ const E=(typeof QuestEngine!=="undefined")?QuestEngine:null;
 const G=QuestGeo;
 const STORE="quete-templiers-v3";
 let PRICE="24,90 €";
-const OVERPASS="https://overpass-api.de/api/interpreter";
+// The public OpenStreetMap servers are often busy: try the main one, then two mirrors.
+const OVERPASS=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"];
 const NOMINATIM="https://nominatim.openstreetmap.org";
 
 /* ---------- State ---------- */
@@ -247,7 +248,17 @@ async function getJSON(url,opts,ms){const c=new AbortController();const t=setTim
 function townOf(a){a=a||{};return a.village||a.town||a.city||a.municipality||a.hamlet||"";}
 async function searchPlaces(q){return getJSON(`${NOMINATIM}/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=fr&accept-language=fr&q=${encodeURIComponent(q)}`);}
 async function reverseTown(lat,lon){try{const r=await getJSON(`${NOMINATIM}/reverse?format=jsonv2&zoom=14&accept-language=fr&lat=${lat}&lon=${lon}`,null,10000);return townOf(r.address);}catch(e){return "";}}
-async function fetchPlaces(lat,lon){const r=await getJSON(OVERPASS,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(G.overpassQuery(lat,lon))},30000);return r.elements||[];}
+async function fetchPlaces(lat,lon){
+  const body="data="+encodeURIComponent(G.overpassQuery(lat,lon));let last=null;
+  for(const url of OVERPASS){
+    try{const r=await getJSON(url,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body},20000);
+      // a busy server answers 200 with no places and a "runtime error" remark: try the next one
+      if(Array.isArray(r.elements)&&!(r.remark&&!r.elements.length))return r.elements;
+      last=new Error(r.remark||"no elements");}
+    catch(e){last=e;}
+  }
+  throw last||new Error("overpass");
+}
 // Our own server: answers JSON even for refusals (unpaid, bad request), throws only when unreachable.
 async function api(path,body,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||25000);
   try{const r=await fetch(path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body),signal:c.signal});
@@ -257,7 +268,8 @@ function previewOf(q){return {ok:true,indoorOnly:!!q.indoorOnly,count:q.steps.le
 async function makePreview(body){
   if(!PAID){const q=body.indoor?E.assemble(null,E.indoorStops()):E.build(body.elements,body.start);
     return q.ok?{ok:true,preview:previewOf(q),quest:q,token:""}:q;}
-  const r=await api("api/preview",Object.assign({ref:S.ref},body),30000);
+  const payload=Object.assign({ref:S.ref},body);
+  let r;try{r=await api("api/preview",payload,30000);}catch(e){r=await api("api/preview",payload,30000);}
   if(!r.ok)return r;
   if(r.price)PRICE=r.price;
   return {ok:true,preview:{ok:true,indoorOnly:r.indoorOnly,count:r.count,walkM:r.walkM,minutes:r.minutes,teasers:r.teasers,price:r.price},quest:null,token:r.token};
