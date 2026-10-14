@@ -1,0 +1,28 @@
+# Availability of candidate brand names (trademarks, domains, social accounts), from GitHub's
+# servers, which reach these sites. Started by hand; the results are saved in marketing/noms/.
+name: Vérification des noms
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Vérifier
+        run: |
+          mkdir -p marketing/noms
+          node dev/brand/check.mjs > marketing/noms/verification.json
+      - name: Enregistrer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add marketing/noms
+          git diff --cached --quiet || (git commit -m "Vérification des noms" && git pull --rebase -q && git push)
