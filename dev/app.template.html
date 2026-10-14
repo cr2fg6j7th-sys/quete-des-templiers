@@ -93,6 +93,9 @@ button{cursor:pointer}
 .letter{font-family:var(--display);font-size:3.2rem;color:var(--rose);line-height:1;text-align:center;letter-spacing:.15em}
 .diploma{border:3px double var(--or);border-radius:6px;padding:22px 18px;text-align:center;gap:10px;background:var(--card)}
 .diploma .sign{font-family:var(--display);font-size:1.05rem;color:var(--or);margin-top:4px}
+.diploma .gm{display:flex;flex-direction:column;align-items:center;margin-top:6px;color:var(--ink)}
+.diploma .gm svg{width:150px;height:auto;display:block;margin-bottom:-6px}
+.diploma .gm span{font-family:var(--display);font-size:.95rem;border-top:1px solid var(--muted);padding:3px 18px 0}
 .diploma .name{font-family:var(--display);font-size:2.4rem;color:var(--rose)}
 .timer{font-size:2.2rem;font-variant-numeric:tabular-nums;text-align:center;font-weight:700}
 .map{width:100%;height:auto;display:block;border-radius:12px}
@@ -156,7 +159,9 @@ footer a{color:var(--muted)}
   .dip-title{font-weight:700;font-size:20pt}
   .dip-line{font-style:italic;font-size:15pt;color:#4a5272;margin-top:4mm;max-width:210mm}
   .dip-foot{position:absolute;left:26mm;right:26mm;bottom:17mm;display:flex;justify-content:space-between;align-items:flex-end;gap:10mm}
-  .dip-sign{font-family:var(--display);font-size:15pt;border-top:.3mm solid #5b6482;padding-top:1.5mm;min-width:60mm}
+  .dip-sign{display:flex;flex-direction:column;align-items:center;min-width:62mm}
+  .dip-sig{width:50mm;height:auto;display:block;margin-bottom:-2.5mm}
+  .dip-sign span{font-family:var(--display);font-size:15pt;border-top:.3mm solid #5b6482;padding-top:1.5mm;align-self:stretch;text-align:center}
   .dip-mark{display:flex;align-items:flex-end;gap:5mm}
   .dip-brand{text-align:right;font-family:var(--display);font-size:21pt;color:#a87a1f;line-height:1.2}
   .dip-brand small{display:block;font-family:var(--body);font-size:12pt;color:#5b6482}
@@ -431,10 +436,15 @@ async function parchment(lines,opts){
   const wrap=(t,font,max)=>{x.font=font;const out=[];for(const para of String(t).split("\n")){let cur="";for(const w of para.split(/ +/)){const tryL=cur?cur+" "+w:w;if(x.measureText(tryL).width>max&&cur){out.push(cur);cur=w;}else cur=tryL;}if(cur)out.push(cur);}return out;};
   const laid=lines.filter(l=>l&&l.t).map(l=>{const font=FACE[l.f||"body"](l.s||44);return Object.assign({},l,{font,rows:wrap(l.t,font,860),lh:(l.s||44)*1.22});});
   const total=laid.reduce((a,l)=>a+(l.gap||0)+l.rows.length*l.lh,0);
-  let y=300+Math.max(0,(H-300-150-total)/2);
+  let y=300+Math.max(0,(H-300-(opts&&opts.sign?250:150)-total)/2);   // the signed diploma keeps its lower band free
   for(const l of laid){y+=l.gap||0;x.font=l.font;x.fillStyle=l.c||"#1b2547";for(const r of l.rows){y+=l.lh;x.fillText(r,W/2,y-l.lh*.22);}}
   x.font=FACE.display(40);x.fillStyle="#a87a1f";x.fillText("Ma Quête de Chevalier",W/2,H-108);
   x.font=FACE.body(28);x.fillStyle="#5b6482";x.fillText(TAG,W/2,H-72);
+  // the Grand Master's signature in the lower left corner
+  if(opts&&opts.sign&&SIGN){const [bx,by,bw,bh]=SIGN.box,k=200/bw,x0=92,y0=H-122-bh*k;
+    x.save();x.translate(x0-bx*k,y0-by*k);x.scale(k,k);x.fillStyle="#22306b";x.fill(new Path2D(SIGN.d));x.restore();
+    x.strokeStyle="#5b6482";x.lineWidth=1.5;x.beginPath();x.moveTo(x0-4,H-128);x.lineTo(x0+204,H-128);x.stroke();
+    x.font=FACE.display(26);x.fillStyle="#1b2547";x.fillText("Le Grand Maître",x0+100,H-98);}
   // QR code in the lower right corner, inside the frame
   if(opts&&opts.qr&&QR){const sz=128,pad=8,x0=W-58-18-sz,y0=H-58-18-sz,k=(sz-2*pad)/QR.size;
     x.fillStyle="#fff";x.fillRect(x0,y0,sz,sz);x.save();x.translate(x0+pad,y0+pad);x.scale(k,k);x.fillStyle="#1b2547";x.fill(new Path2D(QR.d));x.restore();}
@@ -461,6 +471,9 @@ function imageMaker(label,fileName,makeLines,evt,opts){
 const TAG="#MaQueteDeChevalier";
 // QR code to the site (?ref=diplome) on the diplomas: a framed diploma brings visitors who scan it.
 const QR=/*QR*/null;
+// The Grand Master's signature (invented: "Aldéran"), above "Le Grand Maître" on every diploma.
+const SIGN=/*SIGN*/null;
+const sigSvg=(cls,ink)=>SIGN?`<svg class="${cls}" viewBox="${SIGN.box.join(" ")}" aria-hidden="true"><path d="${SIGN.d}" fill="${ink}"/></svg>`:"";
 const qrSvg=cls=>QR?`<svg class="${cls}" viewBox="-3 -3 ${QR.size+6} ${QR.size+6}" role="img" aria-label="QR code vers Ma Quête de Chevalier"><rect x="-3" y="-3" width="${QR.size+6}" height="${QR.size+6}" rx="1.5" fill="#fff"/><path d="${QR.d}" fill="#1b2547" shape-rendering="crispEdges"/></svg>`:"";
 function partyDate(){const d=S.invite&&S.invite.date;try{return (d?new Date(d+"T12:00:00"):new Date()).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});}catch(e){return "";}}
 function diplomaSheet(o){
@@ -469,9 +482,10 @@ function diplomaSheet(o){
   p.append(h("p",{class:"dip-order",text:"ordre des gardiens du temple"}),h("p",{class:"dip-by",text:o.by}),
     o.name?h("p",{class:"dip-name",text:o.name}):h("div",{class:"dip-blank"}),
     h("p",{class:"dip-title",text:o.title}),h("p",{class:"dip-line",text:o.line}),
-    h("div",{class:"dip-foot"},h("span",{class:"dip-sign",text:"Le Grand Maître"}),
+    h("div",{class:"dip-foot"},h("div",{class:"dip-sign"},h("span",{text:"Le Grand Maître"})),
       h("div",{class:"dip-mark"},h("span",{class:"dip-brand"},"Ma Quête de Chevalier",h("small",{text:TAG}),QR&&h("small",{class:"dip-scan",text:"Une quête pour votre enfant ? Scannez le code."})))));
   if(QR)p.querySelector(".dip-mark").insertAdjacentHTML("beforeend",qrSvg("dip-qr"));
+  p.querySelector(".dip-sign").insertAdjacentHTML("afterbegin",sigSvg("dip-sig","#22306b"));
   return p;
 }
 function printDiplomas(companions){
@@ -923,6 +937,7 @@ function diplomaScreen(){
       h("div",{class:"name",text:S.name||"Jeune chevalier"}),h("p",null,h("b",{text:g("Chevalier","Chevalière")+" de l'Ordre des Gardiens du Temple"})),
       h("p",{class:"note",text:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`}),
       // A discreet signature: diploma photos shared by parents carry the name of the quest.
+      (()=>{const s=h("div",{class:"gm"},h("span",{text:"Le Grand Maître"}));s.insertAdjacentHTML("afterbegin",sigSvg("","currentColor"));return s;})(),
       h("p",{class:"sign",text:"Ma Quête de Chevalier"})),
     printCard(false),
     h("div",{class:"card adult"},h("h3",{text:"Le diplôme en image"}),
@@ -931,7 +946,7 @@ function diplomaScreen(){
         {t:"ordre des gardiens du temple",f:"label",s:38,c:"#a87a1f"},{t:"Par ce diplôme, le Grand Maître nomme",f:"body",s:46,gap:30},
         {t:S.name||g("Jeune chevalier","Jeune chevalière"),f:"display",s:128,c:"#b8505c",gap:20},
         {t:g("Chevalier","Chevalière")+" de l'Ordre\ndes Gardiens du Temple",f:"bold",s:50,gap:16},
-        {t:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`,f:"italic",s:42,c:"#5b6482",gap:36}],"diplome",{qr:true})),
+        {t:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`,f:"italic",s:42,c:"#5b6482",gap:36}],"diplome",{qr:true,sign:true})),
     shareCard(),
     h("button",{class:"btn ghost",type:"button",onclick:()=>go(Object.assign({},defaults,{name:S.name,hero:S.hero,kids:S.kids,voice:S.voice,town:S.town,screen:"setup"}))},"Créer une nouvelle quête")];
 }
