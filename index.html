@@ -1259,10 +1259,15 @@ function setupScreen(){
   };
   q.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doSearch();}});
   const here=()=>{
-    if(!("geolocation" in navigator)){note.textContent="La position n'est pas disponible : cherchez une adresse.";return;}
-    note.textContent="Recherche de votre position…";
-    navigator.geolocation.getCurrentPosition(async p=>{const lat=p.coords.latitude,lon=p.coords.longitude;startFrom(lat,lon,await reverseTown(lat,lon));},
-      ()=>{note.textContent="Position refusée ou indisponible : cherchez plutôt une adresse.";},{enableHighAccuracy:true,timeout:10000});
+    if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}
+    if(!("geolocation" in navigator)){note.textContent="Ce téléphone ne donne pas sa position : cherchez plutôt une adresse ci-dessous.";return;}
+    note.textContent="Recherche de votre position… (jusqu'à 20 secondes)";
+    locate().then(p=>startFrom(p.lat,p.lon,null)).catch(err=>{
+      const denied=err&&err.code===1;hit(denied?"geo-refus":"geo-echec");
+      note.textContent=denied
+        ?"Le téléphone refuse de donner la position à ce site. Autorisez-la (iPhone : Réglages, Safari, Position ; Android : le cadenas à gauche de l'adresse, Autorisations), ou cherchez une adresse ci-dessous."
+        :"La position n'a pas été trouvée. Réessayez près d'une fenêtre ou dehors, ou cherchez une adresse ci-dessous.";
+    });
   };
   return [
     h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"home"})},"Retour à la présentation"),
@@ -1283,8 +1288,17 @@ function setupScreen(){
   ];
 }
 
+// The phone's position: a quick approximate fix first (Wi-Fi, mobile network: enough for a 700 m quest),
+// then precise GPS only if that fails. Indoors, waiting for GPS alone often runs out of time.
+function locate(){
+  const once=o=>new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lon:p.coords.longitude}),rej,o));
+  return once({enableHighAccuracy:false,timeout:8000,maximumAge:300000})
+    .catch(e=>{if(e&&e.code===1)throw e;return once({enableHighAccuracy:true,timeout:15000,maximumAge:0});});
+}
+// town: known (address search) or null (position: looked up while the quest is prepared, 5 s at most).
 async function startFrom(lat,lon,town){
   if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}
+  const townP=town!=null?Promise.resolve(town):Promise.race([reverseTown(lat,lon),new Promise(r=>setTimeout(()=>r(""),5000))]);
   go({screen:"loading",start:{lat,lon},town:town||""});
   try{
     // Paid build: our server keeps a copy of the places of France and chooses the stops from it.
@@ -1296,8 +1310,9 @@ async function startFrom(lat,lon,town){
       p=await makePreview(els?{start:{lat,lon},elements:els}:{start:{lat,lon},fetch:true});
     }
     if(!PAID)hit(p.ok?"preview":"few");
-    if(!p.ok){if(p.reason==="few"){go({screen:"few",found:p.found});return;}throw new Error(p.reason);}
-    go(Object.assign({},fresh,{preview:p.preview,quest:p.quest,token:p.token,screen:"preview",indoor:false}));
+    const t=await townP;
+    if(!p.ok){if(p.reason==="few"){go({screen:"few",found:p.found,town:t});return;}throw new Error(p.reason);}
+    go(Object.assign({},fresh,{preview:p.preview,quest:p.quest,token:p.token,screen:"preview",indoor:false,town:t}));
   }catch(e){hit("neterr");go({screen:"neterr"});}
 }
 

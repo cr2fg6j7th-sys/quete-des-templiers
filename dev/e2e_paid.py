@@ -222,6 +222,33 @@ async def main():
             sessions = json.loads(urllib.request.urlopen(BASE + "/__sessions").read())
             check(sessions[-1]["metadata"].get("ref") == "fete" and "?ref" not in pg3.url, "provenance « fete » suivie jusqu'au paiement")
             await ctx3.close()
+            # "Partir d'ici": position granted, refused, or no first name yet
+            ctxG = await b.new_context(viewport={"width": 390, "height": 860}, geolocation={"latitude": 48.5, "longitude": 7.47}, permissions=["geolocation"])
+            pgG = await ctxG.new_page(); pgG.on("pageerror", lambda e: errs.append(str(e)))
+            await pgG.route("**/data.geopf.fr/**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(ban)))
+            await pgG.goto(BASE + "/")
+            await pgG.click("button.big >> nth=0")
+            await pgG.click("text=Partir d'ici")
+            check("Indiquez d'abord le prénom" in await pgG.inner_text("body"), "« Partir d'ici » sans prénom : demande le prénom d'abord")
+            await pgG.fill("#hero-name", "Lina")
+            await pgG.click("text=Partir d'ici")
+            await pgG.wait_for_selector("text=Ce qui vous attend", timeout=10000)
+            stG = json.loads(await pgG.evaluate("localStorage.getItem('quete-templiers-v3')"))
+            check(stG["town"] == "Bourg-Test" and stG["start"]["lat"] == 48.5, "« Partir d'ici » : aperçu depuis la position, commune retrouvée")
+            await ctxG.close()
+            ctxD = await b.new_context(viewport={"width": 390, "height": 860})
+            pgD = await ctxD.new_page(); pgD.on("pageerror", lambda e: errs.append(str(e)))
+            await pgD.goto(BASE + "/")
+            await pgD.evaluate("void (navigator.geolocation.getCurrentPosition=(ok,ko)=>setTimeout(()=>ko({code:1}),50))")
+            await pgD.click("button.big >> nth=0")
+            await pgD.fill("#hero-name", "Lina")
+            await pgD.click("text=Partir d'ici")
+            await pgD.wait_for_selector("text=refuse de donner la position", timeout=5000)
+            await pgD.evaluate("void (navigator.geolocation.getCurrentPosition=(ok,ko)=>setTimeout(()=>ko({code:3}),50))")
+            await pgD.click("text=Partir d'ici")
+            await pgD.wait_for_selector("text=La position n'a pas été trouvée", timeout=5000)
+            check(True, "« Partir d'ici » : position refusée ou introuvable, message clair et recherche d'adresse proposée")
+            await ctxD.close()
             # without our copy of the places, and the main map server busy: our server fetches the places
             idx = ROOT / "site" / "places" / "index.json"; idx.rename(idx.with_suffix(".off"))
             ctx4 = await b.new_context(viewport={"width": 390, "height": 860})
@@ -242,7 +269,7 @@ async def main():
             # anonymous counts of the visit, and the report's access to them
             counts = json.loads(urllib.request.urlopen(BASE + "/__counts").read())
             events = {k.split("|")[1] for k in counts}
-            want = {"home", "setup", "preview", "checkout", "unlock", "diploma", "apercu", "apercu-ouvert", "horsligne", "share"}
+            want = {"home", "setup", "preview", "checkout", "unlock", "diploma", "apercu", "apercu-ouvert", "horsligne", "share", "geo-refus", "geo-echec"}
             check(want <= events and all(len(k.split("|")) == 4 for k in counts), "compteurs anonymes : " + ", ".join(sorted(events)))
             key = hashlib.sha256(b"stats:sk_test_local").hexdigest()
             req = lambda body: urllib.request.Request(BASE + "/api/stats", data=json.dumps(body).encode(), headers={"content-type": "application/json"}, method="POST")

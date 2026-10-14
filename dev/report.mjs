@@ -93,6 +93,8 @@ ${row("Clics sur « Créer l'aperçu »", "setup")}
 ${row("Aperçus créés", "preview")}
 ${row("Pas assez de lieux autour du départ", "few")}
 ${row("Cartes en panne (écran d'erreur)", "neterr")}
+${row("Position refusée par le téléphone (« Partir d'ici »)", "geo-refus")}
+${row("Position introuvable (« Partir d'ici »)", "geo-echec")}
 ${row("Aperçus envoyés à quelqu'un", "apercu")}
 ${row("Aperçus reçus et ouverts", "apercu-ouvert")}
 ${row("Pages de paiement ouvertes", "checkout")}
