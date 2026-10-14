@@ -123,7 +123,8 @@ async function checkout(request, env) {
     return reply({ ok: true, url: s.url });
   } catch (e) {
     console.log(String(e));
-    return reply({ ok: false, reason: "stripe" }, 502);
+    // Stripe's own message (for example a missing account setting) helps fix the setup; it holds no secret.
+    return reply({ ok: false, reason: "stripe", detail: String(e.message || e).slice(0, 300) }, 502);
   }
 }
 
