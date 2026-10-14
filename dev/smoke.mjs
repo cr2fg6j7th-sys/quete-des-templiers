@@ -46,6 +46,20 @@ try {
     if (p.json && p.json.ok && p.json.token && !JSON.stringify(p.json).includes("Rosheim")) { ok(`aperçu à Rosheim : ${p.json.count} étapes, ${p.json.walkM} m`); token = p.json.token; }
     else ko(`aperçu à Rosheim (HTTP ${p.status} ${JSON.stringify(p.json).slice(0, 120)})`);
   }
+  // Dense city centres: many places to sort, the heaviest work for the server.
+  const dense = [];
+  for (const [label, c] of [["Strasbourg", { lat: 48.5818, lon: 7.7509 }], ["Paris", { lat: 48.8530, lon: 2.3499 }]]) {
+    try {
+      const r = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": "ma-quete-de-chevalier-smoke" },
+        body: "data=" + encodeURIComponent(QuestGeo.overpassQuery(c.lat, c.lon)) });
+      const els = QuestGeo.slim((await r.json()).elements);
+      const t0 = Date.now();
+      const p = await post("/api/preview", { start: c, elements: els, ref: "smoke" });
+      dense.push(`${label} ${els.length} lieux → ${p.json && p.json.ok ? p.json.count + " étapes" : "HTTP " + p.status} en ${Date.now() - t0} ms`);
+      if (!(p.json && p.json.ok)) failed++;
+    } catch (e) { dense.push(`${label} : carte indisponible`); }
+  }
+  console.log("::notice::Grandes villes : " + dense.join(" ; "));
   const home2 = await post("/api/preview", { indoor: true, ref: "smoke" });
   home2.json && home2.json.ok && home2.json.count === 6 ? ok("aperçu de la quête à la maison") : ko(`quête à la maison (HTTP ${home2.status})`);
   token = token || (home2.json && home2.json.token) || "";
