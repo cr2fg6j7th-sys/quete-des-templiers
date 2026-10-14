@@ -15,6 +15,15 @@ const tmp = path.join(root, "dist", "worker.test.mjs");
 fs.copyFileSync(path.join(root, "dist", "worker.js"), tmp);
 const worker = (await import(pathToFileURL(tmp).href)).default;
 
+// Map servers seen from the worker: answered from dist/osm-fixture.json when the tests provide it.
+const fixture = path.join(root, "dist", "osm-fixture.json");
+const realFetch = globalThis.fetch;
+globalThis.fetch = (input, init) => {
+  const u = String(input && input.url || input);
+  if (/overpass/.test(u) && fs.existsSync(fixture)) return Promise.resolve(new Response(fs.readFileSync(fixture), { headers: { "content-type": "application/json" } }));
+  return realFetch(input, init);
+};
+
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".json": "application/json", ".mp3": "audio/mpeg", ".woff": "font/woff", ".css": "text/css" };
 function file(p) {
   const clean = decodeURIComponent(p).replace(/\.\.+/g, "");

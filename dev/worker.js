@@ -69,6 +69,21 @@ async function stripe(env, method, path, params) {
   return body;
 }
 
+// Fallback when the phone could not reach the map server: try each server from here.
+async function placesFromOSM(start) {
+  const body = "data=" + encodeURIComponent(QuestGeo.overpassQuery(start.lat, start.lon));
+  for (const url of QuestGeo.SERVERS) {
+    try {
+      const r = await fetch(url, { method: "POST", body, signal: AbortSignal.timeout(15000),
+        headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": "MaQueteDeChevalier/1.0" } });
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (Array.isArray(j.elements) && !(j.remark && !j.elements.length)) return QuestGeo.slim(j.elements);
+    } catch (e) { /* next server */ }
+  }
+  return null;
+}
+
 async function preview(request, env) {
   const b = await readJSON(request);
   if (!b) return reply({ ok: false, reason: "bad" }, 400);
@@ -78,9 +93,14 @@ async function preview(request, env) {
     token = await seal({ i: 1 }, env);
   } else {
     const lat = Number(b.start && b.start.lat), lon = Number(b.start && b.start.lon);
-    if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180 || !Array.isArray(b.elements) || b.elements.length > 5000)
-      return reply({ ok: false, reason: "bad" }, 400);
+    if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return reply({ ok: false, reason: "bad" }, 400);
     const start = { lat, lon };
+    if (b.fetch && !Array.isArray(b.elements)) {
+      b.elements = await placesFromOSM(start);
+      log("osm", { ok: !!b.elements });
+      if (!b.elements) return reply({ ok: false, reason: "osm" }, 503);
+    }
+    if (!Array.isArray(b.elements) || b.elements.length > 5000) return reply({ ok: false, reason: "bad" }, 400);
     const sel = QuestEngine.select(b.elements, start);
     if (!sel.ok) { log("preview", { ok: false, found: sel.found, ref: refOf(b) }); return reply(sel); }
     quest = QuestEngine.assemble(start, sel.stops);

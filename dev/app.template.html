@@ -140,8 +140,7 @@ const E=(typeof QuestEngine!=="undefined")?QuestEngine:null;
 const G=QuestGeo;
 const STORE="quete-templiers-v3";
 let PRICE="24,90 €";
-// The public OpenStreetMap servers are often busy: try the main one, then two mirrors.
-const OVERPASS=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"];
+
 const NOMINATIM="https://nominatim.openstreetmap.org";
 
 /* ---------- State ---------- */
@@ -248,9 +247,10 @@ async function getJSON(url,opts,ms){const c=new AbortController();const t=setTim
 function townOf(a){a=a||{};return a.village||a.town||a.city||a.municipality||a.hamlet||"";}
 async function searchPlaces(q){return getJSON(`${NOMINATIM}/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=fr&accept-language=fr&q=${encodeURIComponent(q)}`);}
 async function reverseTown(lat,lon){try{const r=await getJSON(`${NOMINATIM}/reverse?format=jsonv2&zoom=14&accept-language=fr&lat=${lat}&lon=${lon}`,null,10000);return townOf(r.address);}catch(e){return "";}}
-async function fetchPlaces(lat,lon){
+// Places around the start, from the public OpenStreetMap servers (n = how many to try).
+async function fetchPlaces(lat,lon,n){
   const body="data="+encodeURIComponent(G.overpassQuery(lat,lon));let last=null;
-  for(const url of OVERPASS){
+  for(const url of G.SERVERS.slice(0,n)){
     try{const r=await getJSON(url,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body},20000);
       // a busy server answers 200 with no places and a "runtime error" remark: try the next one
       if(Array.isArray(r.elements)&&!(r.remark&&!r.elements.length))return r.elements;
@@ -408,8 +408,10 @@ async function startFrom(lat,lon,town){
   if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}
   go({screen:"loading",start:{lat,lon},town:town||""});
   try{
-    const els=G.slim(await fetchPlaces(lat,lon));
-    const p=await makePreview({start:{lat,lon},elements:els});
+    // Paid build: if the map server is busy, our server fetches the places itself (it tries the mirrors).
+    let els=null;
+    try{els=G.slim(await fetchPlaces(lat,lon,PAID?1:3));}catch(e){if(!PAID)throw e;}
+    const p=await makePreview(els?{start:{lat,lon},elements:els}:{start:{lat,lon},fetch:true});
     if(!p.ok){if(p.reason==="few"){go({screen:"few",found:p.found});return;}throw new Error(p.reason);}
     go(Object.assign({},fresh,{preview:p.preview,quest:p.quest,token:p.token,screen:"preview",indoor:false}));
   }catch(e){go({screen:"neterr"});}

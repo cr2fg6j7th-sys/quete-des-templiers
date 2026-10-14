@@ -5,6 +5,8 @@
 
 const QuestGeo = (() => {
   const SEARCH_RADIUS = 700;     // metres around the start point
+  // Public OpenStreetMap (Overpass) servers, often busy: the main one first, then two mirrors.
+  const SERVERS = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"];
 
   function overpassQuery(lat, lon, r = SEARCH_RADIUS) {
     const a = `(around:${r},${lat.toFixed(6)},${lon.toFixed(6)})`;
@@ -40,7 +42,7 @@ nwr${a}["tourism"~"^(artwork|viewpoint)$"];
       .filter(e => e.tags);
   }
 
-  return { SEARCH_RADIUS, overpassQuery, dist, bearing, slim };
+  return { SEARCH_RADIUS, SERVERS, overpassQuery, dist, bearing, slim };
 })();
 if (typeof module !== "undefined") module.exports = QuestGeo;
 /* GEO-END */

@@ -36,6 +36,8 @@ async def new_page(browser, errs):
     return ctx, pg
 
 async def main():
+    (ROOT / "dist").mkdir(exist_ok=True)
+    (ROOT / "dist" / "osm-fixture.json").write_text(json.dumps(fixture), encoding="utf-8")
     srv = subprocess.Popen(["node", str(ROOT / "dev" / "serve.mjs"), str(PORT)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     for _ in range(50):
         try: urllib.request.urlopen(BASE + "/", timeout=1); break
@@ -149,11 +151,10 @@ async def main():
             sessions = json.loads(urllib.request.urlopen(BASE + "/__sessions").read())
             check(sessions[-1]["metadata"].get("ref") == "fete" and "?ref" not in pg3.url, "provenance « fete » suivie jusqu'au paiement")
             await ctx3.close()
-            # the main map server is busy: the phone falls back to a mirror without showing an error
+            # the main map server is busy: the paid app asks our server to fetch the places
             ctx4 = await b.new_context(viewport={"width": 390, "height": 860})
             pg4 = await ctx4.new_page()
             await pg4.route("**/overpass-api.de/**", lambda r: r.fulfill(status=504, body="Gateway Timeout"))
-            await pg4.route("**/overpass.kumi.systems/**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(fixture)))
             await pg4.route("**/nominatim.openstreetmap.org/search**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(search)))
             await pg4.goto(BASE + "/")
             await pg4.click("button.big >> nth=0")
@@ -162,7 +163,7 @@ async def main():
             await pg4.click("button:has-text('Chercher')")
             await pg4.click("text=Place de l'Église, Bourg-Test")
             await pg4.wait_for_selector("text=Ce qui vous attend", timeout=10000)
-            check(True, "serveur de carte principal en panne : relais par un miroir")
+            check(True, "serveur de carte injoignable depuis le téléphone : relais par notre serveur")
             await ctx4.close()
             check(not errs, "aucune erreur JavaScript " + str(errs[:3]))
             await b.close()

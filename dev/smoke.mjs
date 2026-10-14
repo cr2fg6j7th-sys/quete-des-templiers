@@ -20,17 +20,13 @@ try {
   for (const f of files) { const r = await fetch(site + f, { method: "HEAD" }); if (!r.ok) missing.push(`${f} (HTTP ${r.status})`); }
   missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, prénoms, polices, pages)`);
 
-  // The phone fetches places from these servers itself: they must answer and allow it (CORS).
-  const mirrors = [];
-  for (const url of ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"]) {
-    try {
-      const t0 = Date.now();
-      const r = await fetch(url, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", origin: site, "user-agent": "Mozilla/5.0 (ma-quete-de-chevalier smoke test)" },
-        body: "data=" + encodeURIComponent('[out:json][timeout:10];node(48.4983,7.4703,48.4993,7.4713);out 1;'), signal: AbortSignal.timeout(20000) });
-      mirrors.push(`${new URL(url).host} ${r.status} ${r.headers.get("access-control-allow-origin") ? "CORS ok" : "SANS CORS"} ${Date.now() - t0} ms`);
-    } catch (e) { mirrors.push(`${new URL(url).host} injoignable`); }
+  // When the phone cannot reach the map server, our server fetches the places itself.
+  {
+    const t0 = Date.now();
+    const p = await post("/api/preview", { start: { lat: 48.4983, lon: 7.4703 }, fetch: true, ref: "smoke" });
+    p.json && p.json.ok ? ok(`relais carte par le serveur : ${p.json.count} étapes en ${Date.now() - t0} ms`)
+      : console.log(`::warning::Relais carte par le serveur indisponible (HTTP ${p.status} ${JSON.stringify(p.json)})`);
   }
-  console.log("::notice::Serveurs de carte : " + mirrors.join(" ; "));
 
   // A real quest around the church square of Rosheim, places fetched like the phone does.
   const start = { lat: 48.4983, lon: 7.4703 };
