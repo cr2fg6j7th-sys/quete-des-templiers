@@ -1,0 +1,338 @@
+[
+ {
+  "name": "Ma Quête Légendaire",
+  "trademarks": {
+   "quete legendaire": {
+    "total": 1,
+    "marks": [
+     {
+      "name": "La quête du burger légendaire",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       28
+      ],
+      "date": "2023-08-24T12:00:00.000Z",
+      "owner": [
+       "alice sergent Agissant pour le compte de \"Editions Malice\", Société en cours de formation"
+      ],
+      "id": "FR500000004985838"
+     }
+    ]
+   }
+  },
+  "slugs": {
+   "maquetelegendaire": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403/200)"
+   }
+  }
+ },
+ {
+  "name": "Héros d'un Jour",
+  "trademarks": {
+   "heros d un jour": {
+    "total": 1,
+    "marks": [
+     {
+      "name": "HEROS D'UN JOUR",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       25,
+       28,
+       35,
+       38,
+       41,
+       42
+      ],
+      "date": "1992-07-03T12:00:00.000Z",
+      "owner": [
+       "Philip PLAISANCE,"
+      ],
+      "id": "FR500000092425458"
+     }
+    ]
+   },
+   "heros d'un jour": {
+    "total": 1,
+    "marks": [
+     {
+      "name": "HEROS D'UN JOUR",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       25,
+       28,
+       35,
+       38,
+       41,
+       42
+      ],
+      "date": "1992-07-03T12:00:00.000Z",
+      "owner": [
+       "Philip PLAISANCE,"
+      ],
+      "id": "FR500000092425458"
+     }
+    ]
+   }
+  },
+  "slugs": {
+   "herosdunjour": {
+    "fr": "libre",
+    "com": "pris",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403/200)"
+   }
+  }
+ },
+ {
+  "name": "Ma Quête Magique",
+  "trademarks": {
+   "quete magique": {
+    "total": 0,
+    "marks": []
+   }
+  },
+  "slugs": {
+   "maquetemagique": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403/200)"
+   }
+  }
+ },
+ {
+  "name": "Mission Héros",
+  "trademarks": {
+   "mission heros": {
+    "total": 0,
+    "marks": []
+   }
+  },
+  "slugs": {
+   "missionheros": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403/200)"
+   }
+  }
+ },
+ {
+  "name": "La Quête du Héros",
+  "trademarks": {
+   "quete du heros": {
+    "total": 0,
+    "marks": []
+   }
+  },
+  "slugs": {
+   "laqueteduheros": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403/200)"
+   }
+  }
+ },
+ {
+  "name": "Anniv'Aventure",
+  "trademarks": {
+   "anniv aventure": {
+    "total": 0,
+    "marks": []
+   },
+   "anniversaire aventure": {
+    "total": 0,
+    "marks": []
+   }
+  },
+  "slugs": {
+   "annivaventure": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403/200)"
+   }
+  }
+ },
+ {
+  "name": "Ma Grande Quête (vérifications complémentaires)",
+  "trademarks": {
+   "grande quete": {
+    "total": 9,
+    "marks": [
+     {
+      "name": "GRANDE ENQUETE NATIONALE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       16,
+       35,
+       36
+      ],
+      "date": "2014-02-05T12:00:00.000Z",
+      "owner": [
+       "INSTITUT PASTEUR DE LILLE, Fondation reconnue d'utilité publique"
+      ],
+      "id": "FR500000004066193"
+     },
+     {
+      "name": "LA GRANDE ENQUETE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       28,
+       41
+      ],
+      "date": "2019-07-31T12:00:00.000Z",
+      "owner": [
+       "LA GRANDE ENQUETE Association Loi 1901"
+      ],
+      "id": "FR500000004572259"
+     },
+     {
+      "name": "LA GRANDE QUÊTE DES LUTINS PERDUS",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       41
+      ],
+      "date": "2026-06-15T12:00:00.000Z",
+      "owner": [
+       "CYNTHIA HOMS"
+      ],
+      "id": "FR500000005268498"
+     },
+     {
+      "name": "GESC - GRANDE ENQUETE SPECIAL CONSOMMATION",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       28,
+       35,
+       38
+      ],
+      "date": "1994-04-13T12:00:00.000Z",
+      "owner": [
+       "CLARITAS Société Anonyme"
+      ],
+      "id": "FR500000094515322"
+     },
+     {
+      "name": "ChaRLoTte AUX FRaises A la Conquête de la GRANDE VILLE",
+      "office": "EM",
+      "status": "Registered",
+      "classes": [
+       3,
+       5,
+       16,
+       28,
+       29,
+       9,
+       30,
+       25,
+       41
+      ],
+      "date": "2021-08-09T12:00:00.000Z",
+      "owner": [
+       "Shortcake IP Holdings LLC"
+      ],
+      "id": "EM500000018530328"
+     },
+     {
+      "name": "LES GRANDES ENQUETES BIBLIOGRAPHIQUES 50 QUESTIONS SUR...",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       41
+      ],
+      "date": "1995-10-09T12:00:00.000Z",
+      "owner": [
+       "LEN MEDICAL - Société Anonyme,"
+      ],
+      "id": "FR500000095591597"
+     },
+     {
+      "name": "FLOORZ LA GRANDE PARQUETERIE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       19,
+       35,
+       42
+      ],
+      "date": "2026-04-20T12:00:00.000Z",
+      "owner": [
+       "Bruno Mignot"
+      ],
+      "id": "FR500000005250035"
+     },
+     {
+      "name": "LES GRANDES ENQUETES CRIMINELLES",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       16
+      ],
+      "date": "1989-12-29T12:00:00.000Z",
+      "owner": [
+       "A.L.P. Société en Nom Collectif,"
+      ],
+      "id": "FR500000001567798"
+     },
+     {
+      "name": "Tiquête Les petits dons font les grandes causes.",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       36
+      ],
+      "date": "2002-10-15T12:00:00.000Z",
+      "owner": [
+       "COTTET Michel"
+      ],
+      "id": "FR500000003188932"
+     }
+    ]
+   }
+  },
+  "slugs": {
+   "lagrandequete": {
+    "fr": "libre",
+    "com": "pris",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403/200)"
+   },
+   "magrandequete": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403/200)"
+   }
+  }
+ }
+]
