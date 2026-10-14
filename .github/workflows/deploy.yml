@@ -62,7 +62,14 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx --yes $WRANGLER deploy
+        run: |
+          # On failure, the end of wrangler's output becomes an annotation (readable without the full log).
+          set -o pipefail
+          if ! npx --yes $WRANGLER deploy 2>&1 | tee /tmp/deploy.log; then
+            tail -n 25 /tmp/deploy.log | sed -e 's/\x1b\[[0-9;]*m//g' | grep -v '^\s*$' | while IFS= read -r l; do echo "::error::$l"; done
+            exit 1
+          fi
+          grep -o 'https://[^ ]*workers\.dev' /tmp/deploy.log | head -1 | sed 's/^/::notice::Adresse du site : /'
 
       - name: Clés du serveur
         if: steps.ready.outputs.ok == 'true'
@@ -71,10 +78,12 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
         run: |
-          printf '%s' "$STRIPE_SECRET_KEY" | npx --yes $WRANGLER secret put STRIPE_SECRET_KEY
+          set -o pipefail
+          report() { tail -n 15 /tmp/secret.log | sed -e 's/\x1b\[[0-9;]*m//g' | grep -v '^\s*$' | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
+          printf '%s' "$STRIPE_SECRET_KEY" | npx --yes $WRANGLER secret put STRIPE_SECRET_KEY > /tmp/secret.log 2>&1 || report
           # The quest encryption key is created once and never leaves Cloudflare. It must never
           # change: paid quests are reopened with it. If the list cannot be read, the step fails.
           list=$(npx --yes $WRANGLER secret list --format json)
           if ! printf '%s' "$list" | grep -q QUEST_KEY; then
-            openssl rand -base64 32 | tr -d '\n' | npx --yes $WRANGLER secret put QUEST_KEY
+            openssl rand -base64 32 | tr -d '\n' | npx --yes $WRANGLER secret put QUEST_KEY > /tmp/secret.log 2>&1 || report
           fi
