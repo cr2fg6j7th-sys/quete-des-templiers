@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Anniversaire chevalier 7-10 ans : la chasse au trésor dans votre ville | Ma Quête de Chevalier</title>
+<title>Anniversaire chevalier 7-10 ans : la chasse au trésor dans votre ville | Ma Quête Légendaire</title>
 <meta name="description" content="Un anniversaire chevalier clé en main : une chasse au trésor dans les rues de votre ville, au prénom de votre enfant, avec la voix du Grand Maître. Prête en deux minutes, rien à imprimer, aperçu gratuit.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
-<meta property="og:title" content="Ma Quête de Chevalier">
+<meta property="og:title" content="Ma Quête Légendaire">
 <meta property="og:description" content="La chasse au trésor de chevaliers dans les rues de votre ville, au prénom de votre enfant. Prête en deux minutes, sans rien préparer ni imprimer.">
 <meta property="og:url" content="{{SITE}}/">
 <meta property="og:image" content="{{SITE}}/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Ma Quête de Chevalier : anniversaire 7-10 ans, la chasse au trésor de chevaliers dans votre ville">
+<meta property="og:image:alt" content="Ma Quête Légendaire : anniversaire 7-10 ans, la chasse au trésor de chevaliers dans votre ville">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="{{SITE}}/">
 <link rel="icon" href="favicon.ico" sizes="32x32">
@@ -22,7 +22,7 @@
 <!--ROBOTS-->
 <!--FAQ-->
 <meta name="theme-color" content="#1b2547">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Ma Quête de Chevalier","description":"Quête d'anniversaire numérique pour enfants de 7 à 10 ans : 4 à 6 étapes dans les lieux publics autour d'un point de départ en France, au prénom de l'enfant, avec la voix enregistrée du Grand Maître.","offers":{"@type":"Offer","price":"24.90","priceCurrency":"EUR","availability":"https://schema.org/InStock"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"La Quête du Chevalier","brand":{"@type":"Brand","name":"Ma Quête Légendaire"},"description":"Quête d'anniversaire numérique pour enfants de 7 à 10 ans : 4 à 6 étapes dans les lieux publics autour d'un point de départ en France, au prénom de l'enfant, avec la voix enregistrée du Grand Maître.","offers":{"@type":"Offer","price":"24.90","priceCurrency":"EUR","availability":"https://schema.org/InStock"}}</script>
 <style>
 /* Fonts served by the site itself (SIL Open Font License, see fonts/), so no visitor data goes to a font service. */
 @font-face{font-family:"UnifrakturMaguntia";src:url(fonts/UnifrakturMaguntia-Book.woff) format("woff");font-display:swap}
@@ -438,7 +438,7 @@ async function parchment(lines,opts){
   const total=laid.reduce((a,l)=>a+(l.gap||0)+l.rows.length*l.lh,0);
   let y=300+Math.max(0,(H-300-(opts&&opts.sign?250:150)-total)/2);   // the signed diploma keeps its lower band free
   for(const l of laid){y+=l.gap||0;x.font=l.font;x.fillStyle=l.c||"#1b2547";for(const r of l.rows){y+=l.lh;x.fillText(r,W/2,y-l.lh*.22);}}
-  x.font=FACE.display(40);x.fillStyle="#a87a1f";x.fillText("Ma Quête de Chevalier",W/2,H-108);
+  x.font=FACE.display(40);x.fillStyle="#a87a1f";x.fillText("Ma Quête Légendaire",W/2,H-108);
   x.font=FACE.body(28);x.fillStyle="#5b6482";x.fillText(TAG,W/2,H-72);
   // the Grand Master's signature in the lower left corner
   if(opts&&opts.sign&&SIGN){const [bx,by,bw,bh]=SIGN.box,k=200/bw,x0=92,y0=H-122-bh*k;
@@ -468,14 +468,14 @@ function imageMaker(label,fileName,makeLines,evt,opts){
   return [make,img,send,out];
 }
 /* ---------- Printable diplomas: handed out at the end, and photographed with the child ---------- */
-const TAG="#MaQueteDeChevalier";
+const TAG="#MaQueteLegendaire";
 // QR code to the site (?ref=diplome) on the diplomas: a framed diploma brings visitors who scan it.
 const QR=/*QR*/null;
 // The Grand Master's signature (invented: "Aldéran"), above "Le Grand Maître" on every diploma.
 const SIGN=/*SIGN*/null;
 const GARANCE="#b8202b";   // rouge garance, the ink of the signature (asked by Nathan)
 const sigSvg=(cls,ink)=>SIGN?`<svg class="${cls}" viewBox="${SIGN.box.join(" ")}" aria-hidden="true"><path d="${SIGN.d}" fill="${ink}"/></svg>`:"";
-const qrSvg=cls=>QR?`<svg class="${cls}" viewBox="-3 -3 ${QR.size+6} ${QR.size+6}" role="img" aria-label="QR code vers Ma Quête de Chevalier"><rect x="-3" y="-3" width="${QR.size+6}" height="${QR.size+6}" rx="1.5" fill="#fff"/><path d="${QR.d}" fill="#1b2547" shape-rendering="crispEdges"/></svg>`:"";
+const qrSvg=cls=>QR?`<svg class="${cls}" viewBox="-3 -3 ${QR.size+6} ${QR.size+6}" role="img" aria-label="QR code vers Ma Quête Légendaire"><rect x="-3" y="-3" width="${QR.size+6}" height="${QR.size+6}" rx="1.5" fill="#fff"/><path d="${QR.d}" fill="#1b2547" shape-rendering="crispEdges"/></svg>`:"";
 function partyDate(){const d=S.invite&&S.invite.date;try{return (d?new Date(d+"T12:00:00"):new Date()).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});}catch(e){return "";}}
 function diplomaSheet(o){
   const p=h("section",{class:"dip"});
@@ -484,7 +484,7 @@ function diplomaSheet(o){
     o.name?h("p",{class:"dip-name",text:o.name}):h("div",{class:"dip-blank"}),
     h("p",{class:"dip-title",text:o.title}),h("p",{class:"dip-line",text:o.line}),
     h("div",{class:"dip-foot"},h("div",{class:"dip-sign"},h("span",{text:"Le Grand Maître"})),
-      h("div",{class:"dip-mark"},h("span",{class:"dip-brand"},"Ma Quête de Chevalier",h("small",{text:TAG}),QR&&h("small",{class:"dip-scan",text:"Une quête pour votre enfant ? Scannez le code."})))));
+      h("div",{class:"dip-mark"},h("span",{class:"dip-brand"},"Ma Quête Légendaire",h("small",{text:TAG}),QR&&h("small",{class:"dip-scan",text:"Une quête pour votre enfant ? Scannez le code."})))));
   if(QR)p.querySelector(".dip-mark").insertAdjacentHTML("beforeend",qrSvg("dip-qr"));
   p.querySelector(".dip-sign").insertAdjacentHTML("afterbegin",sigSvg("dip-sig",GARANCE));
   return p;
@@ -599,7 +599,7 @@ function homeScreen(){
   setTimeout(checkName,0);
   return [
     h("header",{class:"hero"},
-      h("p",{class:"brand",text:"Ma Quête de Chevalier"}),
+      h("p",{class:"brand",text:"Ma Quête Légendaire"}),
       h("h1",{text:"La chasse au trésor de chevaliers, dans les rues de votre ville"}),
       h("p",{class:"promise",text:"Pour les anniversaires des 7 à 10 ans : le Grand Maître appelle votre enfant par son prénom et guide la troupe de lieu en lieu. Prête en deux minutes, rien à imprimer."}),
       S.ref==="fete"&&h("p",{class:"note",text:"Vos enfants ont joué à une quête de chevalier chez des amis ? Voici comment préparer la même pour votre enfant, dans votre ville."})),
@@ -784,7 +784,7 @@ function sharePreview(){
   const url=`${location.origin}${location.pathname}?apercu=${S.token}&n=${encodeURIComponent(S.name)}&h=${S.hero}&k=${S.kids}&v=${encodeURIComponent(S.town||"")}`;
   const send=async()=>{
     const text=`Regarde l'aperçu de la quête d'anniversaire de ${S.name} : ${q.count} étapes${q.indoorOnly?" à la maison":`, ${(q.walkM/1000).toFixed(1).replace(".",",")} km à pied`}, environ ${q.minutes} minutes de jeu.`;
-    try{if(navigator.share){await navigator.share({title:"Ma Quête de Chevalier",text,url});hit("apercu");return;}}catch(e){if(e&&e.name==="AbortError")return;}
+    try{if(navigator.share){await navigator.share({title:"Ma Quête Légendaire",text,url});hit("apercu");return;}}catch(e){if(e&&e.name==="AbortError")return;}
     try{await navigator.clipboard.writeText(text+" "+url);out.textContent="Lien de l'aperçu copié.";hit("apercu");}catch(e){out.textContent=url;}
   };
   return h("div",null,h("button",{class:"linkish",type:"button",onclick:send},"Décider à deux ? Envoyer l'aperçu"),out);
@@ -844,7 +844,7 @@ function linkCard(){
   const url=location.origin+location.pathname+"?quete="+encodeURIComponent(S.paid);
   const out=h("p",{class:"note",role:"status"});
   const share=async()=>{
-    try{if(navigator.share){await navigator.share({title:"Ma Quête de Chevalier",text:`La quête de ${S.name}`,url});return;}}catch(e){if(e&&e.name==="AbortError")return;}
+    try{if(navigator.share){await navigator.share({title:"Ma Quête Légendaire",text:`La quête de ${S.name}`,url});return;}}catch(e){if(e&&e.name==="AbortError")return;}
     try{await navigator.clipboard.writeText(url);out.textContent="Lien copié.";}catch(e){out.textContent=url;}
   };
   const mail="mailto:?subject="+encodeURIComponent(`La quête de chevalier de ${S.name||"notre enfant"}`)+"&body="+encodeURIComponent(`Le lien pour ouvrir la quête le jour de la fête :\n${url}\n`);
@@ -954,7 +954,7 @@ function diplomaScreen(){
       h("p",{class:"note",text:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`}),
       // A discreet signature: diploma photos shared by parents carry the name of the quest.
       (()=>{const s=h("div",{class:"gm"},h("span",{text:"Le Grand Maître"}));s.insertAdjacentHTML("afterbegin",sigSvg("","currentColor"));return s;})(),
-      h("p",{class:"sign",text:"Ma Quête de Chevalier"})),
+      h("p",{class:"sign",text:"Ma Quête Légendaire"})),
     printCard(false),
     h("div",{class:"card adult"},h("h3",{text:"Le diplôme en image"}),
       h("p",{class:"note",text:"À garder dans le téléphone ou à envoyer à la famille."}),
@@ -972,8 +972,8 @@ function shareCard(){
   const url=location.origin+location.pathname+"?ref=fete";
   const out=h("p",{class:"note",role:"status"});
   const share=async()=>{
-    const text="Nous avons fêté un anniversaire avec Ma Quête de Chevalier : une chasse au trésor de chevaliers dans notre ville, au prénom de l'enfant.";
-    try{if(navigator.share){await navigator.share({title:"Ma Quête de Chevalier",text,url});hit("share");return;}}catch(e){if(e&&e.name==="AbortError")return;}
+    const text="Nous avons fêté un anniversaire avec Ma Quête Légendaire : une chasse au trésor de chevaliers dans notre ville, au prénom de l'enfant.";
+    try{if(navigator.share){await navigator.share({title:"Ma Quête Légendaire",text,url});hit("share");return;}}catch(e){if(e&&e.name==="AbortError")return;}
     try{await navigator.clipboard.writeText(url);out.textContent="Lien copié.";hit("share");}catch(e){out.textContent=url;}
   };
   return h("div",{class:"card adult"},h("h3",{text:"Les compagnons ont aimé ?"}),

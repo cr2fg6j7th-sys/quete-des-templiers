@@ -114,7 +114,7 @@ async function placesFromOSM(start, origin) {
   for (const url of QuestGeo.SERVERS) {
     try {
       const r = await fetch(url, { method: "POST", body, signal: AbortSignal.timeout(15000),
-        headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": "MaQueteDeChevalier/1.0 (anniversary quests for children)", referer: origin + "/" } });
+        headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": "MaQueteLegendaire/1.0 (anniversary quests for children)", referer: origin + "/" } });
       if (!r.ok) continue;
       const j = await r.json();
       if (Array.isArray(j.elements) && !(j.remark && !j.elements.length)) return QuestGeo.slim(j.elements);
@@ -186,7 +186,7 @@ async function checkout(request, env, ctx) {
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": "eur",
     "line_items[0][price_data][unit_amount]": String(priceCents(env)),
-    "line_items[0][price_data][product_data][name]": "Ma Quête de Chevalier",
+    "line_items[0][price_data][product_data][name]": "La Quête du Chevalier · Ma Quête Légendaire",
     "line_items[0][price_data][product_data][description]":
       `Quête d'anniversaire de ${name || "votre enfant"} : ${quest.steps.length} étapes${quest.indoorOnly ? " à la maison" : town ? " à " + town : ""}. Accès immédiat.`,
     success_url: origin + "/?paid={CHECKOUT_SESSION_ID}",

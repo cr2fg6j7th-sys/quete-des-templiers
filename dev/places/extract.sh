@@ -6,7 +6,7 @@ set -euo pipefail
 OUT=${1:-places-data}
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
-curl -sSfL --retry 3 -A "MaQueteDeChevalier/1.0 (monthly extract)" -o "$WORK/france.osm.pbf" https://download.geofabrik.de/europe/france-latest.osm.pbf
+curl -sSfL --retry 3 -A "MaQueteLegendaire/1.0 (monthly extract)" -o "$WORK/france.osm.pbf" https://download.geofabrik.de/europe/france-latest.osm.pbf
 osmium tags-filter "$WORK/france.osm.pbf" \
   nwr/amenity=place_of_worship,fountain,townhall \
   nwr/man_made=water_well \

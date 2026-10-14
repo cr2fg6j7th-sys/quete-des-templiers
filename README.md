@@ -1,4 +1,6 @@
-# Ma Quête de Chevalier
+# Ma Quête Légendaire
+
+Marque choisie par Nathan le 14 octobre 2026 (avant : « Ma Quête de Chevalier »). La première quête s'appelle « La Quête du Chevalier » ; d'autres thèmes pourront suivre sous la même marque. Les noms techniques restent inchangés exprès : le serveur Cloudflare « ma-quete-de-chevalier » (sa clé de chiffrement des quêtes ne doit jamais changer), le dépôt « quete-des-templiers ».
 
 Une quête d'anniversaire pour enfants de 7 à 10 ans, au prénom de l'enfant, générée en deux minutes avec les vrais lieux autour d'une adresse en France (église, fontaine, vieille porte, parc…). L'adulte guide avec son téléphone, les enfants relèvent les défis et retrouvent les lettres du mot secret. La voix du Grand Maître est enregistrée (Gemini TTS, voix Algenib).
 

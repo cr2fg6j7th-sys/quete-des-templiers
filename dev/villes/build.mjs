@@ -45,7 +45,7 @@ function placesAround(lat, lon, r) {
 // ---- Communes: name, département, population and the point of the chef-lieu ----
 async function getJSON(url) {
   for (let i = 0; i < 3; i++) {
-    try { const r = await fetch(url, { headers: { "User-Agent": "MaQueteDeChevalier/1.0 (pages villes)" } }); if (r.ok) return await r.json(); }
+    try { const r = await fetch(url, { headers: { "User-Agent": "MaQueteLegendaire/1.0 (pages villes)" } }); if (r.ok) return await r.json(); }
     catch (e) {}
     await new Promise(res => setTimeout(res, 1500 * (i + 1)));
   }
@@ -138,7 +138,7 @@ function page(c, s, siblings) {
   const n = s.places.length, q = s.quest;
   const top = s.named.slice(0, 8);
   const ex = top.slice(0, 2).map(p => p.name);
-  const title = `Anniversaire chevalier à ${c.nom} (7-10 ans) | Ma Quête de Chevalier`;
+  const title = `Anniversaire chevalier à ${c.nom} (7-10 ans) | Ma Quête Légendaire`;
   const desc = `Une chasse au trésor de chevaliers à ${c.nom}, ${ex.length ? `de ${list(ex)}` : "dans les rues du centre"} : ${n} lieux à pied autour de ${s.startLabel}, au prénom de votre enfant. Prête en 2 minutes, aperçu gratuit.`;
   const faq = [
     [`Est-ce que la quête marche à ${c.nom} ?`, `Oui. Autour de ${s.startLabel} de ${c.nom}, ${n} lieux publics peuvent servir d'étapes, dont ${list(countsText(s.counts).slice(0, 3))}. Le Grand Maître en choisit 4 à 6 selon votre point de départ, et l'aperçu gratuit vous dit le nombre d'étapes, la distance et la durée avant de payer.`],
@@ -148,7 +148,7 @@ function page(c, s, siblings) {
   ];
   const ld = [
     { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Ma Quête de Chevalier", item: `${SITE}/` },
+      { "@type": "ListItem", position: 1, name: "Ma Quête Légendaire", item: `${SITE}/` },
       { "@type": "ListItem", position: 2, name: "Par ville", item: `${SITE}/anniversaire-chevalier-villes.html` },
       { "@type": "ListItem", position: 3, name: c.nom, item: url }] },
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }
@@ -175,9 +175,9 @@ ${ld.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`
 </head>
 <body>
 <main>
-<p class="back"><a href="./">Ma Quête de Chevalier</a> › <a href="anniversaire-chevalier-villes.html">Par ville</a> › ${esc(c.nom)}</p>
+<p class="back"><a href="./">Ma Quête Légendaire</a> › <a href="anniversaire-chevalier-villes.html">Par ville</a> › ${esc(c.nom)}</p>
 <h1>Anniversaire chevalier à ${esc(c.nom)}</h1>
-<p>À ${esc(c.nom)} (${esc(c.dep)}${repere(c) ? `, à ${repere(c).km} km ${esc(de(repere(c).nom))}` : ""}), Ma Quête de Chevalier prépare en deux minutes une chasse au trésor d'une heure pour un anniversaire de 7 à 10 ans : ${n} lieux publics à moins de ${R} m de ${s.startLabel} peuvent servir d'étapes${ex.length ? `, comme ${esc(list(ex))}` : ""}. Le Grand Maître appelle votre enfant par son prénom et guide la troupe de lieu en lieu.</p>
+<p>À ${esc(c.nom)} (${esc(c.dep)}${repere(c) ? `, à ${repere(c).km} km ${esc(de(repere(c).nom))}` : ""}), Ma Quête Légendaire prépare en deux minutes une chasse au trésor d'une heure pour un anniversaire de 7 à 10 ans : ${n} lieux publics à moins de ${R} m de ${s.startLabel} peuvent servir d'étapes${ex.length ? `, comme ${esc(list(ex))}` : ""}. Le Grand Maître appelle votre enfant par son prénom et guide la troupe de lieu en lieu.</p>
 
 <h2>Une quête au départ de ${s.startLabel}</h2>
 <div class="facts"><div><b>${q.steps.length}</b><span>étapes</span></div><div><b>${km(q.walkM)}</b><span>à pied</span></div><div><b>${q.minutes} min</b><span>de jeu environ</span></div></div>
@@ -218,7 +218,7 @@ function hub(done) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Anniversaire chevalier ${esc(z || "près de chez vous")} : la quête ville par ville | Ma Quête de Chevalier</title>
+<title>Anniversaire chevalier ${esc(z || "près de chez vous")} : la quête ville par ville | Ma Quête Légendaire</title>
 <meta name="description" content="Une chasse au trésor de chevaliers pour un anniversaire de 7 à 10 ans, dans les rues de votre village ou de votre ville : les lieux du Grand Maître à ${esc(list(sorted.slice(0, 5).map(o => o.c.nom)))}…">
 <link rel="canonical" href="${url}">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -226,7 +226,7 @@ ${style}
 </head>
 <body>
 <main>
-<p class="back"><a href="./">Ma Quête de Chevalier</a></p>
+<p class="back"><a href="./">Ma Quête Légendaire</a></p>
 <h1>Anniversaire chevalier ${esc(z || "près de chez vous")}</h1>
 <p>La quête se construit dans chaque village ou ville où il y a quelques lieux publics à pied : église, fontaine, vieille porte, place, parc. Voici, commune par commune, combien de lieux le Grand Maître peut choisir autour de la mairie.</p>
 <ul>

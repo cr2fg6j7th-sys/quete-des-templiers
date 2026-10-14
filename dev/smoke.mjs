@@ -14,7 +14,7 @@ const post = (path, body) => fetch(site + path, { method: "POST", headers: { "co
 try {
   const home = await fetch(site + "/");
   const html = await home.text();
-  home.ok && html.includes("Ma Quête de Chevalier") && html.includes("QUEST_VOICE_KEYS") ? ok("page d'accueil") : ko(`page d'accueil (HTTP ${home.status})`);
+  home.ok && html.includes("Ma Quête Légendaire") && html.includes("QUEST_VOICE_KEYS") ? ok("page d'accueil") : ko(`page d'accueil (HTTP ${home.status})`);
   const files = ["/audio/voix/prologue-dehors-m.mp3", "/audio/noms/lea.mp3", "/audio/noms.json", "/fonts/AlegreyaSans-Regular.woff", "/legal/cgv.html", "/anniversaire-chevalier.html",
     "/sw.js", "/og.png", "/icon.svg", "/favicon.ico", "/apple-touch-icon.png", "/robots.txt", "/sitemap.xml"];
   const missing = [];
