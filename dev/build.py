@@ -5,7 +5,7 @@
 #   *.html guides       pages for Google and Pinterest, from dev/pages/, at the site root
 #   dist/worker.js      Cloudflare server: geo.js + engine.js + worker.js
 # The audio folder is copied into site/ by the deploy workflow (or with --audio).
-import json, shutil, subprocess, sys
+import json, re, shutil, subprocess, sys
 from pathlib import Path
 d = Path(__file__).parent
 root = d.parent
@@ -79,5 +79,12 @@ if "--audio" in sys.argv:
     shutil.copytree(root / "audio", site / "audio", ignore=shutil.ignore_patterns("manifest.json", "rapport-noms.json", "test"))
 
 (root / "dist").mkdir(exist_ok=True)
-(root / "dist" / "worker.js").write_text(geo + "\n" + eng + "\n" + worker, encoding="utf-8")
+# The worker is one ES module: drop the Node-only require/module.exports fallbacks, which the
+# Cloudflare bundler would try to resolve.
+def for_worker(code):
+    code = re.sub(r'\(typeof (\w+) !== "undefined"\) \? \1 : require\("[^"]+"\)', r"\1", code)
+    return re.sub(r'^if \(typeof module !== "undefined"\) module\.exports = \w+;\n', "", code, flags=re.M)
+bundle = for_worker(geo + "\n" + eng) + "\n" + worker
+assert "require(" not in bundle and "module.exports" not in bundle, "worker bundle still has Node code"
+(root / "dist" / "worker.js").write_text(bundle, encoding="utf-8")
 print("index.html, site/ et dist/worker.js reconstruits")
