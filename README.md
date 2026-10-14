@@ -15,7 +15,7 @@ Une quête d'anniversaire pour enfants de 7 à 10 ans, au prénom de l'enfant, g
 - `dev/worker.js` : serveur Cloudflare (`/api/preview`, `/api/checkout`, `/api/unlock`).
 - `dev/app.template.html` : l'interface.
 - `dev/legal/` : conditions de vente, mentions légales, confidentialité ; l'identité du vendeur se remplit une seule fois dans `dev/legal/identite.json`.
-- `dev/villes/` : pages « Anniversaire chevalier à [ville] » pour Google, construites à la mise en ligne avec les lieux de chaque ville (`villes.json` = la liste des communes ; une ville sans assez de lieux nommés n'a pas de page).
+- `dev/villes/` : pages « Anniversaire chevalier à [ville] » pour Google, construites à la mise en ligne avec les lieux de chaque ville (`villes.json` : la zone, pour l'instant les communes de plus de 1 000 habitants à 15 km autour d'Obernai et de Rosheim ; une commune sans assez de lieux nommés n'a pas de page).
 - `dev/snapshot.py` : copie l'accueil tel qu'affiché dans `dev/home.static.html`, pour les robots des IA qui n'exécutent pas le JavaScript. À relancer après chaque changement de l'accueil.
 - `dev/build.py` : construit `index.html` (démo), `site/` (version payante), `legal/` et `dist/worker.js`.
 - `dev/test.js` : tests du moteur ; `dev/serve.mjs` + `dev/e2e_paid.py` : test complet de la version payante avec un faux Stripe.

@@ -51,6 +51,20 @@ async function getJSON(url) {
   }
   return null;
 }
+// All communes of the zone: within rayonKm of its centre, in its départements, above populationMin.
+async function zoneCommunes(z) {
+  const out = [];
+  for (const dep of z.departements) {
+    const list = await getJSON(`https://geo.api.gouv.fr/departements/${dep}/communes?fields=nom,code,centre,population`);
+    if (!list) { console.warn(`département ${dep} : liste des communes indisponible`); continue; }
+    for (const g of list) {
+      if (!g.centre || (g.population || 0) < z.populationMin) continue;
+      const [lon, lat] = g.centre.coordinates;
+      if (E.dist({ lat: z.centre[0], lon: z.centre[1] }, { lat, lon }) <= z.rayonKm * 1000) out.push({ insee: g.code, nom: g.nom });
+    }
+  }
+  return out;
+}
 async function commune(c) {
   const g = await getJSON(`https://geo.api.gouv.fr/communes/${c.insee}?fields=nom,population,departement,region,centre`);
   if (!g || g.nom !== c.nom) { console.warn(`${c.nom} : commune introuvable ou nom différent (${g && g.nom})`); return null; }
@@ -59,6 +73,14 @@ async function commune(c) {
   const f = b && b.features && b.features[0];
   const [lon, lat] = f ? f.geometry.coordinates : g.centre.coordinates;
   return { nom: g.nom, dep: g.departement.nom, depCode: g.departement.code, region: g.region.nom, population: g.population, lat, lon };
+}
+
+// ---- Where a town is, for parents of the area: « à 6 km d'Obernai » ----
+const de = n => /^[aeiouyéèêâîôûh]/i.test(n) ? `d'${n}` : `de ${n}`;
+let REPERES = [];
+function repere(c) {
+  const r = REPERES.map(x => ({ nom: x.nom, km: Math.round(E.dist(c, x) / 1000) })).sort((a, b) => a.km - b.km)[0];
+  return r && r.km >= 2 && !REPERES.some(x => x.nom === c.nom) ? r : null;
 }
 
 // ---- What the page says about one town ----
@@ -127,7 +149,7 @@ function page(c, s, siblings) {
   const ld = [
     { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
       { "@type": "ListItem", position: 1, name: "Ma Quête de Chevalier", item: `${SITE}/` },
-      { "@type": "ListItem", position: 2, name: "Anniversaire chevalier par ville", item: `${SITE}/anniversaire-chevalier-villes.html` },
+      { "@type": "ListItem", position: 2, name: "Par ville", item: `${SITE}/anniversaire-chevalier-villes.html` },
       { "@type": "ListItem", position: 3, name: c.nom, item: url }] },
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }
   ];
@@ -155,7 +177,7 @@ ${ld.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`
 <main>
 <p class="back"><a href="./">Ma Quête de Chevalier</a> › <a href="anniversaire-chevalier-villes.html">Par ville</a> › ${esc(c.nom)}</p>
 <h1>Anniversaire chevalier à ${esc(c.nom)}</h1>
-<p>À ${esc(c.nom)} (${esc(c.dep)}), Ma Quête de Chevalier prépare en deux minutes une chasse au trésor d'une heure pour un anniversaire de 7 à 10 ans : ${n} lieux publics à moins de ${R} m de ${s.startLabel} peuvent servir d'étapes${ex.length ? `, comme ${esc(list(ex))}` : ""}. Le Grand Maître appelle votre enfant par son prénom et guide la troupe de lieu en lieu.</p>
+<p>À ${esc(c.nom)} (${esc(c.dep)}${repere(c) ? `, à ${repere(c).km} km ${esc(de(repere(c).nom))}` : ""}), Ma Quête de Chevalier prépare en deux minutes une chasse au trésor d'une heure pour un anniversaire de 7 à 10 ans : ${n} lieux publics à moins de ${R} m de ${s.startLabel} peuvent servir d'étapes${ex.length ? `, comme ${esc(list(ex))}` : ""}. Le Grand Maître appelle votre enfant par son prénom et guide la troupe de lieu en lieu.</p>
 
 <h2>Une quête au départ de ${s.startLabel}</h2>
 <div class="facts"><div><b>${q.steps.length}</b><span>étapes</span></div><div><b>${km(q.walkM)}</b><span>à pied</span></div><div><b>${q.minutes} min</b><span>de jeu environ</span></div></div>
@@ -188,16 +210,16 @@ ${siblings.length ? `<p>Aussi près de ${esc(c.nom)} : ${siblings.map(o => `<a h
 }
 
 function hub(done) {
-  const byRegion = {};
-  for (const o of done) (byRegion[o.c.region] = byRegion[o.c.region] || []).push(o);
   const url = `${SITE}/anniversaire-chevalier-villes.html`;
+  const z = zone ? zone.nom : "";
+  const sorted = done.slice().sort((a, b) => a.c.nom.localeCompare(b.c.nom, "fr"));
   return `<!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Anniversaire chevalier près de chez vous : la quête ville par ville | Ma Quête de Chevalier</title>
-<meta name="description" content="Une chasse au trésor de chevaliers pour un anniversaire de 7 à 10 ans, dans les rues de votre ville : les lieux du Grand Maître à ${esc(list(done.slice(0, 4).map(o => o.c.nom)))} et partout en France.">
+<title>Anniversaire chevalier ${esc(z || "près de chez vous")} : la quête ville par ville | Ma Quête de Chevalier</title>
+<meta name="description" content="Une chasse au trésor de chevaliers pour un anniversaire de 7 à 10 ans, dans les rues de votre village ou de votre ville : les lieux du Grand Maître à ${esc(list(sorted.slice(0, 5).map(o => o.c.nom)))}…">
 <link rel="canonical" href="${url}">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 ${style}
@@ -205,10 +227,12 @@ ${style}
 <body>
 <main>
 <p class="back"><a href="./">Ma Quête de Chevalier</a></p>
-<h1>Anniversaire chevalier près de chez vous</h1>
-<p>La quête se construit partout en France où il y a quelques lieux publics à pied : un bourg, un quartier, un centre-ville. Voici, ville par ville, combien de lieux le Grand Maître peut choisir autour de la mairie.</p>
-${Object.keys(byRegion).sort().map(r => `<h2>${esc(r)}</h2>\n<ul>\n${byRegion[r].sort((a, b) => a.c.nom.localeCompare(b.c.nom, "fr")).map(o => `<li><a href="${o.file}">Anniversaire chevalier à ${esc(o.c.nom)}</a> : ${o.s.places.length} lieux à pied</li>`).join("\n")}\n</ul>`).join("\n")}
-<p>Votre ville n'est pas dans la liste ? La quête marche quand même : <a href="./?ref=v-hub">créez l'aperçu gratuit</a> avec votre adresse.</p>
+<h1>Anniversaire chevalier ${esc(z || "près de chez vous")}</h1>
+<p>La quête se construit dans chaque village ou ville où il y a quelques lieux publics à pied : église, fontaine, vieille porte, place, parc. Voici, commune par commune, combien de lieux le Grand Maître peut choisir autour de la mairie.</p>
+<ul>
+${sorted.map(o => { const r = repere(o.c); return `<li><a href="${o.file}">Anniversaire chevalier à ${esc(o.c.nom)}</a> : ${o.s.places.length} lieux à pied${r ? `, à ${r.km} km ${esc(de(r.nom))}` : ""}</li>`; }).join("\n")}
+</ul>
+<p>Votre commune n'est pas dans la liste ? La quête marche partout en France : <a href="./?ref=v-hub">créez l'aperçu gratuit</a> avec votre adresse.</p>
 <p class="src">Lieux : © contributeurs OpenStreetMap (licence ODbL).</p>
 </main>
 </body>
@@ -217,8 +241,13 @@ ${Object.keys(byRegion).sort().map(r => `<h2>${esc(r)}</h2>\n<ul>\n${byRegion[r]
 }
 
 // ---- Build ----
-const conf = JSON.parse(fs.readFileSync(path.join(here, "villes.json"), "utf-8")).communes;
+const villes = JSON.parse(fs.readFileSync(path.join(here, "villes.json"), "utf-8"));
+const zone = villes.zone;
 const given = communesFile ? JSON.parse(fs.readFileSync(communesFile, "utf-8")) : null;
+const conf = [...(villes.communes || [])];
+REPERES = zone && zone.reperes || [];
+for (const x of zone ? (given ? Object.entries(given).map(([insee, c]) => ({ insee, nom: c.nom })) : await zoneCommunes(zone)) : [])
+  if (!conf.some(y => y.insee === x.insee)) conf.push(x);
 const done = [];
 for (const x of conf) {
   const c = given ? given[x.insee] : await commune(x);

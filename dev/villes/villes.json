@@ -1,25 +1,17 @@
 {
-  "_": "Pilot of the town pages (dev/villes/build.mjs). INSEE code of each commune; the name is checked against geo.api.gouv.fr at build time. Add towns here once the pilot shows Google sends visits.",
-  "communes": [
-    {"insee": "67482", "nom": "Strasbourg"},
-    {"insee": "68066", "nom": "Colmar"},
-    {"insee": "68224", "nom": "Mulhouse"},
-    {"insee": "67180", "nom": "Haguenau"},
-    {"insee": "67462", "nom": "Sélestat"},
-    {"insee": "67348", "nom": "Obernai"},
-    {"insee": "67300", "nom": "Molsheim"},
-    {"insee": "67411", "nom": "Rosheim"},
-    {"insee": "67130", "nom": "Erstein"},
-    {"insee": "67437", "nom": "Saverne"},
-    {"insee": "67218", "nom": "Illkirch-Graffenstaden"},
-    {"insee": "67447", "nom": "Schiltigheim"},
-    {"insee": "69123", "nom": "Lyon"},
-    {"insee": "33063", "nom": "Bordeaux"},
-    {"insee": "44109", "nom": "Nantes"},
-    {"insee": "35238", "nom": "Rennes"},
-    {"insee": "59350", "nom": "Lille"},
-    {"insee": "31555", "nom": "Toulouse"},
-    {"insee": "34172", "nom": "Montpellier"},
-    {"insee": "21231", "nom": "Dijon"}
-  ]
+  "_": "Town pages (dev/villes/build.mjs). zone: every commune of the listed départements whose centre lies within rayonKm of centre and with at least populationMin inhabitants (geo.api.gouv.fr, at build time). communes: extra communes by INSEE code, the name checked against geo.api.gouv.fr. reperes: towns the parents of the area know, for « à 6 km d'Obernai ». A commune without at least 4 named quest places gets no page.",
+  "zone": {
+    "nom": "autour d'Obernai et de Rosheim",
+    "centre": [48.480, 7.476],
+    "rayonKm": 15,
+    "departements": ["67"],
+    "populationMin": 1000,
+    "reperes": [
+      {"nom": "Obernai", "lat": 48.4622, "lon": 7.4817},
+      {"nom": "Rosheim", "lat": 48.4986, "lon": 7.4706},
+      {"nom": "Molsheim", "lat": 48.5417, "lon": 7.4922},
+      {"nom": "Barr", "lat": 48.4078, "lon": 7.4497}
+    ]
+  },
+  "communes": []
 }
