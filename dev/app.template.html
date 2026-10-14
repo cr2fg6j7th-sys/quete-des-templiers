@@ -439,7 +439,7 @@ async function parchment(lines,opts){
   let y=300+Math.max(0,(H-300-(opts&&opts.sign?250:150)-total)/2);   // the signed diploma keeps its lower band free
   for(const l of laid){y+=l.gap||0;x.font=l.font;x.fillStyle=l.c||"#1b2547";for(const r of l.rows){y+=l.lh;x.fillText(r,W/2,y-l.lh*.22);}}
   x.font=FACE.display(40);x.fillStyle="#a87a1f";x.fillText("Ma Quête Légendaire",W/2,H-108);
-  x.font=FACE.body(28);x.fillStyle="#5b6482";x.fillText(TAG,W/2,H-72);
+  x.font=FACE.body(28);x.fillStyle="#5b6482";x.fillText(TAGS,W/2,H-72);
   // the Grand Master's signature in the lower left corner
   if(opts&&opts.sign&&SIGN){const [bx,by,bw,bh]=SIGN.box,k=200/bw,x0=92,y0=H-122-bh*k;
     x.save();x.translate(x0-bx*k,y0-by*k);x.scale(k,k);x.fillStyle=GARANCE;x.fill(new Path2D(SIGN.d));x.restore();
@@ -469,6 +469,8 @@ function imageMaker(label,fileName,makeLines,evt,opts){
 }
 /* ---------- Printable diplomas: handed out at the end, and photographed with the child ---------- */
 const TAG="#MaQueteLegendaire";
+const IG="@maquetelegendaire";   // the same name on Instagram, Pinterest and TikTok
+const TAGS=TAG+" · "+IG;
 // QR code to the site (?ref=diplome) on the diplomas: a framed diploma brings visitors who scan it.
 const QR=/*QR*/null;
 // The Grand Master's signature (invented: "Aldéran"), above "Le Grand Maître" on every diploma.
@@ -484,7 +486,7 @@ function diplomaSheet(o){
     o.name?h("p",{class:"dip-name",text:o.name}):h("div",{class:"dip-blank"}),
     h("p",{class:"dip-title",text:o.title}),h("p",{class:"dip-line",text:o.line}),
     h("div",{class:"dip-foot"},h("div",{class:"dip-sign"},h("span",{text:"Le Grand Maître"})),
-      h("div",{class:"dip-mark"},h("span",{class:"dip-brand"},"Ma Quête Légendaire",h("small",{text:TAG}),QR&&h("small",{class:"dip-scan",text:"Une quête pour votre enfant ? Scannez le code."})))));
+      h("div",{class:"dip-mark"},h("span",{class:"dip-brand"},"Ma Quête Légendaire",h("small",{text:TAGS}),QR&&h("small",{class:"dip-scan",text:"Une quête pour votre enfant ? Scannez le code."})))));
   if(QR)p.querySelector(".dip-mark").insertAdjacentHTML("beforeend",qrSvg("dip-qr"));
   p.querySelector(".dip-sign").insertAdjacentHTML("afterbegin",sigSvg("dip-sig",GARANCE));
   return p;
@@ -508,7 +510,7 @@ function printCard(before){
   return h("div",{class:"card adult"},h("h3",{text:before?"Les diplômes, à imprimer avant la fête":"Le diplôme à imprimer"}),
     h("p",{class:"note",text:before
       ?`Au format A4, à remettre à la fin, quand le Grand Maître nomme ${S.name||"votre enfant"} ${g("chevalier","chevalière")}. Chaque compagnon peut repartir avec le sien : c'est leur souvenir de la fête.`
-      :`Au format A4, pour ${S.name||"votre enfant"} et ses compagnons. Une photo ${S.name?"de "+S.name:""} avec son diplôme fait un beau souvenir : si vous la partagez sur les réseaux, ajoutez ${TAG}.`}),
+      :`Au format A4, pour ${S.name||"votre enfant"} et ses compagnons. Une photo ${S.name?"de "+S.name:""} avec son diplôme fait un beau souvenir : si vous la partagez sur les réseaux, ajoutez ${TAG} ou identifiez ${IG}.`}),
     h("label",{class:"check",for:"dip-all"},box,`Ajouter un diplôme pour chaque compagnon (${n}, prénom à écrire à la main)`),
     h("button",{class:"btn ghost",type:"button",onclick:()=>printDiplomas(box.checked)},"Imprimer les diplômes"),
     h("p",{class:"note",text:"Sur téléphone : Imprimer, ou « Enregistrer en PDF » pour l'imprimer ailleurs."}));
