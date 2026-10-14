@@ -16,9 +16,13 @@ try {
   const html = await home.text();
   home.ok && html.includes("Ma Quête de Chevalier") && html.includes("QUEST_VOICE_KEYS") ? ok("page d'accueil") : ko(`page d'accueil (HTTP ${home.status})`);
   const files = ["/audio/voix/prologue-dehors-m.mp3", "/audio/noms/lea.mp3", "/audio/noms.json", "/fonts/AlegreyaSans-Regular.woff", "/legal/cgv.html", "/anniversaire-chevalier.html",
-    "/sw.js", "/og.png", "/icon.svg", "/apple-touch-icon.png", "/robots.txt", "/sitemap.xml"];
+    "/sw.js", "/og.png", "/icon.svg", "/favicon.ico", "/apple-touch-icon.png", "/robots.txt", "/sitemap.xml"];
   const missing = [];
-  for (const f of files) { const r = await fetch(site + f, { method: "HEAD" }); if (!r.ok) missing.push(`${f} (HTTP ${r.status})`); }
+  for (const f of files) {
+    let r = await fetch(site + f, { method: "HEAD" });
+    if (!r.ok) r = await fetch(site + f);   // second try with GET, and say what came back
+    if (!r.ok) missing.push(`${f} (HTTP ${r.status} ${r.headers.get("content-type") || ""})`);
+  }
   missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, prénoms, polices, pages, image des liens, hors ligne)`);
 
   // Quests from our own copy of the places of France: a village, two dense city centres.

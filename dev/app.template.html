@@ -16,6 +16,7 @@
 <meta property="og:image:alt" content="Ma Quête de Chevalier : anniversaire 7-10 ans, la chasse au trésor de chevaliers dans votre ville">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="{{SITE}}/">
+<link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!--ROBOTS-->
@@ -134,6 +135,31 @@ footer a{color:var(--muted)}
 .consent{flex-direction:row;align-items:flex-start;gap:12px;font-family:var(--body);letter-spacing:0;font-size:.95rem;line-height:1.4}
 .consent input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--rose)}
 .parchment{width:100%;height:auto;display:block;border-radius:8px;border:1px solid var(--line)}
+.check{flex-direction:row;align-items:center;gap:10px;font-family:var(--body);letter-spacing:0}
+.check input{width:20px;height:20px;accent-color:var(--rose)}
+/* Printable diplomas: A4 landscape, one per page (the hero's, then one per companion). */
+#print{display:none}
+@media print{
+  @page{size:A4 landscape;margin:0}
+  html,body{background:#fff!important;padding:0!important;margin:0!important}
+  body>*:not(#print){display:none!important}
+  #print{display:block}
+  .dip{width:297mm;height:209mm;break-after:page;page-break-after:always;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    color:#1b2547;background:#fbf6e9;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:20mm 30mm 30mm;overflow:hidden;font-family:var(--body)}
+  .dip:last-child{break-after:auto;page-break-after:auto}
+  .dip::before{content:"";position:absolute;inset:9mm;border:2.4mm double #a87a1f}
+  .dip-seal{width:24mm;height:24mm;margin-bottom:3mm}
+  .dip-order{font-family:var(--label);font-size:13pt;letter-spacing:.16em;color:#a87a1f;text-transform:lowercase}
+  .dip-by{font-size:17pt;margin-top:4mm}
+  .dip-name{font-family:var(--display);font-size:58pt;color:#b8505c;line-height:1.1;margin:2mm 0 3mm}
+  .dip-blank{width:150mm;height:22mm;border-bottom:.5mm solid #1b2547;margin:2mm 0 5mm}
+  .dip-title{font-weight:700;font-size:20pt}
+  .dip-line{font-style:italic;font-size:15pt;color:#4a5272;margin-top:4mm;max-width:210mm}
+  .dip-foot{position:absolute;left:26mm;right:26mm;bottom:17mm;display:flex;justify-content:space-between;align-items:flex-end;gap:10mm}
+  .dip-sign{font-family:var(--display);font-size:15pt;border-top:.3mm solid #5b6482;padding-top:1.5mm;min-width:60mm}
+  .dip-brand{text-align:right;font-family:var(--display);font-size:21pt;color:#a87a1f;line-height:1.2}
+  .dip-brand small{display:block;font-family:var(--body);font-size:12pt;color:#5b6482}
+}
 .parchment:not([src]){display:none}
 @media (prefers-reduced-motion:no-preference){.pop{animation:pop .5s ease-out}@keyframes pop{from{transform:scale(.6);opacity:.3}to{transform:none;opacity:1}}.spinner{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}}
 </style>
@@ -404,7 +430,8 @@ async function parchment(lines){
   const total=laid.reduce((a,l)=>a+(l.gap||0)+l.rows.length*l.lh,0);
   let y=300+Math.max(0,(H-300-150-total)/2);
   for(const l of laid){y+=l.gap||0;x.font=l.font;x.fillStyle=l.c||"#1b2547";for(const r of l.rows){y+=l.lh;x.fillText(r,W/2,y-l.lh*.22);}}
-  x.font=FACE.display(40);x.fillStyle="#a87a1f";x.fillText("Ma Quête de Chevalier",W/2,H-100);
+  x.font=FACE.display(40);x.fillStyle="#a87a1f";x.fillText("Ma Quête de Chevalier",W/2,H-108);
+  x.font=FACE.body(28);x.fillStyle="#5b6482";x.fillText(TAG,W/2,H-72);
   return c;
 }
 // Shows the image, then shares it as a file (WhatsApp, Messages…) or saves it. Two taps, because
@@ -423,6 +450,43 @@ function imageMaker(label,fileName,makeLines,evt){
     catch(e){out.textContent="L'image n'a pas pu être créée sur ce téléphone.";}
     make.disabled=false;make.textContent="Mettre à jour l'image";}},label);
   return [make,img,send,out];
+}
+/* ---------- Printable diplomas: handed out at the end, and photographed with the child ---------- */
+const TAG="#MaQueteDeChevalier";
+function partyDate(){const d=S.invite&&S.invite.date;try{return (d?new Date(d+"T12:00:00"):new Date()).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});}catch(e){return "";}}
+function diplomaSheet(o){
+  const p=h("section",{class:"dip"});
+  p.innerHTML=SEAL.replace('class="seal"','class="dip-seal"').replace("var(--rose)","#b8505c");
+  p.append(h("p",{class:"dip-order",text:"ordre des gardiens du temple"}),h("p",{class:"dip-by",text:o.by}),
+    o.name?h("p",{class:"dip-name",text:o.name}):h("div",{class:"dip-blank"}),
+    h("p",{class:"dip-title",text:o.title}),h("p",{class:"dip-line",text:o.line}),
+    h("div",{class:"dip-foot"},h("span",{class:"dip-sign",text:"Le Grand Maître"}),
+      h("span",{class:"dip-brand"},"Ma Quête de Chevalier",h("small",{text:TAG}))));
+  return p;
+}
+function printDiplomas(companions){
+  const where=S.town&&!(S.quest&&S.quest.indoorOnly)?` à ${S.town}`:"",date=partyDate();
+  const hero=S.name||g("Jeune chevalier","Jeune chevalière");
+  const pages=[diplomaSheet({by:"Par ce diplôme, le Grand Maître nomme",name:hero,title:g("Chevalier","Chevalière")+" de l'Ordre des Gardiens du Temple",
+    line:`pour avoir ouvert le Sceau du Temple${where}, le ${date}, avec ses compagnons d'armes.`})];
+  if(companions)for(let i=1;i<(S.kids||8);i++)pages.push(diplomaSheet({by:"Diplôme de bravoure décerné à",title:"Membre de l'Ordre des Gardiens du Temple",
+    line:`pour avoir aidé ${S.name||"le héros de la fête"} à ouvrir le Sceau du Temple${where}, le ${date}.`}));
+  let box=document.getElementById("print");if(!box){box=h("div",{id:"print"});document.body.append(box);}
+  box.replaceChildren(...pages);
+  hit("imprime");
+  try{window.print();}catch(e){}
+}
+function printCard(before){
+  const n=Math.max(1,(S.kids||8)-1);
+  const box=h("input",{type:"checkbox",id:"dip-all"});box.checked=S.dipAll!==false;
+  box.addEventListener("change",()=>{S.dipAll=box.checked;save();});
+  return h("div",{class:"card adult"},h("h3",{text:before?"Les diplômes, à imprimer avant la fête":"Le diplôme à imprimer"}),
+    h("p",{class:"note",text:before
+      ?`Au format A4, à remettre à la fin, quand le Grand Maître nomme ${S.name||"votre enfant"} ${g("chevalier","chevalière")}. Chaque compagnon peut repartir avec le sien : c'est leur souvenir de la fête.`
+      :`Au format A4, pour ${S.name||"votre enfant"} et ses compagnons. Une photo ${S.name?"de "+S.name:""} avec son diplôme fait un beau souvenir : si vous la partagez sur les réseaux, ajoutez ${TAG}.`}),
+    h("label",{class:"check",for:"dip-all"},box,`Ajouter un diplôme pour chaque compagnon (${n}, prénom à écrire à la main)`),
+    h("button",{class:"btn ghost",type:"button",onclick:()=>printDiplomas(box.checked)},"Imprimer les diplômes"),
+    h("p",{class:"note",text:"Sur téléphone : Imprimer, ou « Enregistrer en PDF » pour l'imprimer ailleurs."}));
 }
 const longDate=d=>{try{return new Date(d+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});}catch(e){return d;}};
 function inviteCard(){
@@ -729,6 +793,7 @@ function guideScreen(){
         h("button",{type:"button","aria-pressed":String(S.indoor),onclick:()=>go({indoor:true})},"À la maison")),
       h("p",{class:"note",text:S.indoor?"Même histoire, mêmes énigmes : le Grand Maître raconte chaque lieu, et les défis se font dans la maison.":"Chaque étape se valide en arrivant sur place. Si un lieu est fermé ou inaccessible, vous pourrez passer l'étape."})),
     inviteCard(),
+    printCard(true),
     offlineCard(),
     h("button",{class:"btn",type:"button",onclick:()=>go({screen:"intro"})},"Commencer la quête")
   ];
@@ -849,8 +914,9 @@ function diplomaScreen(){
       h("p",{class:"note",text:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`}),
       // A discreet signature: diploma photos shared by parents carry the name of the quest.
       h("p",{class:"sign",text:"Ma Quête de Chevalier"})),
-    h("div",{class:"card adult"},h("h3",{text:"Le diplôme en souvenir"}),
-      h("p",{class:"note",text:"Le diplôme en image, à garder ou à envoyer à la famille."}),
+    printCard(false),
+    h("div",{class:"card adult"},h("h3",{text:"Le diplôme en image"}),
+      h("p",{class:"note",text:"À garder dans le téléphone ou à envoyer à la famille."}),
       ...imageMaker("Créer le diplôme en image","diplome-chevalier.png",()=>[
         {t:"ordre des gardiens du temple",f:"label",s:38,c:"#a87a1f"},{t:"Par ce diplôme, le Grand Maître nomme",f:"body",s:46,gap:30},
         {t:S.name||g("Jeune chevalier","Jeune chevalière"),f:"display",s:128,c:"#b8505c",gap:20},

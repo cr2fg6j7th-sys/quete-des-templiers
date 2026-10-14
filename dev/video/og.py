@@ -23,6 +23,9 @@ async def main():
         await (await pg.query_selector("#og")).screenshot(path=str(OUT / "og.png"))
         await (await pg.query_selector("#icon")).screenshot(path=str(OUT / "apple-touch-icon.png"))
         await b.close()
-    print("dev/static/ : og.png, apple-touch-icon.png, icon.svg")
+    # favicon.ico, asked by browsers and search engines at the root of the site
+    from PIL import Image
+    Image.open(OUT / "apple-touch-icon.png").convert("RGBA").save(OUT / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
+    print("dev/static/ : og.png, apple-touch-icon.png, icon.svg, favicon.ico")
 
 asyncio.run(main())

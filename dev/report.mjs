@@ -101,6 +101,7 @@ ${row("Voix enregistrée pour jouer sans réseau", "horsligne")}
 ${row("Invitations en image envoyées", "invite")}
 ${row("Diplômes atteints (quête finie)", "diploma")}
 ${row("Diplômes en image", "diplome")}
+${row("Impressions des diplômes", "imprime")}
 ${row("Partages de la quête après la fête", "share")}
 
 Sur 28 jours : ${monthMonth} des visites créent un aperçu, et ${pct(T("checkout", 28), T("preview", 28))} des aperçus ouvrent la page de paiement. Diplômes atteints : ${T("diploma", 28)} en 28 jours, pour ${all.paid} quête${all.paid > 1 ? "s" : ""} payée${all.paid > 1 ? "s" : ""} depuis le début. Avec de petits nombres, ces parts bougent beaucoup d'une semaine à l'autre.
