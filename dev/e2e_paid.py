@@ -46,6 +46,8 @@ async def main():
             errs = []
             ctx, pg = await new_page(b, errs)
             await pg.goto(BASE + "/")
+            check("Le jour de la fête" in await pg.inner_text("body"), "accueil : présentation avant le formulaire")
+            await pg.click("button.big >> nth=0")
             await pg.fill("#hero-name", "Michael")
             await pg.fill("#start-q", "place de l'église Bourg-Test")
             await pg.click("button:has-text('Chercher')")
@@ -128,6 +130,7 @@ async def main():
             await pg3.goto(BASE + "/")
             await pg3.evaluate("localStorage.clear()")
             await pg3.goto(BASE + "/")
+            await pg3.click("button.big >> nth=0")
             await pg3.fill("#hero-name", "Léa")
             await pg3.click("text=Chevalière")
             await pg3.click("text=Il pleut ?")

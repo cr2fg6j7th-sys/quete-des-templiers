@@ -3,8 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>La Quête des Templiers</title>
-<meta name="description" content="Une quête d'anniversaire au prénom de votre enfant, générée en deux minutes autour de chez vous.">
+<title>La Quête des Templiers : anniversaire chevalier pour les 7 à 10 ans</title>
+<meta name="description" content="Une quête de chevaliers dans les rues de votre ville, au prénom de votre enfant, avec la voix du Grand Maître. Prête en deux minutes, aperçu gratuit.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="La Quête des Templiers">
+<meta property="og:description" content="Une quête de chevaliers dans les rues de votre ville, au prénom de votre enfant. Prête en deux minutes, sans rien préparer ni imprimer.">
+<meta name="theme-color" content="#1b2547">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"La Quête des Templiers","description":"Quête d'anniversaire numérique pour enfants de 7 à 10 ans : 4 à 6 étapes dans les lieux publics autour d'un point de départ en France, au prénom de l'enfant, avec la voix enregistrée du Grand Maître.","offers":{"@type":"Offer","price":"24.90","priceCurrency":"EUR","availability":"https://schema.org/InStock"}}</script>
 <style>
 /* Fonts served by the site itself (SIL Open Font License, see fonts/), so no visitor data goes to a font service. */
 @font-face{font-family:"UnifrakturMaguntia";src:url(fonts/UnifrakturMaguntia-Book.woff) format("woff");font-display:swap}
@@ -16,14 +22,14 @@
 @font-face{font-family:"Alegreya Sans SC";src:url(fonts/AlegreyaSansSC-Bold.woff) format("woff");font-weight:700;font-display:swap}
 /* Layout: one narrow column held by the adult guide; six shields track the quest. */
 :root{
-  --stone:#eef0f5;--card:#ffffff;--ink:#1b2547;--muted:#5b6482;--rose:#b8505c;--rose-soft:#f6e3e5;--or:#a87a1f;--line:#d9dce8;--ok:#2f7a4f;
+  --stone:#eef0f5;--card:#ffffff;--ink:#1b2547;--muted:#5b6482;--rose:#b8505c;--rose-soft:#f6e3e5;--or:#a87a1f;--line:#d9dce8;--ok:#2f7a4f;--on-rose:#fff;
   --display:"UnifrakturMaguntia","Old English Text MT",Georgia,serif;
   --body:"Alegreya Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --label:"Alegreya Sans SC","Alegreya Sans",system-ui,sans-serif;
   color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;color-scheme:dark}}
-:root[data-theme="dark"]{--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;color-scheme:dark}}
+:root[data-theme="dark"]{--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;color-scheme:dark}
 *{box-sizing:border-box}
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;background:var(--stone);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
@@ -47,9 +53,9 @@ input[type=text],input[type=number],input[type=search],select{font:inherit;paddi
 .seg button{flex:1;border:0;border-radius:0;background:transparent;color:var(--ink);padding:10px;font:inherit;font-family:var(--label)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--stone)}
 button{cursor:pointer}
-.btn{font:inherit;font-family:var(--label);letter-spacing:.05em;font-size:1.05rem;padding:12px 16px;border-radius:12px;border:0;background:var(--rose);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn{font:inherit;font-family:var(--label);letter-spacing:.05em;font-size:1.05rem;padding:12px 16px;border-radius:12px;border:0;background:var(--rose);color:var(--on-rose);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-.btn.gold{background:var(--or);color:#fff}
+.btn.gold{background:var(--or);color:var(--on-rose)}
 .btn:focus-visible,.seg button:focus-visible,.choice:focus-visible,input:focus-visible,select:focus-visible,.result:focus-visible{outline:3px solid var(--or);outline-offset:2px}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
@@ -82,13 +88,39 @@ ul.rules{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
 .spinner{width:42px;height:42px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--rose);margin:0 auto}
 footer{font-size:.78rem;color:var(--muted);text-align:center}
 footer a{color:var(--muted)}
+/* Home */
+.hero{display:flex;flex-direction:column;gap:12px;padding-top:8px}
+.hero h1{font-size:2.9rem;line-height:1.02;color:var(--ink)}
+.promise{font-size:1.15rem;line-height:1.45}
+.missive{position:relative;margin-top:26px;padding-top:40px;background:var(--rose-soft);border:none}
+.missive h3{text-align:center}
+.seal{position:absolute;top:-27px;left:50%;width:56px;height:56px;margin-left:-28px;filter:drop-shadow(0 2px 2px rgba(80,20,30,.25))}
+.words{font-style:italic;color:var(--ink)}
+.words:empty{display:none}
+.btn.big{font-size:1.15rem;padding:15px 18px}
+.center{text-align:center}
+.block{display:flex;flex-direction:column;gap:12px;margin-top:10px}
+.route{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:20px}
+.route li{display:grid;grid-template-columns:38px 1fr;gap:14px;position:relative}
+.route li:not(:last-child)::before{content:"";position:absolute;left:18px;top:48px;bottom:-16px;border-left:2px dotted var(--or)}
+.route .mark svg{width:38px;height:44px;display:block}
+.route b{display:block;font-family:var(--label);font-size:1.05rem;color:var(--rose);letter-spacing:.04em}
+.kit{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:8px}
+.kit li::marker{color:var(--or)}
+.price{font-family:var(--display);font-size:2rem;line-height:1.1;color:var(--rose)}
+.faq details{border-top:1px solid var(--line);padding:12px 0}
+.faq details:last-child{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;font-weight:700}
+.faq summary::marker{color:var(--rose)}
+.faq summary:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.faq details p{margin-top:8px;color:var(--muted)}
 .consent{flex-direction:row;align-items:flex-start;gap:12px;font-family:var(--body);letter-spacing:0;font-size:.95rem;line-height:1.4}
 .consent input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--rose)}
 @media (prefers-reduced-motion:no-preference){.pop{animation:pop .5s ease-out}@keyframes pop{from{transform:scale(.6);opacity:.3}to{transform:none;opacity:1}}.spinner{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}}
 </style>
 </head>
 <body>
-<div class="wrap" id="app"></div>
+<div class="wrap" id="app"><noscript><h1>La Quête des Templiers</h1><p>Une quête de chevaliers dans les rues de votre ville, au prénom de votre enfant, pour les anniversaires des 7 à 10 ans. Activez JavaScript pour créer votre quête.</p></noscript></div>
 <script>
 /* GEO-START
    Map helpers shared by the browser and the server: the OpenStreetMap query for places
@@ -707,7 +739,7 @@ const NOMINATIM="https://nominatim.openstreetmap.org";
 /* ---------- State ---------- */
 // preview: what is shown before paying; token: the sealed quest (paid build); quest: the full quest once unlocked;
 // paid: the Stripe session that unlocked it (also the key of the reopen link).
-const defaults={name:"",hero:"m",kids:8,indoor:false,unlocked:false,screen:"setup",start:null,town:"",preview:null,token:"",quest:null,paid:"",step:0,phase:"travel",solved:[],hint:0,voice:""};
+const defaults={name:"",hero:"m",kids:8,indoor:false,unlocked:false,screen:"home",start:null,town:"",preview:null,token:"",quest:null,paid:"",step:0,phase:"travel",solved:[],hint:0,voice:""};
 let S=Object.assign({},defaults);
 try{const raw=localStorage.getItem(STORE);if(raw)S=Object.assign({},defaults,JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
@@ -751,13 +783,14 @@ function clipUrl(k){
   return `audio/voix/${k}.mp3`;
 }
 let playRun=0,curAudio=null;
-function playKeys(keys,fallbackText){
+function playKeys(keys,fallbackText,onEnd){
   stopVoice();const run=++playRun;
   const clips=keys.map(clipUrl).filter(Boolean).map(u=>{const a=new Audio(u);a.preload="auto";return a;});
   let i=0;
-  const fail=()=>{if(run!==playRun)return;playRun++;if(!speak(fallbackText))note.textContent="La voix n'est pas disponible : lisez le message à voix haute.";};
+  const fail=()=>{if(run!==playRun)return;playRun++;if(onEnd)onEnd();if(!speak(fallbackText))note.textContent="La voix n'est pas disponible : lisez le message à voix haute.";};
   const next=()=>{
-    if(run!==playRun||i>=clips.length)return;
+    if(run!==playRun)return;
+    if(i>=clips.length){if(onEnd)onEnd();return;}
     const a=clips[i++];curAudio=a;
     a.onended=()=>setTimeout(next,220);a.onerror=fail;
     const p=a.play();if(p&&p.catch)p.catch(fail);
@@ -793,7 +826,7 @@ function shieldRow(){
   const q=S.quest;const row=h("div",{class:"shields",role:"img","aria-label":`${S.solved.length} lettres sur ${q.steps.length} retrouvées`});
   q.steps.forEach((st,i)=>{const got=S.solved.includes(i);const w=h("div",{class:"shield"+(got&&S.lastSolved===i?" pop":"")});
     w.innerHTML=`<svg viewBox="0 0 40 46"><path d="M3 3h34v16c0 13-8 20-17 24C11 39 3 32 3 19z" fill="${got?"var(--rose)":"var(--card)"}" stroke="var(--or)" stroke-width="2.5"/>`+
-      (got?`<text x="20" y="27" text-anchor="middle" font-family="UnifrakturMaguntia, Georgia, serif" font-size="20" fill="#fff">${st.letter}</text>`:`<text x="20" y="27" text-anchor="middle" font-family="Alegreya Sans SC, sans-serif" font-size="13" fill="var(--muted)">${i+1}</text>`)+`</svg>`;
+      (got?`<text x="20" y="27" text-anchor="middle" font-family="UnifrakturMaguntia, Georgia, serif" font-size="20" fill="var(--on-rose)">${st.letter}</text>`:`<text x="20" y="27" text-anchor="middle" font-family="Alegreya Sans SC, sans-serif" font-size="13" fill="var(--muted)">${i+1}</text>`)+`</svg>`;
     row.append(w);});
   return row;
 }
@@ -833,6 +866,81 @@ async function startIndoor(){
 }
 
 /* ---------- Screens ---------- */
+/* ---------- Home: what the quest is, with the Grand Master's voice as a live sample ---------- */
+const SEAL=`<svg class="seal" viewBox="-30 -30 60 60" aria-hidden="true">
+  <path d="M0-27c4 0 5 2 8 2s5-1 8 1 1 5 3 7 5 2 6 5-1 5-1 8 2 5 0 8-5 2-7 4-2 5-5 6-5-1-8 0-4 3-7 3-4-2-7-3-6 0-8-2-1-5-3-7-5-3-6-6 1-5 0-8-3-5-1-8 5-2 7-4 2-6 5-7 5 1 8 0 3-3 6-3z" fill="var(--rose)"/>
+  <circle r="17" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.2"/>
+  <path d="M-1.6-1.6-5-12H5L1.6-1.6 12-5V5L1.6 1.6 5 12H-5L-1.6 1.6-12 5V-5Z" fill="#fff" fill-opacity=".85"/></svg>`;
+const FAQ=[
+  ["Faut-il préparer quelque chose ?","Seulement un petit trésor dans votre sac : bonbons, pièces en chocolat, médailles. Rien à cacher dans la rue, rien à imprimer."],
+  ["Et s'il pleut ?","Passez en mode maison : même histoire, mêmes énigmes, et des défis à faire à l'intérieur. Vous pouvez aussi créer directement une quête à la maison."],
+  ["Un lieu est fermé ou en travaux ?","Un bouton permet de passer l'étape, et la lettre est gagnée quand même."],
+  ["Les enfants entrent-ils dans les églises ?","Non. Tout se passe dehors, devant les lieux."],
+  ["Est-ce que ça marche dans ma ville ?","Partout en France où il y a quelques lieux publics à pied : un bourg, un quartier, un centre-ville. L'aperçu gratuit vous le dit avant de payer."],
+  ["Le prénom de mon enfant est rare ?","Le Grand Maître connaît plus de mille prénoms. Pour les autres, il dit « jeune chevalier » ou « jeune chevalière », et le prénom s'affiche quand même à l'écran et sur le diplôme."],
+  ["Faut-il installer une application ?","Non. La quête s'ouvre dans le navigateur du téléphone. Après le paiement, un lien permet de la rouvrir sur un autre téléphone, par exemple celui d'un autre adulte."],
+  ["Peut-on la préparer à l'avance ?","Oui. Créez-la quand vous voulez : le lien de quête la rouvre le jour de la fête."]
+];
+function homeScreen(){
+  const start=()=>go({screen:"setup"});
+  const nameIn=h("input",{type:"text",id:"demo-name",value:S.name,maxlength:"24",autocomplete:"off",placeholder:"Ex. : Léa"});
+  const known=h("p",{class:"note",role:"status"});
+  const checkName=()=>{known.textContent=S.name.length>1&&nameSet&&!V.nameClip(S.name,nameSet)
+    ?`Le Grand Maître ne connaît pas encore ce prénom : il dira « ${g("jeune chevalier","jeune chevalière")} ».`:"";};
+  nameIn.addEventListener("input",()=>{S.name=nameIn.value.trim();save();checkName();});
+  const words=h("p",{class:"words"});
+  const listen=h("button",{class:"btn",type:"button"},playIcon()," Écouter le Grand Maître");
+  let playing=false;
+  const idle=()=>{playing=false;listen.replaceChildren(playIcon()," Écouter le Grand Maître");};
+  listen.addEventListener("click",()=>{
+    if(playing){stopVoice();idle();return;}
+    const t=`${S.name||g("Jeune chevalier","Jeune chevalière")}, approche. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple passa par ici. Avant de repartir, il cacha un sceau magique…`;
+    words.textContent="« "+t+" »";
+    playing=true;listen.replaceChildren("Arrêter");
+    playKeys(V.message("prologue",{g:S.hero,indoor:false}),t,idle);
+  });
+  const seg=h("div",{class:"seg",role:"group","aria-label":"Chevalier ou chevalière"},
+    ...[["m","Chevalier"],["f","Chevalière"]].map(([v,l])=>h("button",{type:"button","aria-pressed":String(S.hero===v),onclick:e=>{
+      S.hero=v;save();seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b===e.currentTarget)));checkName();}},l)));
+  const fq=h("div",{class:"faq"},FAQ.map(([q,a])=>h("details",null,h("summary",{text:q}),h("p",{text:a}))));
+  setTimeout(checkName,0);
+  return [
+    h("header",{class:"hero"},
+      h("h1",{text:"La Quête des Templiers"}),
+      h("p",{class:"promise",text:"Une quête de chevaliers dans les rues de votre ville, au prénom de votre enfant. Prête en deux minutes, sans rien préparer ni imprimer."})),
+    (()=>{const c=h("section",{class:"card missive","aria-label":"Écouter le Grand Maître"});c.innerHTML=SEAL;
+      c.append(h("h3",{text:"Le Grand Maître a un message pour votre enfant"}),
+        h("label",{for:"demo-name"},"Prénom de l'enfant",nameIn),seg,known,listen,words);return c;})(),
+    h("button",{class:"btn big",type:"button",onclick:start},"Créer l'aperçu gratuit"),
+    h("p",{class:"note center",text:`${PRICE} la quête, à payer après l'aperçu. Quête réussie ou remboursée.`}),
+    h("section",{class:"block"},h("h2",{text:"Le jour de la fête"}),
+      h("ol",{class:"route"},
+        [["Avant","Vous indiquez le prénom et un point de départ : la place de l'église, la mairie, un parc. Le Grand Maître choisit 4 à 6 lieux publics à pied autour : église, fontaine, vieille porte, monument, parc."],
+         ["Pendant","Vous tenez le téléphone. À chaque lieu, les enfants écoutent le Grand Maître, relèvent un défi, résolvent une énigme et gagnent une lettre du mot secret, confiée à un gardien."],
+         ["À la fin","Les gardiens s'alignent pour former le mot secret. Le Sceau s'ouvre, vous sortez le trésor de votre sac, et votre enfant est nommé chevalier ou chevalière, diplôme à l'appui."]]
+        .map(([t,d],i)=>{const li=h("li");const m=h("span",{class:"mark"});
+          m.innerHTML=`<svg viewBox="0 0 40 46" aria-hidden="true"><path d="M3 3h34v16c0 13-8 20-17 24C11 39 3 32 3 19z" fill="var(--card)" stroke="var(--or)" stroke-width="2.5"/><text x="20" y="27" text-anchor="middle" font-family="Alegreya Sans SC, sans-serif" font-size="15" fill="var(--rose)">${i+1}</text></svg>`;
+          li.append(m,h("div",null,h("b",{text:t}),h("p",{text:d})));return li;}))),
+    h("section",{class:"block"},h("h2",{text:"Dans la quête"}),
+      h("ul",{class:"kit"},
+        [["La voix du Grand Maître",", qui appelle votre enfant par son prénom."],
+         ["Des indices, des défis et des énigmes"," pensés pour les 7 à 10 ans, qui font bouger tout le groupe."],
+         ["Un rôle pour chaque enfant"," : chaque lettre gagnée est confiée à un gardien."],
+         ["Le guide de l'adulte"," : itinéraire à pied, consignes de sécurité, trésor à prévoir."],
+         ["Un mode maison s'il pleut"," : même histoire, défis dans le salon."],
+         ["Le diplôme"," de chevalier ou de chevalière, à garder en souvenir."]].map(([b,t])=>h("li",null,h("b",{text:b}),t))),
+      h("p",{class:"note",text:"Environ une heure de jeu, moins de 2 km à pied. De 4 à 15 enfants, avec un adulte pour cinq enfants environ."})),
+    h("section",{class:"card block"},h("h2",{text:"Le prix"}),
+      h("p",{class:"price",text:`${PRICE} la quête`}),
+      h("p",{text:"L'aperçu est gratuit : vous voyez le nombre d'étapes, la distance et la durée avant de payer."}),
+      h("p",{text:"Si la fête ne s'est pas bien passée, écrivez-nous dans les 30 jours : nous vous remboursons, sans justificatif."}),
+      h("button",{class:"btn",type:"button",onclick:start},"Créer l'aperçu gratuit")),
+    h("section",{class:"block"},h("h2",{text:"Questions fréquentes"}),fq),
+    h("button",{class:"btn big",type:"button",onclick:start},"Créer l'aperçu gratuit"),
+    footer()
+  ];
+}
+
 function setupScreen(){
   const nameIn=h("input",{type:"text",id:"hero-name",value:S.name,maxlength:"24",autocomplete:"off",placeholder:"Ex. : Léo"});
   nameIn.addEventListener("input",()=>{S.name=nameIn.value.trim();save();});
@@ -858,8 +966,9 @@ function setupScreen(){
       ()=>{note.textContent="Position refusée ou indisponible : cherchez plutôt une adresse.";},{enableHighAccuracy:true,timeout:10000});
   };
   return [
-    h("div",null,h("p",{class:"eyebrow",text:"anniversaire · 7 à 10 ans"}),h("h1",{text:"La Quête des Templiers"})),
-    h("p",{class:"lead",text:"Une quête au prénom de votre enfant, créée en deux minutes avec les vrais lieux autour de chez vous : église, fontaine, parc, vieille porte… L'adulte guide avec son téléphone, les enfants relèvent les défis."}),
+    h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"home"})},"Retour à la présentation"),
+    h("h2",{text:"Créer l'aperçu gratuit"}),
+    h("p",{class:"lead",text:"Deux minutes suffisent. Vous verrez le nombre d'étapes, la distance et la durée avant de payer."}),
     h("div",{class:"card"},h("h3",{text:"Pour qui est la quête ?"}),
       h("div",{class:"row"},h("label",{for:"hero-name"},"Prénom",nameIn),h("label",{for:"kids"},"Nombre d'enfants",kidsIn)),
       h("label",null,"Le héros de la fête",seg)),
@@ -896,7 +1005,7 @@ function unlockErrScreen(){
     :"Ce lien de quête n'est pas valable. Vérifiez qu'il est complet.";
   return [h("h2",{text:"La quête n'a pas pu s'ouvrir"}),h("p",{text:msg}),
     S.pending&&S.unlockErr!=="bad"&&h("button",{class:"btn",type:"button",onclick:()=>unlockWith(S.pending)},"Réessayer"),
-    h("button",{class:"btn ghost",type:"button",onclick:()=>go({screen:S.preview?"preview":"setup"})},"Retour"),
+    h("button",{class:"btn ghost",type:"button",onclick:()=>go({screen:S.preview?"preview":"home"})},"Retour"),
     h("p",{class:"note",text:"Un souci de paiement ? Écrivez-nous (adresse dans les conditions de vente) : nous vous répondons vite."}),footer()];
 }
 function fewScreen(){return [h("h2",{text:"Pas assez de lieux ici"}),
@@ -1105,24 +1214,24 @@ function diplomaScreen(){
       h("div",{class:"name",text:S.name||"Jeune chevalier"}),h("p",null,h("b",{text:g("Chevalier","Chevalière")+" de l'Ordre des Gardiens du Temple"})),
       h("p",{class:"note",text:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`})),
     h("p",{class:"note",text:"Faites une capture d'écran du diplôme pour le garder en souvenir."}),
-    h("button",{class:"btn ghost",type:"button",onclick:()=>go(Object.assign({},defaults,{name:S.name,hero:S.hero,kids:S.kids,voice:S.voice,town:S.town}))},"Créer une nouvelle quête")];
+    h("button",{class:"btn ghost",type:"button",onclick:()=>go(Object.assign({},defaults,{name:S.name,hero:S.hero,kids:S.kids,voice:S.voice,town:S.town,screen:"setup"}))},"Créer une nouvelle quête")];
 }
 
 function topbar(){
-  if(["setup","loading","few","neterr","preview","unlocking","unlockerr"].includes(S.screen))return null;
+  if(["home","setup","loading","few","neterr","preview","unlocking","unlockerr"].includes(S.screen))return null;
   return h("div",{class:"topbar"},h("span",{class:"eyebrow",text:"la quête des templiers"}),
     h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"preview"})},"Aperçu"));
 }
-const OPEN=["setup","loading","few","neterr","unlocking","unlockerr"];
+const OPEN=["home","setup","loading","few","neterr","unlocking","unlockerr"];
 function render(){
   note.textContent="";stopVoice();app.replaceChildren();
   let screen=S.screen;
-  if(!S.preview&&!OPEN.includes(screen))screen="setup";
+  if(!S.preview&&!OPEN.includes(screen))screen="home";
   else if(!(S.unlocked&&S.quest)&&!OPEN.includes(screen)&&screen!=="preview")screen="preview";
-  const map={setup:setupScreen,loading:loadingScreen,few:fewScreen,neterr:netErrScreen,preview:previewScreen,unlocking:unlockingScreen,unlockerr:unlockErrScreen,
+  const map={home:homeScreen,setup:setupScreen,loading:loadingScreen,few:fewScreen,neterr:netErrScreen,preview:previewScreen,unlocking:unlockingScreen,unlockerr:unlockErrScreen,
     guide:guideScreen,intro:introScreen,step:stepScreen,final:finalScreen,diploma:diplomaScreen};
   const tb=topbar();if(tb)app.append(tb);
-  (map[screen]||setupScreen)().forEach(n=>{if(n)app.append(n);});
+  (map[screen]||homeScreen)().forEach(n=>{if(n)app.append(n);});
 }
 
 /* ---------- Back from Stripe, or a reopen link ---------- */
@@ -1140,7 +1249,7 @@ async function unlockWith(sid){
 }
 
 // A reload in the middle of loading goes back to where it was; everything else resumes.
-if(S.screen==="loading"||S.screen==="unlocking")S.screen=S.preview?"preview":"setup";
+if(S.screen==="loading"||S.screen==="unlocking")S.screen=S.preview?"preview":"home";
 const qs=new URLSearchParams(location.search);
 const sid=qs.get("paid")||qs.get("quete");
 if(PAID&&sid){history.replaceState(null,"",location.pathname);unlockWith(sid);}
