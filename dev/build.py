@@ -27,6 +27,10 @@ VOICE_VERSION = hashlib.sha256(b"".join(f.read_bytes() for f in audio_files if f
 # For robots that do not run JavaScript (the AI assistants' crawlers): the home screen as drawn
 # (dev/home.static.html, made by dev/snapshot.py) and the FAQ as structured data.
 home_static = (d / "home.static.html").read_text(encoding="utf-8").strip() if (d / "home.static.html").exists() else ""
+# The copy records which version of the home screen it was made from: warn when it is out of date.
+home_src = hashlib.sha256((re.search(r"\nconst FAQ=.*?\nfunction setupScreen", t, re.S) or re.search(r".*", t)).group(0).encode()).hexdigest()[:12]
+if f"<!--home {home_src}-->" not in home_static:
+    print("::warning::ATTENTION : l'accueil a changé, relancez python3 dev/snapshot.py pour mettre à jour sa copie (dev/home.static.html)")
 faq = json.loads(re.search(r"const FAQ=(\[.*?\n\]);", t, re.S).group(1))
 faq_ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
     {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]}, ensure_ascii=False) + "</script>"

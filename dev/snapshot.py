@@ -3,7 +3,7 @@
 #   python3 dev/snapshot.py      after any change to the home screen
 # Needs Python Playwright (local only; the deploy reuses the committed file):
 #   dev/home.static.html   the home screen, put inside <div id="app"> by build.py
-import http.server, re, socketserver, subprocess, threading
+import hashlib, http.server, re, socketserver, subprocess, threading
 from functools import partial
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -28,7 +28,9 @@ with sync_playwright() as p:
     html = page.eval_on_selector("#app", "e => e.innerHTML")
     # Buttons only work once the script runs: in the copy, they are plain text holders.
     html = re.sub(r'<p class="note" role="status"></p>|<p class="words"></p>', "", html)
-    (d / "home.static.html").write_text(html.strip() + "\n", encoding="utf-8")
+    src = (d / "app.template.html").read_text(encoding="utf-8")
+    tag = hashlib.sha256(re.search(r"\nconst FAQ=.*?\nfunction setupScreen", src, re.S).group(0).encode()).hexdigest()[:12]
+    (d / "home.static.html").write_text(f"<!--home {tag}-->" + html.strip() + "\n", encoding="utf-8")
     b.close()
 srv.shutdown()
 subprocess.run(["python3", str(d / "build.py")], check=True)
