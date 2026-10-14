@@ -10,6 +10,9 @@
 const HEADERS = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
 const reply = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
 const MAX_BODY = 3000000;
+// One line per event in the Cloudflare logs, to count previews, payments and unlocks. No personal data.
+const refOf = b => String(b && b.ref || "").replace(/[^a-z0-9-]/gi, "").slice(0, 20);
+const log = (evt, data) => console.log(JSON.stringify(Object.assign({ evt }, data)));
 
 const b64u = {
   enc(bytes) { let s = ""; for (const b of bytes) s += String.fromCharCode(b); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); },
@@ -79,10 +82,11 @@ async function preview(request, env) {
       return reply({ ok: false, reason: "bad" }, 400);
     const start = { lat, lon };
     const sel = QuestEngine.select(b.elements, start);
-    if (!sel.ok) return reply(sel);
+    if (!sel.ok) { log("preview", { ok: false, found: sel.found, ref: refOf(b) }); return reply(sel); }
     quest = QuestEngine.assemble(start, sel.stops);
     token = await seal(pack(start, sel.stops), env);
   }
+  log("preview", { ok: true, indoor: !!b.indoor, steps: quest.steps.length, ref: refOf(b) });
   return reply(Object.assign(QuestEngine.preview(quest), { token, price: priceLabel(env) }));
 }
 
@@ -110,11 +114,12 @@ async function checkout(request, env) {
     cancel_url: origin + "/?annule=1",
     "custom_text[submit][message]": "Vous avez demandé l'accès immédiat à la quête et renoncé au droit de rétractation (article L221-28 du Code de la consommation). Garantie : quête réussie ou remboursée.",
     "metadata[n]": name, "metadata[h]": hero, "metadata[k]": String(kids), "metadata[v]": town,
-    "metadata[consent]": new Date().toISOString()
+    "metadata[consent]": new Date().toISOString(), "metadata[ref]": refOf(b)
   };
   for (let i = 0; i * 490 < token.length; i++) params[`metadata[t${i}]`] = token.slice(i * 490, (i + 1) * 490);
   try {
     const s = await stripe(env, "POST", "/v1/checkout/sessions", params);
+    log("checkout", { ref: refOf(b) });
     return reply({ ok: true, url: s.url });
   } catch (e) {
     console.log(String(e));
@@ -129,12 +134,13 @@ async function unlock(request, env) {
   let s;
   try { s = await stripe(env, "GET", "/v1/checkout/sessions/" + id); }
   catch (e) { console.log(String(e)); return reply({ ok: false, reason: "unknown" }, 404); }
-  if (s.payment_status !== "paid") return reply({ ok: false, reason: "unpaid" }, 402);
+  if (s.payment_status !== "paid") { log("unlock", { ok: false, reason: "unpaid" }); return reply({ ok: false, reason: "unpaid" }, 402); }
   const m = s.metadata || {};
   let token = "";
   for (let i = 0; m["t" + i]; i++) token += m["t" + i];
   const quest = questOf(await unseal(token, env));
   if (!quest) return reply({ ok: false, reason: "token" }, 500);
+  log("unlock", { ok: true, ref: m.ref || "" });
   return reply({ ok: true, quest, name: m.n || "", hero: m.h === "f" ? "f" : "m", kids: parseInt(m.k, 10) || 8, town: m.v || "" });
 }
 

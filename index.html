@@ -739,7 +739,7 @@ const NOMINATIM="https://nominatim.openstreetmap.org";
 /* ---------- State ---------- */
 // preview: what is shown before paying; token: the sealed quest (paid build); quest: the full quest once unlocked;
 // paid: the Stripe session that unlocked it (also the key of the reopen link).
-const defaults={name:"",hero:"m",kids:8,indoor:false,unlocked:false,screen:"home",start:null,town:"",preview:null,token:"",quest:null,paid:"",step:0,phase:"travel",solved:[],hint:0,voice:""};
+const defaults={ref:"",name:"",hero:"m",kids:8,indoor:false,unlocked:false,screen:"home",start:null,town:"",preview:null,token:"",quest:null,paid:"",step:0,phase:"travel",solved:[],hint:0,voice:""};
 let S=Object.assign({},defaults);
 try{const raw=localStorage.getItem(STORE);if(raw)S=Object.assign({},defaults,JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
@@ -849,7 +849,7 @@ function previewOf(q){return {ok:true,indoorOnly:!!q.indoorOnly,count:q.steps.le
 async function makePreview(body){
   if(!PAID){const q=body.indoor?E.assemble(null,E.indoorStops()):E.build(body.elements,body.start);
     return q.ok?{ok:true,preview:previewOf(q),quest:q,token:""}:q;}
-  const r=await api("api/preview",body,30000);
+  const r=await api("api/preview",Object.assign({ref:S.ref},body),30000);
   if(!r.ok)return r;
   if(r.price)PRICE=r.price;
   return {ok:true,preview:{ok:true,indoorOnly:r.indoorOnly,count:r.count,walkM:r.walkM,minutes:r.minutes,teasers:r.teasers,price:r.price},quest:null,token:r.token};
@@ -1068,7 +1068,7 @@ function unlockBlock(){
   const pay=async()=>{
     if(!box.checked){note.textContent="Cochez d'abord la case ci-dessus pour accéder à la quête dès le paiement.";return;}
     btn.disabled=true;note.textContent="Ouverture du paiement sécurisé…";
-    try{const r=await api("api/checkout",{token:S.token,consent:true,name:S.name,hero:S.hero,kids:S.kids,town:S.town});
+    try{const r=await api("api/checkout",{token:S.token,consent:true,name:S.name,hero:S.hero,kids:S.kids,town:S.town,ref:S.ref});
       if(r.ok&&r.url){location.href=r.url;return;}
       note.textContent=r.reason==="token"?"Cette quête a expiré : créez-la à nouveau depuis le point de départ.":"Le paiement n'a pas pu s'ouvrir. Réessayez dans un instant.";}
     catch(e){note.textContent="Le serveur ne répond pas. Vérifiez la connexion et réessayez.";}
@@ -1214,9 +1214,23 @@ function diplomaScreen(){
       h("div",{class:"name",text:S.name||"Jeune chevalier"}),h("p",null,h("b",{text:g("Chevalier","Chevalière")+" de l'Ordre des Gardiens du Temple"})),
       h("p",{class:"note",text:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`})),
     h("p",{class:"note",text:"Faites une capture d'écran du diplôme pour le garder en souvenir."}),
+    shareCard(),
     h("button",{class:"btn ghost",type:"button",onclick:()=>go(Object.assign({},defaults,{name:S.name,hero:S.hero,kids:S.kids,voice:S.voice,town:S.town,screen:"setup"}))},"Créer une nouvelle quête")];
 }
 
+// After the party: the parents of the guests are the next customers. Shares the home page, not the paid quest.
+function shareCard(){
+  const url=location.origin+location.pathname+"?ref=fete";
+  const out=h("p",{class:"note",role:"status"});
+  const share=async()=>{
+    const text="Nous avons fêté un anniversaire avec La Quête des Templiers : une quête de chevaliers dans notre ville, au prénom de l'enfant.";
+    try{if(navigator.share){await navigator.share({title:"La Quête des Templiers",text,url});return;}}catch(e){if(e&&e.name==="AbortError")return;}
+    try{await navigator.clipboard.writeText(url);out.textContent="Lien copié.";}catch(e){out.textContent=url;}
+  };
+  return h("div",{class:"card adult"},h("h3",{text:"Les compagnons ont aimé ?"}),
+    h("p",{class:"note",text:"Envoyez la présentation de la quête à leurs parents, pour un prochain anniversaire."}),
+    h("button",{class:"btn ghost",type:"button",onclick:share},"Partager la quête"),out);
+}
 function topbar(){
   if(["home","setup","loading","few","neterr","preview","unlocking","unlockerr"].includes(S.screen))return null;
   return h("div",{class:"topbar"},h("span",{class:"eyebrow",text:"la quête des templiers"}),
@@ -1251,6 +1265,7 @@ async function unlockWith(sid){
 // A reload in the middle of loading goes back to where it was; everything else resumes.
 if(S.screen==="loading"||S.screen==="unlocking")S.screen=S.preview?"preview":"home";
 const qs=new URLSearchParams(location.search);
+if(qs.get("ref")){S.ref=qs.get("ref").replace(/[^a-z0-9-]/gi,"").slice(0,20);save();if(!qs.get("paid")&&!qs.get("quete"))history.replaceState(null,"",location.pathname);}
 const sid=qs.get("paid")||qs.get("quete");
 if(PAID&&sid){history.replaceState(null,"",location.pathname);unlockWith(sid);}
 else if(qs.has("annule")){history.replaceState(null,"",location.pathname);if(S.preview)S.screen="preview";render();note.textContent="Paiement annulé : rien n'a été débité.";}
