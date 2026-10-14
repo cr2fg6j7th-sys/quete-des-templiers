@@ -79,6 +79,7 @@ button{cursor:pointer}
 .note{font-size:.85rem;color:var(--muted)}
 .letter{font-family:var(--display);font-size:3.2rem;color:var(--rose);line-height:1;text-align:center;letter-spacing:.15em}
 .diploma{border:3px double var(--or);border-radius:6px;padding:22px 18px;text-align:center;gap:10px;background:var(--card)}
+.diploma .sign{font-family:var(--display);font-size:1.05rem;color:var(--or);margin-top:4px}
 .diploma .name{font-family:var(--display);font-size:2.4rem;color:var(--rose)}
 .timer{font-size:2.2rem;font-variant-numeric:tabular-nums;text-align:center;font-weight:700}
 .map{width:100%;height:auto;display:block;border-radius:12px}
@@ -651,7 +652,9 @@ function diplomaScreen(){
     h("div",{class:"card adult"},h("h3",{text:"Pour l'adulte"}),h("p",{text:"C'est le moment de sortir le trésor de votre sac et de le remettre aux chevaliers."})),
     h("div",{class:"card diploma"},h("p",{class:"eyebrow",text:"ordre des gardiens du temple"}),h("p",{text:"Par ce diplôme, le Grand Maître nomme"}),
       h("div",{class:"name",text:S.name||"Jeune chevalier"}),h("p",null,h("b",{text:g("Chevalier","Chevalière")+" de l'Ordre des Gardiens du Temple"})),
-      h("p",{class:"note",text:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`})),
+      h("p",{class:"note",text:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`}),
+      // A discreet signature: diploma photos shared by parents carry the name of the quest.
+      h("p",{class:"sign",text:"Ma Quête de Chevalier"})),
     h("p",{class:"note",text:"Faites une capture d'écran du diplôme pour le garder en souvenir."}),
     shareCard(),
     h("button",{class:"btn ghost",type:"button",onclick:()=>go(Object.assign({},defaults,{name:S.name,hero:S.hero,kids:S.kids,voice:S.voice,town:S.town,screen:"setup"}))},"Créer une nouvelle quête")];
