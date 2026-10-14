@@ -103,7 +103,6 @@ async function checkout(request, env) {
   const params = {
     mode: "payment",
     locale: "fr",
-    "payment_method_types[0]": "card",
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": "eur",
     "line_items[0][price_data][unit_amount]": String(priceCents(env)),
