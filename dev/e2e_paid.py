@@ -1,6 +1,6 @@
 # End-to-end test of the paid app in headless Chromium, against dev/serve.mjs (fake Stripe)
 # with OpenStreetMap services mocked by synthetic places. Run: python3 dev/e2e_paid.py
-import asyncio, json, subprocess, sys, time, urllib.request
+import asyncio, hashlib, json, subprocess, sys, time, urllib.request
 from pathlib import Path
 from playwright.async_api import async_playwright
 
@@ -22,6 +22,10 @@ console.log(JSON.stringify({elements:[
 """]))
 PLACES = ["Saint-Martin", "Fontaine du Marché", "Porte Haute", "Porte Basse", "Parc des Remparts", "Monument aux morts", "Jeanne d'Arc"]
 search = [{"lat": "48.5", "lon": "7.47", "display_name": "Place de l'Église, Bourg-Test, Bas-Rhin, France", "name": "Place de l'Église", "address": {"village": "Bourg-Test"}}]
+# national address base: same spot (merged with the OpenStreetMap answer), and a second address
+ban = {"type": "FeatureCollection", "features": [
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [7.47002, 48.50001]}, "properties": {"label": "Place de l'Église 67999 Bourg-Test", "score": 0.92, "city": "Bourg-Test"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [7.48, 48.51]}, "properties": {"label": "Rue de l'Église 67999 Autre-Bourg", "score": 0.5, "city": "Autre-Bourg"}}]}
 fails = []
 def check(cond, label):
     print(("ok   " if cond else "FAIL ") + label)
@@ -35,6 +39,7 @@ async def new_page(browser, errs):
     pg.on("request", lambda r: OSM_CALLS.append(r.url) if "overpass" in r.url else None)
     await pg.route("**/overpass-api.de/**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(fixture)))
     await pg.route("**/nominatim.openstreetmap.org/search**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(search)))
+    await pg.route("**/data.geopf.fr/**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(ban)))
     return ctx, pg
 
 async def main():
@@ -59,7 +64,10 @@ async def main():
             await pg.fill("#hero-name", "Michael")
             await pg.fill("#start-q", "place de l'église Bourg-Test")
             await pg.click("button:has-text('Chercher')")
-            await pg.click("text=Place de l'Église, Bourg-Test")
+            await pg.wait_for_selector("text=Rue de l'Église 67999 Autre-Bourg", timeout=8000)
+            labels = await pg.eval_on_selector_all("button.result", "b=>b.map(x=>x.textContent)")
+            check(labels == ["Place de l'Église 67999 Bourg-Test", "Rue de l'Église 67999 Autre-Bourg"], "adresses : base nationale d'abord, doublon OpenStreetMap fusionné " + str(labels))
+            await pg.click("text=Place de l'Église 67999 Bourg-Test")
             await pg.wait_for_selector("text=Ce qui vous attend", timeout=8000)
             store = await pg.evaluate("localStorage.getItem('quete-templiers-v3')")
             dom = await pg.content()
@@ -68,6 +76,18 @@ async def main():
             check("function choose" not in dom, "le moteur de choix des lieux n'est pas dans la page")
             check(not OSM_CALLS, "aperçu fait depuis notre copie des lieux, sans appeler OpenStreetMap")
             await pg.screenshot(path=str(ROOT / "dist" / "p1-apercu.png"), full_page=True)
+            # send the preview to the other parent: it opens on another phone, places still hidden
+            await pg.evaluate("navigator.clipboard.writeText=t=>{window.__copied=t;return Promise.resolve()};navigator.share=undefined")
+            await pg.click("text=Décider à deux")
+            shared = (await pg.evaluate("window.__copied")).split(" ")[-1]
+            check("?apercu=" in shared and "&n=Michael" in shared, "aperçu : lien à envoyer à l'autre parent")
+            ctxS, pgS = await new_page(b, errs)
+            await pgS.goto(shared.replace("http://127.0.0.1:%d" % PORT, BASE))
+            await pgS.wait_for_selector("text=Ce qui vous attend", timeout=8000)
+            bodyS = await pgS.inner_text("body"); domS = await pgS.content()
+            check("La quête de Michael" in bodyS and "Débloquer la quête" in bodyS and not any(x in domS for x in PLACES) and "?apercu" not in pgS.url,
+                  "aperçu reçu : même quête, prête à payer, lieux cachés, adresse nettoyée")
+            await ctxS.close()
             await pg.click("button:has-text('Débloquer la quête')")
             check("Cochez d'abord" in await pg.inner_text("body"), "paiement refusé sans la case cochée")
             await pg.check("#consent")
@@ -89,6 +109,27 @@ async def main():
             await pg.wait_for_selector("text=Le guide du Grand Maître", timeout=8000)
             check("?paid" not in pg.url, "retour de paiement : quête ouverte, adresse nettoyée")
             check("Votre lien de quête" in await pg.inner_text("body"), "guide : carte du lien de quête")
+            mail = await pg.get_attribute("a:has-text(\"par e-mail\")", "href")
+            check(mail.startswith("mailto:?subject=") and "quete%3Dcs_test_" in mail, "guide : lien de quête envoyable par e-mail")
+            # the voice of this quest is kept on the phone
+            await pg.wait_for_function("(document.getElementById('offline-status')||{}).textContent.includes('enregistrée')", timeout=20000)
+            check(True, "voix de la quête enregistrée dans le téléphone")
+            # invitation as an image
+            await pg.fill("#inv-date", "2026-11-21")
+            await pg.fill("#inv-time", "14:30")
+            await pg.fill("#inv-place", "Place de l'Église")
+            await pg.click("text=Créer l'invitation")
+            await pg.wait_for_function("(()=>{const i=document.querySelector('img.parchment');return i&&i.naturalWidth===1080})()", timeout=8000)
+            await pg.locator("img.parchment").first.screenshot(path=str(ROOT / "dist" / "p3-invitation.png"))
+            check(await pg.is_visible("text=Envoyer ou enregistrer l'image"), "invitation en image prête à envoyer")
+            # without network: reload, the page and the voice come from the phone
+            await ctx.set_offline(True)
+            await pg.reload()
+            await pg.wait_for_selector("text=Le guide du Grand Maître", timeout=8000)
+            st206 = await pg.evaluate("""(async()=>{const k=JSON.parse(localStorage.getItem('quete-templiers-v3'));
+              const r=await fetch('audio/voix/'+(k.hero==='f'?'intro-dehors-f':'intro-dehors-m')+'.mp3',{headers:{Range:'bytes=0-99'}});return [r.status,(await r.arrayBuffer()).byteLength]})()""")
+            check(st206 == [206, 100], f"sans réseau : page rouverte et voix servie par morceaux {st206}")
+            await ctx.set_offline(False)
             sid = json.loads(urllib.request.urlopen(BASE + "/__sessions").read())[-1]["id"]
             await pg.screenshot(path=str(ROOT / "dist" / "p2-guide.png"), full_page=True)
             # play the whole quest
@@ -110,6 +151,10 @@ async def main():
             await pg.click("text=Ouvrir le Sceau")
             await pg.wait_for_selector("text=Le trésor est à vous", timeout=4000)
             check("Michael" in await pg.inner_text(".diploma"), f"quête jouée jusqu'au diplôme ({n} étapes, mot {word})")
+            await pg.click("text=Créer le diplôme en image")
+            await pg.wait_for_function("(()=>{const i=document.querySelector('img.parchment');return i&&i.naturalWidth===1080})()", timeout=8000)
+            await pg.locator("img.parchment").first.screenshot(path=str(ROOT / "dist" / "p4-diplome.png"))
+            check(True, "diplôme en image")
             await pg.evaluate("navigator.clipboard.writeText=t=>{window.__copied=t;return Promise.resolve()};navigator.share=undefined")
             await pg.click("text=Partager la quête")
             copied = await pg.evaluate("window.__copied")
@@ -164,6 +209,7 @@ async def main():
             pg4 = await ctx4.new_page()
             await pg4.route("**/overpass-api.de/**", lambda r: r.fulfill(status=504, body="Gateway Timeout"))
             await pg4.route("**/nominatim.openstreetmap.org/search**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(search)))
+            await pg4.route("**/data.geopf.fr/**", lambda r: r.abort())
             await pg4.goto(BASE + "/")
             await pg4.click("button.big >> nth=0")
             await pg4.fill("#hero-name", "Léo")
@@ -171,9 +217,22 @@ async def main():
             await pg4.click("button:has-text('Chercher')")
             await pg4.click("text=Place de l'Église, Bourg-Test")
             await pg4.wait_for_selector("text=Ce qui vous attend", timeout=10000)
-            check(True, "sans copie des lieux et carte injoignable : relais par notre serveur")
+            check(True, "sans copie des lieux et carte injoignable : relais par notre serveur ; base d'adresses injoignable : OpenStreetMap seul")
             await ctx4.close()
             idx.with_suffix(".off").rename(idx)
+            # anonymous counts of the visit, and the report's access to them
+            counts = json.loads(urllib.request.urlopen(BASE + "/__counts").read())
+            events = {k.split("|")[1] for k in counts}
+            want = {"home", "setup", "preview", "checkout", "unlock", "diploma", "apercu", "apercu-ouvert", "horsligne", "share"}
+            check(want <= events and all(len(k.split("|")) == 4 for k in counts), "compteurs anonymes : " + ", ".join(sorted(events)))
+            key = hashlib.sha256(b"stats:sk_test_local").hexdigest()
+            req = lambda body: urllib.request.Request(BASE + "/api/stats", data=json.dumps(body).encode(), headers={"content-type": "application/json"}, method="POST")
+            st = json.loads(urllib.request.urlopen(req({"key": key, "days": 2})).read())
+            day = time.strftime("%Y-%m-%d", time.gmtime())
+            check(st["ok"] and st["days"][day]["preview"].get("fete") == 1, "compteurs lisibles par le rapport (provenance comprise)")
+            try: urllib.request.urlopen(req({"key": "faux"})); bad = 200
+            except urllib.error.HTTPError as e: bad = e.code
+            check(bad == 403, "compteurs refusés sans la bonne clé")
             check(not errs, "aucune erreur JavaScript " + str(errs[:3]))
             await b.close()
     finally:

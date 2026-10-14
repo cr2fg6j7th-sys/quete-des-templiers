@@ -11,7 +11,7 @@ async function list(path, params) {
   let after = "";
   for (let page = 0; page < 50; page++) {
     const q = new URLSearchParams(Object.assign({ limit: "100" }, params, after ? { starting_after: after } : {}));
-    const r = await fetch(`https://api.stripe.com/v1/${path}?${q}`, { headers: { authorization: "Bearer " + key } });
+    const r = await fetch(`${process.env.STRIPE_API || "https://api.stripe.com"}/v1/${path}?${q}`, { headers: { authorization: "Bearer " + key } });
     const j = await r.json();
     if (!r.ok) throw new Error(`Stripe ${r.status} ${j.error && j.error.message}`);
     out.push(...j.data);
@@ -31,6 +31,28 @@ function summary(sessions) {
   for (const s of paid) { const t = (s.metadata || {}).v || "à la maison"; towns[t] = (towns[t] || 0) + 1; }
   return { opened: real.length, paid: paid.length, revenue: paid.reduce((a, s) => a + (s.amount_total || 0), 0), byRef, towns };
 }
+
+// Anonymous counts of the visit, kept by the site (see /api/hit in dev/worker.js).
+const SITE = process.env.SITE_URL || "https://ma-quete-de-chevalier.pv6ggk8t2v.workers.dev";
+async function visits() {
+  const enc = new TextEncoder().encode("stats:" + key);
+  const k = [...new Uint8Array(await crypto.subtle.digest("SHA-256", enc))].map(b => b.toString(16).padStart(2, "0")).join("");
+  try {
+    const r = await fetch(SITE + "/api/stats", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ key: k, days: 28 }) });
+    const j = await r.json();
+    return j.ok ? j.days : null;
+  } catch (e) { return null; }
+}
+// sum of an event over the last n days, without the automatic checks ("smoke") and the free demo ("demo")
+function total(days, evt, n, only) {
+  let t = 0;
+  for (const [day, d] of Object.entries(days)) {
+    if ((Date.now() - Date.parse(day + "T00:00:00Z")) / 86400000 >= n) continue;
+    for (const [ref, c] of Object.entries(d[evt] || {})) if (only ? ref === only : ref !== "smoke" && ref !== "demo") t += c;
+  }
+  return t;
+}
+const pct = (a, b) => b ? Math.round(100 * a / b) + " %" : "—";
 
 const week = summary(await list("checkout/sessions", { "created[gte]": String(weekAgo) }));
 const all = summary(await list("checkout/sessions", {}));
@@ -53,3 +75,36 @@ Paiements Stripe en mode ${mode}${mode === "test" ? " : ce sont des achats d'ess
 Provenance des ventes de la semaine : ${fmt(week.byRef)}.
 Communes des ventes de la semaine : ${fmt(week.towns)}.
 `);
+
+const days = await visits();
+if (!days) console.log("Parcours des visiteurs : compteurs indisponibles (stockage Cloudflare pas encore branché).\n");
+else {
+  const row = (label, evt) => `| ${label} | ${total(days, evt, 7)} | ${total(days, evt, 28)} |`;
+  const T = (e, n) => total(days, e, n);
+  const monthMonth = pct(T("preview", 28), T("home", 28));
+  console.log(`## Parcours des visiteurs
+
+Comptes anonymes du site (sans les vérifications automatiques ni la démo).
+
+| | 7 derniers jours | 28 derniers jours |
+| --- | --- | --- |
+${row("Visites de la page d'accueil", "home")}
+${row("Clics sur « Créer l'aperçu »", "setup")}
+${row("Aperçus créés", "preview")}
+${row("Pas assez de lieux autour du départ", "few")}
+${row("Cartes en panne (écran d'erreur)", "neterr")}
+${row("Aperçus envoyés à quelqu'un", "apercu")}
+${row("Aperçus reçus et ouverts", "apercu-ouvert")}
+${row("Pages de paiement ouvertes", "checkout")}
+${row("Quêtes ouvertes après paiement (avec les réouvertures)", "unlock")}
+${row("Voix enregistrée pour jouer sans réseau", "horsligne")}
+${row("Invitations en image envoyées", "invite")}
+${row("Diplômes atteints (quête finie)", "diploma")}
+${row("Diplômes en image", "diplome")}
+${row("Partages de la quête après la fête", "share")}
+
+Sur 28 jours : ${monthMonth} des visites créent un aperçu, et ${pct(T("checkout", 28), T("preview", 28))} des aperçus ouvrent la page de paiement. Diplômes atteints : ${T("diploma", 28)} en 28 jours, pour ${all.paid} quête${all.paid > 1 ? "s" : ""} payée${all.paid > 1 ? "s" : ""} depuis le début. Avec de petits nombres, ces parts bougent beaucoup d'une semaine à l'autre.
+
+Démo gratuite (entourage), 28 jours : visites ${total(days, "home", 28, "demo")} · aperçus ${total(days, "preview", 28, "demo")} · diplômes ${total(days, "diploma", 28, "demo")}.
+`);
+}

@@ -94,6 +94,28 @@ jobs:
           node dev/test.js
           if [ -f places-data/index.json ]; then cp -r places-data site/places; echo "::notice::Lieux en ligne : $(cat places-data/index.json)"; fi
 
+      # Anonymous visit counts (Workers KV, free plan). The namespace is created once; if the
+      # Cloudflare token cannot do it, the site goes online without counts and a warning says so.
+      - name: Compteurs de visites
+        if: steps.ready.outputs.ok == 'true'
+        continue-on-error: true
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          api="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/storage/kv/namespaces"
+          title="ma-quete-de-chevalier-compteurs"
+          id=$(curl -sS -H "Authorization: Bearer $CF_TOKEN" "$api?per_page=100" | jq -r --arg t "$title" '.result[]? | select(.title==$t) | .id' | head -1)
+          if [ -z "$id" ]; then
+            res=$(curl -sS -X POST -H "Authorization: Bearer $CF_TOKEN" -H "content-type: application/json" -d "{\"title\":\"$title\"}" "$api")
+            id=$(printf '%s' "$res" | jq -r '.result.id // empty')
+            [ -n "$id" ] || echo "::warning::Compteurs de visites non créés : $(printf '%s' "$res" | jq -c '.errors' | head -c 300). Il faut peut-être ajouter « Workers KV Storage : Modifier » au jeton Cloudflare."
+          fi
+          if [ -n "$id" ]; then
+            printf '\n[[kv_namespaces]]\nbinding = "STATS"\nid = "%s"\n' "$id" >> wrangler.toml
+            echo "::notice::Compteurs de visites branchés"
+          fi
+
       - name: Envoyer sur Cloudflare
         id: deploy
         if: steps.ready.outputs.ok == 'true'

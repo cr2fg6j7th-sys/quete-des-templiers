@@ -24,7 +24,7 @@ globalThis.fetch = (input, init) => {
   return realFetch(input, init);
 };
 
-const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".json": "application/json", ".mp3": "audio/mpeg", ".woff": "font/woff", ".css": "text/css" };
+const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".png": "image/png", ".svg": "image/svg+xml", ".txt": "text/plain", ".xml": "application/xml", ".json": "application/json", ".mp3": "audio/mpeg", ".woff": "font/woff", ".css": "text/css" };
 function file(p) {
   const clean = decodeURIComponent(p).replace(/\.\.+/g, "");
   for (const dir of ["site", "."]) {
@@ -50,6 +50,9 @@ async function fakeStripe(req, url) {
     sessions.set(id, { id, payment_status: "unpaid", status: "open", metadata, params: Object.fromEntries(p) });
     return Response.json({ id, url: `${base}/fake-checkout?id=${id}` });
   }
+  if (req.method === "GET" && url.pathname === "/stripe/v1/checkout/sessions")
+    return Response.json({ data: [...sessions.values()].map(x => Object.assign({ amount_total: x.payment_status === "paid" ? 2490 : null }, x)).reverse(), has_more: false });
+  if (req.method === "GET" && url.pathname === "/stripe/v1/refunds") return Response.json({ data: [], has_more: false });
   const m = url.pathname.match(/^\/stripe\/v1\/checkout\/sessions\/([^/]+)$/);
   if (req.method === "GET" && m) {
     const s = sessions.get(m[1]);
@@ -71,7 +74,14 @@ function fakeCheckout(url) {
     { headers: { "content-type": "text/html; charset=utf-8" } });
 }
 
+// Fake Workers KV for the anonymous counts (binding STATS).
+const kv = new Map();
+const STATS = {
+  put: async (k, v) => { kv.set(k, v); },
+  list: async ({ prefix }) => ({ keys: [...kv.keys()].filter(k => k.startsWith(prefix || "")).map(name => ({ name })), list_complete: true })
+};
 const env = {
+  STATS,
   QUEST_KEY: "cle-de-test", STRIPE_SECRET_KEY: "sk_test_local", STRIPE_API: `${base}/stripe`, PRICE_CENTS: "2490",
   ASSETS: { fetch: req => file(new URL(req.url).pathname) }
 };
@@ -86,7 +96,8 @@ http.createServer(async (nreq, nres) => {
     if (url.pathname.startsWith("/stripe/")) res = await fakeStripe(req, url);
     else if (url.pathname === "/fake-checkout") res = fakeCheckout(url);
     else if (url.pathname === "/__sessions") res = Response.json([...sessions.values()]);
-    else res = await worker.fetch(req, env);
+    else if (url.pathname === "/__counts") res = Response.json([...kv.keys()]);
+    else res = await worker.fetch(req, env, { waitUntil: p => p });
   } catch (e) { res = new Response(String(e && e.stack || e), { status: 500 }); }
   nres.writeHead(res.status, Object.fromEntries(res.headers));
   nres.end(Buffer.from(await res.arrayBuffer()));

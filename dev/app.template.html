@@ -9,6 +9,16 @@
 <meta property="og:locale" content="fr_FR">
 <meta property="og:title" content="Ma Quête de Chevalier">
 <meta property="og:description" content="La chasse au trésor de chevaliers dans les rues de votre ville, au prénom de votre enfant. Prête en deux minutes, sans rien préparer ni imprimer.">
+<meta property="og:url" content="{{SITE}}/">
+<meta property="og:image" content="{{SITE}}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ma Quête de Chevalier : anniversaire 7-10 ans, la chasse au trésor de chevaliers dans votre ville">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="{{SITE}}/">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!--ROBOTS-->
 <meta name="theme-color" content="#1b2547">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Ma Quête de Chevalier","description":"Quête d'anniversaire numérique pour enfants de 7 à 10 ans : 4 à 6 étapes dans les lieux publics autour d'un point de départ en France, au prénom de l'enfant, avec la voix enregistrée du Grand Maître.","offers":{"@type":"Offer","price":"24.90","priceCurrency":"EUR","availability":"https://schema.org/InStock"}}</script>
 <style>
@@ -31,6 +41,7 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;color-scheme:dark}}
 :root[data-theme="dark"]{--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;background:var(--stone);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
 .wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:flex;flex-direction:column;gap:18px}
@@ -46,7 +57,7 @@ a{color:var(--rose)}
 .voice{background:var(--rose-soft);border:none}
 .voice p{font-style:italic}
 label{font-family:var(--label);letter-spacing:.05em;font-size:.95rem;display:flex;flex-direction:column;gap:6px}
-input[type=text],input[type=number],input[type=search],select{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink);width:100%}
+input[type=text],input[type=number],input[type=search],input[type=date],input[type=time],select{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink);width:100%}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 .row>*{flex:1 1 140px;min-width:0}
 .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
@@ -91,7 +102,11 @@ footer{font-size:.78rem;color:var(--muted);text-align:center}
 footer a{color:var(--muted)}
 /* Home */
 .hero{display:flex;flex-direction:column;gap:12px;padding-top:8px}
-.hero h1{font-size:2.9rem;line-height:1.02;color:var(--ink)}
+.hero .brand{font-family:var(--display);font-size:1.9rem;line-height:1;color:var(--rose)}
+.hero h1{font-family:var(--body);font-weight:700;font-size:1.8rem;line-height:1.15;color:var(--ink)}
+.sticky{position:fixed;left:0;right:0;bottom:0;padding:18px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--stone) 35%);display:flex;justify-content:center;z-index:5}
+.sticky .btn{width:100%;max-width:528px;box-shadow:0 4px 14px rgba(27,37,71,.25)}
+.missive .btn.listen{border-color:var(--rose);color:var(--rose);background:var(--card)}
 .promise{font-size:1.15rem;line-height:1.45}
 .missive{position:relative;margin-top:26px;padding-top:40px;background:var(--rose-soft);border:none}
 .missive h3{text-align:center}
@@ -117,6 +132,8 @@ footer a{color:var(--muted)}
 .faq details p{margin-top:8px;color:var(--muted)}
 .consent{flex-direction:row;align-items:flex-start;gap:12px;font-family:var(--body);letter-spacing:0;font-size:.95rem;line-height:1.4}
 .consent input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--rose)}
+.parchment{width:100%;height:auto;display:block;border-radius:8px;border:1px solid var(--line)}
+.parchment:not([src]){display:none}
 @media (prefers-reduced-motion:no-preference){.pop{animation:pop .5s ease-out}@keyframes pop{from{transform:scale(.6);opacity:.3}to{transform:none;opacity:1}}.spinner{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}}
 </style>
 </head>
@@ -145,6 +162,19 @@ const STORE="quete-templiers-v3";
 let PRICE="24,90 €";
 
 const NOMINATIM="https://nominatim.openstreetmap.org";
+// National address base (IGN Géoplateforme): exact street numbers everywhere in France, 50 requests/s.
+const GEOPF="https://data.geopf.fr/geocodage";
+// Voice and page kept on the phone after the unlock (Cache Storage, read by sw.js when there is no network).
+const VOICE_CACHE="quete-voix-/*VOICE_VERSION*/";
+const FONTS=["UnifrakturMaguntia-Book","AlegreyaSans-Regular","AlegreyaSans-Italic","AlegreyaSans-Medium","AlegreyaSans-Bold","AlegreyaSansSC-Medium","AlegreyaSansSC-Bold"].map(f=>`fonts/${f}.woff`);
+// Browsers inside an app (Instagram, TikTok, Facebook…): their storage is often wiped, and the tab hard to find again.
+const INAPP=/FBAN|FBAV|Instagram|TikTok|musical_ly|Bytedance|Snapchat|Pinterest|Line\//i.test(navigator.userAgent);
+
+// Anonymous count of a step of the visit (no cookie, no identifier): see /api/hit in worker.js.
+// The free demo counts under the ref "demo", so the tests of friends and family stay apart.
+function hit(e){try{const body=JSON.stringify({e,ref:PAID?S.ref:"demo"});const url=PAID?"api/hit":PLACES_SITE&&PLACES_SITE+"/api/hit";
+  if(url&&navigator.sendBeacon)navigator.sendBeacon(url,body);}catch(x){}}
+if("serviceWorker" in navigator)try{navigator.serviceWorker.register("sw.js").catch(()=>{});}catch(e){}
 
 /* ---------- State ---------- */
 // preview: what is shown before paying; token: the sealed quest (paid build); quest: the full quest once unlocked;
@@ -240,7 +270,7 @@ function shieldRow(){
     row.append(w);});
   return row;
 }
-function footer(){return h("footer",null,"Lieux : © contributeurs OpenStreetMap (licence ODbL). Recherche d'adresse : Nominatim.",h("br"),
+function footer(){return h("footer",null,"Lieux : © contributeurs OpenStreetMap (licence ODbL). Recherche d'adresse : Base Adresse Nationale (IGN) et Nominatim.",h("br"),
   h("a",{href:"anniversaire-chevalier.html"},"Guide : organiser un anniversaire chevalier"),h("br"),
   h("a",{href:"legal/cgv.html"},"Conditions de vente")," · ",h("a",{href:"legal/mentions-legales.html"},"Mentions légales")," · ",h("a",{href:"legal/confidentialite.html"},"Confidentialité"));}
 
@@ -248,8 +278,27 @@ function footer(){return h("footer",null,"Lieux : © contributeurs OpenStreetMap
 async function getJSON(url,opts,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||20000);
   try{const r=await fetch(url,Object.assign({signal:c.signal},opts||{}));if(!r.ok)throw new Error("HTTP "+r.status);return await r.json();}finally{clearTimeout(t);}}
 function townOf(a){a=a||{};return a.village||a.town||a.city||a.municipality||a.hamlet||"";}
-async function searchPlaces(q){return getJSON(`${NOMINATIM}/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=fr&accept-language=fr&q=${encodeURIComponent(q)}`);}
-async function reverseTown(lat,lon){try{const r=await getJSON(`${NOMINATIM}/reverse?format=jsonv2&zoom=14&accept-language=fr&lat=${lat}&lon=${lon}`,null,10000);return townOf(r.address);}catch(e){return "";}}
+// Address search, asked to both services at once: the national address base knows every street
+// number, OpenStreetMap knows parks and monuments. Sure addresses first, then OpenStreetMap, then the rest.
+// One search per tap on "Chercher" (no search-as-you-type: Nominatim's usage policy).
+async function searchPlaces(q){
+  const e=encodeURIComponent(q);
+  const [ban,osm]=await Promise.allSettled([
+    getJSON(`${GEOPF}/search?q=${e}&limit=5`,null,8000),
+    getJSON(`${NOMINATIM}/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=fr&accept-language=fr&q=${e}`,null,10000)]);
+  if(ban.status==="rejected"&&osm.status==="rejected")throw ban.reason;
+  const sure=[],rest=[],out=[];
+  if(ban.status==="fulfilled")for(const f of (ban.value&&ban.value.features)||[]){
+    const p=f.properties||{},c=f.geometry&&f.geometry.coordinates;if(!c||!p.label)continue;
+    (p.score>=0.7?sure:rest).push({label:p.label,lat:+c[1],lon:+c[0],town:p.city||""});}
+  const fromOsm=osm.status==="fulfilled"&&Array.isArray(osm.value)?osm.value.map(x=>({label:x.display_name,lat:+x.lat,lon:+x.lon,town:townOf(x.address)||x.name||""})):[];
+  for(const r of [...sure,...fromOsm,...rest])if(isFinite(r.lat)&&isFinite(r.lon)&&!out.some(o=>G.dist(o,r)<60))out.push(r);
+  return out.slice(0,6);
+}
+async function reverseTown(lat,lon){
+  try{const r=await getJSON(`${GEOPF}/reverse?lon=${lon}&lat=${lat}&limit=1`,null,6000);const p=r&&r.features&&r.features[0]&&r.features[0].properties;if(p&&p.city)return p.city;}catch(e){}
+  try{const r=await getJSON(`${NOMINATIM}/reverse?format=jsonv2&zoom=14&accept-language=fr&lat=${lat}&lon=${lon}`,null,10000);return townOf(r.address);}catch(e){return "";}
+}
 // Places around the start, from the public OpenStreetMap servers (n = how many to try).
 async function fetchPlaces(lat,lon,n){
   const body="data="+encodeURIComponent(G.overpassQuery(lat,lon));let last=null;
@@ -289,41 +338,152 @@ async function demoFromTiles(lat,lon){
   const q=E.assemble({lat,lon},sel.stops);return {ok:true,preview:previewOf(q),quest:q,token:""};
 }
 
+/* ---------- Without network: the quest's voice is kept on the phone ---------- */
+// Every clip the quest can play (outdoors and at home), the page itself, the fonts and the list of names.
+function questClips(){
+  const q=S.quest,g0=S.hero,keys=[];
+  for(const indoor of [false,true])keys.push(...V.message("prologue",{g:g0,indoor}),...V.message("intro",{g:g0,indoor}));
+  q.steps.forEach((st,i)=>keys.push(...V.message("indice",{g:g0,cat:st.cat,v:st.v||0}),...V.message("recit",{g:g0,cat:st.cat,v:st.v||0}),
+    ...V.message("lettre",{g:g0,letter:st.letter,last:i===q.steps.length-1,word:q.word})));
+  keys.push(...V.message("fin",{g:g0,word:q.word}));
+  return keys.map(clipUrl).filter(Boolean);
+}
+let offline={state:"",done:0,total:0,key:""};
+function showOffline(){
+  const el=document.getElementById("offline-status");if(!el)return;
+  el.textContent=offline.state==="busy"?`Enregistrement de la voix du Grand Maître sur ce téléphone… ${offline.done} sur ${offline.total}`
+    :offline.state==="ok"?"La voix du Grand Maître est enregistrée sur ce téléphone : la quête se joue même sans réseau."
+    :offline.state?"Une partie de la voix n'a pas pu être enregistrée. Gardez du réseau pendant la quête, ou rouvrez ce guide avec une connexion.":"";
+}
+async function keepOffline(){
+  if(!("caches" in window)||!S.quest)return;
+  const key=(S.paid||"demo")+S.hero+S.name;
+  if(offline.key===key&&(offline.state==="busy"||offline.state==="ok"))return;
+  const urls=[...new Set([new URL("./",location.href).href,...[...FONTS,"audio/noms.json",...questClips()].map(u=>new URL(u,location.href).href)])];
+  offline={state:"busy",done:0,total:urls.length,key};showOffline();
+  let failed=0;
+  try{
+    const c=await caches.open(VOICE_CACHE);
+    const one=async u=>{try{if(!(await c.match(u))){const r=await fetch(u,{cache:"no-cache"});if(!r.ok)throw new Error(r.status);await c.put(u,r);}}catch(e){failed++;}offline.done++;showOffline();};
+    const queue=[...urls];await Promise.all([0,1,2].map(async()=>{while(queue.length)await one(queue.shift());}));
+  }catch(e){failed++;}
+  if(offline.key!==key)return;
+  offline.state=failed?"partial":"ok";showOffline();
+  if(!failed)hit("horsligne");
+}
+function offlineCard(){
+  if(!("caches" in window))return null;
+  setTimeout(showOffline,0);
+  return h("div",{class:"card adult"},h("h3",{text:"Sans réseau ?"}),
+    h("p",{class:"note",id:"offline-status",role:"status"}),
+    h("p",{class:"note",text:"Le jour de la fête, ouvrez la quête une fois avec du réseau avant de partir : tout sera prêt."}));
+}
+
+/* ---------- Parchments: the invitation and the diploma as images (WhatsApp, photos) ---------- */
+const sealD=()=>SEAL.match(/ d="([^"]+)"/)[1];  // the wax of the seal drawn on the home page
+const CROSS_D="M-1.6-1.6-5-12H5L1.6-1.6 12-5V5L1.6 1.6 5 12H-5L-1.6 1.6-12 5V-5Z";
+const FACE={display:s=>`${s}px UnifrakturMaguntia, Georgia, serif`,label:s=>`500 ${s}px "Alegreya Sans SC", sans-serif`,
+  body:s=>`${s}px "Alegreya Sans", sans-serif`,italic:s=>`italic ${s}px "Alegreya Sans", sans-serif`,bold:s=>`700 ${s}px "Alegreya Sans", sans-serif`};
+// lines: [{t, f: display|label|body|italic|bold, s: size, c: colour, gap: space before}]
+async function parchment(lines){
+  try{await Promise.all(Object.values(FACE).map(f=>document.fonts.load(f(40),"Aé")));}catch(e){}
+  const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+  const paper=x.createRadialGradient(W/2,H/2,150,W/2,H/2,900);paper.addColorStop(0,"#fbf6e9");paper.addColorStop(1,"#eadbb8");
+  x.fillStyle=paper;x.fillRect(0,0,W,H);
+  x.strokeStyle="#a87a1f";x.lineWidth=7;x.strokeRect(38,38,W-76,H-76);x.lineWidth=2;x.strokeRect(58,58,W-116,H-116);
+  x.save();x.translate(W/2,175);x.scale(3,3);x.fillStyle="#b8505c";x.fill(new Path2D(sealD()));
+  x.strokeStyle="rgba(255,255,255,.35)";x.lineWidth=1.2;x.beginPath();x.arc(0,0,17,0,Math.PI*2);x.stroke();
+  x.fillStyle="rgba(255,255,255,.85)";x.fill(new Path2D(CROSS_D));x.restore();
+  x.textAlign="center";x.textBaseline="alphabetic";
+  // breaks only at plain spaces (never at the no-break space before « ! » or in « 14 h 30 ») and at \n
+  const wrap=(t,font,max)=>{x.font=font;const out=[];for(const para of String(t).split("\n")){let cur="";for(const w of para.split(/ +/)){const tryL=cur?cur+" "+w:w;if(x.measureText(tryL).width>max&&cur){out.push(cur);cur=w;}else cur=tryL;}if(cur)out.push(cur);}return out;};
+  const laid=lines.filter(l=>l&&l.t).map(l=>{const font=FACE[l.f||"body"](l.s||44);return Object.assign({},l,{font,rows:wrap(l.t,font,860),lh:(l.s||44)*1.22});});
+  const total=laid.reduce((a,l)=>a+(l.gap||0)+l.rows.length*l.lh,0);
+  let y=300+Math.max(0,(H-300-150-total)/2);
+  for(const l of laid){y+=l.gap||0;x.font=l.font;x.fillStyle=l.c||"#1b2547";for(const r of l.rows){y+=l.lh;x.fillText(r,W/2,y-l.lh*.22);}}
+  x.font=FACE.display(40);x.fillStyle="#a87a1f";x.fillText("Ma Quête de Chevalier",W/2,H-100);
+  return c;
+}
+// Shows the image, then shares it as a file (WhatsApp, Messages…) or saves it. Two taps, because
+// phones only allow sharing right after a tap, and drawing the image takes a moment.
+function imageMaker(label,fileName,makeLines,evt){
+  const img=h("img",{class:"parchment",alt:""});const out=h("p",{class:"note",role:"status"});let file=null,url="";
+  const send=h("button",{class:"btn",type:"button",hidden:true,onclick:async()=>{
+    try{if(file&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});hit(evt);return;}}catch(e){if(e&&e.name==="AbortError")return;}
+    const a=h("a",{href:url,download:fileName});document.body.append(a);a.click();a.remove();hit(evt);
+    out.textContent="Image enregistrée. Sur iPhone, vous pouvez aussi appuyer longuement sur l'image puis « Enregistrer dans Photos ».";}},"Envoyer ou enregistrer l'image");
+  const make=h("button",{class:"btn ghost",type:"button",onclick:async()=>{
+    make.disabled=true;out.textContent="Le Grand Maître prépare le parchemin…";
+    try{const c=await parchment(makeLines());const blob=await new Promise(r=>c.toBlob(r,"image/png"));
+      if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);file=new File([blob],fileName,{type:"image/png"});
+      img.src=url;img.alt=label;send.hidden=false;out.textContent="";}
+    catch(e){out.textContent="L'image n'a pas pu être créée sur ce téléphone.";}
+    make.disabled=false;make.textContent="Mettre à jour l'image";}},label);
+  return [make,img,send,out];
+}
+const longDate=d=>{try{return new Date(d+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});}catch(e){return d;}};
+function inviteCard(){
+  const f=S.invite||{};const set=(k,v)=>{S.invite=Object.assign({},S.invite,{[k]:v});save();};
+  const date=h("input",{type:"date",id:"inv-date",value:f.date||""}),time=h("input",{type:"time",id:"inv-time",value:f.time||"14:00"});
+  const place=h("input",{type:"text",id:"inv-place",maxlength:"60",value:f.place||"",placeholder:"Ex. : 3 rue des Lilas"});
+  const rsvp=h("input",{type:"text",id:"inv-rsvp",maxlength:"70",value:f.rsvp||"",placeholder:"Ex. : Réponse à Julie avant le 10 mai"});
+  date.addEventListener("change",()=>set("date",date.value));time.addEventListener("change",()=>set("time",time.value));
+  place.addEventListener("input",()=>set("place",place.value.trim()));rsvp.addEventListener("input",()=>set("rsvp",rsvp.value.trim()));
+  const lines=()=>{const hm=(time.value||"").replace(":","\u00a0h\u00a0").replace(/\u00a0h\u00a000$/,"\u00a0h");
+    return [{t:"ordre des gardiens du temple",f:"label",s:38,c:"#a87a1f"},{t:"Oyez, oyez\u00a0!",f:"display",s:104,gap:10},
+      {t:`${g("Le chevalier","La chevalière")}${S.name?" "+S.name:""} convoque ses compagnons d'armes pour une quête de chevaliers, le jour de son anniversaire.`,f:"body",s:46,gap:24},
+      date.value&&{t:"le jour de la quête",f:"label",s:36,c:"#b8505c",gap:44},date.value&&{t:longDate(date.value)+(hm?`, à ${hm}`:""),f:"bold",s:54},
+      place.value&&{t:"rendez-vous",f:"label",s:36,c:"#b8505c",gap:30},place.value&&{t:place.value,f:"bold",s:50},
+      {t:"Apporte ton courage, et ta plus belle cape si tu en as une.",f:"italic",s:42,c:"#5b6482",gap:44},
+      rsvp.value&&{t:rsvp.value,f:"body",s:38,gap:22}];};
+  return h("div",{class:"card adult"},h("h3",{text:"L'invitation des compagnons"}),
+    h("p",{class:"note",text:"Une invitation en image, à envoyer aux parents des invités par WhatsApp ou par message."}),
+    h("div",{class:"row"},h("label",{for:"inv-date"},"Date",date),h("label",{for:"inv-time"},"Heure",time)),
+    h("label",{for:"inv-place"},"Lieu du rendez-vous",place),h("label",{for:"inv-rsvp"},"Réponse (facultatif)",rsvp),
+    ...imageMaker("Créer l'invitation","invitation-chevalier.png",lines,"invite"));
+}
+
 /* ---------- New quest ---------- */
 const fresh={unlocked:false,paid:"",solved:[],step:0,phase:"travel",hint:0};
 async function startIndoor(){
   go({screen:"loading",start:null});
   try{const p=await makePreview({indoor:true});
     if(!p.ok)throw new Error(p.reason);
+    if(!PAID)hit("preview");
     go(Object.assign({},fresh,{preview:p.preview,quest:p.quest,token:p.token,screen:"preview",indoor:true}));}
-  catch(e){go({screen:"neterr"});}
+  catch(e){hit("neterr");go({screen:"neterr"});}
 }
 
 /* ---------- Screens ---------- */
 /* ---------- Home: what the quest is, with the Grand Master's voice as a live sample ---------- */
 const SEAL=`<svg class="seal" viewBox="-30 -30 60 60" aria-hidden="true">
-  <path d="M0-27c4 0 5 2 8 2s5-1 8 1 1 5 3 7 5 2 6 5-1 5-1 8 2 5 0 8-5 2-7 4-2 5-5 6-5-1-8 0-4 3-7 3-4-2-7-3-6 0-8-2-1-5-3-7-5-3-6-6 1-5 0-8-3-5-1-8 5-2 7-4 2-6 5-7 5 1 8 0 3-3 6-3z" fill="var(--rose)"/>
+  <path d="M25.0 -1.4Q26.0 0.0 26.8 1.6Q27.5 3.1 26.4 4.4Q25.4 5.8 24.1 6.9Q22.9 8.0 22.9 9.5Q23.0 11.1 22.9 12.7Q22.8 14.3 21.2 15.0Q19.6 15.7 18.1 16.1Q16.6 16.6 16.2 18.2Q15.7 19.7 15.1 21.3Q14.4 22.9 12.8 23.1Q11.2 23.2 9.6 23.1Q8.1 23.0 6.9 24.2Q5.8 25.4 4.5 26.5Q3.1 27.5 1.5 26.7Q0.0 25.9 -1.3 24.9Q-2.7 23.9 -4.2 24.3Q-5.6 24.7 -7.2 25.0Q-8.8 25.3 -9.9 23.9Q-10.9 22.6 -11.7 21.3Q-12.6 20.0 -14.2 19.9Q-15.9 19.9 -17.6 19.6Q-19.3 19.3 -19.8 17.7Q-20.3 16.2 -20.5 14.6Q-20.7 13.0 -22.1 12.2Q-23.5 11.3 -24.7 10.2Q-26.0 9.1 -25.5 7.4Q-25.0 5.7 -24.3 4.2Q-23.6 2.7 -24.4 1.3Q-25.2 0.0 -25.9 -1.5Q-26.5 -3.0 -25.5 -4.3Q-24.5 -5.6 -23.5 -6.7Q-22.4 -7.9 -22.8 -9.5Q-23.1 -11.1 -23.2 -12.9Q-23.3 -14.6 -21.8 -15.4Q-20.4 -16.3 -18.8 -16.8Q-17.3 -17.3 -16.7 -18.8Q-16.2 -20.3 -15.4 -21.7Q-14.5 -23.1 -12.8 -23.0Q-11.0 -22.9 -9.4 -22.6Q-7.8 -22.3 -6.7 -23.4Q-5.6 -24.5 -4.3 -25.5Q-3.0 -26.6 -1.5 -26.0Q-0.0 -25.3 1.3 -24.6Q2.7 -23.8 4.2 -24.5Q5.8 -25.2 7.4 -25.7Q9.1 -26.1 10.2 -24.8Q11.3 -23.5 12.2 -22.1Q13.0 -20.7 14.5 -20.4Q16.1 -20.1 17.6 -19.7Q19.2 -19.2 19.4 -17.5Q19.7 -15.7 19.8 -14.1Q19.9 -12.5 21.3 -11.7Q22.6 -10.9 24.0 -9.9Q25.4 -8.9 25.1 -7.3Q24.9 -5.7 24.5 -4.2Q24.1 -2.7 25.0 -1.4Z" fill="var(--rose)"/>
   <circle r="17" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.2"/>
   <path d="M-1.6-1.6-5-12H5L1.6-1.6 12-5V5L1.6 1.6 5 12H-5L-1.6 1.6-12 5V-5Z" fill="#fff" fill-opacity=".85"/></svg>`;
 const FAQ=[
   ["Faut-il préparer quelque chose ?","Seulement un petit trésor dans votre sac : bonbons, pièces en chocolat, médailles. Rien à cacher dans la rue, rien à imprimer."],
-  ["Et s'il pleut ?","Passez en mode maison : même histoire, mêmes énigmes, et des défis à faire à l'intérieur. Vous pouvez aussi créer directement une quête à la maison."],
+  ["Et s'il pleut, ou en hiver ?","Passez en mode maison : même histoire, mêmes énigmes, et des défis à faire à l'intérieur. Vous pouvez aussi créer directement une quête à la maison."],
   ["Un lieu est fermé ou en travaux ?","Un bouton permet de passer l'étape, et la lettre est gagnée quand même."],
   ["Les enfants entrent-ils dans les églises ?","Non. Tout se passe dehors, devant les lieux."],
   ["Est-ce que ça marche dans ma ville ?","Partout en France où il y a quelques lieux publics à pied : un bourg, un quartier, un centre-ville. L'aperçu gratuit vous le dit avant de payer."],
   ["Le prénom de mon enfant est rare ?","Le Grand Maître connaît plus de mille prénoms. Pour les autres, il dit « jeune chevalier » ou « jeune chevalière », et le prénom s'affiche quand même à l'écran et sur le diplôme."],
   ["Faut-il installer une application ?","Non. La quête s'ouvre dans le navigateur du téléphone. Après le paiement, un lien permet de la rouvrir sur un autre téléphone, par exemple celui d'un autre adulte."],
-  ["Peut-on la préparer à l'avance ?","Oui. Créez-la quand vous voulez : le lien de quête la rouvre le jour de la fête."]
+  ["Peut-on la préparer à l'avance ?","Oui. Créez-la quand vous voulez : le lien de quête la rouvre le jour de la fête, et une invitation en image est fournie pour les compagnons."],
+  ["Mon enfant a 6 ans, ou 11 ans ?","Les défis et les énigmes sont pensés pour les 7 à 10 ans. À 6 ans, ça marche si un grand ou un adulte aide à lire les réponses. Dès 11 ans, les énigmes peuvent sembler faciles."],
+  ["Est-ce prudent avec un groupe d'enfants ?","Le parcours reste à pied autour du point de départ, dans des lieux publics. Le guide de l'adulte rappelle les consignes : un adulte pour cinq enfants environ, le groupe qui reste ensemble, les défis sur le trottoir, une place ou dans un parc."]
 ];
+let homeIO=null;
 function homeScreen(){
-  const start=()=>go({screen:"setup"});
+  const start=()=>{hit("setup");go({screen:"setup"});};
   const nameIn=h("input",{type:"text",id:"demo-name",value:S.name,maxlength:"24",autocomplete:"off",placeholder:"Ex. : Léa"});
   const known=h("p",{class:"note",role:"status"});
   const checkName=()=>{known.textContent=S.name.length>1&&nameSet&&!V.nameClip(S.name,nameSet)
     ?`Le Grand Maître ne connaît pas encore ce prénom : il dira « ${g("jeune chevalier","jeune chevalière")} ».`:"";};
-  nameIn.addEventListener("input",()=>{S.name=nameIn.value.trim();save();checkName();});
+  const cta=h("button",{class:"btn big",type:"button",onclick:start});
+  const label=()=>{cta.textContent=S.name.length>1?`Créer la quête de ${S.name}`:"Créer l'aperçu gratuit";};label();
+  nameIn.addEventListener("input",()=>{S.name=nameIn.value.trim();save();checkName();label();});
   const words=h("p",{class:"words"});
-  const listen=h("button",{class:"btn",type:"button"},playIcon()," Écouter le Grand Maître");
+  const listen=h("button",{class:"btn ghost listen",type:"button"},playIcon()," Écouter le Grand Maître");
   let playing=false;
   const idle=()=>{playing=false;listen.replaceChildren(playIcon()," Écouter le Grand Maître");};
   listen.addEventListener("click",()=>{
@@ -337,16 +497,25 @@ function homeScreen(){
     ...[["m","Chevalier"],["f","Chevalière"]].map(([v,l])=>h("button",{type:"button","aria-pressed":String(S.hero===v),onclick:e=>{
       S.hero=v;save();seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b===e.currentTarget)));checkName();}},l)));
   const fq=h("div",{class:"faq"},FAQ.map(([q,a])=>h("details",null,h("summary",{text:q}),h("p",{text:a}))));
+  // A call to action stays at the bottom of the screen while none of the page's buttons is visible.
+  const priceCta=h("button",{class:"btn",type:"button",onclick:start},"Créer l'aperçu gratuit");
+  const lastCta=h("button",{class:"btn big",type:"button",onclick:start},"Créer l'aperçu gratuit");
+  const bar=h("div",{class:"sticky",hidden:true},h("button",{class:"btn big",type:"button",onclick:start},"Créer l'aperçu gratuit"));
+  if("IntersectionObserver" in window)setTimeout(()=>{const seen=new Map();
+    homeIO=new IntersectionObserver(es=>{for(const e of es)seen.set(e.target,e.isIntersecting);bar.hidden=[...seen.values()].some(Boolean)||window.scrollY<300;});
+    [cta,priceCta,lastCta].forEach(x=>homeIO.observe(x));},0);
   setTimeout(checkName,0);
   return [
     h("header",{class:"hero"},
-      h("h1",{text:"Ma Quête de Chevalier"}),
-      h("p",{class:"promise",text:"La chasse au trésor de chevaliers dans les rues de votre ville, au prénom de votre enfant. Prête en deux minutes, sans rien préparer ni imprimer."})),
+      h("p",{class:"brand",text:"Ma Quête de Chevalier"}),
+      h("h1",{text:"La chasse au trésor de chevaliers, dans les rues de votre ville"}),
+      h("p",{class:"promise",text:"Pour les anniversaires des 7 à 10 ans : le Grand Maître appelle votre enfant par son prénom et guide la troupe de lieu en lieu. Prête en deux minutes, rien à imprimer."}),
+      S.ref==="fete"&&h("p",{class:"note",text:"Vos enfants ont joué à une quête de chevalier chez des amis ? Voici comment préparer la même pour votre enfant, dans votre ville."})),
     (()=>{const c=h("section",{class:"card missive","aria-label":"Écouter le Grand Maître"});c.innerHTML=SEAL;
       c.append(h("h3",{text:"Le Grand Maître a un message pour votre enfant"}),
         h("label",{for:"demo-name"},"Prénom de l'enfant",nameIn),seg,known,listen,words);return c;})(),
-    h("button",{class:"btn big",type:"button",onclick:start},"Créer l'aperçu gratuit"),
-    h("p",{class:"note center",text:`${PRICE} la quête, à payer après l'aperçu. Quête réussie ou remboursée.`}),
+    cta,
+    h("p",{class:"note center",text:`Aperçu gratuit, puis ${PRICE} pour débloquer la quête. Paiement sécurisé. Quête réussie ou remboursée.`}),
     h("section",{class:"block"},h("h2",{text:"Le jour de la fête"}),
       h("ol",{class:"route"},
         [["Avant","Vous indiquez le prénom et un point de départ : la place de l'église, la mairie, un parc. Le Grand Maître choisit 4 à 6 lieux publics à pied autour : église, fontaine, vieille porte, monument, parc."],
@@ -366,12 +535,14 @@ function homeScreen(){
       h("p",{class:"note",text:"Environ une heure de jeu, moins de 2 km à pied. De 4 à 15 enfants, avec un adulte pour cinq enfants environ."})),
     h("section",{class:"card block"},h("h2",{text:"Le prix"}),
       h("p",{class:"price",text:`${PRICE} la quête`}),
+      h("p",{text:"Soit environ 3 € par enfant pour une fête de huit. Le Grand Maître anime la quête : pas d'animateur à payer, rien à préparer."}),
       h("p",{text:"L'aperçu est gratuit : vous voyez le nombre d'étapes, la distance et la durée avant de payer."}),
       h("p",{text:"Si la fête ne s'est pas bien passée, écrivez-nous dans les 30 jours : nous vous remboursons, sans justificatif."}),
-      h("button",{class:"btn",type:"button",onclick:start},"Créer l'aperçu gratuit")),
+      priceCta),
     h("section",{class:"block"},h("h2",{text:"Questions fréquentes"}),fq),
-    h("button",{class:"btn big",type:"button",onclick:start},"Créer l'aperçu gratuit"),
-    footer()
+    lastCta,
+    footer(),
+    bar
   ];
 }
 
@@ -389,7 +560,7 @@ function setupScreen(){
     const v=q.value.trim();if(v.length<3){note.textContent="Tapez une adresse, un parc ou une ville.";return;}
     note.textContent="Recherche…";results.replaceChildren();
     try{const r=await searchPlaces(v);note.textContent=r.length?"Choisissez le point de départ :":"Aucun lieu trouvé. Essayez avec le nom de la ville.";
-      r.forEach(x=>results.append(h("button",{class:"result",type:"button",text:x.display_name,onclick:()=>startFrom(+x.lat,+x.lon,townOf(x.address)||x.name||"")})));}
+      r.forEach(x=>results.append(h("button",{class:"result",type:"button",text:x.label,onclick:()=>startFrom(x.lat,x.lon,x.town)})));}
     catch(e){note.textContent="La recherche d'adresse ne répond pas. Vérifiez la connexion et réessayez.";}
   };
   q.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doSearch();}});
@@ -430,9 +601,10 @@ async function startFrom(lat,lon,town){
       try{els=G.slim(await fetchPlaces(lat,lon,PAID?1:3));}catch(e){if(!PAID)throw e;}
       p=await makePreview(els?{start:{lat,lon},elements:els}:{start:{lat,lon},fetch:true});
     }
+    if(!PAID)hit(p.ok?"preview":"few");
     if(!p.ok){if(p.reason==="few"){go({screen:"few",found:p.found});return;}throw new Error(p.reason);}
     go(Object.assign({},fresh,{preview:p.preview,quest:p.quest,token:p.token,screen:"preview",indoor:false}));
-  }catch(e){go({screen:"neterr"});}
+  }catch(e){hit("neterr");go({screen:"neterr"});}
 }
 
 function loadingScreen(){return [h("div",{class:"card",style:"text-align:center"},h("div",{class:"spinner"}),
@@ -494,9 +666,21 @@ function previewScreen(){
       h("p",{class:"lock",text:"Les lieux exacts se révèlent un par un pendant la partie."})),
     voiceCard(prologueText(),"Prologue gratuit · à écouter dès maintenant",null,V.message("prologue",{g:S.hero,indoor:!!q.indoorOnly})),
     ...unlockBlock(),
+    PAID&&S.token&&!S.unlocked&&sharePreview(),
     h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"setup"})},"Changer de point de départ"),
     footer()
   ];
+}
+// To decide together: the preview opens on the other parent's phone, places still hidden.
+function sharePreview(){
+  const q=S.preview,out=h("p",{class:"note",role:"status"});
+  const url=`${location.origin}${location.pathname}?apercu=${S.token}&n=${encodeURIComponent(S.name)}&h=${S.hero}&k=${S.kids}&v=${encodeURIComponent(S.town||"")}`;
+  const send=async()=>{
+    const text=`Regarde l'aperçu de la quête d'anniversaire de ${S.name} : ${q.count} étapes${q.indoorOnly?" à la maison":`, ${(q.walkM/1000).toFixed(1).replace(".",",")} km à pied`}, environ ${q.minutes} minutes de jeu.`;
+    try{if(navigator.share){await navigator.share({title:"Ma Quête de Chevalier",text,url});hit("apercu");return;}}catch(e){if(e&&e.name==="AbortError")return;}
+    try{await navigator.clipboard.writeText(text+" "+url);out.textContent="Lien de l'aperçu copié.";hit("apercu");}catch(e){out.textContent=url;}
+  };
+  return h("div",null,h("button",{class:"linkish",type:"button",onclick:send},"Décider à deux ? Envoyer l'aperçu"),out);
 }
 // Unlock: free in the demo build; consent + Stripe payment in the paid build.
 function unlockBlock(){
@@ -523,13 +707,16 @@ function unlockBlock(){
 }
 function guideScreen(){
   const ratio=Math.ceil((S.kids||8)/5);const q=S.quest;
+  const winter=!S.indoor&&!q.indoorOnly&&[10,11,0,1].includes(new Date().getMonth());
   return [
     h("div",null,h("p",{class:"eyebrow",text:"avant de partir"}),h("h2",{text:"Le guide du Grand Maître"})),
     h("p",{class:"lead",text:"Ces consignes sont pour vous, l'adulte. Les enfants n'ont pas besoin de regarder l'écran."}),
+    PAID&&S.paid&&linkCard(),
     h("div",{class:"card adult"},h("h3",{text:"Le groupe"}),h("ul",{class:"rules"},
       h("li",{text:`Pour ${S.kids} enfants, prévoyez au moins ${ratio} adulte${ratio>1?"s":""} (un pour cinq enfants environ).`}),
       h("li",{text:"Les étapes sont des lieux publics : église (on reste dehors), fontaine, parc, place, monument. Les défis se font sur le trottoir, une place ou dans un parc."}),
-      h("li",{text:"Le téléphone reste dans les mains d'un adulte. Pour chaque étape, vous voyez le lieu exact et un lien d'itinéraire à pied."}))),
+      h("li",{text:"Le téléphone reste dans les mains d'un adulte. Pour chaque étape, vous voyez le lieu exact et un lien d'itinéraire à pied."}),
+      winter&&h("li",{text:"En hiver, la nuit tombe vers 17 h : partez au plus tard vers 15 h 30 pour finir avant la nuit."}))),
     h("div",{class:"card adult"},h("h3",{text:"Le trésor"}),h("ul",{class:"rules"},
       h("li",{text:"Gardez dans votre sac un petit coffre ou un sachet : bonbons, pièces en chocolat, médailles."}),
       h("li",{text:"Vous le remettrez à la fin, quand les enfants auront trouvé le mot secret. Rien à cacher dans la rue."}))),
@@ -538,11 +725,13 @@ function guideScreen(){
         h("button",{type:"button","aria-pressed":String(!S.indoor),onclick:()=>go({indoor:false})},"Dehors"),
         h("button",{type:"button","aria-pressed":String(S.indoor),onclick:()=>go({indoor:true})},"À la maison")),
       h("p",{class:"note",text:S.indoor?"Même histoire, mêmes énigmes : le Grand Maître raconte chaque lieu, et les défis se font dans la maison.":"Chaque étape se valide en arrivant sur place. Si un lieu est fermé ou inaccessible, vous pourrez passer l'étape."})),
-    PAID&&S.paid&&linkCard(),
+    inviteCard(),
+    offlineCard(),
     h("button",{class:"btn",type:"button",onclick:()=>go({screen:"intro"})},"Commencer la quête")
   ];
 }
-// The reopen link works on any phone, e.g. another adult's on the day of the party.
+// The reopen link works on any phone, e.g. another adult's on the day of the party. Phones can wipe
+// a site's data after some days without a visit (Safari: 7 days), so the link is the safe copy.
 function linkCard(){
   const url=location.origin+location.pathname+"?quete="+encodeURIComponent(S.paid);
   const out=h("p",{class:"note",role:"status"});
@@ -550,9 +739,11 @@ function linkCard(){
     try{if(navigator.share){await navigator.share({title:"Ma Quête de Chevalier",text:`La quête de ${S.name}`,url});return;}}catch(e){if(e&&e.name==="AbortError")return;}
     try{await navigator.clipboard.writeText(url);out.textContent="Lien copié.";}catch(e){out.textContent=url;}
   };
+  const mail="mailto:?subject="+encodeURIComponent(`La quête de chevalier de ${S.name||"notre enfant"}`)+"&body="+encodeURIComponent(`Le lien pour ouvrir la quête le jour de la fête :\n${url}\n`);
   return h("div",{class:"card adult"},h("h3",{text:"Votre lien de quête"}),
-    h("p",{class:"note",text:"Gardez ce lien : il rouvre la quête sur n'importe quel téléphone, par exemple celui d'un autre adulte le jour de la fête."}),
-    h("button",{class:"btn ghost",type:"button",onclick:share},"Partager ou copier le lien"),out);
+    h("p",{class:"note",text:"Envoyez-vous ce lien : il rouvre la quête sur n'importe quel téléphone, même si celui-ci a effacé ses données, et permet à un autre adulte de la suivre."}),
+    INAPP&&h("p",{class:"note",text:"Vous êtes dans le navigateur d'une application (Instagram, TikTok, Facebook…) : le jour de la fête, ouvrez plutôt ce lien dans Safari ou Chrome."}),
+    h("div",{class:"row"},h("button",{class:"btn ghost",type:"button",onclick:share},"Partager ou copier"),h("a",{class:"btn ghost",href:mail},"M'envoyer par e-mail")),out);
 }
 function introScreen(){
   const n=S.quest.steps.length;
@@ -635,7 +826,7 @@ function finalScreen(){
   const q=S.quest;const letters=S.solved.map(k=>q.steps[k].letter).join(" ");
   const inp=h("input",{type:"text",id:"secret",autocomplete:"off",placeholder:"Le mot secret"});const fb=h("p",{role:"status",class:"hint"});
   const check=()=>{const v=inp.value.normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().trim();
-    if(v===q.word)go({screen:"diploma"});else fb.textContent=`Ce n'est pas encore ça. Il commence par ${q.word[0]}.`;};
+    if(v===q.word){hit("diploma");go({screen:"diploma"});}else fb.textContent=`Ce n'est pas encore ça. Il commence par ${q.word[0]}.`;};
   inp.addEventListener("keydown",e=>{if(e.key==="Enter")check();});
   return [shieldRow(),h("div",null,h("p",{class:"eyebrow",text:"le sceau du temple"}),h("h2",{text:"Le mot secret"})),
     h("div",{class:"card adult"},h("h3",{text:"Pour l'adulte"}),
@@ -655,7 +846,13 @@ function diplomaScreen(){
       h("p",{class:"note",text:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`}),
       // A discreet signature: diploma photos shared by parents carry the name of the quest.
       h("p",{class:"sign",text:"Ma Quête de Chevalier"})),
-    h("p",{class:"note",text:"Faites une capture d'écran du diplôme pour le garder en souvenir."}),
+    h("div",{class:"card adult"},h("h3",{text:"Le diplôme en souvenir"}),
+      h("p",{class:"note",text:"Le diplôme en image, à garder ou à envoyer à la famille."}),
+      ...imageMaker("Créer le diplôme en image","diplome-chevalier.png",()=>[
+        {t:"ordre des gardiens du temple",f:"label",s:38,c:"#a87a1f"},{t:"Par ce diplôme, le Grand Maître nomme",f:"body",s:46,gap:30},
+        {t:S.name||g("Jeune chevalier","Jeune chevalière"),f:"display",s:128,c:"#b8505c",gap:20},
+        {t:g("Chevalier","Chevalière")+" de l'Ordre\ndes Gardiens du Temple",f:"bold",s:50,gap:16},
+        {t:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`,f:"italic",s:42,c:"#5b6482",gap:36}],"diplome")),
     shareCard(),
     h("button",{class:"btn ghost",type:"button",onclick:()=>go(Object.assign({},defaults,{name:S.name,hero:S.hero,kids:S.kids,voice:S.voice,town:S.town,screen:"setup"}))},"Créer une nouvelle quête")];
 }
@@ -666,8 +863,8 @@ function shareCard(){
   const out=h("p",{class:"note",role:"status"});
   const share=async()=>{
     const text="Nous avons fêté un anniversaire avec Ma Quête de Chevalier : une chasse au trésor de chevaliers dans notre ville, au prénom de l'enfant.";
-    try{if(navigator.share){await navigator.share({title:"Ma Quête de Chevalier",text,url});return;}}catch(e){if(e&&e.name==="AbortError")return;}
-    try{await navigator.clipboard.writeText(url);out.textContent="Lien copié.";}catch(e){out.textContent=url;}
+    try{if(navigator.share){await navigator.share({title:"Ma Quête de Chevalier",text,url});hit("share");return;}}catch(e){if(e&&e.name==="AbortError")return;}
+    try{await navigator.clipboard.writeText(url);out.textContent="Lien copié.";hit("share");}catch(e){out.textContent=url;}
   };
   return h("div",{class:"card adult"},h("h3",{text:"Les compagnons ont aimé ?"}),
     h("p",{class:"note",text:"Envoyez la présentation de la quête à leurs parents, pour un prochain anniversaire."}),
@@ -680,12 +877,14 @@ function topbar(){
 }
 const OPEN=["home","setup","loading","few","neterr","unlocking","unlockerr"];
 function render(){
-  note.textContent="";stopVoice();app.replaceChildren();
+  note.textContent="";stopVoice();app.replaceChildren();if(homeIO){homeIO.disconnect();homeIO=null;}
   let screen=S.screen;
   if(!S.preview&&!OPEN.includes(screen))screen="home";
   else if(!(S.unlocked&&S.quest)&&!OPEN.includes(screen)&&screen!=="preview")screen="preview";
   const map={home:homeScreen,setup:setupScreen,loading:loadingScreen,few:fewScreen,neterr:netErrScreen,preview:previewScreen,unlocking:unlockingScreen,unlockerr:unlockErrScreen,
     guide:guideScreen,intro:introScreen,step:stepScreen,final:finalScreen,diploma:diplomaScreen};
+  if(!render.seen){render.seen=true;if(screen==="home")hit("home");}
+  if(S.unlocked&&S.quest)keepOffline();
   const tb=topbar();if(tb)app.append(tb);
   (map[screen]||homeScreen)().forEach(n=>{if(n)app.append(n);});
 }
@@ -704,12 +903,25 @@ async function unlockWith(sid){
     same?{screen:OPEN.includes(was)||was==="preview"?"guide":was}:{}));
 }
 
+// A preview received from someone else (?apercu=token&n=…): the same quest, ready to pay.
+async function openShared(token,p){
+  if(S.unlocked&&S.quest&&S.screen!=="diploma"){render();note.textContent="Une quête est déjà ouverte sur ce téléphone : l'aperçu reçu n'a pas été ouvert.";return;}
+  go({screen:"loading",start:null});
+  let r=null;try{r=await api("api/preview",{token,ref:S.ref||"apercu"});}catch(e){}
+  if(!r||!r.ok){go({screen:"home"});note.textContent="Cet aperçu n'a pas pu s'ouvrir : créez-en un nouveau ci-dessous.";return;}
+  if(r.price)PRICE=r.price;
+  go(Object.assign({},fresh,{ref:S.ref||"apercu",token:r.token,quest:null,start:null,screen:"preview",indoor:!!r.indoorOnly,
+    preview:{ok:true,indoorOnly:r.indoorOnly,count:r.count,walkM:r.walkM,minutes:r.minutes,teasers:r.teasers,price:r.price},
+    name:(p.get("n")||"").slice(0,24),hero:p.get("h")==="f"?"f":"m",kids:Math.max(2,Math.min(15,parseInt(p.get("k"),10)||8)),town:(p.get("v")||"").slice(0,60)}));
+}
+
 // A reload in the middle of loading goes back to where it was; everything else resumes.
 if(S.screen==="loading"||S.screen==="unlocking")S.screen=S.preview?"preview":"home";
 const qs=new URLSearchParams(location.search);
-if(qs.get("ref")){S.ref=qs.get("ref").replace(/[^a-z0-9-]/gi,"").slice(0,20);save();if(!qs.get("paid")&&!qs.get("quete"))history.replaceState(null,"",location.pathname);}
+if(qs.get("ref")){S.ref=qs.get("ref").replace(/[^a-z0-9-]/gi,"").slice(0,20);save();if(!qs.get("paid")&&!qs.get("quete")&&!qs.get("apercu"))history.replaceState(null,"",location.pathname);}
 const sid=qs.get("paid")||qs.get("quete");
 if(PAID&&sid){history.replaceState(null,"",location.pathname);unlockWith(sid);}
+else if(PAID&&qs.get("apercu")){history.replaceState(null,"",location.pathname);openShared(qs.get("apercu"),qs);}
 else if(qs.has("annule")){history.replaceState(null,"",location.pathname);if(S.preview)S.screen="preview";render();note.textContent="Paiement annulé : rien n'a été débité.";}
 else render();
 })();

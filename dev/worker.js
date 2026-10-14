@@ -1,11 +1,14 @@
 /* WORKER-START
    Server of the paid app (Cloudflare Worker). The build puts geo.js and engine.js in front of
-   this file. It serves the site, and three routes:
-     POST /api/preview  places found by the browser -> free preview + sealed quest token
+   this file. It serves the site, and these routes:
+     POST /api/preview  start point -> free preview + sealed quest token (or a shared token -> its preview)
      POST /api/checkout sealed token -> Stripe Checkout page
      POST /api/unlock   paid Stripe session -> full quest
+     POST /api/hit      one anonymous count of a step of the visit (home page, preview, diploma…)
+     POST /api/stats    the counts, for the weekly report (key derived from the Stripe secret)
    The token is encrypted (AES-GCM), so the places of a quest stay hidden until payment.
-   Secrets: STRIPE_SECRET_KEY, QUEST_KEY. Variables: PRICE_CENTS, STRIPE_API (tests only). */
+   Secrets: STRIPE_SECRET_KEY, QUEST_KEY. Variables: PRICE_CENTS, STRIPE_API (tests only).
+   Optional binding: STATS (Workers KV) for the counts; without it, counting is simply off. */
 
 const HEADERS = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
 const reply = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: HEADERS });
@@ -13,6 +16,23 @@ const MAX_BODY = 3000000;
 // One line per event in the Cloudflare logs, to count previews, payments and unlocks. No personal data.
 const refOf = b => String(b && b.ref || "").replace(/[^a-z0-9-]/gi, "").slice(0, 20);
 const log = (evt, data) => console.log(JSON.stringify(Object.assign({ evt }, data)));
+
+// Anonymous counts of the visit, one KV key per event: "day|event|ref|random", kept 400 days.
+// No IP address, no identifier, no cookie: only how many times each step happened, and the ref.
+const EVENTS = new Set(["home", "setup", "preview", "few", "nodata", "neterr", "checkout", "unlock", "diploma",
+  "invite", "diplome", "share", "apercu", "apercu-ouvert", "horsligne"]);
+function count(env, ctx, evt, ref) {
+  if (!env.STATS || !EVENTS.has(evt)) return;
+  const day = new Date().toISOString().slice(0, 10);
+  const key = `${day}|${evt}|${ref || "-"}|${crypto.randomUUID().slice(0, 8)}`;
+  // The free plan allows 1,000 writes a day: past that, counts are lost for the day, nothing breaks.
+  const p = env.STATS.put(key, "1", { expirationTtl: 400 * 86400 }).catch(() => {});
+  if (ctx && ctx.waitUntil) ctx.waitUntil(p);
+}
+async function statsKey(env) {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("stats:" + (env.STRIPE_SECRET_KEY || "")));
+  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
 
 const b64u = {
   enc(bytes) { let s = ""; for (const b of bytes) s += String.fromCharCode(b); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); },
@@ -103,10 +123,17 @@ async function placesFromOSM(start, origin) {
   return null;
 }
 
-async function preview(request, env) {
+async function preview(request, env, ctx) {
   const b = await readJSON(request);
   if (!b) return reply({ ok: false, reason: "bad" }, 400);
   let token, quest;
+  // A preview sent to someone else (the other parent): same quest, places still hidden.
+  if (typeof b.token === "string" && b.token) {
+    quest = questOf(await unseal(b.token, env));
+    if (!quest) return reply({ ok: false, reason: "token" }, 400);
+    count(env, ctx, "apercu-ouvert", refOf(b));
+    return reply(Object.assign(QuestEngine.preview(quest), { token: b.token, price: priceLabel(env) }));
+  }
   if (b.indoor) {
     quest = QuestEngine.assemble(null, QuestEngine.indoorStops());
     token = await seal({ i: 1 }, env);
@@ -117,9 +144,10 @@ async function preview(request, env) {
     // 1. our own copy of OpenStreetMap places (no elements sent by the phone)
     if (!Array.isArray(b.elements) && !b.fetch) {
       const places = await placesFromTiles(start, env, new URL(request.url).origin);
-      if (!places) return reply({ ok: false, reason: "nodata" }, 503);
+      if (!places) { count(env, ctx, "nodata", refOf(b)); return reply({ ok: false, reason: "nodata" }, 503); }
       const sel = QuestEngine.selectPlaces(places, start);
       log("preview", { ok: sel.ok, source: "tiles", found: sel.found, ref: refOf(b) });
+      count(env, ctx, sel.ok ? "preview" : "few", refOf(b));
       if (!sel.ok) return reply(sel);
       quest = QuestEngine.assemble(start, sel.stops);
       token = await seal(pack(start, sel.stops), env);
@@ -133,15 +161,16 @@ async function preview(request, env) {
     }
     if (!Array.isArray(b.elements) || b.elements.length > 5000) return reply({ ok: false, reason: "bad" }, 400);
     const sel = QuestEngine.select(b.elements, start);
-    if (!sel.ok) { log("preview", { ok: false, found: sel.found, ref: refOf(b) }); return reply(sel); }
+    if (!sel.ok) { log("preview", { ok: false, found: sel.found, ref: refOf(b) }); count(env, ctx, "few", refOf(b)); return reply(sel); }
     quest = QuestEngine.assemble(start, sel.stops);
     token = await seal(pack(start, sel.stops), env);
   }
   log("preview", { ok: true, indoor: !!b.indoor, steps: quest.steps.length, ref: refOf(b) });
+  count(env, ctx, "preview", refOf(b));
   return reply(Object.assign(QuestEngine.preview(quest), { token, price: priceLabel(env) }));
 }
 
-async function checkout(request, env) {
+async function checkout(request, env, ctx) {
   const b = await readJSON(request);
   if (!b || b.consent !== true) return reply({ ok: false, reason: "consent" }, 400);
   const t = await unseal(b.token, env);
@@ -170,6 +199,7 @@ async function checkout(request, env) {
   try {
     const s = await stripe(env, "POST", "/v1/checkout/sessions", params);
     log("checkout", { ref: refOf(b) });
+    count(env, ctx, "checkout", refOf(b));
     return reply({ ok: true, url: s.url });
   } catch (e) {
     console.log(String(e));
@@ -178,7 +208,7 @@ async function checkout(request, env) {
   }
 }
 
-async function unlock(request, env) {
+async function unlock(request, env, ctx) {
   const b = await readJSON(request);
   const id = String(b && b.session || "");
   if (!/^cs_(test|live)_[A-Za-z0-9]{10,200}$/.test(id)) return reply({ ok: false, reason: "bad" }, 400);
@@ -192,18 +222,49 @@ async function unlock(request, env) {
   const quest = questOf(await unseal(token, env));
   if (!quest) return reply({ ok: false, reason: "token" }, 500);
   log("unlock", { ok: true, ref: m.ref || "" });
+  count(env, ctx, "unlock", refOf(m));
   return reply({ ok: true, quest, name: m.n || "", hero: m.h === "f" ? "f" : "m", kids: parseInt(m.k, 10) || 8, town: m.v || "" });
 }
 
+// A step of the visit seen by the phone (sent with navigator.sendBeacon).
+async function hit(request, env, ctx) {
+  const b = await readJSON(request);
+  if (b && typeof b.e === "string") count(env, ctx, b.e, refOf(b));
+  return new Response(null, { status: 204 });
+}
+
+// Counts for the weekly report: { days: { "2026-10-14": { home: { direct: 3, fete: 1 }, … } } }.
+async function stats(request, env) {
+  const b = await readJSON(request);
+  if (!b || b.key !== await statsKey(env)) return reply({ ok: false, reason: "key" }, 403);
+  if (!env.STATS) return reply({ ok: false, reason: "off" }, 503);
+  const n = Math.max(1, Math.min(60, parseInt(b.days, 10) || 7)), days = {};
+  for (let i = 0; i < n; i++) {
+    const day = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10), d = days[day] = {};
+    let cursor;
+    do {
+      const page = await env.STATS.list({ prefix: day + "|", cursor });
+      for (const k of page.keys) {
+        const [, evt, ref] = k.name.split("|");
+        (d[evt] = d[evt] || {})[ref] = (d[evt][ref] || 0) + 1;
+      }
+      cursor = page.list_complete ? null : page.cursor;
+    } while (cursor);
+  }
+  return reply({ ok: true, days });
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname.startsWith("/api/")) {
       if (request.method !== "POST") return reply({ ok: false, reason: "method" }, 405);
       try {
-        if (url.pathname === "/api/preview") return await preview(request, env);
-        if (url.pathname === "/api/checkout") return await checkout(request, env);
-        if (url.pathname === "/api/unlock") return await unlock(request, env);
+        if (url.pathname === "/api/preview") return await preview(request, env, ctx);
+        if (url.pathname === "/api/checkout") return await checkout(request, env, ctx);
+        if (url.pathname === "/api/unlock") return await unlock(request, env, ctx);
+        if (url.pathname === "/api/hit") return await hit(request, env, ctx);
+        if (url.pathname === "/api/stats") return await stats(request, env);
       } catch (e) {
         console.log(String(e && e.stack || e));
         return reply({ ok: false, reason: "server" }, 500);

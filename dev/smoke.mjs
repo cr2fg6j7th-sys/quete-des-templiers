@@ -15,10 +15,11 @@ try {
   const home = await fetch(site + "/");
   const html = await home.text();
   home.ok && html.includes("Ma Quête de Chevalier") && html.includes("QUEST_VOICE_KEYS") ? ok("page d'accueil") : ko(`page d'accueil (HTTP ${home.status})`);
-  const files = ["/audio/voix/prologue-dehors-m.mp3", "/audio/noms/lea.mp3", "/audio/noms.json", "/fonts/AlegreyaSans-Regular.woff", "/legal/cgv.html", "/anniversaire-chevalier.html"];
+  const files = ["/audio/voix/prologue-dehors-m.mp3", "/audio/noms/lea.mp3", "/audio/noms.json", "/fonts/AlegreyaSans-Regular.woff", "/legal/cgv.html", "/anniversaire-chevalier.html",
+    "/sw.js", "/og.png", "/icon.svg", "/apple-touch-icon.png", "/robots.txt", "/sitemap.xml"];
   const missing = [];
   for (const f of files) { const r = await fetch(site + f, { method: "HEAD" }); if (!r.ok) missing.push(`${f} (HTTP ${r.status})`); }
-  missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, prénoms, polices, pages)`);
+  missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, prénoms, polices, pages, image des liens, hors ligne)`);
 
   // Quests from our own copy of the places of France: a village, two dense city centres.
   let token = "";
@@ -44,9 +45,35 @@ try {
     p.json && p.json.ok ? ok("relais OpenStreetMap par le serveur") : console.log(`::warning::Relais OpenStreetMap indisponible (HTTP ${p.status})`);
   }
 
+  // The national address base answers phones (CORS) with Rosheim.
+  {
+    let msg;
+    try {
+      const r = await fetch("https://data.geopf.fr/geocodage/search?q=" + encodeURIComponent("place de la République Rosheim") + "&limit=1", { headers: { origin: site } });
+      const j = await r.json();
+      const f = j.features && j.features[0];
+      msg = f && /Rosheim/.test(f.properties.label) && r.headers.get("access-control-allow-origin") ? null : `réponse inattendue (HTTP ${r.status}, CORS ${r.headers.get("access-control-allow-origin")})`;
+    } catch (e) { msg = String(e); }
+    msg ? console.log(`::warning::Base Adresse Nationale : ${msg} (Nominatim prend le relais)`) : ok("recherche d'adresse (Base Adresse Nationale)");
+  }
+
+  // Anonymous counts and the weekly report's access to them.
+  {
+    const h = await fetch(site + "/api/hit", { method: "POST", body: JSON.stringify({ e: "home", ref: "smoke" }) });
+    const key = [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("stats:" + (process.env.STRIPE_SECRET_KEY || ""))))].map(b => b.toString(16).padStart(2, "0")).join("");
+    const st = await post("/api/stats", { key, days: 1 });
+    if (h.status === 204 && st.json && st.json.ok) ok("compteurs de visites");
+    else console.log(`::warning::Compteurs de visites inactifs (hit HTTP ${h.status}, stats ${st.status} ${st.json && st.json.reason})`);
+  }
+
   const home2 = await post("/api/preview", { indoor: true, ref: "smoke" });
   home2.json && home2.json.ok && home2.json.count === 6 ? ok("aperçu de la quête à la maison") : ko(`quête à la maison (HTTP ${home2.status})`);
   token = token || (home2.json && home2.json.token) || "";
+
+  if (token) {
+    const again = await post("/api/preview", { token, ref: "smoke" });
+    again.json && again.json.ok ? ok("aperçu envoyé à quelqu'un : rouvert") : ko(`aperçu envoyé (HTTP ${again.status})`);
+  }
 
   const bad = await post("/api/checkout", { token: "faux", consent: true });
   bad.status === 400 ? ok("jeton trafiqué refusé") : ko(`jeton trafiqué (HTTP ${bad.status})`);

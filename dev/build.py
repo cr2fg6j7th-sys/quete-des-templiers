@@ -4,23 +4,36 @@
 #   legal/, site/legal/ sales terms, legal notice, privacy, filled from dev/legal/identite.json
 #   *.html guides       pages for Google and Pinterest, from dev/pages/, at the site root
 #   dist/worker.js      Cloudflare server: geo.js + engine.js + worker.js
+#   sw.js               keeps a bought quest playable without network (both builds)
+#   og.png, icons       link preview image and icons (dev/static/, made by dev/video/og.py)
+#   robots.txt, sitemap.xml   for search engines (paid site only; the demo is marked noindex)
 # The audio folder is copied into site/ by the deploy workflow (or with --audio).
-import json, re, shutil, subprocess, sys
+import hashlib, json, re, shutil, subprocess, sys
 from pathlib import Path
 d = Path(__file__).parent
 root = d.parent
 read = lambda n: (d / n).read_text(encoding="utf-8")
 t, geo, eng, voice, worker = read("app.template.html"), read("geo.js"), read("engine.js"), read("voice.js"), read("worker.js")
 
-# The paid site, whose copy of the places of France the demo reads (CORS allowed on /places/).
-PLACES_SITE = "https://ma-quete-de-chevalier.pv6ggk8t2v.workers.dev"
+# The paid site: its address goes in the link previews and for Google; the demo reads its copy of
+# the places of France (CORS allowed on /places/). To change when the domain name is bought.
+SITE = PLACES_SITE = "https://ma-quete-de-chevalier.pv6ggk8t2v.workers.dev"
+# Changes when the voice clips change, so phones drop the old copy kept for playing without network.
+audio_files = [root / "audio" / "manifest.json", root / "audio" / "noms.json"]
+VOICE_VERSION = hashlib.sha256(b"".join(f.read_bytes() for f in audio_files if f.exists())).hexdigest()[:10]
 
 def page(engine_part, paid):
     return (t.replace("/*GEO*/", geo).replace("/*ENGINE*/", engine_part).replace("/*VOICE*/", voice)
              .replace("const PAID=/*PAID*/false;", f"const PAID={'true' if paid else 'false'};")
-             .replace("/*PLACES_SITE*/", "" if paid else PLACES_SITE))
+             .replace("/*PLACES_SITE*/", "" if paid else PLACES_SITE)
+             .replace("{{SITE}}", SITE).replace("/*VOICE_VERSION*/", VOICE_VERSION)
+             .replace("<!--ROBOTS-->", "" if paid else '<meta name="robots" content="noindex">'))
+sw = read("sw.js").replace("/*VOICE_VERSION*/", VOICE_VERSION)
 
 (root / "index.html").write_text(page(eng, False), encoding="utf-8")
+(root / "sw.js").write_text(sw, encoding="utf-8")
+for f in (d / "static").iterdir():
+    shutil.copy(f, root / f.name)
 
 # Legal pages: one identity file (dev/legal/identite.json) fills every page.
 STYLE = """<style>
@@ -42,7 +55,7 @@ med = ident.get("mediateur") or ""
 if med and ident.get("mediateur_site"):
     med = f'{med} (<a href="{ident["mediateur_site"]}" rel="noopener">{ident["mediateur_site"]}</a>)'
 fields = {
-    "{{STYLE}}": STYLE, "{{DATE}}": "13 octobre 2026",
+    "{{STYLE}}": STYLE, "{{DATE}}": "14 octobre 2026",
     "{{NOM}}": ident.get("nom") or todo("nom et prénom"),
     "{{SIRET}}": ident.get("siret") or todo("numéro SIRET"),
     "{{ADRESSE}}": ident.get("adresse") or todo("adresse"),
@@ -53,10 +66,12 @@ def fill(html):
     for k, v in fields.items():
         html = html.replace(k, v)
     return html
-# Guides for Google and Pinterest (dev/pages/), served at the site root.
-guide_pages = {f.name: fill(f.read_text(encoding="utf-8")) for f in sorted((d / "pages").glob("*.html"))}
+# Guides for Google and Pinterest (dev/pages/), served at the site root. Google is told the paid
+# site holds the original (canonical); the demo copies are not to be indexed.
+guide_pages = {f.name: fill(f.read_text(encoding="utf-8")).replace("</head>", f'<link rel="canonical" href="{SITE}/{f.name}">\n</head>', 1)
+               for f in sorted((d / "pages").glob("*.html"))}
 for name, html in guide_pages.items():
-    (root / name).write_text(html, encoding="utf-8")
+    (root / name).write_text(html.replace("</head>", '<meta name="robots" content="noindex">\n</head>', 1), encoding="utf-8")
 legal_pages = {}
 for f in sorted((d / "legal").glob("*.html")):
     html = f.read_text(encoding="utf-8")
@@ -79,8 +94,16 @@ for name, html in legal_pages.items():
 for name, html in guide_pages.items():
     (site / name).write_text(html, encoding="utf-8")
 shutil.copytree(root / "fonts", site / "fonts")
+(site / "sw.js").write_text(sw, encoding="utf-8")
+for f in (d / "static").iterdir():
+    shutil.copy(f, site / f.name)
+(site / "robots.txt").write_text(f"User-agent: *\nDisallow: /api/\nDisallow: /places/\nDisallow: /audio/\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
+urls = [SITE + "/"] + [f"{SITE}/{n}" for n in guide_pages]
+(site / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + "".join(f"  <url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
 # Headers of the static files (Cloudflare): the demo may read the place tiles from another site.
-(site / "_headers").write_text("/places/*\n  Access-Control-Allow-Origin: *\n  Cache-Control: public, max-age=86400\n", encoding="utf-8")
+(site / "_headers").write_text("/places/*\n  Access-Control-Allow-Origin: *\n  Cache-Control: public, max-age=86400\n"
+    "/sw.js\n  Cache-Control: no-cache\n", encoding="utf-8")
 if "--audio" in sys.argv:
     shutil.copytree(root / "audio", site / "audio", ignore=shutil.ignore_patterns("manifest.json", "rapport-noms.json", "test"))
 
