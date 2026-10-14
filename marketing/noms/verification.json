@@ -1,0 +1,1758 @@
+[
+ {
+  "name": "Ma Grande Quête",
+  "trademarks": {
+   "grande quete": {
+    "total": 9,
+    "marks": [
+     {
+      "name": "GRANDE ENQUETE NATIONALE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       16,
+       35,
+       36
+      ],
+      "date": "2014-02-05T12:00:00.000Z",
+      "owner": [
+       "INSTITUT PASTEUR DE LILLE, Fondation reconnue d'utilité publique"
+      ],
+      "id": "FR500000004066193"
+     },
+     {
+      "name": "LA GRANDE ENQUETE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       28,
+       41
+      ],
+      "date": "2019-07-31T12:00:00.000Z",
+      "owner": [
+       "LA GRANDE ENQUETE Association Loi 1901"
+      ],
+      "id": "FR500000004572259"
+     },
+     {
+      "name": "LA GRANDE QUÊTE DES LUTINS PERDUS",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       41
+      ],
+      "date": "2026-06-15T12:00:00.000Z",
+      "owner": [
+       "CYNTHIA HOMS"
+      ],
+      "id": "FR500000005268498"
+     },
+     {
+      "name": "GESC - GRANDE ENQUETE SPECIAL CONSOMMATION",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       28,
+       35,
+       38
+      ],
+      "date": "1994-04-13T12:00:00.000Z",
+      "owner": [
+       "CLARITAS Société Anonyme"
+      ],
+      "id": "FR500000094515322"
+     },
+     {
+      "name": "ChaRLoTte AUX FRaises A la Conquête de la GRANDE VILLE",
+      "office": "EM",
+      "status": "Registered",
+      "classes": [
+       3,
+       5,
+       16,
+       28,
+       29,
+       9,
+       30,
+       25,
+       41
+      ],
+      "date": "2021-08-09T12:00:00.000Z",
+      "owner": [
+       "Shortcake IP Holdings LLC"
+      ],
+      "id": "EM500000018530328"
+     },
+     {
+      "name": "LES GRANDES ENQUETES BIBLIOGRAPHIQUES 50 QUESTIONS SUR...",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       41
+      ],
+      "date": "1995-10-09T12:00:00.000Z",
+      "owner": [
+       "LEN MEDICAL - Société Anonyme,"
+      ],
+      "id": "FR500000095591597"
+     },
+     {
+      "name": "FLOORZ LA GRANDE PARQUETERIE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       19,
+       35,
+       42
+      ],
+      "date": "2026-04-20T12:00:00.000Z",
+      "owner": [
+       "Bruno Mignot"
+      ],
+      "id": "FR500000005250035"
+     },
+     {
+      "name": "LES GRANDES ENQUETES CRIMINELLES",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       16
+      ],
+      "date": "1989-12-29T12:00:00.000Z",
+      "owner": [
+       "A.L.P. Société en Nom Collectif,"
+      ],
+      "id": "FR500000001567798"
+     },
+     {
+      "name": "Tiquête Les petits dons font les grandes causes.",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       36
+      ],
+      "date": "2002-10-15T12:00:00.000Z",
+      "owner": [
+       "COTTET Michel"
+      ],
+      "id": "FR500000003188932"
+     }
+    ]
+   }
+  },
+  "slugs": {
+   "magrandequete": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403)"
+   },
+   "lagrandequete": {
+    "fr": "? (TypeError)",
+    "com": "pris",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403)"
+   }
+  }
+ },
+ {
+  "name": "Mon Épopée",
+  "trademarks": {
+   "epopee": {
+    "total": 91,
+    "marks": [
+     {
+      "name": "Épopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       33
+      ],
+      "date": "2021-04-22T12:00:00.000Z",
+      "owner": [
+       "DWS SAS"
+      ],
+      "id": "FR500000004758280"
+     },
+     {
+      "name": "EPOPEE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       21
+      ],
+      "date": "2021-05-21T12:00:00.000Z",
+      "owner": [
+       "HERMES INTERNATIONAL société en commandite par actions"
+      ],
+      "id": "FR500000004768958"
+     },
+     {
+      "name": "EPOPEE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       23,
+       24,
+       25
+      ],
+      "date": "1990-06-07T12:00:00.000Z",
+      "owner": [
+       "3 SUISSES INTERNATIONAL, société anonyme,"
+      ],
+      "id": "FR500000001596047"
+     },
+     {
+      "name": "EPOPEE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       41
+      ],
+      "date": "2023-10-16T12:00:00.000Z",
+      "owner": [
+       "Mélanie ESPELLE"
+      ],
+      "id": "FR500000004998856"
+     },
+     {
+      "name": "EPOPEE",
+      "office": "WO",
+      "status": "Registered",
+      "classes": [
+       21
+      ],
+      "date": "2021-10-28T12:00:00.000Z",
+      "owner": [
+       "HERMES INTERNATIONAL"
+      ],
+      "id": "WO500000001638484"
+     },
+     {
+      "name": "ÉPOPÉE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       35,
+       41,
+       42,
+       44
+      ],
+      "date": "2005-04-21T12:00:00.000Z",
+      "owner": [
+       "BIOFARMA, société par actions simplifiée"
+      ],
+      "id": "FR500000003354644"
+     },
+     {
+      "name": "Epopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       35,
+       42,
+       45
+      ],
+      "date": "2023-09-26T12:00:00.000Z",
+      "owner": [
+       "EPOPEE SAS"
+      ],
+      "id": "FR500000004993497"
+     },
+     {
+      "name": "EPOPEE",
+      "office": "WO",
+      "status": "Registered",
+      "classes": [
+       3
+      ],
+      "date": "2026-05-21T12:00:00.000Z",
+      "owner": [
+       "Makers B Co., Ltd."
+      ],
+      "id": "WO500000001924587"
+     },
+     {
+      "name": "Épopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       38,
+       41
+      ],
+      "date": "2023-01-20T12:00:00.000Z",
+      "owner": [
+       "Monsieur Romain Maréchal"
+      ],
+      "id": "FR500000004930135"
+     },
+     {
+      "name": "EPOPEE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       5
+      ],
+      "date": "1995-03-07T12:00:00.000Z",
+      "owner": [
+       "Nufarm Europe GmbH société de droit allemand"
+      ],
+      "id": "FR500000095561580"
+     },
+     {
+      "name": "Épopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       35,
+       36,
+       41
+      ],
+      "date": "2020-02-20T12:00:00.000Z",
+      "owner": [
+       "Monsieur Charles CABILLIC"
+      ],
+      "id": "FR500000004625975"
+     },
+     {
+      "name": "EPOPEE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       12
+      ],
+      "date": "1991-10-25T12:00:00.000Z",
+      "owner": [
+       "Automobiles CITROËN (Société Anonyme),"
+      ],
+      "id": "FR500000001701579"
+     },
+     {
+      "name": "EPOPEE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       23,
+       24,
+       25
+      ],
+      "date": "1980-06-09T12:00:00.000Z",
+      "owner": [
+       "LES FILS DE LOUIS MULLIEZ,"
+      ],
+      "id": "FR500000001138010"
+     },
+     {
+      "name": "EPOPEE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       36,
+       38
+      ],
+      "date": "2000-03-06T12:00:00.000Z",
+      "owner": [
+       "BESSIS Pierre,"
+      ],
+      "id": "FR500000003012155"
+     },
+     {
+      "name": "EPOPEE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       14
+      ],
+      "date": "1991-11-19T12:00:00.000Z",
+      "owner": [
+       "VUILLEMIN REGNIER, société anonyme,"
+      ],
+      "id": "FR500000001707564"
+     },
+     {
+      "name": "Épopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       28,
+       41
+      ],
+      "date": "2016-09-29T12:00:00.000Z",
+      "owner": [
+       "Mme. Mélanie Espelle"
+      ],
+      "id": "FR500000004303150"
+     },
+     {
+      "name": "Épopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       3
+      ],
+      "date": "2023-07-27T12:00:00.000Z",
+      "owner": [
+       "Monsieur Jean-Baptiste Orcel"
+      ],
+      "id": "FR500000004980778"
+     },
+     {
+      "name": "Épopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       14
+      ],
+      "date": "2022-05-25T12:00:00.000Z",
+      "owner": [
+       "Madame Mélanie LEONCE DA ROCHA"
+      ],
+      "id": "FR500000004872406"
+     },
+     {
+      "name": "EPOPEE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       3,
+       5,
+       44
+      ],
+      "date": "1994-12-23T12:00:00.000Z",
+      "owner": [
+       "FRANCE COSMETICS ET Cie SARL"
+      ],
+      "id": "FR500000094550683"
+     },
+     {
+      "name": "épopée 2024",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       35,
+       41,
+       43
+      ],
+      "date": "2021-03-10T12:00:00.000Z",
+      "owner": [
+       "PARIS 2024 - Comité d'organisation des Jeux Olympiques et Paralympiques / COJO Association Loi 1901 déclarée d'utilité publique"
+      ],
+      "id": "FR500000004741959"
+     },
+     {
+      "name": "EPOPEE BELLE",
+      "office": "WO",
+      "status": "Registered",
+      "classes": [
+       33
+      ],
+      "date": "2024-10-09T12:00:00.000Z",
+      "owner": [
+       "L.G.I."
+      ],
+      "id": "WO500000001827402"
+     },
+     {
+      "name": "EPOPEE BELLE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       33
+      ],
+      "date": "2023-11-14T12:00:00.000Z",
+      "owner": [
+       "L.G.I. Société par actions simplifiée"
+      ],
+      "id": "FR500000005006008"
+     },
+     {
+      "name": "EPOPEE 358 E",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       3,
+       4
+      ],
+      "date": "2018-10-29T12:00:00.000Z",
+      "owner": [
+       "ASTREE SAS"
+      ],
+      "id": "FR500000004495408"
+     },
+     {
+      "name": "Épopée Campus",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       41
+      ],
+      "date": "2026-01-13T12:00:00.000Z",
+      "owner": [
+       "EPOPEE VILLAGE SAS"
+      ],
+      "id": "FR500000005216804"
+     },
+     {
+      "name": "Epopée Villae",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       35,
+       36
+      ],
+      "date": "2022-03-28T12:00:00.000Z",
+      "owner": [
+       "Epopée Gestion SAS"
+      ],
+      "id": "FR500000004856185"
+     },
+     {
+      "name": "Epopée Sonore",
+      "office": "FR",
+      "status": "Filed",
+      "classes": [
+       35,
+       38,
+       39,
+       41,
+       45
+      ],
+      "date": "2021-10-22T12:00:00.000Z",
+      "owner": [
+       "Madame Marine Allamel"
+      ],
+      "id": "FR500000004811060"
+     },
+     {
+      "name": "Épopée Gestion",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       35,
+       36,
+       41
+      ],
+      "date": "2020-02-20T12:00:00.000Z",
+      "owner": [
+       "Monsieur Charles CABILLIC"
+      ],
+      "id": "FR500000004625988"
+     },
+     {
+      "name": "Épopée Capital",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       35,
+       36,
+       41
+      ],
+      "date": "2020-02-20T12:00:00.000Z",
+      "owner": [
+       "Monsieur Charles CABILLIC"
+      ],
+      "id": "FR500000004625982"
+     },
+     {
+      "name": "Epopée des créateurs",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       41
+      ],
+      "date": "2019-01-18T12:00:00.000Z",
+      "owner": [
+       "Isabelle Gilbert"
+      ],
+      "id": "FR500000004516746"
+     },
+     {
+      "name": "é épopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       16,
+       18,
+       25
+      ],
+      "date": "2017-03-10T12:00:00.000Z",
+      "owner": [
+       "Mme Lefèvre Isabelle, Agissant pour le compte de la société épopée en cours de formation"
+      ],
+      "id": "FR500000004344605"
+     },
+     {
+      "name": ". Epopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       14,
+       18,
+       24,
+       25,
+       26
+      ],
+      "date": "2019-01-08T12:00:00.000Z",
+      "owner": [
+       "GVO SAS"
+      ],
+      "id": "FR500000004513593"
+     },
+     {
+      "name": "GRANDE EPOPEE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       32,
+       33
+      ],
+      "date": "1987-04-30T12:00:00.000Z",
+      "owner": [
+       "CAMUS LA GRANDE MARQUE, SA"
+      ],
+      "id": "FR500000001406186"
+     },
+     {
+      "name": "GRANDE EPOPEE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       32,
+       33
+      ],
+      "date": "1977-09-29T12:00:00.000Z",
+      "owner": [
+       "CAMUS LA GRANDE MARQUE,"
+      ],
+      "id": "FR500000001028792"
+     },
+     {
+      "name": "GRANDE EPOPEE",
+      "office": "WO",
+      "status": "Expired",
+      "classes": [
+       32,
+       33
+      ],
+      "date": "1994-03-02T12:00:00.000Z",
+      "owner": [
+       "CAMUS LA GRANDE MARQUE, Société anonyme"
+      ],
+      "id": "WO500000000614380"
+     },
+     {
+      "name": "Nouvelle épopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       16,
+       28,
+       35,
+       41,
+       45
+      ],
+      "date": "2023-06-09T12:00:00.000Z",
+      "owner": [
+       "Madame Marine ALLAMEL"
+      ],
+      "id": "FR500000004968136"
+     },
+     {
+      "name": "Épopées",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       35,
+       39,
+       41
+      ],
+      "date": "2019-02-01T12:00:00.000Z",
+      "owner": [
+       "JULIE SIMOES"
+      ],
+      "id": "FR500000004521248"
+     },
+     {
+      "name": "EPOPEES",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       25
+      ],
+      "date": "2022-01-05T12:00:00.000Z",
+      "owner": [
+       "Yallingup Clothing SARL"
+      ],
+      "id": "FR500000004831366"
+     },
+     {
+      "name": "L'épopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       16,
+       35,
+       38,
+       41
+      ],
+      "date": "2020-06-25T12:00:00.000Z",
+      "owner": [
+       "Monsieur Jean-Baptiste Sagot"
+      ],
+      "id": "FR500000004660797"
+     },
+     {
+      "name": "L'Epopée",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       25,
+       35,
+       41
+      ],
+      "date": "2003-07-22T12:00:00.000Z",
+      "owner": [
+       "AT2J CONSEIL"
+      ],
+      "id": "FR500000003239185"
+     },
+     {
+      "name": "L'EPOPEE",
+      "office": "FR",
+      "status": "Ended",
+      "classes": [
+       32,
+       33
+      ],
+      "date": "2023-08-02T12:00:00.000Z",
+      "owner": [
+       "Perrine Lhoumeau Samserà"
+      ],
+      "id": "FR500000004982167"
+     },
+     {
+      "name": "Z'épopées",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       16,
+       35,
+       41
+      ],
+      "date": "2014-09-22T12:00:00.000Z",
+      "owner": [
+       "L'Yonne en Scène, Association loi 1901"
+      ],
+      "id": "FR500000004120335"
+     },
+     {
+      "name": "Vinépopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       16,
+       33,
+       35,
+       38,
+       39,
+       41,
+       43
+      ],
+      "date": "2021-02-26T12:00:00.000Z",
+      "owner": [
+       "Association de la Cité des vins et des Climats de Bourgogne Association déclarée"
+      ],
+      "id": "FR500000004737603"
+     },
+     {
+      "name": "La belle épopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       25,
+       39,
+       43
+      ],
+      "date": "2018-07-25T12:00:00.000Z",
+      "owner": [
+       "Monsieur Clément DACQUIN"
+      ],
+      "id": "FR500000004471861"
+     },
+     {
+      "name": "Vin'Epopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       16,
+       33,
+       35,
+       38,
+       39,
+       41,
+       43
+      ],
+      "date": "2021-02-26T12:00:00.000Z",
+      "owner": [
+       "Association de la Cité des vins et des Climats de Bourgogne Association déclarée"
+      ],
+      "id": "FR500000004737623"
+     },
+     {
+      "name": "THE SAINT epopee",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       16,
+       25,
+       35,
+       41
+      ],
+      "date": "2021-02-10T12:00:00.000Z",
+      "owner": [
+       "Monsieur Mathieu Maroudin"
+      ],
+      "id": "FR500000004731358"
+     },
+     {
+      "name": "La Grande Epopée",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       33
+      ],
+      "date": "2022-09-29T12:00:00.000Z",
+      "owner": [
+       "CAVE DE GAN JURANCON Société coopérative agricole à capital variable"
+      ],
+      "id": "FR500000004901562"
+     },
+     {
+      "name": "L'Epopée Village",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       31,
+       35,
+       36,
+       41,
+       43
+      ],
+      "date": "2021-03-24T12:00:00.000Z",
+      "owner": [
+       "EPOPEE FOUNDERS Société par actions simplifiée"
+      ],
+      "id": "FR500000004747559"
+     },
+     {
+      "name": "Épopée d'une Transformation Réussie",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       35,
+       38,
+       41
+      ],
+      "date": "2017-07-21T12:00:00.000Z",
+      "owner": [
+       "Valtus SASU"
+      ],
+      "id": "FR500000004378032"
+     },
+     {
+      "name": "EPOPEE ROYALE CHATEAUX DE LA LOIRE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       14,
+       16,
+       18,
+       25,
+       35,
+       41
+      ],
+      "date": "2025-07-04T12:00:00.000Z",
+      "owner": [
+       "frederic pitrois"
+      ],
+      "id": "FR500000005161659"
+     },
+     {
+      "name": "LES BLEUS 2018, AU COEUR DE L'EPOPEE RUSSE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       9,
+       16,
+       25,
+       28,
+       38,
+       41,
+       45
+      ],
+      "date": "2018-07-20T12:00:00.000Z",
+      "owner": [
+       "Federation Entertainment Société par action simplifiée"
+      ],
+      "id": "FR500000004470640"
+     },
+     {
+      "name": "VELO LEGENDE MAGAZINE DE L'EPOPEE CYCLISTE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       38,
+       41
+      ],
+      "date": "1994-12-07T12:00:00.000Z",
+      "owner": [
+       "VESPINI Jean paul,"
+      ],
+      "id": "FR500000094548525"
+     },
+     {
+      "name": "les petites épopées",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       24,
+       25
+      ],
+      "date": "2021-07-27T12:00:00.000Z",
+      "owner": [
+       "Les Petits Garçons SASU"
+      ],
+      "id": "FR500000004788444"
+     },
+     {
+      "name": "L’EPOPEE LE DROIT DE REVER, LE POUVOIR DE FAIRE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       31,
+       35,
+       36,
+       41,
+       43
+      ],
+      "date": "2021-03-24T12:00:00.000Z",
+      "owner": [
+       "EPOPEE FOUNDERS Société par actions simplifiée"
+      ],
+      "id": "FR500000004747595"
+     },
+     {
+      "name": "L'EPOPEE DES VERTS",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       16,
+       18,
+       35,
+       36,
+       38,
+       41,
+       42
+      ],
+      "date": "2006-02-09T12:00:00.000Z",
+      "owner": [
+       "SASP AS SAINT ETIENNE Société anonyme à conseil d'administration"
+      ],
+      "id": "FR500000003409140"
+     },
+     {
+      "name": "Sagas & Epopées",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       28
+      ],
+      "date": "2005-03-04T12:00:00.000Z",
+      "owner": [
+       "Allegra Toys Ltda SARL"
+      ],
+      "id": "FR500000003344742"
+     },
+     {
+      "name": "Epopée de la Nuit première heure deuxième heure troisième heure quatrième heure 5 ème heure ...",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       16,
+       35,
+       38,
+       41
+      ],
+      "date": "2013-01-29T12:00:00.000Z",
+      "owner": [
+       "M. GERARD WIEHE BERENY"
+      ],
+      "id": "FR500000003978218"
+     },
+     {
+      "name": "L'Epopée Céleste",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       4
+      ],
+      "date": "2021-08-25T12:00:00.000Z",
+      "owner": [
+       "Madame Stéphanie MAUDUIT"
+      ],
+      "id": "FR500000004794647"
+     },
+     {
+      "name": "CÔTE BLEUE L'EPOPEE 2018 CARRY-LE-ROUET",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       30,
+       32,
+       33
+      ],
+      "date": "2019-07-10T12:00:00.000Z",
+      "owner": [
+       "Monsieur Jérôme Baboulet"
+      ],
+      "id": "FR500000004566465"
+     },
+     {
+      "name": "L'Épopée Temporelle",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       9,
+       25,
+       28,
+       38,
+       41
+      ],
+      "date": "2017-06-20T12:00:00.000Z",
+      "owner": [
+       "M. Cyprien Iov"
+      ],
+      "id": "FR500000004370120"
+     },
+     {
+      "name": "Lou de Pre épopée",
+      "office": "WO",
+      "status": "Registered",
+      "classes": [
+       3
+      ],
+      "date": "2026-08-07T12:00:00.000Z",
+      "owner": [
+       "LA RIVE SPOLKA AKCYJNA"
+      ],
+      "id": "WO500000001943792"
+     },
+     {
+      "name": "L'EPOPEE NAPOLEONIENNE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       14
+      ],
+      "date": "1982-04-19T12:00:00.000Z",
+      "owner": [
+       "LE MEDAILLIER-FRANKLIN (S.A.)"
+      ],
+      "id": "FR500000001202047"
+     },
+     {
+      "name": "La Belle Épopée Biblique",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       38,
+       41
+      ],
+      "date": "2025-06-05T12:00:00.000Z",
+      "owner": [
+       "Evelyne ZINGA"
+      ],
+      "id": "FR500000005153499"
+     },
+     {
+      "name": "THÉÂTRE DE L'ÉPOPÉE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       9,
+       16,
+       41
+      ],
+      "date": "2007-01-11T12:00:00.000Z",
+      "owner": [
+       "Corrion Rodolphe"
+      ],
+      "id": "FR500000003474096"
+     },
+     {
+      "name": "L'épopée des NaîtSens",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       44
+      ],
+      "date": "2022-05-08T12:00:00.000Z",
+      "owner": [
+       "Madame Océane LANDOIN"
+      ],
+      "id": "FR500000004866707"
+     },
+     {
+      "name": "LE BEGONIA DE ROCHEFORT L'EPOPEE DU BEGONIA DE ROCHEFORT",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       1,
+       3,
+       8,
+       9,
+       14,
+       16,
+       20,
+       21,
+       24,
+       26,
+       28,
+       31,
+       32,
+       34,
+       35,
+       37,
+       38,
+       39,
+       41,
+       42
+      ],
+      "date": "1988-10-26T12:00:00.000Z",
+      "owner": [
+       "La Société franÇaise du Bégonia (association loi 1901),"
+      ],
+      "id": "FR500000001729575"
+     },
+     {
+      "name": "GUILLAUME LE CONQUERANT LA FABULEUSE EPOPEE CALVADOS - NORMANDIE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       9,
+       16,
+       35,
+       38,
+       41
+      ],
+      "date": "2017-11-13T12:00:00.000Z",
+      "owner": [
+       "COMITE DEPARTEMENTAL DU TOURISME DU CALVADOS - CALVADOS ATTRACTIVITE"
+      ],
+      "id": "FR500000004404034"
+     },
+     {
+      "name": "LA FABULEUSE EPOPEE DE LA MOTO",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       25,
+       35,
+       41
+      ],
+      "date": "2004-05-24T12:00:00.000Z",
+      "owner": [
+       "RAVAU GUILLAUME JEROME FRANCOIS",
+       "DARDAINE CECILE GABRIELLE YVONNE"
+      ],
+      "id": "FR500000003293320"
+     },
+     {
+      "name": "SUPER ! agence d'épopées musicales",
+      "office": "EM",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       41
+      ],
+      "date": "2011-10-24T12:00:00.000Z",
+      "owner": [
+       "Catala, Julien"
+      ],
+      "id": "EM500000010363679"
+     },
+     {
+      "name": "THE CITADEL - ÉPOPÉE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       9,
+       41,
+       42
+      ],
+      "date": "2025-12-22T12:00:00.000Z",
+      "owner": [
+       "Moïse NDONDA KONGOTE Agissant pour le compte de \"THE CITADEL - ÉPOPÉE\", Société en cours de formation"
+      ],
+      "id": "FR500000005211354"
+     },
+     {
+      "name": "REALISER SON TRAIN ELECTRIQUE LA GRANDE EPOPEE DU TRAIN HISTOIRE ET TECHNOLOGIE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       28,
+       38,
+       41
+      ],
+      "date": "2002-01-25T12:00:00.000Z",
+      "owner": [
+       "HACHETTE COLLECTIONS, Société en Nom Collectif"
+      ],
+      "id": "FR500000003143706"
+     },
+     {
+      "name": "L'Épopée créative",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       35,
+       41
+      ],
+      "date": "2015-10-01T12:00:00.000Z",
+      "owner": [
+       "Mme gilbert isabelle, Agissant pour le compte de la société Sfumato en cours de formation"
+      ],
+      "id": "FR500000004214242"
+     },
+     {
+      "name": "Epopées du Monde",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       39
+      ],
+      "date": "2017-04-03T12:00:00.000Z",
+      "owner": [
+       "Privilèges Voyages, SAS"
+      ],
+      "id": "FR500000004351528"
+     },
+     {
+      "name": "1828 L'épopée des johnnies",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       31,
+       32,
+       33
+      ],
+      "date": "2014-08-07T12:00:00.000Z",
+      "owner": [
+       "BRASSERIE KERAV'ALE SARL"
+      ],
+      "id": "FR500000004110864"
+     },
+     {
+      "name": "L'Épopée Rura",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       25,
+       35,
+       36,
+       41
+      ],
+      "date": "2026-03-27T12:00:00.000Z",
+      "owner": [
+       "Association Rura Association déclarée"
+      ],
+      "id": "FR500000005237770"
+     },
+     {
+      "name": "L'EPOPEE DES JEUNES TALENTS : HASARD OU DESTIN ?",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       16,
+       35,
+       38,
+       41
+      ],
+      "date": "2013-05-14T12:00:00.000Z",
+      "owner": [
+       "DITES NOUS TOUT, SARL"
+      ],
+      "id": "FR500000004004733"
+     },
+     {
+      "name": "Dans la forêt épopée - e-pop'art - E-POP EDIPROD",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       25,
+       28,
+       41
+      ],
+      "date": "2013-02-04T12:00:00.000Z",
+      "owner": [
+       "M. PATRICK CHEVAL"
+      ],
+      "id": "FR500000003979653"
+     },
+     {
+      "name": "LA CHEVALERIE, UNE EPOPÉE EUROPÉENNE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       28,
+       41
+      ],
+      "date": "1999-03-15T12:00:00.000Z",
+      "owner": [
+       "FLOBER SA,"
+      ],
+      "id": "FR500000099781739"
+     },
+     {
+      "name": "L'épopée des Flason",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       43
+      ],
+      "date": "2025-06-22T12:00:00.000Z",
+      "owner": [
+       "Samuel Flason"
+      ],
+      "id": "FR500000005158007"
+     },
+     {
+      "name": "Lou de Pre épopée",
+      "office": "EM",
+      "status": "Registered",
+      "classes": [
+       3
+      ],
+      "date": "2026-02-23T12:00:00.000Z",
+      "owner": [
+       "LA RIVE SPOLKA AKCYJNA"
+      ],
+      "id": "EM500000019320777"
+     },
+     {
+      "name": "L'Epopée de la Transformation",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       35,
+       41
+      ],
+      "date": "2025-04-29T12:00:00.000Z",
+      "owner": [
+       "KEY DRIVERS CONSULTING SARL Société à responsabilité limitée"
+      ],
+      "id": "FR500000005143356"
+     },
+     {
+      "name": "LE COLONEL REMY RACONTE UNE EPOPEE DE LA RESISTANCE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       16,
+       41
+      ],
+      "date": "1980-05-14T12:00:00.000Z",
+      "owner": [
+       "EDITIONS ATLAS"
+      ],
+      "id": "FR500000001134728"
+     },
+     {
+      "name": "L'EPOPEE DES PHALANSTERRES RETROUVEZ VOS RACINES ù",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       1,
+       5,
+       31,
+       42
+      ],
+      "date": "1990-06-11T12:00:00.000Z",
+      "owner": [
+       "PHALANSTERES S.A.,"
+      ],
+      "id": "FR500000001679273"
+     },
+     {
+      "name": "L’ÉPOPÉE DES ÉLUS",
+      "office": "EM",
+      "status": "Registered",
+      "classes": [
+       9,
+       28,
+       16
+      ],
+      "date": "2008-04-09T12:00:00.000Z",
+      "owner": [
+       "Kabushiki Kaisha Square Enix (also trading as Square Enix Co., Ltd.)"
+      ],
+      "id": "EM500000006817951"
+     },
+     {
+      "name": "CONSTRUIRE LE PEN DUICK DECOUVREZ L'EPOPEE D'ERIC TABARLY ET L'UNIVERS DE LA VOILE",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       9,
+       16,
+       38,
+       41
+      ],
+      "date": "2002-04-17T12:00:00.000Z",
+      "owner": [
+       "HACHETTE COLLECTIONS (S.N.C.)"
+      ],
+      "id": "FR500000003159968"
+     },
+     {
+      "name": "Epopées Voyages",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       39
+      ],
+      "date": "2017-04-03T12:00:00.000Z",
+      "owner": [
+       "Privilèges Voyages, SAS"
+      ],
+      "id": "FR500000004351537"
+     },
+     {
+      "name": "Les CABOTEURS EPOPEE EN RIVES URBAINES",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       39,
+       41,
+       43
+      ],
+      "date": "2021-04-07T12:00:00.000Z",
+      "owner": [
+       "LA FLOTILLE SAS"
+      ],
+      "id": "FR500000004752643"
+     },
+     {
+      "name": "melozzoO l'épopée du sonore",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       16,
+       35,
+       41
+      ],
+      "date": "2012-05-12T12:00:00.000Z",
+      "owner": [
+       "Mme. Jeanne-martine Vacher"
+      ],
+      "id": "FR500000003919569"
+     },
+     {
+      "name": "Civilisations disparues Epopées & Mysteres",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       16,
+       38,
+       41
+      ],
+      "date": "1998-06-18T12:00:00.000Z",
+      "owner": [
+       "SELECTION DU READER'S DIGEST, S.A.,"
+      ],
+      "id": "FR500000098737699"
+     },
+     {
+      "name": "Epopées d'Asie",
+      "office": "FR",
+      "status": "Ended",
+      "classes": [
+       39
+      ],
+      "date": "2017-04-03T12:00:00.000Z",
+      "owner": [
+       "Privilèges Voyages, SAS"
+      ],
+      "id": "FR500000004351543"
+     },
+     {
+      "name": "L'Epopée des créateurs",
+      "office": "FR",
+      "status": "Ended",
+      "classes": [
+       41
+      ],
+      "date": "2017-07-12T12:00:00.000Z",
+      "owner": [
+       "Sfumato, SASU"
+      ],
+      "id": "FR500000004375854"
+     },
+     {
+      "name": "Les Grandes Epopées",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       38
+      ],
+      "date": "2025-11-13T12:00:00.000Z",
+      "owner": [
+       "Jaafar STEIBLEN-RAJI"
+      ],
+      "id": "FR500000005198780"
+     }
+    ]
+   }
+  },
+  "slugs": {
+   "monepopee": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "pris",
+    "pinterest": "? (HTTP 403)"
+   }
+  }
+ },
+ {
+  "name": "Le Héros du Jour",
+  "trademarks": {
+   "heros du jour": {
+    "total": 0,
+    "marks": []
+   }
+  },
+  "slugs": {
+   "herosdujour": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "pris",
+    "pinterest": "? (HTTP 403)"
+   },
+   "leherosdujour": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "pris",
+    "pinterest": "? (HTTP 403)"
+   }
+  }
+ },
+ {
+  "name": "Quêtes & Légendes",
+  "trademarks": {
+   "quetes et legendes": {
+    "total": 1,
+    "marks": [
+     {
+      "name": "RUSTIK AVENTURES QUETES & LEGENDES QUELLE SERA LA PROCHAINE AVENTURE ? 1 PARC D IMMERSION VRCPB",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       28,
+       41,
+       43
+      ],
+      "date": "2017-01-25T12:00:00.000Z",
+      "owner": [
+       "M. Julien PREVOST"
+      ],
+      "id": "FR500000004332353"
+     }
+    ]
+   },
+   "quetes & legendes": {
+    "total": 1,
+    "marks": [
+     {
+      "name": "RUSTIK AVENTURES QUETES & LEGENDES QUELLE SERA LA PROCHAINE AVENTURE ? 1 PARC D IMMERSION VRCPB",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       28,
+       41,
+       43
+      ],
+      "date": "2017-01-25T12:00:00.000Z",
+      "owner": [
+       "M. Julien PREVOST"
+      ],
+      "id": "FR500000004332353"
+     }
+    ]
+   },
+   "quete et legende": {
+    "total": 1,
+    "marks": [
+     {
+      "name": "RUSTIK AVENTURES QUETES & LEGENDES QUELLE SERA LA PROCHAINE AVENTURE ? 1 PARC D IMMERSION VRCPB",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       28,
+       41,
+       43
+      ],
+      "date": "2017-01-25T12:00:00.000Z",
+      "owner": [
+       "M. Julien PREVOST"
+      ],
+      "id": "FR500000004332353"
+     }
+    ]
+   }
+  },
+  "slugs": {
+   "quetesetlegendes": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403)"
+   }
+  }
+ },
+ {
+  "name": "Héroïka",
+  "trademarks": {
+   "heroika": {
+    "total": 2,
+    "marks": [
+     {
+      "name": "HEROIKA",
+      "office": "EM",
+      "status": "Registered",
+      "classes": [
+       14,
+       16,
+       18
+      ],
+      "date": "2008-08-13T12:00:00.000Z",
+      "owner": [
+       "TROIKA Germany GmbH"
+      ],
+      "id": "EM500000007180482"
+     },
+     {
+      "name": "HEROIKA",
+      "office": "FR",
+      "status": "Expired",
+      "classes": [
+       28
+      ],
+      "date": "1988-10-06T12:00:00.000Z",
+      "owner": [
+       "Monsieur CHLOUPEK Georges,"
+      ],
+      "id": "FR500000001493103"
+     }
+    ]
+   }
+  },
+  "slugs": {
+   "heroika": {
+    "fr": "libre",
+    "com": "pris",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "pris",
+    "pinterest": "? (HTTP 403)"
+   }
+  }
+ },
+ {
+  "name": "Anniversaire Légendaire",
+  "trademarks": {
+   "anniversaire legendaire": {
+    "total": 2,
+    "marks": [
+     {
+      "name": "LEGENDAIRE ANNIVERSAIRE",
+      "office": "WO",
+      "status": "Registered",
+      "classes": [
+       35,
+       16,
+       41
+      ],
+      "date": "2016-09-06T12:00:00.000Z",
+      "owner": [
+       "BRICO DEPOT, société par actions simplifiée,à associé unique"
+      ],
+      "id": "WO500000001331051"
+     },
+     {
+      "name": "LEGENDAIRE ANNIVERSAIRE",
+      "office": "FR",
+      "status": "Registered",
+      "classes": [
+       16,
+       35,
+       41
+      ],
+      "date": "2016-03-24T12:00:00.000Z",
+      "owner": [
+       "BRICO DEPOT, société par actions simplifiée à associé unique"
+      ],
+      "id": "FR500000004259801"
+     }
+    ]
+   }
+  },
+  "slugs": {
+   "anniversairelegendaire": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403)"
+   }
+  }
+ },
+ {
+  "name": "Ma Quête de Chevalier",
+  "trademarks": {
+   "quete de chevalier": {
+    "total": 0,
+    "marks": []
+   }
+  },
+  "slugs": {
+   "maquetedechevalier": {
+    "fr": "libre",
+    "com": "libre",
+    "instagram": "? (HTTP 429)",
+    "tiktok": "libre",
+    "pinterest": "? (HTTP 403)"
+   }
+  }
+ }
+]
