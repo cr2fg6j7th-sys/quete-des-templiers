@@ -156,10 +156,23 @@ async def main():
             kids = await pg.evaluate("JSON.parse(localStorage.getItem('quete-templiers-v3')).kids")
             pages = await pg.evaluate("window.__printed")
             check(pages == kids, f"diplômes imprimables : celui du héros et un par compagnon ({pages} pages A4)")
+            # the QR code printed on the diploma leads to the site, counted as "diplome"
+            await pg.emulate_media(media="print")
+            pdf = ROOT / "dist" / "diplomes.pdf"
+            await pg.pdf(path=str(pdf), prefer_css_page_size=True, print_background=True)
+            await pg.emulate_media(media="screen")
+            subprocess.run(["pdftoppm", "-r", "200", "-png", "-f", "1", "-l", "1", "-singlefile", str(pdf), str(ROOT / "dist" / "p5-diplome-imprime")], check=True)
+            import cv2
+            found = cv2.QRCodeDetector().detectAndDecode(cv2.imread(str(ROOT / "dist" / "p5-diplome-imprime.png")))[0]
+            check(found.endswith("/?ref=diplome"), f"QR code du diplôme imprimé lisible : {found}")
             await pg.click("text=Créer le diplôme en image")
             await pg.wait_for_function("(()=>{const i=document.querySelector('img.parchment');return i&&i.naturalWidth===1080})()", timeout=8000)
             await pg.locator("img.parchment").first.screenshot(path=str(ROOT / "dist" / "p4-diplome.png"))
-            check(True, "diplôme en image")
+            import base64, cv2, numpy as np
+            png = await pg.evaluate("(()=>{const i=document.querySelector('img.parchment'),c=document.createElement('canvas');c.width=i.naturalWidth;c.height=i.naturalHeight;c.getContext('2d').drawImage(i,0,0);return c.toDataURL('image/png').split(',')[1]})()")
+            img = cv2.imdecode(np.frombuffer(base64.b64decode(png), np.uint8), cv2.IMREAD_COLOR)
+            found = cv2.QRCodeDetector().detectAndDecode(img)[0]
+            check(found.endswith("/?ref=diplome"), f"diplôme en image, avec un QR code lisible : {found}")
             await pg.evaluate("navigator.clipboard.writeText=t=>{window.__copied=t;return Promise.resolve()};navigator.share=undefined")
             await pg.click("text=Partager la quête")
             copied = await pg.evaluate("window.__copied")

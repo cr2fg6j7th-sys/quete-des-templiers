@@ -157,8 +157,11 @@ footer a{color:var(--muted)}
   .dip-line{font-style:italic;font-size:15pt;color:#4a5272;margin-top:4mm;max-width:210mm}
   .dip-foot{position:absolute;left:26mm;right:26mm;bottom:17mm;display:flex;justify-content:space-between;align-items:flex-end;gap:10mm}
   .dip-sign{font-family:var(--display);font-size:15pt;border-top:.3mm solid #5b6482;padding-top:1.5mm;min-width:60mm}
+  .dip-mark{display:flex;align-items:flex-end;gap:5mm}
   .dip-brand{text-align:right;font-family:var(--display);font-size:21pt;color:#a87a1f;line-height:1.2}
   .dip-brand small{display:block;font-family:var(--body);font-size:12pt;color:#5b6482}
+  .dip-brand .dip-scan{font-size:9.5pt;margin-top:1mm}
+  .dip-qr{width:24mm;height:24mm;display:block}
 }
 .parchment:not([src]){display:none}
 @media (prefers-reduced-motion:no-preference){.pop{animation:pop .5s ease-out}@keyframes pop{from{transform:scale(.6);opacity:.3}to{transform:none;opacity:1}}.spinner{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}}
@@ -414,7 +417,7 @@ const CROSS_D="M-1.6-1.6-5-12H5L1.6-1.6 12-5V5L1.6 1.6 5 12H-5L-1.6 1.6-12 5V-5Z
 const FACE={display:s=>`${s}px UnifrakturMaguntia, Georgia, serif`,label:s=>`500 ${s}px "Alegreya Sans SC", sans-serif`,
   body:s=>`${s}px "Alegreya Sans", sans-serif`,italic:s=>`italic ${s}px "Alegreya Sans", sans-serif`,bold:s=>`700 ${s}px "Alegreya Sans", sans-serif`};
 // lines: [{t, f: display|label|body|italic|bold, s: size, c: colour, gap: space before}]
-async function parchment(lines){
+async function parchment(lines,opts){
   try{await Promise.all(Object.values(FACE).map(f=>document.fonts.load(f(40),"Aé")));}catch(e){}
   const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
   const paper=x.createRadialGradient(W/2,H/2,150,W/2,H/2,900);paper.addColorStop(0,"#fbf6e9");paper.addColorStop(1,"#eadbb8");
@@ -432,11 +435,14 @@ async function parchment(lines){
   for(const l of laid){y+=l.gap||0;x.font=l.font;x.fillStyle=l.c||"#1b2547";for(const r of l.rows){y+=l.lh;x.fillText(r,W/2,y-l.lh*.22);}}
   x.font=FACE.display(40);x.fillStyle="#a87a1f";x.fillText("Ma Quête de Chevalier",W/2,H-108);
   x.font=FACE.body(28);x.fillStyle="#5b6482";x.fillText(TAG,W/2,H-72);
+  // QR code in the lower right corner, inside the frame
+  if(opts&&opts.qr&&QR){const sz=128,pad=8,x0=W-58-18-sz,y0=H-58-18-sz,k=(sz-2*pad)/QR.size;
+    x.fillStyle="#fff";x.fillRect(x0,y0,sz,sz);x.save();x.translate(x0+pad,y0+pad);x.scale(k,k);x.fillStyle="#1b2547";x.fill(new Path2D(QR.d));x.restore();}
   return c;
 }
 // Shows the image, then shares it as a file (WhatsApp, Messages…) or saves it. Two taps, because
 // phones only allow sharing right after a tap, and drawing the image takes a moment.
-function imageMaker(label,fileName,makeLines,evt){
+function imageMaker(label,fileName,makeLines,evt,opts){
   const img=h("img",{class:"parchment",alt:""});const out=h("p",{class:"note",role:"status"});let file=null,url="";
   const send=h("button",{class:"btn",type:"button",hidden:true,onclick:async()=>{
     try{if(file&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});hit(evt);return;}}catch(e){if(e&&e.name==="AbortError")return;}
@@ -444,7 +450,7 @@ function imageMaker(label,fileName,makeLines,evt){
     out.textContent="Image enregistrée. Sur iPhone, vous pouvez aussi appuyer longuement sur l'image puis « Enregistrer dans Photos ».";}},"Envoyer ou enregistrer l'image");
   const make=h("button",{class:"btn ghost",type:"button",onclick:async()=>{
     make.disabled=true;out.textContent="Le Grand Maître prépare le parchemin…";
-    try{const c=await parchment(makeLines());const blob=await new Promise(r=>c.toBlob(r,"image/png"));
+    try{const c=await parchment(makeLines(),opts);const blob=await new Promise(r=>c.toBlob(r,"image/png"));
       if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);file=new File([blob],fileName,{type:"image/png"});
       img.src=url;img.alt=label;send.hidden=false;out.textContent="";}
     catch(e){out.textContent="L'image n'a pas pu être créée sur ce téléphone.";}
@@ -453,6 +459,9 @@ function imageMaker(label,fileName,makeLines,evt){
 }
 /* ---------- Printable diplomas: handed out at the end, and photographed with the child ---------- */
 const TAG="#MaQueteDeChevalier";
+// QR code to the site (?ref=diplome) on the diplomas: a framed diploma brings visitors who scan it.
+const QR=/*QR*/null;
+const qrSvg=cls=>QR?`<svg class="${cls}" viewBox="-3 -3 ${QR.size+6} ${QR.size+6}" role="img" aria-label="QR code vers Ma Quête de Chevalier"><rect x="-3" y="-3" width="${QR.size+6}" height="${QR.size+6}" rx="1.5" fill="#fff"/><path d="${QR.d}" fill="#1b2547" shape-rendering="crispEdges"/></svg>`:"";
 function partyDate(){const d=S.invite&&S.invite.date;try{return (d?new Date(d+"T12:00:00"):new Date()).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});}catch(e){return "";}}
 function diplomaSheet(o){
   const p=h("section",{class:"dip"});
@@ -461,7 +470,8 @@ function diplomaSheet(o){
     o.name?h("p",{class:"dip-name",text:o.name}):h("div",{class:"dip-blank"}),
     h("p",{class:"dip-title",text:o.title}),h("p",{class:"dip-line",text:o.line}),
     h("div",{class:"dip-foot"},h("span",{class:"dip-sign",text:"Le Grand Maître"}),
-      h("span",{class:"dip-brand"},"Ma Quête de Chevalier",h("small",{text:TAG}))));
+      h("div",{class:"dip-mark"},h("span",{class:"dip-brand"},"Ma Quête de Chevalier",h("small",{text:TAG}),QR&&h("small",{class:"dip-scan",text:"Une quête pour votre enfant ? Scannez le code."})))));
+  if(QR)p.querySelector(".dip-mark").insertAdjacentHTML("beforeend",qrSvg("dip-qr"));
   return p;
 }
 function printDiplomas(companions){
@@ -921,7 +931,7 @@ function diplomaScreen(){
         {t:"ordre des gardiens du temple",f:"label",s:38,c:"#a87a1f"},{t:"Par ce diplôme, le Grand Maître nomme",f:"body",s:46,gap:30},
         {t:S.name||g("Jeune chevalier","Jeune chevalière"),f:"display",s:128,c:"#b8505c",gap:20},
         {t:g("Chevalier","Chevalière")+" de l'Ordre\ndes Gardiens du Temple",f:"bold",s:50,gap:16},
-        {t:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`,f:"italic",s:42,c:"#5b6482",gap:36}],"diplome")),
+        {t:`pour avoir ouvert le Sceau du Temple${S.town&&!q.indoorOnly?" à "+S.town:""}, le ${today}, avec ${S.kids} compagnons d'armes.`,f:"italic",s:42,c:"#5b6482",gap:36}],"diplome",{qr:true})),
     shareCard(),
     h("button",{class:"btn ghost",type:"button",onclick:()=>go(Object.assign({},defaults,{name:S.name,hero:S.hero,kids:S.kids,voice:S.voice,town:S.town,screen:"setup"}))},"Créer une nouvelle quête")];
 }

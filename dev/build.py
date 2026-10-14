@@ -35,13 +35,19 @@ faq = json.loads(re.search(r"const FAQ=(\[.*?\n\]);", t, re.S).group(1))
 faq_ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
     {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]}, ensure_ascii=False) + "</script>"
 
+# QR code of the diplomas (dev/qr-diplome.json, made by dev/video/qr.py): it must point to this site.
+qr = json.loads((d / "qr-diplome.json").read_text(encoding="utf-8"))
+if qr["url"] != SITE + "/?ref=diplome":
+    sys.exit("Le QR code des diplômes pointe vers " + qr["url"] + " : relancer python3 dev/video/qr.py")
+qr_js = json.dumps({"size": qr["size"], "d": qr["d"]})
+
 def page(engine_part, paid):
     return (t.replace("/*GEO*/", geo).replace("/*ENGINE*/", engine_part).replace("/*VOICE*/", voice)
              .replace("const PAID=/*PAID*/false;", f"const PAID={'true' if paid else 'false'};")
              .replace("/*PLACES_SITE*/", "" if paid else PLACES_SITE)
              .replace("{{SITE}}", SITE).replace("/*VOICE_VERSION*/", VOICE_VERSION)
              .replace("<!--ROBOTS-->", "" if paid else '<meta name="robots" content="noindex">')
-             .replace("<!--FAQ-->", faq_ld).replace("/*HOME*/", home_static))
+             .replace("<!--FAQ-->", faq_ld).replace("/*HOME*/", home_static).replace("/*QR*/null", qr_js))
 sw = read("sw.js").replace("/*VOICE_VERSION*/", VOICE_VERSION)
 
 (root / "index.html").write_text(page(eng, False), encoding="utf-8")

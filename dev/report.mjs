@@ -106,6 +106,8 @@ ${row("Partages de la quête après la fête", "share")}
 
 Sur 28 jours : ${monthMonth} des visites créent un aperçu, et ${pct(T("checkout", 28), T("preview", 28))} des aperçus ouvrent la page de paiement. Diplômes atteints : ${T("diploma", 28)} en 28 jours, pour ${all.paid} quête${all.paid > 1 ? "s" : ""} payée${all.paid > 1 ? "s" : ""} depuis le début. Avec de petits nombres, ces parts bougent beaucoup d'une semaine à l'autre.
 
+Visites de l'accueil par provenance, 28 jours : ${(() => { const by = {}; for (const [day, d] of Object.entries(days)) { if ((Date.now() - Date.parse(day + "T00:00:00Z")) / 86400000 >= 28) continue; for (const [ref, c] of Object.entries(d.home || {})) if (ref !== "smoke" && ref !== "demo") by[ref === "-" ? "direct" : ref] = (by[ref === "-" ? "direct" : ref] || 0) + c; } return fmt(by); })()} (diplome = QR code des diplômes, fete = partage après la fête).
+
 Démo gratuite (entourage), 28 jours : visites ${total(days, "home", 28, "demo")} · aperçus ${total(days, "preview", 28, "demo")} · diplômes ${total(days, "diploma", 28, "demo")}.
 `);
 }
