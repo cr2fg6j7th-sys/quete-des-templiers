@@ -10,6 +10,8 @@ on:
     workflows: ["Voix du Grand Maître"]
     types: [completed]
   workflow_dispatch:
+  schedule:
+    - cron: "17 3 2 * *"   # the 2nd of each month: new OpenStreetMap places
 
 permissions:
   contents: read
@@ -51,11 +53,46 @@ jobs:
         with:
           node-version: 22
 
+      # Places of France from OpenStreetMap, extracted once a month and kept in the Actions cache.
+      # If an extraction fails, last month's places are used; with none at all, the app falls back
+      # to the public Overpass servers.
+      - name: Mois des lieux
+        id: month
+        if: steps.ready.outputs.ok == 'true'
+        run: echo "m=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: Lieux de France (copie du mois)
+        id: places
+        if: steps.ready.outputs.ok == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: places-data
+          key: places-v1-${{ steps.month.outputs.m }}
+          restore-keys: places-v1-
+
+      - name: Extraire les lieux de France
+        id: extract
+        if: steps.ready.outputs.ok == 'true' && steps.places.outputs.cache-hit != 'true'
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool
+          bash dev/places/extract.sh places-data.new
+          rm -rf places-data && mv places-data.new places-data
+          echo "::notice::Lieux de France extraits : $(cat places-data/index.json)"
+
+      - name: Garder les lieux du mois
+        if: steps.extract.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: places-data
+          key: places-v1-${{ steps.month.outputs.m }}
+
       - name: Construire le site et le serveur
         if: steps.ready.outputs.ok == 'true'
         run: |
           python3 dev/build.py --audio
           node dev/test.js
+          if [ -f places-data/index.json ]; then cp -r places-data site/places; echo "::notice::Lieux en ligne : $(cat places-data/index.json)"; fi
 
       - name: Envoyer sur Cloudflare
         id: deploy

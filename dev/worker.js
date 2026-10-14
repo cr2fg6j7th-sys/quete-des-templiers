@@ -69,13 +69,32 @@ async function stripe(env, method, path, params) {
   return body;
 }
 
+// Places of France, extracted once a month from OpenStreetMap into 0.1° tiles (site/places/).
+// Returns the classified places around start, or null when the tiles are not deployed.
+async function placesFromTiles(start, env, origin) {
+  const get = path => env.ASSETS.fetch(new Request(origin + path));
+  const index = await get("/places/index.json");
+  if (!index.ok) return null;
+  const tile = 0.1, r = 900, dLat = r / 111320, dLon = r / (111320 * Math.cos(start.lat * Math.PI / 180));
+  const keys = new Set();
+  for (const la of [start.lat - dLat, start.lat + dLat]) for (const lo of [start.lon - dLon, start.lon + dLon])
+    keys.add(`${Math.floor(la / tile)}_${Math.floor(lo / tile)}`);
+  const places = [];
+  for (const key of keys) {
+    const res = await get(`/places/${key}.json`);
+    if (!res.ok) continue;     // no place at all in this tile
+    for (const [cat, lat, lon, name, score, id] of await res.json()) places.push({ cat, lat, lon, name, score, id });
+  }
+  return places;
+}
+
 // Fallback when the phone could not reach the map server: try each server from here.
-async function placesFromOSM(start) {
+async function placesFromOSM(start, origin) {
   const body = "data=" + encodeURIComponent(QuestGeo.overpassQuery(start.lat, start.lon));
   for (const url of QuestGeo.SERVERS) {
     try {
       const r = await fetch(url, { method: "POST", body, signal: AbortSignal.timeout(15000),
-        headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": "MaQueteDeChevalier/1.0" } });
+        headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": "MaQueteDeChevalier/1.0 (anniversary quests for children)", referer: origin + "/" } });
       if (!r.ok) continue;
       const j = await r.json();
       if (Array.isArray(j.elements) && !(j.remark && !j.elements.length)) return QuestGeo.slim(j.elements);
@@ -95,8 +114,20 @@ async function preview(request, env) {
     const lat = Number(b.start && b.start.lat), lon = Number(b.start && b.start.lon);
     if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return reply({ ok: false, reason: "bad" }, 400);
     const start = { lat, lon };
+    // 1. our own copy of OpenStreetMap places (no elements sent by the phone)
+    if (!Array.isArray(b.elements) && !b.fetch) {
+      const places = await placesFromTiles(start, env, new URL(request.url).origin);
+      if (!places) return reply({ ok: false, reason: "nodata" }, 503);
+      const sel = QuestEngine.selectPlaces(places, start);
+      log("preview", { ok: sel.ok, source: "tiles", found: sel.found, ref: refOf(b) });
+      if (!sel.ok) return reply(sel);
+      quest = QuestEngine.assemble(start, sel.stops);
+      token = await seal(pack(start, sel.stops), env);
+      return reply(Object.assign(QuestEngine.preview(quest), { token, price: priceLabel(env) }));
+    }
+    // 2. places fetched from Overpass, by the phone or (fallback) by this server
     if (b.fetch && !Array.isArray(b.elements)) {
-      b.elements = await placesFromOSM(start);
+      b.elements = await placesFromOSM(start, new URL(request.url).origin);
       log("osm", { ok: !!b.elements });
       if (!b.elements) return reply({ ok: false, reason: "osm" }, 503);
     }

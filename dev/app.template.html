@@ -408,10 +408,14 @@ async function startFrom(lat,lon,town){
   if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}
   go({screen:"loading",start:{lat,lon},town:town||""});
   try{
-    // Paid build: if the map server is busy, our server fetches the places itself (it tries the mirrors).
-    let els=null;
-    try{els=G.slim(await fetchPlaces(lat,lon,PAID?1:3));}catch(e){if(!PAID)throw e;}
-    const p=await makePreview(els?{start:{lat,lon},elements:els}:{start:{lat,lon},fetch:true});
+    // Paid build: our server keeps a copy of the places of France and chooses the stops from it.
+    // Without that copy: the phone asks OpenStreetMap, and if it is busy our server tries the mirrors.
+    let p=PAID?await makePreview({start:{lat,lon}}):{ok:false,reason:"nodata"};
+    if(!p.ok&&p.reason==="nodata"){
+      let els=null;
+      try{els=G.slim(await fetchPlaces(lat,lon,PAID?1:3));}catch(e){if(!PAID)throw e;}
+      p=await makePreview(els?{start:{lat,lon},elements:els}:{start:{lat,lon},fetch:true});
+    }
     if(!p.ok){if(p.reason==="few"){go({screen:"few",found:p.found});return;}throw new Error(p.reason);}
     go(Object.assign({},fresh,{preview:p.preview,quest:p.quest,token:p.token,screen:"preview",indoor:false}));
   }catch(e){go({screen:"neterr"});}

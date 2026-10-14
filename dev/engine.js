@@ -408,7 +408,11 @@ const QuestEngine = (() => {
   // ---- 5. build the quest ----
   // The places chosen for a quest, in walking order. This is what a paid quest stores.
   function select(elements, start) {
-    const places = dedupe(elements.map(classify).filter(Boolean));
+    return selectPlaces(elements.map(classify).filter(Boolean), start);
+  }
+  // Same, from places already classified (the server's tiles: {id, cat, lat, lon, name, score}).
+  function selectPlaces(classified, start) {
+    const places = dedupe(classified.filter(p => dist(start, p) <= SEARCH_RADIUS + 120));
     const stops = choose(start, places, 6);
     if (!stops) return { ok: false, reason: "few", found: places.length };
     return { ok: true, stops: stops.map(s => ({ cat: s.cat, lat: s.lat, lon: s.lon, name: s.name, id: s.id })) };
@@ -457,7 +461,7 @@ const QuestEngine = (() => {
     return { ok: true, indoorOnly: !!q.indoorOnly, count: q.steps.length, walkM: q.walkM, minutes: q.minutes, teasers: q.steps.map(s => s.teaser) };
   }
 
-  return { overpassQuery, classify, dedupe, choose, select, assemble, indoorStops, build, preview, dist, bearing, articleize, T, HERE, WORDS, SEARCH_RADIUS, MAX_WALK };
+  return { overpassQuery, classify, dedupe, choose, select, selectPlaces, assemble, indoorStops, build, preview, dist, bearing, articleize, T, HERE, WORDS, SEARCH_RADIUS, MAX_WALK };
 })();
 if (typeof module !== "undefined") module.exports = QuestEngine;
 /* ENGINE-END */

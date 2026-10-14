@@ -20,42 +20,24 @@ try {
   for (const f of files) { const r = await fetch(site + f, { method: "HEAD" }); if (!r.ok) missing.push(`${f} (HTTP ${r.status})`); }
   missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, prénoms, polices, pages)`);
 
-  // When the phone cannot reach the map server, our server fetches the places itself.
-  {
+  // Quests from our own copy of the places of France: a village, two dense city centres.
+  let token = "";
+  const towns = [];
+  for (const [label, c] of [["Rosheim", { lat: 48.4983, lon: 7.4703 }], ["Strasbourg", { lat: 48.5818, lon: 7.7509 }], ["Paris", { lat: 48.8530, lon: 2.3499 }]]) {
     const t0 = Date.now();
+    const p = await post("/api/preview", { start: c, ref: "smoke" });
+    if (p.json && p.json.ok) { towns.push(`${label} ${p.json.count} étapes ${p.json.walkM} m (${Date.now() - t0} ms)`); token = token || p.json.token; }
+    else if (p.json && p.json.reason === "nodata") { towns.push(`${label} : copie des lieux absente`); }
+    else { towns.push(`${label} : HTTP ${p.status} ${JSON.stringify(p.json).slice(0, 80)}`); failed++; }
+  }
+  console.log((towns.some(t => /HTTP|absente/.test(t)) ? "::warning::" : "::notice::") + "Aperçus depuis notre copie des lieux : " + towns.join(" ; "));
+
+  // Fallback without the copy: our server asks the public Overpass servers (often busy).
+  {
     const p = await post("/api/preview", { start: { lat: 48.4983, lon: 7.4703 }, fetch: true, ref: "smoke" });
-    p.json && p.json.ok ? ok(`relais carte par le serveur : ${p.json.count} étapes en ${Date.now() - t0} ms`)
-      : console.log(`::warning::Relais carte par le serveur indisponible (HTTP ${p.status} ${JSON.stringify(p.json)})`);
+    p.json && p.json.ok ? ok("relais OpenStreetMap par le serveur") : console.log(`::warning::Relais OpenStreetMap indisponible (HTTP ${p.status})`);
   }
 
-  // A real quest around the church square of Rosheim, places fetched like the phone does.
-  const start = { lat: 48.4983, lon: 7.4703 };
-  let elements = [];
-  try {
-    const r = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": "ma-quete-de-chevalier-smoke" },
-      body: "data=" + encodeURIComponent(QuestGeo.overpassQuery(start.lat, start.lon)) });
-    elements = QuestGeo.slim((await r.json()).elements);
-  } catch (e) { console.log("::warning::OpenStreetMap ne répond pas, test sur la quête à la maison seulement"); }
-  let token = "";
-  if (elements.length) {
-    const p = await post("/api/preview", { start, elements, ref: "smoke" });
-    if (p.json && p.json.ok && p.json.token && !JSON.stringify(p.json).includes("Rosheim")) { ok(`aperçu à Rosheim : ${p.json.count} étapes, ${p.json.walkM} m`); token = p.json.token; }
-    else ko(`aperçu à Rosheim (HTTP ${p.status} ${JSON.stringify(p.json).slice(0, 120)})`);
-  }
-  // Dense city centres: many places to sort, the heaviest work for the server.
-  const dense = [];
-  for (const [label, c] of [["Strasbourg", { lat: 48.5818, lon: 7.7509 }], ["Paris", { lat: 48.8530, lon: 2.3499 }]]) {
-    try {
-      const r = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": "ma-quete-de-chevalier-smoke" },
-        body: "data=" + encodeURIComponent(QuestGeo.overpassQuery(c.lat, c.lon)) });
-      const els = QuestGeo.slim((await r.json()).elements);
-      const t0 = Date.now();
-      const p = await post("/api/preview", { start: c, elements: els, ref: "smoke" });
-      dense.push(`${label} ${els.length} lieux → ${p.json && p.json.ok ? p.json.count + " étapes" : "HTTP " + p.status} en ${Date.now() - t0} ms`);
-      if (!(p.json && p.json.ok)) failed++;
-    } catch (e) { dense.push(`${label} : carte indisponible`); }
-  }
-  console.log("::notice::Grandes villes : " + dense.join(" ; "));
   const home2 = await post("/api/preview", { indoor: true, ref: "smoke" });
   home2.json && home2.json.ok && home2.json.count === 6 ? ok("aperçu de la quête à la maison") : ko(`quête à la maison (HTTP ${home2.status})`);
   token = token || (home2.json && home2.json.token) || "";

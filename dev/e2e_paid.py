@@ -27,10 +27,12 @@ def check(cond, label):
     print(("ok   " if cond else "FAIL ") + label)
     if not cond: fails.append(label)
 
+OSM_CALLS = []
 async def new_page(browser, errs):
     ctx = await browser.new_context(viewport={"width": 390, "height": 860})
     pg = await ctx.new_page()
     pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.on("request", lambda r: OSM_CALLS.append(r.url) if "overpass" in r.url else None)
     await pg.route("**/overpass-api.de/**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(fixture)))
     await pg.route("**/nominatim.openstreetmap.org/search**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(search)))
     return ctx, pg
@@ -38,6 +40,10 @@ async def new_page(browser, errs):
 async def main():
     (ROOT / "dist").mkdir(exist_ok=True)
     (ROOT / "dist" / "osm-fixture.json").write_text(json.dumps(fixture), encoding="utf-8")
+    seq = "".join("\x1e" + json.dumps({"type": "Feature", "geometry": {"type": "Point", "coordinates": [e["lon"], e["lat"]]},
+                   "properties": dict(e["tags"], **{"@type": e["type"], "@id": e["id"]})}) + "\n" for e in fixture["elements"])
+    (ROOT / "dist" / "fixture.geojsonseq").write_text(seq, encoding="utf-8")
+    subprocess.run(["node", str(ROOT / "dev" / "places" / "build.mjs"), str(ROOT / "dist" / "fixture.geojsonseq"), str(ROOT / "site" / "places")], check=True)
     srv = subprocess.Popen(["node", str(ROOT / "dev" / "serve.mjs"), str(PORT)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     for _ in range(50):
         try: urllib.request.urlopen(BASE + "/", timeout=1); break
@@ -60,6 +66,7 @@ async def main():
             check(not any(x in store for x in PLACES) and not any(x in dom for x in PLACES), "aperçu : aucun lieu dans la page ni dans le téléphone")
             check('"quest":null' in store and '"token":"' in store, "aperçu : seul un jeton chiffré est gardé")
             check("function choose" not in dom, "le moteur de choix des lieux n'est pas dans la page")
+            check(not OSM_CALLS, "aperçu fait depuis notre copie des lieux, sans appeler OpenStreetMap")
             await pg.screenshot(path=str(ROOT / "dist" / "p1-apercu.png"), full_page=True)
             await pg.click("button:has-text('Débloquer la quête')")
             check("Cochez d'abord" in await pg.inner_text("body"), "paiement refusé sans la case cochée")
@@ -151,7 +158,8 @@ async def main():
             sessions = json.loads(urllib.request.urlopen(BASE + "/__sessions").read())
             check(sessions[-1]["metadata"].get("ref") == "fete" and "?ref" not in pg3.url, "provenance « fete » suivie jusqu'au paiement")
             await ctx3.close()
-            # the main map server is busy: the paid app asks our server to fetch the places
+            # without our copy of the places, and the main map server busy: our server fetches the places
+            idx = ROOT / "site" / "places" / "index.json"; idx.rename(idx.with_suffix(".off"))
             ctx4 = await b.new_context(viewport={"width": 390, "height": 860})
             pg4 = await ctx4.new_page()
             await pg4.route("**/overpass-api.de/**", lambda r: r.fulfill(status=504, body="Gateway Timeout"))
@@ -163,8 +171,9 @@ async def main():
             await pg4.click("button:has-text('Chercher')")
             await pg4.click("text=Place de l'Église, Bourg-Test")
             await pg4.wait_for_selector("text=Ce qui vous attend", timeout=10000)
-            check(True, "serveur de carte injoignable depuis le téléphone : relais par notre serveur")
+            check(True, "sans copie des lieux et carte injoignable : relais par notre serveur")
             await ctx4.close()
+            idx.with_suffix(".off").rename(idx)
             check(not errs, "aucune erreur JavaScript " + str(errs[:3]))
             await b.close()
     finally:
