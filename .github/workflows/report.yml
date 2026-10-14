@@ -1,0 +1,33 @@
+# Weekly sales report from Stripe, saved in marketing/rapports/ for the Sunday marketing review.
+name: Point de la semaine
+
+on:
+  schedule:
+    - cron: "0 5 * * 0"   # Sunday 05:00 UTC, before the marketing review
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Rapport Stripe
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: |
+          mkdir -p marketing/rapports
+          f="marketing/rapports/$(date -u +%Y-%m-%d).md"
+          node dev/report.mjs > "$f"
+          echo "::notice::$(grep -E 'Quêtes payées' "$f")"
+      - name: Enregistrer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add marketing/rapports
+          git diff --cached --quiet || (git commit -m "Point de la semaine" && git pull --rebase -q && git push)
