@@ -32,6 +32,12 @@ try {
   }
   console.log((towns.some(t => /HTTP|absente/.test(t)) ? "::warning::" : "::notice::") + "Aperçus depuis notre copie des lieux : " + towns.join(" ; "));
 
+  // The free demo (GitHub Pages) reads the same tiles from another origin.
+  {
+    const r = await fetch(site + "/places/index.json", { headers: { origin: "https://cr2fg6j7th-sys.github.io" } });
+    r.ok && r.headers.get("access-control-allow-origin") === "*" ? ok("lieux lisibles par la démo (CORS)") : console.log(`::warning::Lieux non lisibles par la démo (HTTP ${r.status}, CORS ${r.headers.get("access-control-allow-origin")})`);
+  }
+
   // Fallback without the copy: our server asks the public Overpass servers (often busy).
   {
     const p = await post("/api/preview", { start: { lat: 48.4983, lon: 7.4703 }, fetch: true, ref: "smoke" });

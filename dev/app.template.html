@@ -136,6 +136,8 @@ footer a{color:var(--muted)}
 // Paid build: the server chooses the places and unlocks the quest after payment.
 // Demo build (GitHub Pages): everything runs in the phone, the unlock button is free.
 const PAID=/*PAID*/false;
+// Demo build: reads the copy of the places of France kept by the paid site (public map data).
+const PLACES_SITE="/*PLACES_SITE*/";
 const E=(typeof QuestEngine!=="undefined")?QuestEngine:null;
 const G=QuestGeo;
 const STORE="quete-templiers-v3";
@@ -275,6 +277,17 @@ async function makePreview(body){
   return {ok:true,preview:{ok:true,indoorOnly:r.indoorOnly,count:r.count,walkM:r.walkM,minutes:r.minutes,teasers:r.teasers,price:r.price},quest:null,token:r.token};
 }
 
+// Demo build only: the same tiles as the server, chosen in the phone.
+async function demoFromTiles(lat,lon){
+  if(!PLACES_SITE)return {ok:false,reason:"nodata"};
+  const idx=await fetch(PLACES_SITE+"/places/index.json");if(!idx.ok)return {ok:false,reason:"nodata"};
+  const r=900,dLat=r/111320,dLon=r/(111320*Math.cos(lat*Math.PI/180)),keys=new Set(),places=[];
+  for(const a of [lat-dLat,lat+dLat])for(const b of [lon-dLon,lon+dLon])keys.add(`${Math.floor(a/0.1)}_${Math.floor(b/0.1)}`);
+  for(const k of keys){const t=await fetch(`${PLACES_SITE}/places/${k}.json`);if(t.ok)for(const [cat,la,lo,name,score,id] of await t.json())places.push({cat,lat:la,lon:lo,name,score,id});}
+  const sel=E.selectPlaces(places,{lat,lon});if(!sel.ok)return sel;
+  const q=E.assemble({lat,lon},sel.stops);return {ok:true,preview:previewOf(q),quest:q,token:""};
+}
+
 /* ---------- New quest ---------- */
 const fresh={unlocked:false,paid:"",solved:[],step:0,phase:"travel",hint:0};
 async function startIndoor(){
@@ -410,7 +423,7 @@ async function startFrom(lat,lon,town){
   try{
     // Paid build: our server keeps a copy of the places of France and chooses the stops from it.
     // Without that copy: the phone asks OpenStreetMap, and if it is busy our server tries the mirrors.
-    let p=PAID?await makePreview({start:{lat,lon}}):{ok:false,reason:"nodata"};
+    let p=PAID?await makePreview({start:{lat,lon}}):await demoFromTiles(lat,lon).catch(()=>({ok:false,reason:"nodata"}));
     if(!p.ok&&p.reason==="nodata"){
       let els=null;
       try{els=G.slim(await fetchPlaces(lat,lon,PAID?1:3));}catch(e){if(!PAID)throw e;}

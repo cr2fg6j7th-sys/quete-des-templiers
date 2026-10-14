@@ -12,9 +12,13 @@ root = d.parent
 read = lambda n: (d / n).read_text(encoding="utf-8")
 t, geo, eng, voice, worker = read("app.template.html"), read("geo.js"), read("engine.js"), read("voice.js"), read("worker.js")
 
+# The paid site, whose copy of the places of France the demo reads (CORS allowed on /places/).
+PLACES_SITE = "https://ma-quete-de-chevalier.pv6ggk8t2v.workers.dev"
+
 def page(engine_part, paid):
     return (t.replace("/*GEO*/", geo).replace("/*ENGINE*/", engine_part).replace("/*VOICE*/", voice)
-             .replace("const PAID=/*PAID*/false;", f"const PAID={'true' if paid else 'false'};"))
+             .replace("const PAID=/*PAID*/false;", f"const PAID={'true' if paid else 'false'};")
+             .replace("/*PLACES_SITE*/", "" if paid else PLACES_SITE))
 
 (root / "index.html").write_text(page(eng, False), encoding="utf-8")
 
@@ -75,6 +79,8 @@ for name, html in legal_pages.items():
 for name, html in guide_pages.items():
     (site / name).write_text(html, encoding="utf-8")
 shutil.copytree(root / "fonts", site / "fonts")
+# Headers of the static files (Cloudflare): the demo may read the place tiles from another site.
+(site / "_headers").write_text("/places/*\n  Access-Control-Allow-Origin: *\n  Cache-Control: public, max-age=86400\n", encoding="utf-8")
 if "--audio" in sys.argv:
     shutil.copytree(root / "audio", site / "audio", ignore=shutil.ignore_patterns("manifest.json", "rapport-noms.json", "test"))
 
