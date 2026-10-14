@@ -25,7 +25,7 @@ try {
   for (const url of ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"]) {
     try {
       const t0 = Date.now();
-      const r = await fetch(url, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", origin: site },
+      const r = await fetch(url, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", origin: site, "user-agent": "Mozilla/5.0 (ma-quete-de-chevalier smoke test)" },
         body: "data=" + encodeURIComponent('[out:json][timeout:10];node(48.4983,7.4703,48.4993,7.4713);out 1;'), signal: AbortSignal.timeout(20000) });
       mirrors.push(`${new URL(url).host} ${r.status} ${r.headers.get("access-control-allow-origin") ? "CORS ok" : "SANS CORS"} ${Date.now() - t0} ms`);
     } catch (e) { mirrors.push(`${new URL(url).host} injoignable`); }
