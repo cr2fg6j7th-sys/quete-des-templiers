@@ -6,7 +6,9 @@ import QuestGeo from "./geo.js";
 const site = process.argv[2].replace(/\/$/, "");
 const testKey = /^(sk|rk)_test_/.test(process.env.STRIPE_SECRET_KEY || "");
 let failed = 0;
-const ok = msg => console.log(`::notice::OK ${msg}`);
+// GitHub shows at most 10 notices per step: the passed checks are gathered into one line at the end.
+const passed = [];
+const ok = msg => passed.push(msg);
 const ko = msg => { failed++; console.log(`::error::ÉCHEC ${msg}`); };
 const post = (path, body) => fetch(site + path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
   .then(async r => ({ status: r.status, json: await r.json().catch(() => null) }));
@@ -93,4 +95,5 @@ try {
 } catch (e) {
   ko(String(e));
 }
+console.log(`::notice::OK (${passed.length}) : ${passed.join(" ; ")}`);
 process.exit(failed ? 1 : 0);
