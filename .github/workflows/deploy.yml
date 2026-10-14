@@ -93,6 +93,10 @@ jobs:
           python3 dev/build.py --audio
           node dev/test.js
           if [ -f places-data/index.json ]; then cp -r places-data site/places; echo "::notice::Lieux en ligne : $(cat places-data/index.json)"; fi
+          # Town pages for Google, from the same places (a failure never blocks the deploy).
+          if [ -f places-data/index.json ]; then
+            if node dev/villes/build.mjs places-data site "$(cat dist/site-url.txt)" > /tmp/villes.log; then echo "::notice::$(tail -1 /tmp/villes.log)"; else echo "::warning::Pages de ville non construites : $(tail -3 /tmp/villes.log | tr '\n' ' ')"; fi
+          fi
 
       # Anonymous visit counts (Workers KV, free plan). The namespace is created once; if the
       # Cloudflare token cannot do it, the site goes online without counts and a warning says so.

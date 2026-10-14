@@ -7,6 +7,7 @@
 #   sw.js               keeps a bought quest playable without network (both builds)
 #   og.png, icons       link preview image and icons (dev/static/, made by dev/video/og.py)
 #   robots.txt, sitemap.xml   for search engines (paid site only; the demo is marked noindex)
+#   town pages          added by dev/villes/build.mjs in the deploy, once the places of France are there
 #   home.static.html    the home screen copied into the page for robots without JavaScript (dev/snapshot.py)
 # The audio folder is copied into site/ by the deploy workflow (or with --audio).
 import hashlib, json, re, shutil, subprocess, sys
@@ -58,13 +59,16 @@ h2{font-size:1.1rem;color:var(--rose);margin:1.6em 0 .3em}
 p,li{margin:.4em 0}a{color:var(--rose)}.maj,.back{color:var(--muted);font-size:.9rem}
 .todo{background:#fff3c4;color:#5a4300;padding:0 4px;border-radius:4px}
 </style>"""
+(root / "dist").mkdir(exist_ok=True)
+(root / "dist" / "page-style.html").write_text(STYLE, encoding="utf-8")  # read by dev/villes/build.mjs
+(root / "dist" / "site-url.txt").write_text(SITE, encoding="utf-8")
 ident = json.loads((d / "legal" / "identite.json").read_text(encoding="utf-8"))
 todo = lambda label: f'<span class="todo">[à compléter : {label}]</span>'
 med = ident.get("mediateur") or ""
 if med and ident.get("mediateur_site"):
     med = f'{med} (<a href="{ident["mediateur_site"]}" rel="noopener">{ident["mediateur_site"]}</a>)'
 fields = {
-    "{{STYLE}}": STYLE, "{{DATE}}": "14 octobre 2026",
+    "{{STYLE}}": STYLE, "{{SITE}}": SITE, "{{DATE}}": "14 octobre 2026",
     "{{NOM}}": ident.get("nom") or todo("nom et prénom"),
     "{{SIRET}}": ident.get("siret") or todo("numéro SIRET"),
     "{{ADRESSE}}": ident.get("adresse") or todo("adresse"),
