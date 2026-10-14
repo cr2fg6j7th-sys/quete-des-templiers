@@ -58,6 +58,7 @@ jobs:
           node dev/test.js
 
       - name: Envoyer sur Cloudflare
+        id: deploy
         if: steps.ready.outputs.ok == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -69,7 +70,9 @@ jobs:
             tail -n 25 /tmp/deploy.log | sed -e 's/\x1b\[[0-9;]*m//g' | grep -v '^\s*$' | while IFS= read -r l; do echo "::error::$l"; done
             exit 1
           fi
-          grep -o 'https://[^ ]*workers\.dev' /tmp/deploy.log | head -1 | sed 's/^/::notice::Adresse du site : /'
+          url=$(grep -o 'https://[^ ]*workers\.dev' /tmp/deploy.log | head -1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "::notice::Adresse du site : $url"
 
       - name: Clés du serveur
         if: steps.ready.outputs.ok == 'true'
@@ -87,3 +90,11 @@ jobs:
           if ! printf '%s' "$list" | grep -q QUEST_KEY; then
             openssl rand -base64 32 | tr -d '\n' | npx --yes $WRANGLER secret put QUEST_KEY > /tmp/secret.log 2>&1 || report
           fi
+
+      - name: Vérifier le site en ligne
+        if: steps.ready.outputs.ok == 'true' && steps.deploy.outputs.url != ''
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: |
+          sleep 10
+          node dev/smoke.mjs "${{ steps.deploy.outputs.url }}"
