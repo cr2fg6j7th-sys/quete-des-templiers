@@ -34,14 +34,14 @@
 @font-face{font-family:"Alegreya Sans SC";src:url(fonts/AlegreyaSansSC-Bold.woff) format("woff");font-weight:700;font-display:swap}
 /* Layout: one narrow column held by the adult guide; six shields track the quest. */
 :root{
-  --stone:#eef0f5;--card:#ffffff;--ink:#1b2547;--muted:#5b6482;--rose:#b8505c;--rose-soft:#f6e3e5;--or:#a87a1f;--line:#d9dce8;--ok:#2f7a4f;--on-rose:#fff;
+  --stone:#eef0f5;--card:#ffffff;--ink:#1b2547;--muted:#5b6482;--rose:#b8505c;--rose-soft:#f6e3e5;--or:#a87a1f;--line:#d9dce8;--ok:#2f7a4f;--on-rose:#fff;--garance:#b8202b;
   --display:"UnifrakturMaguntia","Old English Text MT",Georgia,serif;
   --body:"Alegreya Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --label:"Alegreya Sans SC","Alegreya Sans",system-ui,sans-serif;
   color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;color-scheme:dark}}
-:root[data-theme="dark"]{--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;--garance:#f0707a;color-scheme:dark}}
+:root[data-theme="dark"]{--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;--garance:#f0707a;color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -94,7 +94,7 @@ button{cursor:pointer}
 .diploma{border:3px double var(--or);border-radius:6px;padding:22px 18px;text-align:center;gap:10px;background:var(--card)}
 .diploma .sign{font-family:var(--display);font-size:1.05rem;color:var(--or);margin-top:4px}
 .diploma .gm{display:flex;flex-direction:column;align-items:center;margin-top:6px;color:var(--ink)}
-.diploma .gm svg{width:150px;height:auto;display:block;margin-bottom:-6px}
+.diploma .gm svg{width:150px;height:auto;display:block;margin-bottom:-6px;color:var(--garance)}
 .diploma .gm span{font-family:var(--display);font-size:.95rem;border-top:1px solid var(--muted);padding:3px 18px 0}
 .diploma .name{font-family:var(--display);font-size:2.4rem;color:var(--rose)}
 .timer{font-size:2.2rem;font-variant-numeric:tabular-nums;text-align:center;font-weight:700}
@@ -442,7 +442,7 @@ async function parchment(lines,opts){
   x.font=FACE.body(28);x.fillStyle="#5b6482";x.fillText(TAG,W/2,H-72);
   // the Grand Master's signature in the lower left corner
   if(opts&&opts.sign&&SIGN){const [bx,by,bw,bh]=SIGN.box,k=200/bw,x0=92,y0=H-122-bh*k;
-    x.save();x.translate(x0-bx*k,y0-by*k);x.scale(k,k);x.fillStyle="#22306b";x.fill(new Path2D(SIGN.d));x.restore();
+    x.save();x.translate(x0-bx*k,y0-by*k);x.scale(k,k);x.fillStyle=GARANCE;x.fill(new Path2D(SIGN.d));x.restore();
     x.strokeStyle="#5b6482";x.lineWidth=1.5;x.beginPath();x.moveTo(x0-4,H-128);x.lineTo(x0+204,H-128);x.stroke();
     x.font=FACE.display(26);x.fillStyle="#1b2547";x.fillText("Le Grand Maître",x0+100,H-98);}
   // QR code in the lower right corner, inside the frame
@@ -473,6 +473,7 @@ const TAG="#MaQueteDeChevalier";
 const QR=/*QR*/null;
 // The Grand Master's signature (invented: "Aldéran"), above "Le Grand Maître" on every diploma.
 const SIGN=/*SIGN*/null;
+const GARANCE="#b8202b";   // rouge garance, the ink of the signature (asked by Nathan)
 const sigSvg=(cls,ink)=>SIGN?`<svg class="${cls}" viewBox="${SIGN.box.join(" ")}" aria-hidden="true"><path d="${SIGN.d}" fill="${ink}"/></svg>`:"";
 const qrSvg=cls=>QR?`<svg class="${cls}" viewBox="-3 -3 ${QR.size+6} ${QR.size+6}" role="img" aria-label="QR code vers Ma Quête de Chevalier"><rect x="-3" y="-3" width="${QR.size+6}" height="${QR.size+6}" rx="1.5" fill="#fff"/><path d="${QR.d}" fill="#1b2547" shape-rendering="crispEdges"/></svg>`:"";
 function partyDate(){const d=S.invite&&S.invite.date;try{return (d?new Date(d+"T12:00:00"):new Date()).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});}catch(e){return "";}}
@@ -485,7 +486,7 @@ function diplomaSheet(o){
     h("div",{class:"dip-foot"},h("div",{class:"dip-sign"},h("span",{text:"Le Grand Maître"})),
       h("div",{class:"dip-mark"},h("span",{class:"dip-brand"},"Ma Quête de Chevalier",h("small",{text:TAG}),QR&&h("small",{class:"dip-scan",text:"Une quête pour votre enfant ? Scannez le code."})))));
   if(QR)p.querySelector(".dip-mark").insertAdjacentHTML("beforeend",qrSvg("dip-qr"));
-  p.querySelector(".dip-sign").insertAdjacentHTML("afterbegin",sigSvg("dip-sig","#22306b"));
+  p.querySelector(".dip-sign").insertAdjacentHTML("afterbegin",sigSvg("dip-sig",GARANCE));
   return p;
 }
 function printDiplomas(companions){
