@@ -1,0 +1,42 @@
+# State of the domain, from GitHub's servers (Claude's session cannot reach Cloudflare or the DNS):
+# the zone in Cloudflare (status, the two name servers to put at OVH), and what the .fr registry
+# (AFNIC) answers: name servers in use and DNSSEC (DS record). Started by hand. Prints no secret.
+name: Vérification du domaine
+
+on:
+  workflow_dispatch:
+    inputs:
+      domaine:
+        description: "Nom de domaine"
+        default: "maquetelegendaire.fr"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cloudflare
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          D: ${{ inputs.domaine }}
+        run: |
+          r=$(curl -s -H "Authorization: Bearer $CF_TOKEN" "https://api.cloudflare.com/client/v4/zones?name=$D&account.id=$CF_ACCOUNT")
+          if [ "$(echo "$r" | jq -r .success)" != "true" ]; then
+            echo "::warning::Cloudflare refuse la lecture des domaines avec la clé actuelle : $(echo "$r" | jq -c '[.errors[]?.message]')"
+            exit 0
+          fi
+          n=$(echo "$r" | jq '.result | length')
+          if [ "$n" = "0" ]; then echo "::warning::Cloudflare : aucun domaine $D sur ce compte (ou la clé ne voit pas ce domaine)"; exit 0; fi
+          echo "$r" | jq -r '.result[0] | "::notice::Cloudflare : \(.name) trouvé, statut « \(.status) », offre « \(.plan.name) », serveurs de noms à mettre chez OVH : \(.name_servers | join(" et ")) ; serveurs actuels vus par Cloudflare : \((.original_name_servers // []) | join(", "))"'
+      - name: Registre .fr (AFNIC)
+        env:
+          D: ${{ inputs.domaine }}
+        run: |
+          sudo apt-get install -y -qq dnsutils >/dev/null 2>&1 || true
+          ns=$(dig +norec +short NS "$D" @d.nic.fr | sort | tr '\n' ' ')
+          [ -n "$ns" ] || ns=$(dig +norec NS "$D" @d.nic.fr | awk '/IN[[:space:]]+NS/ {print $5}' | sort | tr '\n' ' ')
+          ds=$(dig +short DS "$D" @d.nic.fr | tr '\n' ' ')
+          echo "::notice::Registre .fr : serveurs de noms déclarés = ${ns:-aucun} ; DNSSEC (enregistrement DS) = ${ds:-aucun, donc désactivé}"
