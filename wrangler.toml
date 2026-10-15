@@ -5,6 +5,13 @@ main = "dist/worker.js"
 compatibility_date = "2025-09-01"
 workers_dev = true
 
+# The site's own address (domain bought by Nathan at OVH on 15/10/2026, DNS at Cloudflare).
+# Cloudflare creates the DNS records and the certificate itself. The workers.dev address stays on.
+routes = [
+  { pattern = "maquetelegendaire.fr", custom_domain = true },
+  { pattern = "www.maquetelegendaire.fr", custom_domain = true },
+]
+
 # The site (page, voice, fonts, legal pages). Requests for a file are served directly;
 # everything else (the /api/ routes) goes to the worker.
 [assets]
