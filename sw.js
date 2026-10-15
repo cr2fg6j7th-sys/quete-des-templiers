@@ -4,7 +4,7 @@
 //   page (navigation): network first, cached copy if the network fails or takes over 6 s
 //   voice, fonts, list of names: cached copy first (with "Range" support: phones ask audio in pieces)
 //   everything else (/api/, other sites): untouched
-const CACHE = "quete-voix-18aa658f57";
+const CACHE = "quete-voix-de5528c25f";
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", e => e.waitUntil((async () => {

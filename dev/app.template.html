@@ -167,6 +167,13 @@ footer a{color:var(--muted)}
   .dip-brand small{display:block;font-family:var(--body);font-size:12pt;color:#5b6482}
   .dip-brand .dip-scan{font-size:9.5pt;margin-top:1mm}
   .dip-qr{width:24mm;height:24mm;display:block}
+  .lc-sheet{width:297mm;height:209mm;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:7mm;padding:10mm;box-sizing:border-box;background:#fff}
+  .lc{position:relative;border:1.6mm double #a87a1f;border-radius:4mm;background:#fbf6e9;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;color:#1b2547;font-family:var(--body);overflow:hidden}
+  .lc-seal{width:15mm;height:15mm}
+  .lc-letter{font-family:var(--label);font-weight:700;font-size:120pt;line-height:1;color:#b8505c;margin:1mm 0 2mm}
+  .lc-order{font-family:var(--label);font-size:9pt;letter-spacing:.14em;color:#a87a1f;text-transform:lowercase;margin:0}
+  .lc-where{position:absolute;bottom:3mm;left:5mm;right:5mm;font-size:7.5pt;color:#8a8fa6;text-align:center;margin:0}
 }
 .parchment:not([src]){display:none}
 @media (prefers-reduced-motion:no-preference){.pop{animation:pop .5s ease-out}@keyframes pop{from{transform:scale(.6);opacity:.3}to{transform:none;opacity:1}}.spinner{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}}
@@ -381,6 +388,7 @@ function questClips(){
   const q=S.quest,g0=S.hero,keys=[];
   for(const indoor of [false,true])keys.push(...V.message("prologue",{g:g0,indoor}),...V.message("intro",{g:g0,indoor}));
   q.steps.forEach((st,i)=>keys.push(...V.message("indice",{g:g0,cat:st.cat,v:st.v||0}),...V.message("recit",{g:g0,cat:st.cat,v:st.v||0}),
+    ...(st.hideId?[...V.message("indice",{g:g0,indoor:true,cache:st.hideId}),...V.message("recit",{g:g0,indoor:true,cache:st.hideId,cat:st.cat,v:st.v||0})]:[]),
     ...V.message("lettre",{g:g0,letter:st.letter,last:i===q.steps.length-1,word:q.word})));
   keys.push(...V.message("fin",{g:g0,word:q.word}));
   return keys.map(clipUrl).filter(Boolean);
@@ -503,6 +511,28 @@ function printDiplomas(companions){
   hit("imprime");
   try{window.print();}catch(e){}
 }
+// At home: the adult hides one card per letter before the party. The list stays on this adult screen.
+function hideCard(){
+  const q=S.quest;
+  return h("div",{class:"card adult"},h("h3",{text:"La chasse aux lettres, à préparer avant la fête (5 minutes)"}),
+    h("p",{class:"note",text:"Imprimez les cartes, ou écrivez chaque lettre en grand sur un papier plié en deux. Puis cachez-les, sans que les enfants vous voient :"}),
+    h("ol",{class:"rules"},...q.steps.map(st=>h("li",null,"lettre ",h("b",{text:st.letter})," : ",st.hide||"où vous voulez"))),
+    h("button",{class:"btn ghost",type:"button",onclick:printLetters},"Imprimer les cartes des lettres"),
+    h("p",{class:"note",text:"Pas de canapé ou d'étagère à livres ? Un fauteuil ou une pile de magazines feront l'affaire : les énigmes du Grand Maître s'y prêtent."}));
+}
+function printLetters(){
+  const q=S.quest;
+  const sheet=h("section",{class:"lc-sheet"},...q.steps.map((st,i)=>{
+    const c=h("div",{class:"lc"});
+    c.innerHTML=SEAL.replace('class="seal"','class="lc-seal"').replace("var(--rose)","#b8505c");
+    c.append(h("div",{class:"lc-letter",text:st.letter}),h("p",{class:"lc-order",text:"ordre des gardiens du temple"}),
+      h("p",{class:"lc-where",text:`étape ${i+1} · à cacher ${st.hide||""}`}));
+    return c;}));
+  let box=document.getElementById("print");if(!box){box=h("div",{id:"print"});document.body.append(box);}
+  box.replaceChildren(sheet);
+  hit("imprime");
+  try{window.print();}catch(e){}
+}
 function printCard(before){
   const n=Math.max(1,(S.kids||8)-1);
   const box=h("input",{type:"checkbox",id:"dip-all"});box.checked=S.dipAll!==false;
@@ -556,7 +586,7 @@ const SEAL=`<svg class="seal" viewBox="-30 -30 60 60" aria-hidden="true">
   <path d="M-1.6-1.6-5-12H5L1.6-1.6 12-5V5L1.6 1.6 5 12H-5L-1.6 1.6-12 5V-5Z" fill="#fff" fill-opacity=".85"/></svg>`;
 const FAQ=[
   ["Faut-il préparer quelque chose ?","Seulement un petit trésor dans votre sac : bonbons, pièces en chocolat, médailles. Rien à cacher dans la rue, rien à imprimer."],
-  ["Et s'il pleut, ou en hiver ?","Passez en mode maison : même histoire, mêmes énigmes, et des défis à faire à l'intérieur. Vous pouvez aussi créer directement une quête à la maison."],
+  ["Et s'il pleut, ou en hiver ?","Passez en mode maison : le Grand Maître transforme la quête en chasse aux lettres. Vous cachez six cartes dans la maison (5 minutes, à imprimer ou à écrire à la main), les enfants les retrouvent grâce à ses énigmes et relèvent des défis faits pour l'intérieur. Vous pouvez aussi créer directement une quête à la maison."],
   ["Un lieu est fermé ou en travaux ?","Un bouton permet de passer l'étape, et la lettre est gagnée quand même."],
   ["Les enfants entrent-ils dans les églises ?","Non. Tout se passe dehors, devant les lieux."],
   ["Est-ce que ça marche dans ma ville ?","Partout en France où il y a quelques lieux publics à pied : un bourg, un quartier, un centre-ville. L'aperçu gratuit vous le dit avant de payer."],
@@ -624,7 +654,7 @@ function homeScreen(){
          ["Des indices, des défis et des énigmes"," pensés pour les 7 à 10 ans, qui font bouger tout le groupe."],
          ["Un rôle pour chaque enfant"," : chaque lettre gagnée est confiée à un gardien."],
          ["Le guide de l'adulte"," : itinéraire à pied, consignes de sécurité, trésor à prévoir."],
-         ["Un mode maison s'il pleut"," : même histoire, défis dans le salon."],
+         ["Un mode maison s'il pleut"," : une chasse aux lettres cachées dans la maison."],
          ["Le diplôme"," de chevalier ou de chevalière, à garder en souvenir."]].map(([b,t])=>h("li",null,h("b",{text:b}),t))),
       h("p",{class:"note",text:"Environ une heure de jeu, moins de 2 km à pied. De 4 à 15 enfants, avec un adulte pour cinq enfants environ."})),
     h("section",{class:"card block"},h("h2",{text:"Le prix"}),
@@ -758,7 +788,7 @@ function mapTeaser(){
 }
 function prologueText(){
   return S.preview.indoorOnly
-    ?`Approche, {N}. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple cacha un sceau magique et dispersa les ${S.preview.count} lettres du mot secret qui permet de l'ouvrir. Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'${g("un chevalier courageux","une chevalière courageuse")}. Je vais te raconter les lieux où il est passé, et tu relèveras mes défis sans quitter la maison. Es-tu ${g("prêt","prête")} ?`
+    ?`Approche, {N}. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple cacha un sceau magique et dispersa les ${S.preview.count} lettres du mot secret qui permet de l'ouvrir. Cette nuit, ses lettres sont apparues, cachées dans ta maison ! Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'${g("un chevalier courageux","une chevalière courageuse")}. Avec tes compagnons, résous mes énigmes pour trouver chaque cachette, relève mes défis, et rapporte-moi les lettres. Es-tu ${g("prêt","prête")} ?`
     :`Approche, {N}. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple traversa {V}. Avant de repartir, il cacha un sceau magique et dispersa les ${S.preview.count} lettres du mot secret qui permet de l'ouvrir. Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'${g("un chevalier courageux","une chevalière courageuse")}. Avec tes compagnons, suis les indices, relève mes défis, et rapporte-moi les lettres. Es-tu ${g("prêt","prête")} ?`;
 }
 function previewScreen(){
@@ -821,19 +851,19 @@ function guideScreen(){
     h("div",null,h("p",{class:"eyebrow",text:"avant de partir"}),h("h2",{text:"Le guide du Grand Maître"})),
     h("p",{class:"lead",text:"Ces consignes sont pour vous, l'adulte. Les enfants n'ont pas besoin de regarder l'écran."}),
     PAID&&S.paid&&linkCard(),
-    h("div",{class:"card adult"},h("h3",{text:"Le groupe"}),h("ul",{class:"rules"},
+    S.indoor?hideCard():h("div",{class:"card adult"},h("h3",{text:"Le groupe"}),h("ul",{class:"rules"},
       h("li",{text:`Pour ${S.kids} enfants, prévoyez au moins ${ratio} adulte${ratio>1?"s":""} (un pour cinq enfants environ).`}),
       h("li",{text:"Les étapes sont des lieux publics : église (on reste dehors), fontaine, parc, place, monument. Les défis se font sur le trottoir, une place ou dans un parc."}),
       h("li",{text:"Le téléphone reste dans les mains d'un adulte. Pour chaque étape, vous voyez le lieu exact et un lien d'itinéraire à pied."}),
       winter&&h("li",{text:"En hiver, la nuit tombe vers 17 h : partez au plus tard vers 15 h 30 pour finir avant la nuit."}))),
     h("div",{class:"card adult"},h("h3",{text:"Le trésor"}),h("ul",{class:"rules"},
-      h("li",{text:"Gardez dans votre sac un petit coffre ou un sachet : bonbons, pièces en chocolat, médailles."}),
-      h("li",{text:"Vous le remettrez à la fin, quand les enfants auront trouvé le mot secret. Rien à cacher dans la rue."}))),
+      h("li",{text:S.indoor?"Préparez un petit coffre ou un sachet : bonbons, pièces en chocolat, médailles. Gardez-le avec vous, hors de vue.":"Gardez dans votre sac un petit coffre ou un sachet : bonbons, pièces en chocolat, médailles."}),
+      h("li",{text:S.indoor?"Vous le remettrez à la fin, quand les enfants auront trouvé le mot secret.":"Vous le remettrez à la fin, quand les enfants auront trouvé le mot secret. Rien à cacher dans la rue."}))),
     !q.indoorOnly&&h("div",{class:"card adult"},h("h3",{text:"Où jouer ?"}),
       h("div",{class:"seg",role:"group","aria-label":"Mode de jeu"},
         h("button",{type:"button","aria-pressed":String(!S.indoor),onclick:()=>go({indoor:false})},"Dehors"),
         h("button",{type:"button","aria-pressed":String(S.indoor),onclick:()=>go({indoor:true})},"À la maison")),
-      h("p",{class:"note",text:S.indoor?"Même histoire, mêmes énigmes : le Grand Maître raconte chaque lieu, et les défis se font dans la maison.":"Chaque étape se valide en arrivant sur place. Si un lieu est fermé ou inaccessible, vous pourrez passer l'étape."})),
+      h("p",{class:"note",text:S.indoor?"Une chasse aux lettres dans la maison : vous cachez les cartes avant la fête (5 minutes), les enfants les retrouvent grâce aux énigmes du Grand Maître, puis relèvent ses défis.":"Chaque étape se valide en arrivant sur place. Si un lieu est fermé ou inaccessible, vous pourrez passer l'étape."})),
     inviteCard(),
     printCard(true),
     offlineCard(),
@@ -857,10 +887,12 @@ function linkCard(){
 }
 function introScreen(){
   const n=S.quest.steps.length;
-  const t=`{N}, [[chevalier|chevalière]] de l'Ordre, la quête commence ! À chaque lieu, tu gagneras une lettre. Les ${n} lettres arrivent dans le désordre : à toi de retrouver le mot secret à la fin. ${S.indoor?"Aujourd'hui, nous voyageons par la pensée : écoute bien mes récits.":"Suis les indices, reste toujours près des adultes, et ouvre grand les yeux."}`;
+  const t=S.indoor
+    ?`{N}, [[chevalier|chevalière]] de l'Ordre, la chasse commence ! Chaque énigme te mène à une cachette de la maison. Quand tu trouves une lettre, apporte-la au Grand Maître, sans la montrer aux autres. Les ${n} lettres sont dans le désordre : à toi de retrouver le mot secret à la fin.`
+    :`{N}, [[chevalier|chevalière]] de l'Ordre, la quête commence ! À chaque lieu, tu gagneras une lettre. Les ${n} lettres arrivent dans le désordre : à toi de retrouver le mot secret à la fin. Suis les indices, reste toujours près des adultes, et ouvre grand les yeux.`;
   return [h("div",null,h("p",{class:"eyebrow",text:"la quête commence"}),h("h2",{text:`En route, ${S.name||"jeune chevalier"} !`})),
     voiceCard(t,null,null,V.message("intro",{g:S.hero,indoor:S.indoor})),note,
-    h("button",{class:"btn",type:"button",onclick:()=>go({screen:"step",step:0,phase:S.indoor?"arrived":"travel",hint:0})},"Première étape")];
+    h("button",{class:"btn",type:"button",onclick:()=>go({screen:"step",step:0,phase:S.indoor&&!S.quest.steps[0].hideId?"arrived":"travel",hint:0})},"Première étape")];
 }
 
 function routeLinks(st){
@@ -886,8 +918,17 @@ function timerBlock(sec){
 }
 function stepScreen(){
   const q=S.quest,i=S.step,st=q.steps[i],n=q.steps.length,P={P:st.P};
-  const title=(S.indoor||S.phase!=="travel")?fill("{P}",P):"Où aller ?";
+  const home=S.indoor&&st.hideId;
+  const title=S.phase==="travel"?(home?"Où est cachée la lettre ?":"Où aller ?"):fill("{P}",P);
   const head=[shieldRow(),h("div",null,h("p",{class:"eyebrow",text:`étape ${i+1} sur ${n}`}),h("h2",{text:title}))];
+  if(S.phase==="travel"&&home){
+    return [...head,voiceCard(`Écoute bien, {N}. ${st.hideClue}`,"L'énigme de la cachette",null,V.message("indice",{g:S.hero,indoor:true,cache:st.hideId})),note,
+      h("div",{class:"card adult"},h("h3",{text:"Pour l'adulte"}),
+        h("p",null,"La lettre ",h("b",{text:st.letter})," est cachée ",h("b",{text:st.hide}),"."),
+        h("p",{class:"note",text:"Laissez chercher. Si les enfants sèchent, dites « tu chauffes » ou « tu refroidis ». Celui qui trouve la carte l'apporte au Grand Maître sans la montrer aux autres."})),
+      h("button",{class:"btn",type:"button",onclick:()=>go({phase:"arrived",hint:0})},"Lettre trouvée !"),
+      h("button",{class:"linkish",type:"button",onclick:()=>go({phase:"arrived",hint:0})},"Carte introuvable ? Continuer quand même")];
+  }
   if(S.phase==="travel"){
     const out=h("p",{class:"note",role:"status"});
     return [...head,voiceCard(`Écoute bien, {N}. ${st.clue}`,"L'indice pour les enfants",null,V.message("indice",{g:S.hero,cat:st.cat,v:st.v||0})),note,
@@ -902,7 +943,8 @@ function stepScreen(){
       h("button",{class:"linkish",type:"button",onclick:()=>solve(i)},"Lieu fermé ou inaccessible ? Passer cette étape")];
   }
   if(S.phase==="arrived"){
-    return [...head,voiceCard(st.story,null,P,V.message("recit",{g:S.hero,cat:st.cat,v:st.v||0})),note,
+    return [...head,voiceCard(home?`{N}, bravo, tu l'as trouvée ! Maintenant, ferme les yeux, et imagine. ${st.story}`:st.story,home?"Le récit du Grand Maître":null,P,
+        V.message("recit",{g:S.hero,cat:st.cat,v:st.v||0,indoor:!!home,cache:st.hideId})),note,
       h("div",{class:"card"},h("h3",{text:"Le défi des chevaliers"}),h("p",{text:fill(S.indoor?st.defiIn:st.defi,P)}),st.timer?timerBlock(st.timer):null),
       !S.indoor&&h("p",{class:"note",text:"Pour l'adulte : "+st.adult}),
       h("button",{class:"btn",type:"button",onclick:()=>go({phase:"question"})},"Défi réussi : à l'énigme !")];
@@ -920,13 +962,13 @@ function stepScreen(){
   if(S.phase==="letter"){
     const last=i===n-1;
     return [...head,h("div",{class:"card",style:"text-align:center"},h("h3",{text:"Lettre gagnée"}),h("div",{class:"letter pop",text:st.letter}),
-        h("p",{class:"note",text:"Le gardien de cette lettre la répète trois fois à voix haute. Ensuite, il doit s'en souvenir jusqu'à la fin de la quête."}),
+        h("p",{class:"note",text:S.indoor&&st.hideId?"Le gardien de cette lettre garde sa carte précieusement, face cachée, jusqu'à la fin de la quête.":"Le gardien de cette lettre la répète trois fois à voix haute. Ensuite, il doit s'en souvenir jusqu'à la fin de la quête."}),
         h("p",{text:`Lettres retrouvées : ${S.solved.map(k=>q.steps[k].letter).join(" ")}`})),
       voiceCard(last
         ?`Voici la dernière lettre : ${st.letter}. Choisissez son gardien. Tu as maintenant toutes les lettres, {N}, mais elles sont dans le désordre… Retrouve le mot secret. Un indice : ${q.hint}${/…$/.test(q.hint)?"":"."}`
         :`Bien joué, {N}. Voici la lettre ${st.letter}. Choisissez un gardien de la lettre, un chevalier qui ne l'a pas encore été. Il devra s'en souvenir jusqu'à la fin de la quête.`,
         null,null,V.message("lettre",{g:S.hero,letter:st.letter,last,word:q.word})),note,
-      h("button",{class:"btn",type:"button",onclick:()=>last?go({screen:"final"}):go({step:i+1,phase:S.indoor?"arrived":"travel",hint:0})},last?"Trouver le mot secret":"Étape suivante")];
+      h("button",{class:"btn",type:"button",onclick:()=>last?go({screen:"final"}):go({step:i+1,phase:S.indoor&&!q.steps[i+1].hideId?"arrived":"travel",hint:0})},last?"Trouver le mot secret":"Étape suivante")];
   }
   return [];
 }
@@ -940,7 +982,7 @@ function finalScreen(){
   inp.addEventListener("keydown",e=>{if(e.key==="Enter")check();});
   return [shieldRow(),h("div",null,h("p",{class:"eyebrow",text:"le sceau du temple"}),h("h2",{text:"Le mot secret"})),
     h("div",{class:"card adult"},h("h3",{text:"Pour l'adulte"}),
-      h("p",{text:"Appelez les gardiens des lettres et alignez-les face à vous. Chacun crie sa lettre. Les chevaliers changent de place jusqu'à former le mot secret. Puis tapez le mot ci-dessous."})),
+      h("p",{text:S.indoor&&q.steps[0].hideId?"Appelez les gardiens des lettres : chacun pose sa carte sur la table, face visible. Les chevaliers déplacent les cartes jusqu'à former le mot secret. Puis tapez le mot ci-dessous.":"Appelez les gardiens des lettres et alignez-les face à vous. Chacun crie sa lettre. Les chevaliers changent de place jusqu'à former le mot secret. Puis tapez le mot ci-dessous."})),
     h("div",{class:"card",style:"text-align:center"},h("p",{text:"Si un gardien a oublié sa lettre, les voici, dans le désordre :"}),h("div",{class:"letter",text:letters})),
     h("div",{class:"card"},h("label",{for:"secret"},"L'adulte tape le mot trouvé par les enfants",inp),h("button",{class:"btn",type:"button",onclick:check},"Ouvrir le Sceau"),fb)];
 }
@@ -984,7 +1026,7 @@ function shareCard(){
 }
 function topbar(){
   if(["home","setup","loading","few","neterr","preview","unlocking","unlockerr"].includes(S.screen))return null;
-  return h("div",{class:"topbar"},h("span",{class:"eyebrow",text:"ma quête de chevalier"}),
+  return h("div",{class:"topbar"},h("span",{class:"eyebrow",text:"ma quête légendaire"}),
     h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"preview"})},"Aperçu"));
 }
 const OPEN=["home","setup","loading","few","neterr","unlocking","unlockerr"];

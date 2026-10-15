@@ -34,7 +34,7 @@ function check(name, q) {
   assert.strictEqual([...q.scrambled].sort().join(""), [...q.word].sort().join(""), name + ": letters must spell the word");
   assert.notStrictEqual(q.scrambled, q.word, name + ": letters must be scrambled");
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++)
-    assert(E.dist(q.steps[i], q.steps[j]) >= 60, name + ": stops too close");
+    assert(E.dist(q.steps[i], q.steps[j]) >= (q.steps[i].cat === q.steps[j].cat ? 60 : 35), name + ": stops too close");
   console.log(`\n${name}: ${n} étapes, ${q.walkM} m, ~${q.minutes} min, mot ${q.word} (lettres : ${q.scrambled})`);
   q.steps.forEach((s, i) => console.log(`  ${i + 1}. [${s.cat}] ${s.P}  (+${s.legM} m vers ${s.dir}) lettre ${s.letter}`));
 }
@@ -43,6 +43,23 @@ const q1 = E.build(dense, C);
 check("Bourg dense", q1);
 assert(!q1.steps.some(s => /Plaque|Mosquée|Château lointain/.test(s.name)), "excluded places must not appear");
 assert(q1.steps.filter(s => s.name === "Église Saint-Martin").length <= 1, "duplicate church merged");
+
+// A small village with what every village has (crosses, water tower, lavoir, school, fire station…) gets a quest
+const village = [
+  node(0, 40, { amenity: "place_of_worship", religion: "christian", name: "Église Saint-Ulrich" }),
+  node(-40, 30, { historic: "memorial", memorial: "war_memorial" }),                        // 35 m+ from the church
+  node(250, -120, { historic: "wayside_cross" }),
+  node(-200, 260, { man_made: "water_tower" }),
+  node(120, 200, { amenity: "lavoir", name: "Lavoir" }),
+  node(-150, -200, { amenity: "fire_station" }),
+  node(60, -60, { amenity: "post_box" }),
+  node(10, 10, { natural: "tree" }),                                                         // plain tree: ignored
+  node(30, -250, { leisure: "pitch", sport: "tennis" })                                      // tennis court: ignored
+];
+const qv = E.build(village, C);
+check("Petit village", qv);
+assert(!qv.steps.some(s => s.cat === "tree" || s.cat === "sport"), "plain trees and tennis courts are not stops");
+for (const s of qv.steps) assert(E.T[s.cat] && E.HERE[s.cat], "texts for " + s.cat);
 
 // Sparse village: only 3 usable places -> must refuse and suggest indoor mode
 const sparse = [node(0, 50, { amenity: "place_of_worship", religion: "christian", name: "Église" }),

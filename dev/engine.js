@@ -6,13 +6,18 @@
 const QuestEngine = (() => {
   const G = (typeof QuestGeo !== "undefined") ? QuestGeo : require("./geo.js");
   const { SEARCH_RADIUS, overpassQuery, dist, bearing } = G;
-  const MAX_WALK = 1600;         // metres of walking for the whole quest
+  const MAX_WALK = 1800;         // metres of walking for the whole quest
   const WALK_FACTOR = 1.3;       // straight line -> real walking distance
-  const MIN_GAP = 60;            // two stops closer than this feel like one place
+  const MIN_GAP = 60;            // two stops of the same kind closer than this feel like one place
+  const MIN_GAP_OTHER = 35;      // a church and the war memorial in front of it are two stops (villages)
+  const tooClose = (a, b) => dist(a, b) < (a.cat === b.cat ? MIN_GAP : MIN_GAP_OTHER);
 
   // ---- 1. classify OSM elements into kid-friendly categories ----
   const BASE = { gate: 9, castle: 9, ruins: 8, tower: 8, church: 8, well: 8, fountain: 7, viewpoint: 6,
-    townhall: 6, square: 6, park: 6, statue: 6, memorial: 5, artwork: 5, playground: 4 };
+    townhall: 6, square: 6, park: 6, statue: 6, memorial: 5, artwork: 5, playground: 4,
+    // what every village has (added 15/10/2026): they let small communes have a quest too
+    mill: 7, lavoir: 7, house: 6, tree: 6, cross: 5, watertower: 5, fire: 4, library: 4, school: 3, sport: 3, postbox: 2 };
+  const PITCH = /^(soccer|multi|basketball|rugby|rugby_union|team_handball|volleyball|football)\b/;
 
   function classify(el) {
     const t = el.tags || {};
@@ -41,6 +46,19 @@ const QuestEngine = (() => {
     else if (t.leisure === "playground") cat = "playground";
     else if (t.tourism === "viewpoint") cat = "viewpoint";
     else if (t.tourism === "artwork") cat = (t.artwork_type === "statue" || t.artwork_type === "sculpture") ? "statue" : (t.name ? "artwork" : null);
+    else if (t.historic === "wayside_chapel" || (t.building === "chapel" && t.name)) cat = "church";
+    else if (t.amenity === "watering_place" || t.historic === "fountain") cat = "fountain";
+    else if (t.historic === "wayside_cross" || t.man_made === "cross") cat = "cross";
+    else if (t.man_made === "water_tower") cat = "watertower";
+    else if (t.amenity === "lavoir") cat = "lavoir";
+    else if (t.man_made === "watermill" || t.man_made === "windmill" || t.historic === "mill") cat = "mill";
+    else if (t.natural === "tree") cat = (t.name || t.denotation === "natural_monument" || t.denotation === "landmark") ? "tree" : null;
+    else if (["building", "house", "farm"].includes(t.historic) || (t.heritage && t.building && t.building !== "no")) cat = t.name ? "house" : null;
+    else if (t.amenity === "fire_station") cat = "fire";
+    else if (t.amenity === "library") cat = "library";
+    else if (t.amenity === "school") cat = t.name ? "school" : null;
+    else if (t.leisure === "stadium" || (t.leisure === "pitch" && PITCH.test(t.sport || ""))) cat = "sport";
+    else if (t.amenity === "post_box") cat = "postbox";
     if (!cat) return null;
     let score = BASE[cat] + (t.name ? 2 : 0) + (t.historic ? 1 : 0) + (t.wikidata || t.wikipedia ? 1 : 0);
     return { id: `${el.type}/${el.id}`, cat, lat, lon, name: t.name || "", score, tags: t };
@@ -58,7 +76,7 @@ const QuestEngine = (() => {
 
   // ---- 3. choose and order the stops ----
   const LIMIT = { church: 2, park: 2, fountain: 2, statue: 2, square: 1, playground: 1, memorial: 1,
-    townhall: 1, gate: 2, tower: 2, castle: 1, ruins: 1, well: 1, artwork: 1, viewpoint: 1 };
+    townhall: 1, gate: 2, tower: 2, castle: 1, ruins: 1, well: 1, artwork: 1, viewpoint: 1, cross: 2 };
 
   function pathLength(start, stops) {
     let d = 0, cur = start;
@@ -74,7 +92,7 @@ const QuestEngine = (() => {
       for (const c of cands) {
         if (chosen.includes(c)) continue;
         if ((used[c.cat] || 0) >= (LIMIT[c.cat] || 1)) continue;
-        if (chosen.some(s => dist(s, c) < MIN_GAP)) continue;
+        if (chosen.some(s => tooClose(s, c))) continue;
         const v = c.score - 0.03 * dist(cur, c) - 2.5 * (used[c.cat] || 0);
         if (v > bestV) { bestV = v; best = c; }
       }
@@ -379,6 +397,151 @@ const QuestEngine = (() => {
       fact: "En hauteur, on voit loin et on se défend mieux.",
       hints: ["Pensez aux guetteurs.", "Pour surveiller.", "Pour voir arriver les ennemis."],
       adult: "Restez derrière les barrières."
+    }],
+    // ---- what every village has (added 15/10/2026) ----
+    cross: [{
+      teaser: "Une croix qui veille au bord du chemin.",
+      generic: "la croix",
+      clue: "Autrefois, on plantait des croix au bord des chemins pour guider les voyageurs. Cherchez-en une, en pierre ou en bois.",
+      story: "Te voici devant {P}, {N}. Les voyageurs et les pèlerins s'arrêtaient devant ces croix pour se reposer et se donner du courage avant de reprendre la route. Les chevaliers du Temple, eux, protégeaient ces voyageurs sur les chemins.",
+      defi: "Le serment du chevalier : chacun promet à voix haute une bonne action qu'il fera aujourd'hui, la main posée sur le cœur.",
+      defiIn: "Le serment du chevalier : chacun promet à voix haute une bonne action qu'il fera aujourd'hui, la main posée sur le cœur.",
+      q: "Comment appelait-on les voyageurs qui marchaient très loin pour rejoindre un lieu saint ?", choices: ["Des pèlerins", "Des pirates", "Des astronautes"], answer: 0,
+      fact: "Les Templiers ont été créés pour protéger les pèlerins sur les routes.",
+      hints: ["Ils faisaient un pèlerinage.", "Ça commence par « pèle… ».", "Des pèlerins."],
+      adult: "Lieu de recueillement : on parle doucement et on ne grimpe pas."
+    }, {
+      teaser: "Un signe dressé là où les chemins se croisent.",
+      generic: "le calvaire",
+      clue: "Une autre croix vous attend, souvent là où deux chemins se croisent. Ouvrez l'œil aux carrefours.",
+      story: "Encore une croix, {N} ! On en dressait souvent aux carrefours : quand on hésitait entre deux chemins, on s'y arrêtait pour réfléchir. Un bon chevalier prend toujours le temps de choisir le bon chemin.",
+      defi: "Le carrefour : le Grand Maître montre deux directions. Chaque chevalier choisit la sienne en sautant à pieds joints, puis tout le monde se rassemble en criant : « Pour l'Ordre ! »",
+      defiIn: "Le carrefour : le Grand Maître montre deux coins de la pièce. Chaque chevalier choisit le sien en sautant à pieds joints, puis tout le monde se rassemble au centre en criant : « Pour l'Ordre ! »",
+      q: "Comment appelle-t-on l'endroit où deux routes se croisent ?", choices: ["Un carrefour", "Un plafond", "Un pont-levis"], answer: 0,
+      fact: "Au carrefour, il faut choisir sa route.",
+      hints: ["Les routes s'y « croisent ».", "Ça commence par « carre… ».", "Un carrefour."],
+      adult: "Restez sur le bas-côté : ces croix sont souvent au bord des routes."
+    }],
+    watertower: [{
+      teaser: "Un château qui ne garde pas de trésor… mais de l'eau.",
+      generic: "le château d'eau",
+      clue: "Cherchez un château très étrange : une grande tour ronde, souvent en hauteur, sans fenêtre ni chevalier.",
+      story: "Voici {P}, {N} ! Ce château-là ne protège pas un seigneur : il garde l'eau de tout le village, tout là-haut. Grâce à lui, l'eau descend toute seule jusqu'aux robinets des maisons.",
+      defi: "La chaîne de l'eau : tout le monde se met en file et fait passer de main en main un seau imaginaire très lourd, sans en renverser une goutte. Le dernier crie « Plouf ! ».",
+      defiIn: "La chaîne de l'eau : en file, faites passer de main en main un gobelet en plastique rempli d'eau, au-dessus d'une serviette, sans en renverser une goutte.",
+      q: "Pourquoi garde-t-on l'eau tout en haut d'un château d'eau ?", choices: ["Pour qu'elle descende toute seule jusqu'aux robinets", "Pour que les oiseaux puissent boire", "Pour qu'elle soit plus près du soleil"], answer: 0,
+      fact: "L'eau descend toute seule : c'est la pesanteur qui la pousse.",
+      hints: ["L'eau aime descendre.", "Pense aux robinets des maisons.", "Pour qu'elle descende toute seule jusqu'aux robinets."],
+      adult: "On reste en dehors des clôtures."
+    }],
+    lavoir: [{
+      teaser: "Un bassin où l'on faisait la grande lessive.",
+      generic: "le lavoir",
+      clue: "Avant les machines à laver, on lavait le linge dans un bassin couvert, rempli d'eau. Cherchez ce bassin.",
+      story: "Te voici devant {P}, {N}. Autrefois, les lavandières venaient ici laver le linge à la main. Elles le frottaient, le tapaient avec un battoir et le rinçaient dans l'eau froide, en se racontant les nouvelles du village.",
+      defi: "Les lavandières : par deux, tenez un drap imaginaire. Frottez, tapez, essorez, puis secouez-le très fort en comptant jusqu'à trois.",
+      defiIn: "Les lavandières : par deux, prenez une serviette. Faites semblant de la frotter, de la taper, de l'essorer, puis pliez-la le plus vite possible.",
+      q: "Avant les machines à laver, où lavait-on le linge ?", choices: ["Au lavoir", "Au four à pain", "Au grenier"], answer: 0,
+      fact: "Faire la lessive pouvait prendre toute une journée.",
+      hints: ["Le mot ressemble à « laver ».", "C'est un bassin rempli d'eau.", "Au lavoir."],
+      adult: "On ne marche pas sur le bord du bassin."
+    }],
+    mill: [{
+      teaser: "Une grande roue qui travaillait jour et nuit.",
+      generic: "le moulin",
+      clue: "Cherchez un vieux bâtiment près de l'eau, ou une grande roue : c'est là qu'on fabriquait la farine du pain.",
+      story: "Voici {P}, {N}. Ici, la force de l'eau ou du vent faisait tourner une grande roue, qui faisait tourner deux énormes pierres. Entre elles, le blé était écrasé pour devenir de la farine.",
+      defi: "La roue du moulin : tout le monde se tient par la main en cercle et tourne lentement, puis de plus en plus vite. Au signal « Stop ! », tout le monde s'arrête net, sans tomber.",
+      defiIn: "La roue du moulin : tout le monde se tient par la main en cercle et tourne lentement, puis de plus en plus vite. Au signal « Stop ! », tout le monde s'arrête net, sans tomber.",
+      q: "Que fabriquait-on dans un moulin ?", choices: ["De la farine", "Des chaussures", "Du chocolat"], answer: 0,
+      fact: "Le meunier transformait le blé en farine, et le boulanger la farine en pain.",
+      hints: ["On en a besoin pour faire du pain.", "C'est une poudre blanche.", "De la farine."],
+      adult: "Moulin souvent privé : on regarde depuis la rue, loin de l'eau."
+    }],
+    tree: [{
+      teaser: "Un géant très vieux, qui ne bouge jamais.",
+      generic: "le vieil arbre",
+      clue: "Cherchez un arbre pas comme les autres : très vieux, très grand, ou planté là pour qu'on s'en souvienne.",
+      story: "Te voici devant {P}, {N}. Certains arbres vivent plusieurs centaines d'années. Celui-ci a peut-être vu passer des cavaliers, des marchés et des fêtes. Autrefois, on se réunissait parfois à l'ombre d'un grand arbre pour rendre la justice.",
+      defi: "La ronde de l'arbre : en vous tenant la main, combien de chevaliers faut-il pour faire le tour du tronc ? Si vous ne pouvez pas l'approcher, devinez-le !",
+      defiIn: "La forêt des chevaliers : chacun se transforme en arbre, les bras en branches, et tient en équilibre sur un pied pendant que le Grand Maître souffle comme le vent.",
+      q: "Comment connaître l'âge d'un arbre coupé ?", choices: ["En comptant les cercles de son tronc", "En comptant ses feuilles", "En mesurant son ombre"], answer: 0,
+      fact: "Chaque année, le tronc grandit d'un nouveau cercle.",
+      hints: ["Regarde l'intérieur d'un tronc coupé.", "Un cercle par année.", "En comptant les cercles de son tronc."],
+      adult: "On ne grimpe pas et on n'arrache rien."
+    }],
+    house: [{
+      teaser: "Une maison qui a traversé les siècles.",
+      generic: "la vieille maison",
+      clue: "Cherchez une maison très ancienne, peut-être avec des poutres de bois dessinées sur sa façade.",
+      story: "Voici {P}, {N}. Elle a traversé les siècles ! Autrefois, on construisait avec ce que l'on trouvait autour de soi : du bois pour les poutres, de la terre et de la paille pour boucher les trous entre elles.",
+      defi: "Les bâtisseurs : construisez une maison avec vos corps ! Deux chevaliers font le toit en joignant leurs mains au-dessus de leur tête, les autres font les murs. Tenez dix secondes sans que la maison s'écroule.",
+      defiIn: "Les bâtisseurs : construisez une maison avec vos corps ! Deux chevaliers font le toit en joignant leurs mains au-dessus de leur tête, les autres font les murs. Tenez dix secondes sans que la maison s'écroule.",
+      timer: 10,
+      q: "Comment appelle-t-on les maisons aux poutres de bois apparentes ?", choices: ["Les maisons à colombages", "Les maisons en chocolat", "Les igloos"], answer: 0,
+      fact: "Il y a beaucoup de maisons à colombages en Alsace et en Normandie.",
+      hints: ["Le mot fait penser à un oiseau blanc, la colombe.", "Colom…", "Les maisons à colombages."],
+      adult: "Maison habitée : on reste sur le trottoir, sans bruit."
+    }],
+    fire: [{
+      teaser: "La maison des chevaliers d'aujourd'hui.",
+      generic: "la caserne des pompiers",
+      clue: "Cherchez la maison des héros d'aujourd'hui : un bâtiment avec de grandes portes, d'où partent des camions rouges.",
+      story: "Voici {P}, {N}. Ici veillent les pompiers, les chevaliers d'aujourd'hui. Comme les chevaliers d'autrefois, ils sont courageux et prêts à partir à tout moment pour aider les autres.",
+      defi: "L'alerte : au signal « Alerte ! » du Grand Maître, tout le monde se met en rang le plus vite possible, au garde-à-vous. Puis on recommence, encore plus vite !",
+      defiIn: "L'alerte : au signal « Alerte ! » du Grand Maître, tout le monde se met en rang le plus vite possible, au garde-à-vous. Puis on recommence, encore plus vite !",
+      q: "Quel numéro faut-il appeler pour joindre les pompiers ?", choices: ["Le 18", "Le 10", "Le 42"], answer: 0,
+      fact: "Le 18 et le 112 servent à appeler les secours en cas d'urgence.",
+      hints: ["C'est un nombre plus petit que 20.", "Huit plus dix.", "Le 18."],
+      adult: "Ne vous placez jamais devant les portes de sortie des camions."
+    }],
+    library: [{
+      teaser: "Un trésor de mots et d'histoires.",
+      generic: "la bibliothèque",
+      clue: "Cherchez la maison des livres, là où dorment des milliers d'histoires.",
+      story: "Te voici devant {P}, {N}. Au Moyen Âge, il n'y avait pas d'imprimerie : des moines copiaient les livres à la main, lettre après lettre. Un seul livre pouvait demander des mois de travail !",
+      defi: "Les copistes : chacun trace dans l'air, avec son doigt, la première lettre de son prénom, la plus grande et la plus belle possible. Les autres doivent la deviner.",
+      defiIn: "Les copistes : chacun trace dans l'air, avec son doigt, la première lettre de son prénom, la plus grande et la plus belle possible. Les autres doivent la deviner.",
+      q: "Comment appelait-on ceux qui recopiaient les livres à la main ?", choices: ["Des copistes", "Des imprimantes", "Des cuisiniers"], answer: 0,
+      fact: "Les copistes décoraient la première lettre de chaque page avec de l'or et des couleurs.",
+      hints: ["Ils faisaient des copies.", "Ça commence par « copi… ».", "Des copistes."],
+      adult: "Restez dehors et parlez doucement : on lit à l'intérieur."
+    }],
+    school: [{
+      teaser: "Un lieu où l'on apprend à lire et à compter.",
+      generic: "l'école",
+      clue: "Cherchez le bâtiment où les enfants apprennent à lire, à écrire et à compter.",
+      story: "Voici {P}, {N}. Les jeunes écuyers aussi apprenaient beaucoup de choses : lire, compter, monter à cheval, et surtout les bonnes manières d'un chevalier.",
+      defi: "La dictée des chevaliers : chacun à son tour dit une lettre du mot « chevalier », dans l'ordre, sans se tromper. Une erreur ? On recommence depuis le début !",
+      defiIn: "La dictée des chevaliers : chacun à son tour dit une lettre du mot « chevalier », dans l'ordre, sans se tromper. Une erreur ? On recommence depuis le début !",
+      q: "Sur quoi les écoliers écrivaient-ils autrefois ?", choices: ["Sur une ardoise, avec une craie", "Sur une tablette tactile", "Sur un nuage"], answer: 0,
+      fact: "L'ardoise s'effaçait avec un chiffon, et on recommençait.",
+      hints: ["C'est une pierre noire et plate.", "On écrit dessus avec une craie.", "Sur une ardoise."],
+      adult: "On reste devant l'école, sans entrer dans la cour."
+    }],
+    sport: [{
+      teaser: "Un champ parfait pour un tournoi.",
+      generic: "le terrain de sport",
+      clue: "Les chevaliers s'entraînaient sur un grand terrain plat. Cherchez un terrain de sport, avec des buts ou des lignes tracées au sol.",
+      story: "Te voici au bord du terrain, {N}. Autrefois, les chevaliers s'affrontaient lors de grands tournois, devant tout le village qui les encourageait. Ce terrain ferait un parfait champ de tournoi !",
+      defi: "La course des destriers : chacun galope comme un cheval jusqu'à un repère choisi par le Grand Maître, en imitant le bruit des sabots, puis revient au trot.",
+      defiIn: "La course des destriers : à quatre pattes, chaque chevalier fait le tour de la pièce comme un cheval, puis revient au trot.",
+      q: "Comment s'appelait la grande fête où les chevaliers s'affrontaient devant le public ?", choices: ["Le tournoi", "Le carnaval", "Le marché"], answer: 0,
+      fact: "Les tournois servaient aussi d'entraînement aux chevaliers.",
+      hints: ["Ça ressemble à « tourner ».", "Tour… tour…", "Le tournoi."],
+      adult: "Si une équipe joue, restez au bord du terrain."
+    }],
+    postbox: [{
+      teaser: "Une petite maison jaune pour les messages.",
+      generic: "la boîte aux lettres",
+      clue: "Cherchez une petite boîte jaune où l'on glisse les lettres. Le Templier y a laissé un message.",
+      story: "Voici {P}, {N}. Au temps des chevaliers, les messages voyageaient à cheval, portés par des messagers. Aujourd'hui, on glisse sa lettre ici, et elle peut partir tout autour du monde !",
+      defi: "Le message secret : le Grand Maître murmure une phrase à l'oreille d'un chevalier, qui la répète à son voisin, et ainsi de suite. Le dernier la dit à voix haute : est-ce toujours la même ?",
+      defiIn: "Le message secret : le Grand Maître murmure une phrase à l'oreille d'un chevalier, qui la répète à son voisin, et ainsi de suite. Le dernier la dit à voix haute : est-ce toujours la même ?",
+      q: "Avant la Poste, comment voyageaient les messages des seigneurs ?", choices: ["Portés par des messagers à cheval", "Par Internet", "Par la pensée"], answer: 0,
+      fact: "Les messagers changeaient de cheval en route pour aller plus vite.",
+      hints: ["Il n'y avait ni téléphone ni Internet.", "Un cavalier…", "Portés par des messagers à cheval."],
+      adult: "Boîte souvent au bord de la rue : restez sur le trottoir."
     }]
   };
 
@@ -387,14 +550,21 @@ const QuestEngine = (() => {
   const HERE = { church: ["cette église", "ce lieu de prière"], gate: ["cette porte", "cette vieille porte"], tower: ["cette tour"],
     castle: ["ce château"], ruins: ["ces ruines"], well: ["ce puits"], fountain: ["cette fontaine", "cette fontaine"],
     townhall: ["cette mairie"], memorial: ["ce monument"], statue: ["cette statue", "ce monument"], artwork: ["cette œuvre"],
-    square: ["cette place"], park: ["ce parc", "ce jardin"], playground: ["cette aire de jeux"], viewpoint: ["ce point de vue"] };
+    square: ["cette place"], park: ["ce parc", "ce jardin"], playground: ["cette aire de jeux"], viewpoint: ["ce point de vue"],
+    cross: ["cette croix", "ce calvaire"], watertower: ["ce château d'eau"], lavoir: ["ce lavoir"], mill: ["ce moulin"], tree: ["cet arbre"],
+    house: ["cette vieille maison"], fire: ["cette caserne"], library: ["cette bibliothèque"], school: ["cette école"], sport: ["ce terrain"],
+    postbox: ["cette boîte aux lettres"] };
 
   // "Église Saint-Martin" -> "l'église Saint-Martin"; "Saint-Martin" (church) -> "l'église Saint-Martin"
   const NOUNS = [["hôtel de ville", "l'"], ["aire de jeux", "l'"], ["monument", "le "], ["église", "l'"], ["chapelle", "la "],
     ["cathédrale", "la "], ["basilique", "la "], ["temple", "le "], ["parc", "le "], ["jardin", "le "], ["square", "le "],
     ["place", "la "], ["fontaine", "la "], ["puits", "le "], ["porte", "la "], ["tour", "la "], ["château", "le "],
     ["fort", "le "], ["manoir", "le "], ["statue", "la "], ["mairie", "la "], ["maison", "la "], ["ruines", "les "],
-    ["belvédère", "le "], ["calvaire", "le "], ["lavoir", "le "], ["stèle", "la "], ["buste", "le "]];
+    ["belvédère", "le "], ["calvaire", "le "], ["lavoir", "le "], ["stèle", "la "], ["buste", "le "],
+    ["château d'eau", "le "], ["croix", "la "], ["moulin", "le "], ["arbre", "l'"], ["tilleul", "le "], ["chêne", "le "],
+    ["caserne", "la "], ["centre de secours", "le "], ["centre d'incendie", "le "], ["bibliothèque", "la "], ["médiathèque", "la "],
+    ["école", "l'"], ["groupe scolaire", "le "], ["collège", "le "], ["stade", "le "], ["terrain", "le "], ["complexe sportif", "le "],
+    ["ferme", "la "], ["oratoire", "l'"], ["presbytère", "le "], ["auberge", "l'"], ["hôtel", "l'"]];
   function articleize(name, generic) {
     if (!name) return generic;
     const low = name.toLowerCase();
@@ -421,6 +591,22 @@ const QuestEngine = (() => {
   // The quest at home works anywhere: same story, no map.
   const INDOOR = ["church", "gate", "well", "castle", "square", "park"];
   function indoorStops() { return INDOOR.map(cat => ({ cat })); }
+  // At home, the Templar hid each letter in the house: the adult hides the cards before the party (5 minutes),
+  // the children find each one from the Grand Master's riddle. Places every home has, in this order.
+  const CACHES = [
+    { id: "chaussure", where: "dans une chaussure, dans l'entrée",
+      clue: "Le Templier a caché cette lettre dans une cachette qui t'accompagne partout, mais toujours à tes pieds ! Cherche bien, et pince-toi le nez." },
+    { id: "frigo", where: "dans le réfrigérateur, sur une étagère du bas ou collée sur la porte",
+      clue: "Cette lettre-ci est cachée dans un coffre magique où il fait toujours froid, même en plein été. Quand on l'ouvre, une petite lumière s'allume !" },
+    { id: "oreiller", where: "sous l'oreiller du lit de l'enfant",
+      clue: "Cette lettre dort là où tu poses ta tête chaque soir, pour rêver de dragons et de chevaliers." },
+    { id: "livre", where: "entre les pages d'un livre, sur une étagère",
+      clue: "Cette lettre se cache entre les pages d'un grimoire, là où dorment les histoires. Cherche parmi les livres !" },
+    { id: "canape", where: "sous un coussin du canapé",
+      clue: "Cette lettre est cachée sous un nuage tout doux, là où toute la famille s'assoit le soir." },
+    { id: "table", where: "collée sous la table du repas, avec un morceau de ruban adhésif",
+      clue: "Cette lettre attend sous la grande table où les chevaliers prennent leur repas. Regarde bien, même par en dessous !" }
+  ];
 
   // Full quest (texts, letters, distances) from chosen stops. start is null for the quest at home.
   function assemble(start, stops) {
@@ -438,7 +624,9 @@ const QuestEngine = (() => {
         lat: indoor ? null : s.lat, lon: indoor ? null : s.lon,
         P: indoor ? tpl.generic : articleize(s.name, tpl.generic),
         legM: indoor ? 0 : Math.round(dist(prev, s) * WALK_FACTOR / 10) * 10,
-        dir: indoor ? "" : bearing(prev, s), osm: s.id || null
+        dir: indoor ? "" : bearing(prev, s), osm: s.id || null,
+        // where the letter card is hidden when the quest is played at home (also after a rainy switch)
+        hideId: CACHES[i % CACHES.length].id, hide: CACHES[i % CACHES.length].where, hideClue: CACHES[i % CACHES.length].clue
       });
       if (!indoor) prev = s;
       return step;
@@ -461,7 +649,7 @@ const QuestEngine = (() => {
     return { ok: true, indoorOnly: !!q.indoorOnly, count: q.steps.length, walkM: q.walkM, minutes: q.minutes, teasers: q.steps.map(s => s.teaser) };
   }
 
-  return { overpassQuery, classify, dedupe, choose, select, selectPlaces, assemble, indoorStops, build, preview, dist, bearing, articleize, T, HERE, WORDS, SEARCH_RADIUS, MAX_WALK };
+  return { overpassQuery, classify, dedupe, choose, select, selectPlaces, assemble, indoorStops, build, preview, dist, bearing, articleize, T, HERE, WORDS, CACHES, SEARCH_RADIUS, MAX_WALK };
 })();
 if (typeof module !== "undefined") module.exports = QuestEngine;
 /* ENGINE-END */

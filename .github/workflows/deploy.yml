@@ -67,8 +67,12 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: places-data
-          key: places-v1-${{ steps.month.outputs.m }}
-          restore-keys: places-v1-
+          key: places-v2-${{ steps.month.outputs.m }}
+          # v2 (15/10/2026): village places too (crosses, water towers, lavoirs, mills, schools…).
+          # A v1 copy is used if the new extraction fails.
+          restore-keys: |
+            places-v2-
+            places-v1-
 
       - name: Extraire les lieux de France
         id: extract
@@ -85,7 +89,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: places-data
-          key: places-v1-${{ steps.month.outputs.m }}
+          key: places-v2-${{ steps.month.outputs.m }}
 
       - name: Construire le site et le serveur
         if: steps.ready.outputs.ok == 'true'

@@ -12,12 +12,16 @@ const QuestGeo = (() => {
     const a = `(around:${r},${lat.toFixed(6)},${lon.toFixed(6)})`;
     return `[out:json][timeout:25];(
 nwr${a}["amenity"="place_of_worship"];
-nwr${a}["amenity"~"^(fountain|townhall)$"];
-nwr${a}["man_made"="water_well"];
-nwr${a}["historic"~"^(city_gate|castle|tower|ruins|fort|manor|monument|memorial|archaeological_site)$"];
-nwr${a}["leisure"~"^(park|playground|garden)$"];
+nwr${a}["amenity"~"^(fountain|townhall|watering_place|lavoir|fire_station|library|school|post_box)$"];
+nwr${a}["man_made"~"^(water_well|cross|water_tower|watermill|windmill)$"];
+nwr${a}["historic"~"^(city_gate|castle|tower|ruins|fort|manor|monument|memorial|archaeological_site|wayside_chapel|fountain|wayside_cross|mill|building|house|farm)$"];
+nwr${a}["leisure"~"^(park|playground|garden|pitch|stadium)$"];
 nwr${a}["place"="square"];
 nwr${a}["tourism"~"^(artwork|viewpoint)$"];
+nwr${a}["building"="chapel"]["name"];
+node${a}["natural"="tree"]["name"];
+node${a}["natural"="tree"]["denotation"~"^(natural_monument|landmark)$"];
+nwr${a}["heritage"]["building"]["name"];
 );out center tags;`;
   }
 

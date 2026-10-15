@@ -88,9 +88,13 @@ const CAT = {
   church: ["église ou chapelle", "églises et chapelles"], gate: ["porte ancienne", "portes anciennes"], castle: ["château ou fort", "châteaux et forts"],
   ruins: ["ruine", "ruines"], tower: ["tour", "tours"], well: ["puits", "puits"], fountain: ["fontaine", "fontaines"], viewpoint: ["belvédère", "belvédères"],
   townhall: ["mairie", "mairies"], square: ["place", "places"], park: ["parc ou jardin", "parcs et jardins"], statue: ["statue ou monument", "statues et monuments"],
-  memorial: ["monument aux morts", "monuments aux morts"], artwork: ["œuvre d'art", "œuvres d'art"], playground: ["aire de jeux", "aires de jeux"]
+  memorial: ["monument aux morts", "monuments aux morts"], artwork: ["œuvre d'art", "œuvres d'art"], playground: ["aire de jeux", "aires de jeux"],
+  cross: ["croix de chemin", "croix de chemin"], watertower: ["château d'eau", "châteaux d'eau"], lavoir: ["lavoir", "lavoirs"], mill: ["moulin", "moulins"],
+  tree: ["arbre remarquable", "arbres remarquables"], house: ["maison ancienne", "maisons anciennes"], fire: ["caserne de pompiers", "casernes de pompiers"],
+  library: ["bibliothèque", "bibliothèques"], school: ["école", "écoles"], sport: ["terrain de sport", "terrains de sport"], postbox: ["boîte aux lettres", "boîtes aux lettres"]
 };
-const ORDER = ["gate", "castle", "tower", "ruins", "church", "fountain", "well", "square", "park", "statue", "memorial", "viewpoint", "artwork", "townhall", "playground"];
+const ORDER = ["gate", "castle", "tower", "ruins", "church", "house", "mill", "lavoir", "fountain", "well", "cross", "tree", "square", "park", "statue", "memorial",
+  "viewpoint", "artwork", "watertower", "townhall", "fire", "library", "school", "sport", "playground", "postbox"];
 
 function study(c) {
   // Start from the town hall when it stands near the chef-lieu: that is where parents would start.
