@@ -52,3 +52,11 @@ jobs:
           [ -n "$ns" ] || ns=$(dig +norec NS "$D" @d.nic.fr | awk '/IN[[:space:]]+NS/ {print $5}' | sort | tr '\n' ' ')
           ds=$(dig +short DS "$D" @d.nic.fr | tr '\n' ' ')
           echo "::notice::Registre .fr : serveurs de noms déclarés = ${ns:-aucun} ; DNSSEC (enregistrement DS) = ${ds:-aucun, donc désactivé}"
+      - name: Le site répond-il ?
+        env:
+          D: ${{ inputs.domaine }}
+        run: |
+          for u in "https://$D/" "https://www.$D/?ref=test"; do
+            r=$(curl -sS -o /dev/null -m 20 -w '%{http_code} %{redirect_url} (certificat : %{ssl_verify_result})' "$u" 2>&1) || true
+            echo "::notice::$u → $r"
+          done
