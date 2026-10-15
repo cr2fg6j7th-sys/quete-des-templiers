@@ -1,0 +1,48 @@
+# Reads the state of the Stripe account with the key kept in GitHub (never printed): key mode,
+# activation, missing items, public details, payment methods. Runs on a push to the verif-stripe
+# branch only, so it never redeploys the site.
+name: Vérification Stripe
+
+on:
+  push:
+    branches: [verif-stripe]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Lire le compte Stripe
+        env:
+          K: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: |
+          node - <<'EOF'
+          const k = process.env.K || "";
+          const mode = /^(sk|rk)_live_/.test(k) ? "RÉELLE" : /^(sk|rk)_test_/.test(k) ? "test" : "inconnue";
+          const kind = k.startsWith("rk_") ? "limitée" : "secrète";
+          const get = async p => { const r = await fetch("https://api.stripe.com/v1/" + p, { headers: { authorization: "Bearer " + k } }); return { status: r.status, j: await r.json() }; };
+          const out = [`Clé dans GitHub : ${kind}, mode ${mode}`];
+          const a = await get("account");
+          if (a.status !== 200) out.push(`compte : HTTP ${a.status} ${a.j.error ? a.j.error.type : ""}`);
+          else {
+            const x = a.j, bp = x.business_profile || {}, s = x.settings || {}, rq = x.requirements || {};
+            out.push(`pays ${x.country}, type ${x.business_type || "?"}`);
+            out.push(`paiements ${x.charges_enabled ? "activés" : "PAS activés"}, versements ${x.payouts_enabled ? "activés" : "PAS activés"}, dossier ${x.details_submitted ? "envoyé" : "pas envoyé"}`);
+            out.push(`à fournir : ${(rq.currently_due || []).join(", ") || "rien"} ; en retard : ${(rq.past_due || []).join(", ") || "rien"} ; en vérification : ${(rq.pending_verification || []).join(", ") || "rien"} ; blocage : ${rq.disabled_reason || "aucun"}`);
+            out.push(`nom public « ${bp.name || ""} », site ${bp.url || "vide"}, e-mail de contact ${bp.support_email ? "renseigné" : "vide"}, téléphone ${bp.support_phone ? "renseigné" : "vide"}`);
+            out.push(`libellé relevé « ${(s.payments || {}).statement_descriptor || ""} », abrégé « ${(s.card_payments || {}).statement_descriptor_prefix || ""} », nom affiché « ${(s.dashboard || {}).display_name || ""} »`);
+            out.push("capacités : " + (Object.entries(x.capabilities || {}).map(([c, v]) => c + " " + v).join(", ") || "aucune"));
+          }
+          const pm = await get("payment_method_configurations?limit=10");
+          if (pm.status === 200) {
+            const list = pm.j.data || [], c = list.find(x => x.is_default) || list[0];
+            const st = n => !c || !c[n] ? "absent" : `${(c[n].display_preference || {}).value || "?"}${c[n].available ? "" : " (indisponible)"}`;
+            if (c) out.push(`moyens de paiement : carte ${st("card")}, Apple Pay ${st("apple_pay")}, Google Pay ${st("google_pay")}, Link ${st("link")}`);
+          } else out.push(`moyens de paiement : HTTP ${pm.status}`);
+          for (const l of out) console.log("::notice::" + l.replace(/\n/g, " "));
+          EOF
