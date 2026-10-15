@@ -270,6 +270,10 @@ async function stats(request, env) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    // www and the technical workers.dev address send page visits to the main address, keeping
+    // the path and the ?ref (QR codes, links already shared). The API answers on every address.
+    if (env.SITE_HOST && url.hostname !== env.SITE_HOST && !url.pathname.startsWith("/api/") && (request.method === "GET" || request.method === "HEAD"))
+      return Response.redirect("https://" + env.SITE_HOST + url.pathname + url.search, 301);
     if (url.pathname.startsWith("/api/")) {
       if (request.method !== "POST") return reply({ ok: false, reason: "method" }, 405);
       try {

@@ -19,7 +19,7 @@ t, geo, eng, voice, worker = read("app.template.html"), read("geo.js"), read("en
 
 # The paid site: its address goes in the link previews and for Google; the demo reads its copy of
 # the places of France (CORS allowed on /places/). To change when the domain name is bought.
-SITE = PLACES_SITE = "https://ma-quete-de-chevalier.pv6ggk8t2v.workers.dev"
+SITE = PLACES_SITE = "https://maquetelegendaire.fr"
 # Changes when the voice clips change, so phones drop the old copy kept for playing without network.
 audio_files = [root / "audio" / "manifest.json", root / "audio" / "noms.json"]
 VOICE_VERSION = hashlib.sha256(b"".join(f.read_bytes() for f in audio_files if f.exists())).hexdigest()[:10]

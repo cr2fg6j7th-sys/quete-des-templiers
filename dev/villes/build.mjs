@@ -1,6 +1,6 @@
 // Town pages for Google: « Anniversaire chevalier à Colmar », one page per commune of villes.json,
 // built from the same places of France the quests use (OpenStreetMap tiles of dev/places/).
-//   node dev/villes/build.mjs places-data site https://ma-quete-de-chevalier…workers.dev [--communes test.json]
+//   node dev/villes/build.mjs places-data site https://maquetelegendaire.fr [--communes test.json]
 // Run by the deploy workflow after build.py, once the tiles are there. Each page carries what only
 // this town has: how many quest places stand within walking distance of its town hall, their names,
 // and the length of a quest from there. It never shows a route nor a riddle: that is what is sold.
