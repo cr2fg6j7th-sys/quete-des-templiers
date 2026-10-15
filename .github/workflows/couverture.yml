@@ -1,0 +1,44 @@
+# How many communes can get a quest (Alsace in full, a fixed sample of France), from the places of
+# France kept in the Actions cache. Started by hand; results in marketing/couverture/<label>.json.
+name: Couverture des communes
+
+on:
+  workflow_dispatch:
+    inputs:
+      cle:
+        description: "Copie des lieux (préfixe de la clé de cache : places-v1, places-v2…)"
+        default: "places-v1"
+      label:
+        description: "Nom du résultat (avant, apres…)"
+        default: "avant"
+
+permissions:
+  contents: write
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Copie des lieux
+        id: places
+        uses: actions/cache/restore@v4
+        with:
+          path: places-data
+          key: ${{ inputs.cle }}-none
+          restore-keys: ${{ inputs.cle }}-
+      - name: Mesurer
+        run: |
+          [ -f places-data/index.json ] || { echo "::error::Pas de copie des lieux pour ${{ inputs.cle }}"; exit 1; }
+          mkdir -p marketing/couverture
+          node dev/places/coverage.mjs places-data "${{ inputs.label }}" > "marketing/couverture/${{ inputs.label }}.json" 2> /tmp/resume.txt
+          echo "::notice::${{ inputs.label }} (${{ inputs.cle }}) : $(cat /tmp/resume.txt | head -c 1500)"
+      - name: Enregistrer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add marketing/couverture dev/places/points-communes.json
+          git diff --cached --quiet || (git commit -m "Couverture des communes : ${{ inputs.label }}" && git pull --rebase -q && git push)
