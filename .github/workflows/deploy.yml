@@ -120,6 +120,28 @@ jobs:
             echo "::notice::Compteurs de visites branchés"
           fi
 
+      # The site's domain (maquetelegendaire.fr and www). Cloudflare copied OVH's parking records
+      # when the domain arrived; they block the attachment, so the first attachment replaces them
+      # (as wrangler does when asked interactively). Afterwards this step only checks.
+      - name: Domaine du site
+        if: steps.ready.outputs.ok == 'true'
+        continue-on-error: true
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          acc="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT"
+          have=$(curl -sS -H "Authorization: Bearer $CF_TOKEN" "$acc/workers/domains" | jq -r '[.result[]? | select(.service=="ma-quete-de-chevalier") | .hostname] | join(" ")')
+          want=$(grep -o 'pattern = "[^"]*", custom_domain = true' wrangler.toml | cut -d'"' -f2)
+          missing=$(for h in $want; do case " $have " in *" $h "*) ;; *) echo "$h";; esac; done)
+          if [ -z "$missing" ]; then echo "::notice::Domaine du site déjà branché : $have"; exit 0; fi
+          origins=$(printf '%s\n' $missing | jq -R '{hostname: .}' | jq -s -c .)
+          r=$(curl -sS -X PUT -H "Authorization: Bearer $CF_TOKEN" -H "content-type: application/json" \
+            -d "{\"override_scope\":false,\"override_existing_origin\":false,\"override_existing_dns_record\":true,\"origins\":$origins}" \
+            "$acc/workers/scripts/ma-quete-de-chevalier/domains/records")
+          if [ "$(echo "$r" | jq -r .success)" = "true" ]; then echo "::notice::Domaine du site branché : $(echo $missing)"
+          else echo "::warning::Domaine du site non branché : $(echo "$r" | jq -c '[.errors[]?.message]' | head -c 500)"; fi
+
       - name: Envoyer sur Cloudflare
         id: deploy
         if: steps.ready.outputs.ok == 'true'
