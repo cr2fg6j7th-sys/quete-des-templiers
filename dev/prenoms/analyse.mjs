@@ -14,10 +14,12 @@ const ALSACE = new Set(["67", "68"]);
 
 function rows(file) {
   const lines = fs.readFileSync(file, "utf-8").split(/\r?\n/).filter(Boolean);
-  const head = lines[0].replace(/^﻿/, "").split(";").map(h => h.trim().toUpperCase().replace(/"/g, ""));
+  const sep = (lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ";" : ",";
+  const head = lines[0].replace(/^\uFEFF/, "").split(sep).map(h => h.trim().toUpperCase().replace(/"/g, ""));
+  console.error(`${file} : ${lines.length} lignes, colonnes ${head.join("|")}, exemple ${lines[1]}`);
   const col = names => head.findIndex(h => names.includes(h));
-  const iName = col(["PRENOM", "PREUSUEL"]), iYear = col(["PERIODE", "ANNAIS"]), iN = col(["VALEUR", "NOMBRE"]), iDpt = col(["DPT"]), iSex = col(["SEXE"]);
-  return lines.slice(1).map(l => l.split(";").map(x => x.replace(/"/g, "").trim())).map(c => ({ name: c[iName], year: c[iYear], n: +c[iN] || 0, dpt: iDpt >= 0 ? c[iDpt] : null, sex: c[iSex] }));
+  const iName = col(["PRENOM", "PREUSUEL"]), iYear = col(["PERIODE", "ANNAIS"]), iN = col(["VALEUR", "NOMBRE"]), iDpt = col(["DPT", "DEPARTEMENT", "GEOGRAPHIE"]), iSex = col(["SEXE"]);
+  return lines.slice(1).map(l => l.split(sep).map(x => x.replace(/"/g, "").trim())).map(c => ({ name: c[iName], year: c[iYear], n: +c[iN] || 0, dpt: iDpt >= 0 ? String(c[iDpt]).replace(/^0+/, "") : null, sex: c[iSex] }));
 }
 const pretty = s => s.toLowerCase().replace(/(^|[-\s'])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
 
@@ -44,14 +46,14 @@ function coverage(set) {
   let a = 0, b = 0;
   for (const [k, n] of nat) if (covered(k, set)) a += n;
   for (const [k, n] of als) if (covered(k, set)) b += n;
-  return { france: +(100 * a / natTotal).toFixed(1), alsace: +(100 * b / alsTotal).toFixed(1) };
+  return { france: +(100 * a / natTotal).toFixed(1), alsace: alsTotal ? +(100 * b / alsTotal).toFixed(1) : null };
 }
 
 // Candidates: not covered yet, ranked by their share in France plus their share in Alsace.
 const all = new Set([...nat.keys(), ...als.keys()]);
 const cands = [...all].filter(k => !covered(k, recorded))
   .map(k => ({ prenom: k, france: nat.get(k) || 0, alsace: als.get(k) || 0, genre: (sexOf.get(k) || 0) >= 0 ? "m" : "f",
-    poids: (nat.get(k) || 0) / natTotal + (als.get(k) || 0) / alsTotal }))
+    poids: (nat.get(k) || 0) / natTotal + (alsTotal ? (als.get(k) || 0) / alsTotal : 0) }))
   .filter(c => c.france >= 20 || c.alsace >= 10)
   .sort((a, b) => b.poids - a.poids);
 // One recording per sound: the most frequent spelling stands for the others.
