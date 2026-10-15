@@ -37,15 +37,60 @@ jobs:
               cmd = ["ffmpeg", "-loglevel", "error", "-y"] + (extra or []) + ["-i", src, "-af", TRIM + FILTER, "-ac", "1", "-b:a", "56k", out]
               subprocess.run(cmd, check=True)
           manifest = json.load(open("audio/manifest.json", encoding="utf-8"))
+          # audio/sources.json: the recording each MP3 was made from. A new recording of the same
+          # line (new text, new voice) replaces the old MP3.
+          sources = json.load(open("audio/sources.json", encoding="utf-8")) if os.path.exists("audio/sources.json") else {}
           done = 0
           for key, url in manifest.get("clips", {}).items():
               out = os.path.join("audio", key + ".mp3")
-              if os.path.exists(out):
+              if os.path.exists(out) and sources.get(key, url) == url:
+                  sources[key] = url
                   continue
               urllib.request.urlretrieve(url, "/tmp/clip.wav")
               mp3("/tmp/clip.wav", out)
+              sources[key] = url
               done += 1
-          print(f"{done} clip(s) ajouté(s)")
+          print(f"{done} clip(s) ajouté(s) ou remplacé(s)")
+
+          # Background music: stereo, quieter, the quiet start and end cut, and the end blended into the
+          # start, so the page can loop it without a jump.
+          def loudness(path):
+              r = subprocess.run(["ffmpeg", "-nostats", "-loglevel", "verbose", "-i", path, "-af", "ebur128=framelog=verbose", "-f", "null", "-"], capture_output=True, text=True)
+              frames = [(float(t), float(m)) for t, m in re.findall(r"t:\s*([\d.]+)\s+TARGET:\S+\s+LUFS\s+M:\s*(-?[\d.]+)", r.stderr)]
+              integ = re.findall(r"I:\s*(-?[\d.]+) LUFS", r.stderr)
+              return frames, float(integ[-1]) if integ else -14.0
+          music_report = {}
+          for key, url in manifest.get("musique", {}).items():
+              out = os.path.join("audio", "musique", key + ".mp3")
+              if os.path.exists(out) and sources.get("musique/" + key) == url:
+                  continue
+              os.makedirs("audio/musique", exist_ok=True)
+              urllib.request.urlretrieve(url, "/tmp/music.src")
+              frames, integ = loudness("/tmp/music.src")
+              levels = sorted(m for t, m in frames)
+              body = levels[len(levels) // 2]
+              loud = [t for t, m in frames if m >= body - 5]
+              start, end = max(loud[0] - 0.4, 0.0), loud[-1]
+              x = 2.5
+              gain = -20.0 - integ
+              # body: from start + x to the end; head: the first x seconds, faded in under the end of the body
+              graph = (f"[0:a]atrim=start={start + x:.2f}:end={end:.2f},asetpts=PTS-STARTPTS[body];"
+                       f"[1:a]atrim=start={start:.2f}:end={start + x:.2f},asetpts=PTS-STARTPTS[head];"
+                       f"[body][head]acrossfade=d={x}:c1=qsin:c2=qsin,volume={gain:.1f}dB[out]")
+              subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", "/tmp/music.src", "-i", "/tmp/music.src", "-filter_complex", graph,
+                              "-map", "[out]", "-ac", "2", "-ar", "44100", "-b:a", "96k", out], check=True)
+              sources["musique/" + key] = url
+              music_report[key] = {"source_s": round(frames[-1][0], 1) if frames else None, "debut_s": round(start, 1), "fin_s": round(end, 1),
+                                   "boucle_s": round(end - start - x, 1), "volume_lufs": integ, "milieu_lufs": body, "gain_db": round(gain, 1)}
+          if music_report:
+              json.dump(music_report, open("audio/musique/rapport.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+              print("::notice::Musique : " + json.dumps(music_report, ensure_ascii=False))
+          # The page plays audio/musique/accueil.mp3: a copy of the version chosen in the manifest.
+          choice = manifest.get("musique_accueil")
+          if choice and os.path.exists(f"audio/musique/{choice}.mp3"):
+              import shutil
+              shutil.copyfile(f"audio/musique/{choice}.mp3", "audio/musique/accueil.mp3")
+          json.dump(sources, open("audio/sources.json", "w", encoding="utf-8"), ensure_ascii=False, indent=0, sort_keys=True)
 
           # First-name batches: one recording holds many names separated by silences.
           def speech_spans(path, noise, dur):
@@ -100,4 +145,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add audio
-          git diff --cached --quiet || (git commit -m "Ajout des clips de voix" && git pull --rebase -q && git push)
+          git diff --cached --quiet || (git commit -m "Ajout des clips de voix et de la musique" && git pull --rebase -q && git push)

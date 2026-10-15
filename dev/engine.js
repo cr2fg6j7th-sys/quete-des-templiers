@@ -13,10 +13,25 @@ const QuestEngine = (() => {
   const tooClose = (a, b) => dist(a, b) < (a.cat === b.cat ? MIN_GAP : MIN_GAP_OTHER);
 
   // ---- 1. classify OSM elements into kid-friendly categories ----
-  const BASE = { gate: 9, castle: 9, ruins: 8, tower: 8, church: 8, well: 8, fountain: 7, viewpoint: 6,
-    townhall: 6, square: 6, park: 6, statue: 6, memorial: 5, artwork: 5, playground: 4,
-    // what every village has (added 15/10/2026): they let small communes have a quest too
-    mill: 7, lavoir: 7, house: 6, tree: 6, cross: 5, watertower: 5, fire: 4, library: 4, school: 3, sport: 3, postbox: 2 };
+  // From the most to the least interesting stop for a child (Nathan's ranking, 15/10/2026): churches,
+  // remarkable buildings, mills, lavoirs, crosses and calvaries first; the post box last. A name adds 2,
+  // a historic tag 1 and a Wikipedia article 1. The village places (mill to post box) let small
+  // communes have a quest too.
+  const RANK = [
+    ["church", 10],                                                     // églises, chapelles
+    ["castle", 9.5], ["gate", 9.5], ["tower", 9], ["ruins", 9],         // bâtiments remarquables
+    ["mill", 8.5], ["lavoir", 8.5],                                     // moulins, lavoirs
+    ["cross", 8],                                                       // calvaires, croix de chemin
+    ["fountain", 7.5], ["well", 7.5],                                   // fontaines, puits
+    ["house", 7], ["tree", 7],                                          // vieilles maisons, arbres remarquables
+    ["watertower", 6.5], ["statue", 6.5],                               // châteaux d'eau, statues
+    ["memorial", 6], ["townhall", 6],                                   // monuments aux morts, mairies
+    ["fire", 5.5], ["square", 5.5], ["viewpoint", 5.5],                 // casernes de pompiers, places, points de vue
+    ["artwork", 5], ["park", 5],                                        // œuvres d'art, parcs
+    ["library", 4.5], ["playground", 4],                                // bibliothèques, aires de jeux
+    ["school", 3.5], ["sport", 3],                                      // écoles, terrains de sport
+    ["postbox", 1.5]];                                                  // boîtes aux lettres
+  const BASE = Object.fromEntries(RANK);
   const PITCH = /^(soccer|multi|basketball|rugby|rugby_union|team_handball|volleyball|football)\b/;
 
   function classify(el) {
@@ -163,7 +178,7 @@ const QuestEngine = (() => {
       teaser: "Une tour où dorment des cloches.",
       generic: "l'église",
       clue: "Levez les yeux : cherchez un clocher qui dépasse des toits. La prochaine lettre s'y cache.",
-      story: "Bravo, {N}. Te voici devant {P}. Au Moyen Âge, les chevaliers venaient prier avant de partir en voyage. Les cloches annonçaient les fêtes, les dangers et l'heure de la journée.",
+      story: "Bravo, {N}. Te voici devant {P}. Au Moyen Âge, les chevaliers venaient prier avant de partir en voyage. Les cloches annonçaient les fêtes, les dangers et l'heure de la journée. Certaines sont énormes : le gros bourdon de Notre-Dame de Paris pèse environ treize tonnes, plus lourd que deux éléphants !",
       defi: "Restez à l'extérieur. En silence, comme des chevaliers en mission, comptez les fenêtres de la façade. Chacun murmure son nombre à l'oreille du Grand Maître.",
       defiIn: "Chaque chevalier fait sonner une cloche imaginaire : « Dong ! » Le Grand Maître choisit la cloche la plus grave et la plus rigolote.",
       q: "Comment s'appelle la tour d'une église où se trouvent les cloches ?", choices: ["Le clocher", "Le donjon", "La cheminée"], answer: 0,
@@ -174,7 +189,7 @@ const QuestEngine = (() => {
       teaser: "Un lieu de pierre où l'on chuchote.",
       generic: "la chapelle",
       clue: "Cherchez un bâtiment surmonté d'une croix. Les chevaliers y venaient avant chaque grande aventure.",
-      story: "Te voici devant {P}, {N}. Avant d'être nommé chevalier, un jeune écuyer passait toute une nuit à veiller dans une église ou une chapelle, sans dormir. On appelait cela la veillée d'armes.",
+      story: "Te voici devant {P}, {N}. Avant d'être nommé chevalier, un jeune écuyer passait toute une nuit à veiller dans une église ou une chapelle, sans dormir. On appelait cela la veillée d'armes. Le lendemain, le nouveau chevalier recevait parfois une bonne tape sur la nuque, la colée, pour ne jamais oublier ce grand jour !",
       defi: "La veillée d'armes : tout le monde ferme les yeux et reste parfaitement silencieux pendant quinze secondes, comme un écuyer qui veille.",
       defiIn: "La veillée d'armes : tout le monde ferme les yeux et reste parfaitement silencieux pendant quinze secondes, comme un écuyer qui veille.",
       timer: 15,
@@ -187,7 +202,7 @@ const QuestEngine = (() => {
       teaser: "Une porte qui gardait la ville.",
       generic: "la porte de la ville",
       clue: "Au Moyen Âge, les villes avaient des portes dans leurs murailles. Cherchez une tour sous laquelle on peut passer.",
-      story: "Voici {P}. Ces portes étaient les gardiennes de la ville. Le soir, on les fermait, et des gardes surveillaient qui voulait entrer. Le Templier, lui, connaissait le mot de passe…",
+      story: "Voici {P}. Ces portes étaient les gardiennes de la ville. Le soir, on les fermait, et des gardes surveillaient qui voulait entrer. En cas d'attaque, une lourde grille, la herse, tombait d'un coup devant l'entrée, comme une mâchoire géante ! Le Templier, lui, connaissait le mot de passe…",
       defi: "Devenez les gardes de la porte : tout le monde se tient droit comme une lance, sans bouger ni rire, pendant vingt secondes.",
       defiIn: "Devenez les gardes du château : tout le monde se tient droit comme une lance, sans bouger ni rire, pendant vingt secondes.",
       timer: 20,
@@ -199,7 +214,7 @@ const QuestEngine = (() => {
       teaser: "Une deuxième porte, gardée depuis des siècles.",
       generic: "la vieille porte",
       clue: "Une autre porte de l'ancienne muraille vous attend. Cherchez des pierres très anciennes au-dessus de la rue.",
-      story: "Encore une porte, {N} ! {P} faisait partie des remparts. Les habitants payaient parfois une petite taxe pour faire entrer leurs marchandises en ville : on l'appelait l'octroi.",
+      story: "Encore une porte, {N} ! {P} faisait partie des remparts. Les habitants payaient parfois une petite taxe pour faire entrer leurs marchandises en ville : on l'appelait l'octroi. On payait pour un tonneau de vin, pour un sac de farine… et même pour un cochon !",
       defi: "Le péage des chevaliers : pour passer, chaque chevalier doit donner au Grand Maître un mot qui commence par la première lettre de son prénom.",
       defiIn: "Le péage des chevaliers : pour passer, chaque chevalier doit donner au Grand Maître un mot qui commence par la première lettre de son prénom.",
       q: "Comment appelle-t-on le grand mur qui entourait une ville au Moyen Âge ?", choices: ["Les remparts", "La haie", "Le grillage"], answer: 0,
@@ -211,7 +226,7 @@ const QuestEngine = (() => {
       teaser: "Une tour d'où l'on voyait arriver les ennemis.",
       generic: "la tour",
       clue: "Cherchez une tour en pierre plus haute que les maisons autour. C'est un poste de guet parfait.",
-      story: "Voici {P}, {N}. Du haut des tours, les guetteurs surveillaient l'horizon. S'ils voyaient arriver des ennemis, ils donnaient l'alerte.",
+      story: "Voici {P}, {N}. Du haut des tours, les guetteurs surveillaient l'horizon. S'ils voyaient arriver des ennemis, ils donnaient l'alerte en soufflant de toutes leurs forces dans une grande corne : « Tuuut ! »",
       defi: "Les guetteurs : chacun cherche autour de lui quelque chose de rouge, quelque chose de vert et un toit pointu. Le premier qui a trouvé les trois crie « Alerte ! ».",
       defiIn: "Les guetteurs : chacun cherche dans la pièce quelque chose de rouge, quelque chose de vert et un objet pointu. Le premier qui a trouvé les trois crie « Alerte ! ».",
       q: "Comment s'appelait le soldat qui surveillait l'horizon du haut d'une tour ?", choices: ["Le guetteur", "Le cuisinier", "Le jardinier"], answer: 0,
@@ -223,7 +238,7 @@ const QuestEngine = (() => {
       teaser: "Une demeure de seigneur, solide comme un roc.",
       generic: "le château",
       clue: "Cherchez la demeure la plus fortifiée du coin : de gros murs, peut-être une tour. Un seigneur y vivait.",
-      story: "Te voici devant {P}. Les seigneurs vivaient derrière d'épais murs de pierre. Les chevaliers les servaient et défendaient le château.",
+      story: "Te voici devant {P}. Les seigneurs vivaient derrière d'épais murs de pierre. Les chevaliers les servaient et défendaient le château. Et les toilettes ? C'était un petit coin accroché au mur, avec un trou qui donnait directement… dans le vide, au-dessus du fossé !",
       defi: "Le siège du château : la moitié de l'équipe forme un mur en se tenant par les bras, l'autre moitié doit trouver le mot magique pour passer. Le Grand Maître décide quand le mur s'ouvre.",
       defiIn: "Le siège du château : construisez en deux minutes une forteresse de coussins assez grande pour cacher toute l'équipe.",
       q: "Comment s'appelle la plus grande tour d'un château fort ?", choices: ["Le donjon", "Le grenier", "Le garage"], answer: 0,
@@ -235,7 +250,7 @@ const QuestEngine = (() => {
       teaser: "Des pierres qui racontent une histoire très ancienne.",
       generic: "les ruines",
       clue: "Cherchez de vieilles pierres, des murs à moitié écroulés. Le temps a laissé un indice.",
-      story: "Voici {P}. Ces pierres sont restées debout pendant des siècles. Les archéologues étudient ce genre de lieu pour comprendre comment on vivait autrefois.",
+      story: "Voici {P}. Ces pierres sont restées debout pendant des siècles. Les archéologues étudient ce genre de lieu pour comprendre comment on vivait autrefois. En grattant la terre avec de petits pinceaux, ils retrouvent parfois des pièces, des jouets d'enfants… et même des dés pour jouer !",
       defi: "Les archéologues : chacun cherche du regard, sans rien déplacer, la pierre la plus ancienne et la plus abîmée. Le Grand Maître choisit la gagnante.",
       defiIn: "Les archéologues : le Grand Maître cache une petite pièce dans la pièce, les chevaliers ont une minute pour la retrouver.",
       q: "Comment s'appelle le métier de ceux qui étudient les vestiges du passé ?", choices: ["Archéologue", "Astronaute", "Boulanger"], answer: 0,
@@ -247,7 +262,7 @@ const QuestEngine = (() => {
       teaser: "Un trou très profond qui cache un trésor liquide.",
       generic: "le puits",
       clue: "Avant l'eau du robinet, chaque quartier avait son point d'eau. Cherchez un puits en pierre.",
-      story: "Bravo, {N}. Voici {P}. Avant l'eau du robinet, les habitants venaient y remplir leurs seaux, chaque jour, même en hiver.",
+      story: "Bravo, {N}. Voici {P}. Avant l'eau du robinet, les habitants venaient y remplir leurs seaux, chaque jour, même en hiver. Un seau plein d'eau pèse aussi lourd qu'un petit chien : les enfants aidaient souvent à les porter !",
       defi: "Relais du puits : chaque chevalier mime à son tour de remonter un seau très lourd, puis le passe au suivant sans en renverser une goutte.",
       defiIn: "Relais du puits : faites passer un gobelet en plastique rempli d'eau de chevalier en chevalier, au-dessus d'une serviette, sans en renverser une goutte.",
       q: "À quoi servait un puits ?", choices: ["À puiser de l'eau sous la terre", "À cacher des trésors", "À faire peur aux voleurs"], answer: 0,
@@ -259,7 +274,7 @@ const QuestEngine = (() => {
       teaser: "Un lieu où l'eau chante.",
       generic: "la fontaine",
       clue: "Tendez l'oreille : cherchez un endroit où l'eau coule ou jaillit.",
-      story: "Te voici près de {P}, {N}. Avant l'eau du robinet, les fontaines servaient à tout le village : on y remplissait les cruches et on y faisait boire les chevaux.",
+      story: "Te voici près de {P}, {N}. Avant l'eau du robinet, les fontaines servaient à tout le village : on y remplissait les cruches et on y faisait boire les chevaux. Un cheval boit une trentaine de litres d'eau par jour : ça en fait, des allers et retours !",
       defi: "Les porteurs d'eau : chaque chevalier mime de porter une cruche pleine sur sa tête, en marchant trois pas sans la faire tomber.",
       defiIn: "Les porteurs d'eau : chaque chevalier marche dix pas avec un livre posé sur la tête, sans le faire tomber.",
       q: "À quoi servaient les fontaines avant l'eau du robinet ?", choices: ["À remplir les cruches et faire boire les animaux", "À prendre son bain", "À rien du tout"], answer: 0,
@@ -270,7 +285,7 @@ const QuestEngine = (() => {
       teaser: "Une autre source d'eau, plus discrète.",
       generic: "la fontaine",
       clue: "Encore de l'eau ! Cherchez une deuxième fontaine, plus discrète que la première.",
-      story: "Une deuxième fontaine, {N} ! Au Moyen Âge, on disait que certaines sources avaient des pouvoirs. Celle-ci garde une lettre du Templier.",
+      story: "Une deuxième fontaine, {N} ! Au Moyen Âge, on disait que certaines sources avaient des pouvoirs. Aujourd'hui encore, à Rome, les visiteurs jettent des pièces dans une fontaine en faisant un vœu : plus d'un million d'euros chaque année, offerts ensuite aux plus pauvres ! Celle-ci garde une lettre du Templier.",
       defi: "Le vœu du chevalier : chacun fait un vœu en silence pour l'anniversaire de {N}, puis le Grand Maître compte jusqu'à trois et tout le monde crie « Joyeux anniversaire ! ».",
       defiIn: "Le vœu du chevalier : chacun fait un vœu en silence pour l'anniversaire de {N}, puis tout le monde crie « Joyeux anniversaire ! ».",
       q: "Que faut-il pour qu'une fontaine coule ?", choices: ["De l'eau qui arrive d'une source ou d'un tuyau", "Du vent", "Du soleil"], answer: 0,
@@ -282,7 +297,7 @@ const QuestEngine = (() => {
       teaser: "La maison où l'on décide pour toute la ville.",
       generic: "la mairie",
       clue: "Cherchez le bâtiment avec un drapeau bleu, blanc, rouge. C'est là qu'on prend les décisions pour la ville.",
-      story: "Voici {P}, {N}. C'est ici que se réunit le conseil de la ville pour prendre les décisions. Au Moyen Âge, certaines villes avaient déjà leur propre conseil.",
+      story: "Voici {P}, {N}. C'est ici que se réunit le conseil de la ville pour prendre les décisions. Au Moyen Âge, certaines villes avaient déjà leur propre conseil. Le soir, une cloche sonnait le couvre-feu : l'heure d'éteindre les feux et d'aller se coucher !",
       defi: "Le conseil des chevaliers : formez un cercle, et chacun propose une loi rigolote pour la ville. L'équipe vote à main levée pour la meilleure.",
       defiIn: "Le conseil des chevaliers : formez un cercle, et chacun propose une loi rigolote pour la maison. L'équipe vote à main levée pour la meilleure.",
       q: "Qui dirige la mairie ?", choices: ["Le maire", "Le roi", "Le boulanger"], answer: 0,
@@ -294,7 +309,7 @@ const QuestEngine = (() => {
       teaser: "Un lieu où l'on se souvient.",
       generic: "le monument aux morts",
       clue: "Cherchez un monument de pierre avec beaucoup de noms gravés. C'est un lieu calme et important.",
-      story: "Ici, {N}, on se souvient des habitants morts pendant les guerres. Les chevaliers respectaient toujours les lieux de mémoire.",
+      story: "Ici, {N}, on se souvient des habitants morts pendant les guerres. Les chevaliers respectaient toujours les lieux de mémoire. Le 11 novembre, on y dépose des fleurs, et beaucoup de gens portent un bleuet, la petite fleur bleue du souvenir.",
       defi: "Un chevalier sait être sérieux : toute l'équipe garde le silence pendant dix secondes, la main sur le cœur.",
       defiIn: "Un chevalier sait être sérieux : toute l'équipe garde le silence pendant dix secondes, la main sur le cœur.",
       timer: 10,
@@ -307,7 +322,7 @@ const QuestEngine = (() => {
       teaser: "Quelqu'un qui ne bouge jamais.",
       generic: "la statue",
       clue: "Cherchez quelqu'un qui reste parfaitement immobile, jour et nuit, beau temps mauvais temps.",
-      story: "Voici {P}, {N}. Les statues sont faites pour qu'on n'oublie pas une personne ou une histoire. Le Templier aimait les gardiens immobiles.",
+      story: "Voici {P}, {N}. Les statues sont faites pour qu'on n'oublie pas une personne ou une histoire. Le Templier aimait les gardiens immobiles. Le savais-tu ? La statue de la Liberté, à New York, a été imaginée par un sculpteur né à Colmar, en Alsace : Auguste Bartholdi !",
       defi: "Les statues de chevaliers : tout le monde se fige dans la pose la plus héroïque possible pendant quinze secondes. Celui qui bouge rit en premier !",
       defiIn: "Les statues de chevaliers : tout le monde se fige dans la pose la plus héroïque possible pendant quinze secondes.",
       timer: 15,
@@ -319,7 +334,7 @@ const QuestEngine = (() => {
       teaser: "Un deuxième gardien de pierre ou de métal.",
       generic: "le monument",
       clue: "Cherchez un autre monument, un autre gardien immobile qui veille sur la ville.",
-      story: "Encore un gardien, {N} ! {P} veille ici depuis longtemps. Les chevaliers saluaient toujours ceux qui montent la garde.",
+      story: "Encore un gardien, {N} ! {P} veille ici depuis longtemps. Les chevaliers saluaient toujours ceux qui montent la garde. Avec le temps et la pluie, le métal des statues change parfois de couleur : la statue de la Liberté était couleur cuivre, et elle est devenue toute verte !",
       defi: "Le salut des chevaliers : tout le monde salue le monument en posant le poing sur le cœur, puis fait une révérence.",
       defiIn: "Le salut des chevaliers : tout le monde salue le Grand Maître en posant le poing sur le cœur, puis fait une révérence.",
       q: "Quel geste faisait un chevalier devant un roi ?", choices: ["Il mettait un genou à terre", "Il tirait la langue", "Il sautait à cloche-pied"], answer: 0,
@@ -331,7 +346,7 @@ const QuestEngine = (() => {
       teaser: "Une œuvre qu'un artiste a laissée pour tout le monde.",
       generic: "l'œuvre d'art",
       clue: "Cherchez une œuvre d'art en plein air. Un artiste l'a placée là pour qu'on la regarde.",
-      story: "Voici {P}, {N}. Au Moyen Âge, les artistes décoraient les églises et les châteaux. Aujourd'hui, ils décorent aussi les rues.",
+      story: "Voici {P}, {N}. Au Moyen Âge, les artistes décoraient les églises et les châteaux. Aujourd'hui, ils décorent aussi les rues. Pour peindre, les artistes du Moyen Âge mélangeaient leurs couleurs avec… du jaune d'œuf !",
       defi: "L'atelier des artistes : chacun invente le titre le plus rigolo possible pour cette œuvre. Le Grand Maître choisit le meilleur.",
       defiIn: "L'atelier des artistes : chacun dessine en une minute le blason de l'équipe sur une feuille.",
       q: "Comment appelle-t-on le dessin sur le bouclier d'un chevalier ?", choices: ["Un blason", "Une affiche", "Un tag"], answer: 0,
@@ -343,7 +358,7 @@ const QuestEngine = (() => {
       teaser: "Un grand espace où se tenaient les fêtes.",
       generic: "la place",
       clue: "Cherchez une grande place, là où les gens se retrouvent les jours de marché et de fête.",
-      story: "Te voici sur {P}, {N}. Au Moyen Âge, les places accueillaient les marchés, les fêtes et les annonces importantes, criées à voix haute.",
+      story: "Te voici sur {P}, {N}. Au Moyen Âge, les places accueillaient les marchés, les fêtes et les annonces importantes, criées à voix haute. Les jours de marché, on y croisait des poules, des oies… et même des cochons qui se promenaient en liberté !",
       defi: "Le crieur public : chaque chevalier annonce à voix haute, comme un crieur d'autrefois : « Oyez, oyez ! Aujourd'hui, c'est l'anniversaire de {N} ! »",
       defiIn: "Le crieur public : chaque chevalier annonce à voix haute : « Oyez, oyez ! Aujourd'hui, c'est l'anniversaire de {N} ! »",
       q: "Que trouvait-on souvent sur la place d'un village au Moyen Âge ?", choices: ["Le marché", "Une piscine", "Un aéroport"], answer: 0,
@@ -355,7 +370,7 @@ const QuestEngine = (() => {
       teaser: "Un coin de verdure pour s'entraîner.",
       generic: "le parc",
       clue: "Les chevaliers s'entraînaient en plein air. Cherchez de l'herbe et des arbres.",
-      story: "Bravo, {N}. Te voici dans {P}. Les futurs chevaliers s'entraînaient chaque jour en plein air : course, équilibre et maniement de l'épée en bois.",
+      story: "Bravo, {N}. Te voici dans {P}. Les futurs chevaliers s'entraînaient chaque jour en plein air : course, équilibre et maniement de l'épée en bois. À cheval, ils frappaient un mannequin qui tournait sur lui-même : celui qui allait trop lentement recevait un coup de sac de sable dans le dos !",
       defi: "L'entraînement : course au galop sur place pendant dix secondes, puis chacun tient en équilibre sur un pied en comptant jusqu'à dix.",
       defiIn: "L'entraînement : course au galop sur place pendant dix secondes, puis chacun tient en équilibre sur un pied en comptant jusqu'à dix.",
       q: "Au Moyen Âge, quel animal portait les chevaliers ?", choices: ["Le cheval", "La vache", "Le chien"], answer: 0,
@@ -366,7 +381,7 @@ const QuestEngine = (() => {
       teaser: "Un jardin où se cache une lettre.",
       generic: "le jardin",
       clue: "Cherchez un autre coin de verdure, avec des arbres ou des fleurs.",
-      story: "Un nouveau coin de verdure, {N}. Dans les châteaux, on cultivait des jardins de plantes médicinales pour soigner les blessés.",
+      story: "Un nouveau coin de verdure, {N}. Dans les châteaux, on cultivait des jardins de plantes médicinales pour soigner les blessés. Et contre les puces, on glissait dans les lits des herbes qui sentent fort, comme la lavande !",
       defi: "La cueillette : chaque chevalier trouve, sans rien arracher, trois feuilles différentes tombées au sol et les montre au Grand Maître.",
       defiIn: "La cueillette : chaque chevalier trouve dans la maison trois objets de couleurs différentes et les montre au Grand Maître.",
       q: "À quoi servaient certaines plantes dans les jardins du Moyen Âge ?", choices: ["À soigner les malades", "À fabriquer des téléphones", "À faire du plastique"], answer: 0,
@@ -378,7 +393,7 @@ const QuestEngine = (() => {
       teaser: "Un terrain d'entraînement pour jeunes écuyers.",
       generic: "l'aire de jeux",
       clue: "Cherchez un terrain d'entraînement idéal pour de jeunes écuyers : des toboggans, des balançoires…",
-      story: "Te voici sur le terrain d'entraînement, {N} ! Les jeunes écuyers apprenaient l'agilité avant de monter à cheval.",
+      story: "Te voici sur le terrain d'entraînement, {N} ! Les jeunes écuyers apprenaient l'agilité avant de monter à cheval. Les enfants du Moyen Âge jouaient déjà à la toupie, aux billes, à saute-mouton et à colin-maillard !",
       defi: "Le parcours de l'écuyer : chacun traverse l'aire de jeux à sa façon, sans pousser personne, puis revient saluer le Grand Maître.",
       defiIn: "Le parcours de l'écuyer : passer sous une table, sauter par-dessus un coussin, et revenir saluer le Grand Maître.",
       q: "Comment s'appelle le combat à cheval avec des lances ?", choices: ["La joute", "Le foot", "La pêche"], answer: 0,
@@ -390,7 +405,7 @@ const QuestEngine = (() => {
       teaser: "Un endroit d'où l'on voit loin.",
       generic: "le point de vue",
       clue: "Cherchez un endroit d'où l'on voit loin, au-dessus des toits.",
-      story: "Regarde au loin, {N}. Les seigneurs construisaient leurs châteaux en hauteur pour voir arriver les visiteurs… et les ennemis.",
+      story: "Regarde au loin, {N}. Les seigneurs construisaient leurs châteaux en hauteur pour voir arriver les visiteurs… et les ennemis. Par beau temps, on voit parfois à des dizaines de kilomètres : un cavalier mettait presque une journée pour aller aussi loin !",
       defi: "Les guetteurs : chacun trouve au loin quelque chose de rouge, quelque chose de vert et un toit pointu.",
       defiIn: "Les guetteurs : chacun regarde par la fenêtre et trouve quelque chose de rouge, de vert et un toit pointu.",
       q: "Pourquoi construisait-on les châteaux en hauteur ?", choices: ["Pour voir arriver les ennemis", "Pour avoir moins froid", "Pour être près des nuages"], answer: 0,
@@ -403,7 +418,7 @@ const QuestEngine = (() => {
       teaser: "Une croix qui veille au bord du chemin.",
       generic: "la croix",
       clue: "Autrefois, on plantait des croix au bord des chemins pour guider les voyageurs. Cherchez-en une, en pierre ou en bois.",
-      story: "Te voici devant {P}, {N}. Les voyageurs et les pèlerins s'arrêtaient devant ces croix pour se reposer et se donner du courage avant de reprendre la route. Les chevaliers du Temple, eux, protégeaient ces voyageurs sur les chemins.",
+      story: "Te voici devant {P}, {N}. Les voyageurs et les pèlerins s'arrêtaient devant ces croix pour se reposer et se donner du courage avant de reprendre la route. Les chevaliers du Temple, eux, protégeaient ces voyageurs sur les chemins. Certains pèlerins marchaient des mois jusqu'à Saint-Jacques-de-Compostelle, en Espagne, avec une coquille accrochée à leur chapeau !",
       defi: "Le serment du chevalier : chacun promet à voix haute une bonne action qu'il fera aujourd'hui, la main posée sur le cœur.",
       defiIn: "Le serment du chevalier : chacun promet à voix haute une bonne action qu'il fera aujourd'hui, la main posée sur le cœur.",
       q: "Comment appelait-on les voyageurs qui marchaient très loin pour rejoindre un lieu saint ?", choices: ["Des pèlerins", "Des pirates", "Des astronautes"], answer: 0,
@@ -414,7 +429,7 @@ const QuestEngine = (() => {
       teaser: "Un signe dressé là où les chemins se croisent.",
       generic: "le calvaire",
       clue: "Une autre croix vous attend, souvent là où deux chemins se croisent. Ouvrez l'œil aux carrefours.",
-      story: "Encore une croix, {N} ! On en dressait souvent aux carrefours : quand on hésitait entre deux chemins, on s'y arrêtait pour réfléchir. Un bon chevalier prend toujours le temps de choisir le bon chemin.",
+      story: "Encore une croix, {N} ! On en dressait souvent aux carrefours : quand on hésitait entre deux chemins, on s'y arrêtait pour réfléchir. Un bon chevalier prend toujours le temps de choisir le bon chemin. Autrefois, il n'y avait ni panneaux ni GPS : ces croix servaient aussi de repères pour ne pas se perdre !",
       defi: "Le carrefour : le Grand Maître montre deux directions. Chaque chevalier choisit la sienne en sautant à pieds joints, puis tout le monde se rassemble en criant : « Pour l'Ordre ! »",
       defiIn: "Le carrefour : le Grand Maître montre deux coins de la pièce. Chaque chevalier choisit le sien en sautant à pieds joints, puis tout le monde se rassemble au centre en criant : « Pour l'Ordre ! »",
       q: "Comment appelle-t-on l'endroit où deux routes se croisent ?", choices: ["Un carrefour", "Un plafond", "Un pont-levis"], answer: 0,
@@ -426,7 +441,7 @@ const QuestEngine = (() => {
       teaser: "Un château qui ne garde pas de trésor… mais de l'eau.",
       generic: "le château d'eau",
       clue: "Cherchez un château très étrange : une grande tour ronde, souvent en hauteur, sans fenêtre ni chevalier.",
-      story: "Voici {P}, {N} ! Ce château-là ne protège pas un seigneur : il garde l'eau de tout le village, tout là-haut. Grâce à lui, l'eau descend toute seule jusqu'aux robinets des maisons.",
+      story: "Voici {P}, {N} ! Ce château-là ne protège pas un seigneur : il garde l'eau de tout le village, tout là-haut. Grâce à lui, l'eau descend toute seule jusqu'aux robinets des maisons. Il contient autant d'eau que des milliers de baignoires !",
       defi: "La chaîne de l'eau : tout le monde se met en file et fait passer de main en main un seau imaginaire très lourd, sans en renverser une goutte. Le dernier crie « Plouf ! ».",
       defiIn: "La chaîne de l'eau : en file, faites passer de main en main un gobelet en plastique rempli d'eau, au-dessus d'une serviette, sans en renverser une goutte.",
       q: "Pourquoi garde-t-on l'eau tout en haut d'un château d'eau ?", choices: ["Pour qu'elle descende toute seule jusqu'aux robinets", "Pour que les oiseaux puissent boire", "Pour qu'elle soit plus près du soleil"], answer: 0,
@@ -438,7 +453,7 @@ const QuestEngine = (() => {
       teaser: "Un bassin où l'on faisait la grande lessive.",
       generic: "le lavoir",
       clue: "Avant les machines à laver, on lavait le linge dans un bassin couvert, rempli d'eau. Cherchez ce bassin.",
-      story: "Te voici devant {P}, {N}. Autrefois, les lavandières venaient ici laver le linge à la main. Elles le frottaient, le tapaient avec un battoir et le rinçaient dans l'eau froide, en se racontant les nouvelles du village.",
+      story: "Te voici devant {P}, {N}. Autrefois, les lavandières venaient ici laver le linge à la main. Elles le frottaient, le tapaient avec un battoir et le rinçaient dans l'eau froide, en se racontant les nouvelles du village. Et pour que le linge soit bien blanc, on le faisait tremper… dans de l'eau mélangée à de la cendre de bois !",
       defi: "Les lavandières : par deux, tenez un drap imaginaire. Frottez, tapez, essorez, puis secouez-le très fort en comptant jusqu'à trois.",
       defiIn: "Les lavandières : par deux, prenez une serviette. Faites semblant de la frotter, de la taper, de l'essorer, puis pliez-la le plus vite possible.",
       q: "Avant les machines à laver, où lavait-on le linge ?", choices: ["Au lavoir", "Au four à pain", "Au grenier"], answer: 0,
@@ -450,7 +465,7 @@ const QuestEngine = (() => {
       teaser: "Une grande roue qui travaillait jour et nuit.",
       generic: "le moulin",
       clue: "Cherchez un vieux bâtiment près de l'eau, ou une grande roue : c'est là qu'on fabriquait la farine du pain.",
-      story: "Voici {P}, {N}. Ici, la force de l'eau ou du vent faisait tourner une grande roue, qui faisait tourner deux énormes pierres. Entre elles, le blé était écrasé pour devenir de la farine.",
+      story: "Voici {P}, {N}. Ici, la force de l'eau ou du vent faisait tourner une grande roue, qui faisait tourner deux énormes pierres. Entre elles, le blé était écrasé pour devenir de la farine. Le soir, le meunier était tout blanc de farine, des cheveux jusqu'aux sourcils, comme un fantôme !",
       defi: "La roue du moulin : tout le monde se tient par la main en cercle et tourne lentement, puis de plus en plus vite. Au signal « Stop ! », tout le monde s'arrête net, sans tomber.",
       defiIn: "La roue du moulin : tout le monde se tient par la main en cercle et tourne lentement, puis de plus en plus vite. Au signal « Stop ! », tout le monde s'arrête net, sans tomber.",
       q: "Que fabriquait-on dans un moulin ?", choices: ["De la farine", "Des chaussures", "Du chocolat"], answer: 0,
@@ -462,7 +477,7 @@ const QuestEngine = (() => {
       teaser: "Un géant très vieux, qui ne bouge jamais.",
       generic: "le vieil arbre",
       clue: "Cherchez un arbre pas comme les autres : très vieux, très grand, ou planté là pour qu'on s'en souvienne.",
-      story: "Te voici devant {P}, {N}. Certains arbres vivent plusieurs centaines d'années. Celui-ci a peut-être vu passer des cavaliers, des marchés et des fêtes. Autrefois, on se réunissait parfois à l'ombre d'un grand arbre pour rendre la justice.",
+      story: "Te voici devant {P}, {N}. Certains arbres vivent plusieurs centaines d'années. Celui-ci a peut-être vu passer des cavaliers, des marchés et des fêtes. Autrefois, on se réunissait parfois à l'ombre d'un grand arbre pour rendre la justice. En France, certains arbres ont plus de mille ans : ils étaient déjà là au temps des chevaliers !",
       defi: "La ronde de l'arbre : en vous tenant la main, combien de chevaliers faut-il pour faire le tour du tronc ? Si vous ne pouvez pas l'approcher, devinez-le !",
       defiIn: "La forêt des chevaliers : chacun se transforme en arbre, les bras en branches, et tient en équilibre sur un pied pendant que le Grand Maître souffle comme le vent.",
       q: "Comment connaître l'âge d'un arbre coupé ?", choices: ["En comptant les cercles de son tronc", "En comptant ses feuilles", "En mesurant son ombre"], answer: 0,
@@ -474,7 +489,7 @@ const QuestEngine = (() => {
       teaser: "Une maison qui a traversé les siècles.",
       generic: "la vieille maison",
       clue: "Cherchez une maison très ancienne, peut-être avec des poutres de bois dessinées sur sa façade.",
-      story: "Voici {P}, {N}. Elle a traversé les siècles ! Autrefois, on construisait avec ce que l'on trouvait autour de soi : du bois pour les poutres, de la terre et de la paille pour boucher les trous entre elles.",
+      story: "Voici {P}, {N}. Elle a traversé les siècles ! Autrefois, on construisait avec ce que l'on trouvait autour de soi : du bois pour les poutres, de la terre et de la paille pour boucher les trous entre elles. Dans certaines fermes, les animaux vivaient juste en dessous de la chambre : leur chaleur montait et réchauffait la famille… avec l'odeur en prime !",
       defi: "Les bâtisseurs : construisez une maison avec vos corps ! Deux chevaliers font le toit en joignant leurs mains au-dessus de leur tête, les autres font les murs. Tenez dix secondes sans que la maison s'écroule.",
       defiIn: "Les bâtisseurs : construisez une maison avec vos corps ! Deux chevaliers font le toit en joignant leurs mains au-dessus de leur tête, les autres font les murs. Tenez dix secondes sans que la maison s'écroule.",
       timer: 10,
@@ -487,7 +502,7 @@ const QuestEngine = (() => {
       teaser: "La maison des chevaliers d'aujourd'hui.",
       generic: "la caserne des pompiers",
       clue: "Cherchez la maison des héros d'aujourd'hui : un bâtiment avec de grandes portes, d'où partent des camions rouges.",
-      story: "Voici {P}, {N}. Ici veillent les pompiers, les chevaliers d'aujourd'hui. Comme les chevaliers d'autrefois, ils sont courageux et prêts à partir à tout moment pour aider les autres.",
+      story: "Voici {P}, {N}. Ici veillent les pompiers, les chevaliers d'aujourd'hui. Comme les chevaliers d'autrefois, ils sont courageux et prêts à partir à tout moment pour aider les autres. Autrefois, quand un feu éclatait, tout le village faisait la chaîne pour se passer des seaux d'eau, de main en main !",
       defi: "L'alerte : au signal « Alerte ! » du Grand Maître, tout le monde se met en rang le plus vite possible, au garde-à-vous. Puis on recommence, encore plus vite !",
       defiIn: "L'alerte : au signal « Alerte ! » du Grand Maître, tout le monde se met en rang le plus vite possible, au garde-à-vous. Puis on recommence, encore plus vite !",
       q: "Quel numéro faut-il appeler pour joindre les pompiers ?", choices: ["Le 18", "Le 10", "Le 42"], answer: 0,
@@ -499,7 +514,7 @@ const QuestEngine = (() => {
       teaser: "Un trésor de mots et d'histoires.",
       generic: "la bibliothèque",
       clue: "Cherchez la maison des livres, là où dorment des milliers d'histoires.",
-      story: "Te voici devant {P}, {N}. Au Moyen Âge, il n'y avait pas d'imprimerie : des moines copiaient les livres à la main, lettre après lettre. Un seul livre pouvait demander des mois de travail !",
+      story: "Te voici devant {P}, {N}. Au Moyen Âge, il n'y avait pas d'imprimerie : des moines copiaient les livres à la main, lettre après lettre. Un seul livre pouvait demander des mois de travail ! Les livres étaient si précieux qu'on les attachait parfois avec des chaînes, pour que personne ne les emporte.",
       defi: "Les copistes : chacun trace dans l'air, avec son doigt, la première lettre de son prénom, la plus grande et la plus belle possible. Les autres doivent la deviner.",
       defiIn: "Les copistes : chacun trace dans l'air, avec son doigt, la première lettre de son prénom, la plus grande et la plus belle possible. Les autres doivent la deviner.",
       q: "Comment appelait-on ceux qui recopiaient les livres à la main ?", choices: ["Des copistes", "Des imprimantes", "Des cuisiniers"], answer: 0,
@@ -511,7 +526,7 @@ const QuestEngine = (() => {
       teaser: "Un lieu où l'on apprend à lire et à compter.",
       generic: "l'école",
       clue: "Cherchez le bâtiment où les enfants apprennent à lire, à écrire et à compter.",
-      story: "Voici {P}, {N}. Les jeunes écuyers aussi apprenaient beaucoup de choses : lire, compter, monter à cheval, et surtout les bonnes manières d'un chevalier.",
+      story: "Voici {P}, {N}. Les jeunes écuyers aussi apprenaient beaucoup de choses : lire, compter, monter à cheval, et surtout les bonnes manières d'un chevalier. Pour écrire, les élèves utilisaient de petites tablettes recouvertes de cire : pour effacer, il suffisait de lisser la cire !",
       defi: "La dictée des chevaliers : chacun à son tour dit une lettre du mot « chevalier », dans l'ordre, sans se tromper. Une erreur ? On recommence depuis le début !",
       defiIn: "La dictée des chevaliers : chacun à son tour dit une lettre du mot « chevalier », dans l'ordre, sans se tromper. Une erreur ? On recommence depuis le début !",
       q: "Sur quoi les écoliers écrivaient-ils autrefois ?", choices: ["Sur une ardoise, avec une craie", "Sur une tablette tactile", "Sur un nuage"], answer: 0,
@@ -523,7 +538,7 @@ const QuestEngine = (() => {
       teaser: "Un champ parfait pour un tournoi.",
       generic: "le terrain de sport",
       clue: "Les chevaliers s'entraînaient sur un grand terrain plat. Cherchez un terrain de sport, avec des buts ou des lignes tracées au sol.",
-      story: "Te voici au bord du terrain, {N}. Autrefois, les chevaliers s'affrontaient lors de grands tournois, devant tout le village qui les encourageait. Ce terrain ferait un parfait champ de tournoi !",
+      story: "Te voici au bord du terrain, {N}. Autrefois, les chevaliers s'affrontaient lors de grands tournois, devant tout le village qui les encourageait. Ce terrain ferait un parfait champ de tournoi ! Une armure pouvait peser plus de vingt kilos, autant qu'un enfant de six ans : et pourtant, les chevaliers arrivaient à courir avec !",
       defi: "La course des destriers : chacun galope comme un cheval jusqu'à un repère choisi par le Grand Maître, en imitant le bruit des sabots, puis revient au trot.",
       defiIn: "La course des destriers : à quatre pattes, chaque chevalier fait le tour de la pièce comme un cheval, puis revient au trot.",
       q: "Comment s'appelait la grande fête où les chevaliers s'affrontaient devant le public ?", choices: ["Le tournoi", "Le carnaval", "Le marché"], answer: 0,
@@ -535,7 +550,7 @@ const QuestEngine = (() => {
       teaser: "Une petite maison jaune pour les messages.",
       generic: "la boîte aux lettres",
       clue: "Cherchez une petite boîte jaune où l'on glisse les lettres. Le Templier y a laissé un message.",
-      story: "Voici {P}, {N}. Au temps des chevaliers, les messages voyageaient à cheval, portés par des messagers. Aujourd'hui, on glisse sa lettre ici, et elle peut partir tout autour du monde !",
+      story: "Voici {P}, {N}. Au temps des chevaliers, les messages voyageaient à cheval, portés par des messagers. Aujourd'hui, on glisse sa lettre ici, et elle peut partir tout autour du monde ! Le Père Noël a même son adresse en France : chaque année, il reçoit plus d'un million de lettres d'enfants, et il répond à chacune !",
       defi: "Le message secret : le Grand Maître murmure une phrase à l'oreille d'un chevalier, qui la répète à son voisin, et ainsi de suite. Le dernier la dit à voix haute : est-ce toujours la même ?",
       defiIn: "Le message secret : le Grand Maître murmure une phrase à l'oreille d'un chevalier, qui la répète à son voisin, et ainsi de suite. Le dernier la dit à voix haute : est-ce toujours la même ?",
       q: "Avant la Poste, comment voyageaient les messages des seigneurs ?", choices: ["Portés par des messagers à cheval", "Par Internet", "Par la pensée"], answer: 0,
@@ -593,20 +608,61 @@ const QuestEngine = (() => {
   function indoorStops() { return INDOOR.map(cat => ({ cat })); }
   // At home, the Templar hid each letter in the house: the adult hides the cards before the party (5 minutes),
   // the children find each one from the Grand Master's riddle. Places every home has, in this order.
+  // Each hiding place has its own story, challenge and question, about that object in the time of the
+  // knights (15/10/2026: the stories of the outdoor places made no sense at home).
   const CACHES = [
-    { id: "chaussure", where: "dans une chaussure, dans l'entrée",
-      clue: "Le Templier a caché cette lettre dans une cachette qui t'accompagne partout, mais toujours à tes pieds ! Cherche bien, et pince-toi le nez." },
-    { id: "frigo", where: "dans le réfrigérateur, sur une étagère du bas ou collée sur la porte",
-      clue: "Cette lettre-ci est cachée dans un coffre magique où il fait toujours froid, même en plein été. Quand on l'ouvre, une petite lumière s'allume !" },
-    { id: "oreiller", where: "sous l'oreiller du lit de l'enfant",
-      clue: "Cette lettre dort là où tu poses ta tête chaque soir, pour rêver de dragons et de chevaliers." },
-    { id: "livre", where: "entre les pages d'un livre, sur une étagère",
-      clue: "Cette lettre se cache entre les pages d'un grimoire, là où dorment les histoires. Cherche parmi les livres !" },
-    { id: "canape", where: "sous un coussin du canapé",
-      clue: "Cette lettre est cachée sous un nuage tout doux, là où toute la famille s'assoit le soir." },
-    { id: "table", where: "collée sous la table du repas, avec un morceau de ruban adhésif",
-      clue: "Cette lettre attend sous la grande table où les chevaliers prennent leur repas. Regarde bien, même par en dessous !" }
+    { id: "chaussure", where: "dans une chaussure, dans l'entrée", title: "La chaussure du chevalier",
+      teaser: "Une cachette qui suit tes pas.",
+      clue: "Le Templier a caché cette lettre dans une cachette qui t'accompagne partout, mais toujours à tes pieds ! Cherche bien, et pince-toi le nez.",
+      story: "Bravo, {N}, tu l'as trouvée ! Sais-tu que les chevaliers aussi protégeaient leurs pieds ? Sur leur armure, ils portaient des chaussures de métal, faites de petites plaques qui bougeaient comme des écailles. Un jour, la mode fut aux chaussures très pointues, les poulaines. On raconte que des chevaliers devaient couper le bout de leurs chaussures pour pouvoir courir !",
+      defi: "La marche de l'armure : chaque chevalier traverse la pièce comme s'il portait une armure très lourde, raide comme un robot, sans plier les genoux. Le Grand Maître choisit l'armure la plus rigolote.",
+      q: "Comment s'appelaient les chaussures très pointues à la mode au Moyen Âge ?", choices: ["Les poulaines", "Les baskets", "Les palmes"], answer: 0,
+      fact: "Plus on était important, plus la pointe de ses poulaines avait le droit d'être longue.",
+      hints: ["Le mot ressemble au nom d'un animal de la ferme…", "Pou… comme une poule !", "Les poulaines."] },
+    { id: "frigo", where: "dans le réfrigérateur, sur une étagère du bas ou collée sur la porte", title: "Le garde-manger du château",
+      teaser: "Un coffre où il fait toujours froid.",
+      clue: "Cette lettre-ci est cachée dans un coffre magique où il fait toujours froid, même en plein été. Quand on l'ouvre, une petite lumière s'allume !",
+      story: "Bravo, {N}, tu l'as trouvée ! Au temps des chevaliers, il n'y avait pas de réfrigérateur. Pour garder la viande, on la salait, ou on la fumait au-dessus du feu, et les provisions restaient au frais dans les caves du château. Et pendant les grands banquets, on servait parfois un paon rôti, recouvert de ses propres plumes, comme s'il était encore vivant !",
+      defi: "Les statues de glace : les chevaliers marchent dans la pièce. Quand le Grand Maître crie « Glace ! », tout le monde se fige. Celui qui bouge le premier devient le prochain à crier. Trois manches !",
+      q: "Sans réfrigérateur, comment gardait-on la viande au Moyen Âge ?", choices: ["En la salant ou en la fumant", "En la laissant au soleil", "En la cachant sous son lit"], answer: 0,
+      fact: "Le sel était si précieux qu'on l'appelait parfois l'or blanc.",
+      hints: ["Pense à ce qu'on met sur les frites…", "On en trouve dans l'eau de la mer.", "En la salant ou en la fumant."] },
+    { id: "oreiller", where: "sous l'oreiller du lit de l'enfant", title: "La nuit du chevalier",
+      teaser: "Une cachette où l'on fait de beaux rêves.",
+      clue: "Cette lettre dort là où tu poses ta tête chaque soir, pour rêver de dragons et de chevaliers.",
+      story: "Bravo, {N}, tu l'as trouvée ! En voyage, les chevaliers dormaient souvent par terre, enroulés dans leur manteau, la tête posée sur leur selle de cheval. Et dans les auberges, il y avait si peu de lits qu'on devait parfois partager le sien avec des voyageurs inconnus… qui ronflaient peut-être très fort !",
+      defi: "Le dragon endormi : un chevalier fait le dragon, assis les yeux fermés, un coussin à ses pieds : c'est son trésor. Les autres s'approchent sans bruit pour le prendre. Si le dragon entend quelqu'un, il le montre du doigt, et ce chevalier retourne au départ.",
+      q: "Sur quoi les chevaliers en voyage posaient-ils souvent leur tête pour dormir ?", choices: ["Sur leur selle de cheval", "Sur un oreiller en plumes de dragon", "Sur leur casque rempli d'eau"], answer: 0,
+      fact: "Chez les seigneurs, les lits avaient des rideaux tout autour, pour garder la chaleur.",
+      hints: ["Ils voyageaient à cheval…", "On s'assoit dessus pour monter à cheval.", "Sur leur selle de cheval."] },
+    { id: "livre", where: "entre les pages d'un livre, sur une étagère", title: "Le grimoire du moine",
+      teaser: "Une cachette pleine d'histoires.",
+      clue: "Cette lettre se cache entre les pages d'un grimoire, là où dorment les histoires. Cherche parmi les livres !",
+      story: "Bravo, {N}, tu l'as trouvée ! Au Moyen Âge, chaque livre était écrit à la main par des moines, avec une plume d'oie et de l'encre. Ils travaillaient en silence pendant des mois. Et dans le bord des pages, certains dessinaient des choses très rigolotes : des escargots géants qui se battent contre des chevaliers, ou des lapins armés d'une épée !",
+      defi: "Le silence des moines : pendant trente secondes, plus personne ne parle ni ne rit… même si le Grand Maître fait des grimaces !",
+      timer: 30,
+      q: "Avec quoi les moines écrivaient-ils les livres ?", choices: ["Avec une plume d'oiseau et de l'encre", "Avec un stylo à bille", "Avec un ordinateur"], answer: 0,
+      fact: "Un seul livre pouvait demander des mois, et parfois des années de travail.",
+      hints: ["Ça vient d'un oiseau…", "Une oie en a plein sur le dos.", "Avec une plume d'oiseau et de l'encre."] },
+    { id: "canape", where: "sous un coussin du canapé", title: "La grande salle du château",
+      teaser: "Un nuage tout doux où l'on s'assoit.",
+      clue: "Cette lettre est cachée sous un nuage tout doux, là où toute la famille s'assoit le soir.",
+      story: "Bravo, {N}, tu l'as trouvée ! Au château, il n'y avait pas de canapé. Le soir, tout le monde se retrouvait dans la grande salle, près de la cheminée, assis sur des bancs ou sur des coffres. Seul le seigneur avait une vraie chaise, avec un dossier : c'était un honneur ! Pour amuser tout le monde, des musiciens chantaient des histoires de chevaliers, et des montreurs faisaient parfois danser… un ours !",
+      defi: "Le troubadour : chaque chevalier, à son tour, ajoute une phrase à une aventure du Templier. Le Grand Maître commence : « Il était une fois un chevalier qui avait perdu son cheval… »",
+      q: "Dans la grande salle du château, qui avait le droit de s'asseoir sur une vraie chaise ?", choices: ["Le seigneur", "Les chiens", "Tout le monde"], answer: 0,
+      fact: "Les autres s'asseyaient sur des bancs, des tabourets ou des coffres.",
+      hints: ["C'était un honneur…", "La personne la plus importante du château.", "Le seigneur."] },
+    { id: "table", where: "collée sous la table du repas, avec un morceau de ruban adhésif", title: "Le banquet des chevaliers",
+      teaser: "Une cachette sous le grand banquet.",
+      clue: "Cette lettre attend sous la grande table où les chevaliers prennent leur repas. Regarde bien, même par en dessous !",
+      story: "Bravo, {N}, tu l'as trouvée ! Pendant les banquets du Moyen Âge, on mangeait avec ses doigts et son couteau : la fourchette était encore très rare. Et pas d'assiette ! On posait la nourriture sur une grosse tranche de pain, le tranchoir. À la fin du repas, ce pain plein de sauce était donné aux pauvres… ou aux chiens !",
+      defi: "Le banquet mimé : chaque chevalier, à son tour, mime un plat du banquet sans parler : une cuisse de poulet géante, une soupe brûlante, une grappe de raisin… Les autres devinent.",
+      q: "Dans la légende, pourquoi le roi Arthur avait-il choisi une table ronde ?", choices: ["Pour que tous ses chevaliers soient égaux", "Pour pouvoir la faire rouler", "Parce qu'il avait peur des coins"], answer: 0,
+      fact: "Autour d'une table ronde, personne n'est en bout de table : chacun a la même place.",
+      hints: ["Personne n'était plus important que les autres…", "Autour d'un rond, il n'y a pas de bout.", "Pour que tous ses chevaliers soient égaux."] }
   ];
+  // What the step at home shows instead of the outdoor place (also when an outdoor quest is played at home).
+  const homeOf = c => ({ title: c.title, story: c.story, defi: c.defi, timer: c.timer || 0, q: c.q, choices: c.choices, answer: c.answer, fact: c.fact, hints: c.hints });
 
   // Full quest (texts, letters, distances) from chosen stops. start is null for the quest at home.
   function assemble(start, stops) {
@@ -618,16 +674,18 @@ const QuestEngine = (() => {
     const steps = stops.map((s, i) => {
       const n = seen[s.cat] || 0; seen[s.cat] = n + 1;
       const v = indoor ? 0 : Math.min(n, T[s.cat].length - 1);
-      const tpl = T[s.cat][v];
+      const tpl = T[s.cat][v], c = CACHES[i % CACHES.length];
       const step = Object.assign({}, tpl, {
         cat: s.cat, v, letter: scrambled[i], name: s.name || "",
         lat: indoor ? null : s.lat, lon: indoor ? null : s.lon,
-        P: indoor ? tpl.generic : articleize(s.name, tpl.generic),
+        P: indoor ? c.title : articleize(s.name, tpl.generic),
         legM: indoor ? 0 : Math.round(dist(prev, s) * WALK_FACTOR / 10) * 10,
         dir: indoor ? "" : bearing(prev, s), osm: s.id || null,
-        // where the letter card is hidden when the quest is played at home (also after a rainy switch)
-        hideId: CACHES[i % CACHES.length].id, hide: CACHES[i % CACHES.length].where, hideClue: CACHES[i % CACHES.length].clue
+        // where the letter card is hidden when the quest is played at home (also after a rainy switch),
+        // and the story, challenge and question that go with that hiding place
+        hideId: c.id, hide: c.where, hideClue: c.clue, home: homeOf(c)
       });
+      if (indoor) step.teaser = c.teaser;
       if (!indoor) prev = s;
       return step;
     });
@@ -649,7 +707,7 @@ const QuestEngine = (() => {
     return { ok: true, indoorOnly: !!q.indoorOnly, count: q.steps.length, walkM: q.walkM, minutes: q.minutes, teasers: q.steps.map(s => s.teaser) };
   }
 
-  return { overpassQuery, classify, dedupe, choose, select, selectPlaces, assemble, indoorStops, build, preview, dist, bearing, articleize, T, HERE, WORDS, CACHES, SEARCH_RADIUS, MAX_WALK };
+  return { overpassQuery, classify, dedupe, choose, select, selectPlaces, assemble, indoorStops, build, preview, dist, bearing, articleize, T, HERE, WORDS, CACHES, RANK, SEARCH_RADIUS, MAX_WALK };
 })();
 if (typeof module !== "undefined") module.exports = QuestEngine;
 /* ENGINE-END */

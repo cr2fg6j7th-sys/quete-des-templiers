@@ -94,4 +94,14 @@ const pv = JSON.stringify(E.preview(full));
 for (const s of full.steps) assert(!pv.includes(s.name) && !pv.includes(String(s.lat).slice(0, 7)) && !pv.includes(s.choices[s.answer]), "preview leaks " + s.name);
 const home = E.assemble(null, E.indoorStops());
 assert(home.indoorOnly && home.steps.length === 6 && home.scrambled === "ELFIED" && home.steps.every(s => s.lat === null && s.v === 0), "indoor quest");
+// At home, each letter has its hiding place, and the story, challenge and question of that place.
+assert(home.steps.every((s, i) => s.hideId === E.CACHES[i].id && s.hide && s.home && s.home.story.includes("{N}") && s.home.defi
+  && s.home.choices[s.home.answer] && s.home.hints.length === 3 && s.P === E.CACHES[i].title && s.teaser === E.CACHES[i].teaser), "home steps follow the hiding places");
+assert(new Set(home.steps.map(s => s.home.story)).size === 6, "one story per hiding place");
+assert(full.steps.every((s, i) => s.home && s.home.title === E.CACHES[i].title), "an outdoor quest played at home uses the hiding-place stories too");
+const hpv = JSON.stringify(E.preview(home));
+for (const s of home.steps) assert(!hpv.includes(s.hide) && !hpv.includes(s.home.choices[s.home.answer]), "home preview leaks " + s.hideId);
+// The ranking of places: every category once, from the most to the least interesting.
+assert.deepStrictEqual(E.RANK.map(r => r[0]).sort(), Object.keys(E.T).sort(), "RANK lists every category once");
+assert(E.RANK.every((r, i) => i === 0 || r[1] <= E.RANK[i - 1][1]) && E.RANK[0][0] === "church" && E.RANK[E.RANK.length - 1][0] === "postbox", "RANK goes down, church first, post box last");
 console.log("\nTous les tests passent.");

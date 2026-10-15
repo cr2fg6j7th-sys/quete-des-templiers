@@ -13,7 +13,7 @@ const QuestVoice = (() => {
   const LETTERS = ["F", "I", "D", "E", "L", "B", "R", "A", "V", "P"];
 
   const gender = (t, g) => t.replace(/\[\[([^|\]]*)\|([^\]]*)\]\]/g, (m, a, b) => g === "f" ? b : a);
-  const cap = s => s.replace(/(^|[.!?…]\s+|«\s)([a-zàâäéèêëîïôöùûüç])/g, (m, a, b) => a + b.toUpperCase());
+  const cap = s => s.replace(/(^|[.!?]\s+|«\s)([a-zàâäéèêëîïôöùûüç])/g, (m, a, b) => a + b.toUpperCase());
 
   const LINES = {};
   function add(key, text) {
@@ -34,9 +34,11 @@ const QuestVoice = (() => {
     add("prologue-maison", "approche. Je suis le Grand Maître de l'Ordre des Gardiens du Temple. Il y a bien longtemps, un chevalier du Temple cacha un sceau magique et dispersa les lettres du mot secret qui permet de l'ouvrir. Cette nuit, ses lettres sont apparues, cachées dans ta maison ! Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'[[un chevalier courageux|une chevalière courageuse]]. Avec tes compagnons, résous mes énigmes pour trouver chaque cachette, relève mes défis, et rapporte-moi les lettres. Es-tu [[prêt|prête]] ?");
     add("intro-dehors", "[[chevalier|chevalière]] de l'Ordre, la quête commence ! À chaque lieu, tu gagneras une lettre. Les lettres arrivent dans le désordre : à toi de retrouver le mot secret à la fin. Suis les indices, reste toujours près des adultes, et ouvre grand les yeux.");
     add("intro-maison", "[[chevalier|chevalière]] de l'Ordre, la chasse commence ! Chaque énigme te mène à une cachette de la maison. Quand tu trouves une lettre, apporte-la au Grand Maître, sans la montrer aux autres. Les lettres sont dans le désordre : à toi de retrouver le mot secret à la fin.");
-    // at home: the riddle of each hiding place, and the moment the card is found, before the story of the Templar's journey
-    for (const c of E.CACHES) add(`cachette-${c.id}`, "Écoute bien. " + c.clue);
-    add("imagine", "bravo, tu l'as trouvée ! Maintenant, ferme les yeux, et imagine.");
+    // at home: the riddle of each hiding place, then the story that goes with it (the shoe, the fridge…)
+    for (const c of E.CACHES) {
+      add(`cachette-${c.id}`, "Écoute bien. " + c.clue);
+      add(`maison-${c.id}`, spokenStory(c.story, ""));
+    }
     for (const [cat, list] of Object.entries(E.T)) list.forEach((t, v) => {
       add(`indice-${cat}-${v}`, "Écoute bien. " + t.clue);
       add(`recit-${cat}-${v}`, spokenStory(t.story, E.HERE[cat][v]));
@@ -74,7 +76,7 @@ const QuestVoice = (() => {
       case "prologue": return [N, key(`prologue-${where}`, g)];
       case "intro": return ["@name?", key(`intro-${where}`, g)]; // no "Jeune chevalier, chevalier de l'Ordre"
       case "indice": return ctx.indoor && ctx.cache ? [`cachette-${ctx.cache}`] : [key(`indice-${ctx.cat}-${ctx.v}`, g)];
-      case "recit": return ctx.indoor && ctx.cache ? [N, "imagine", key(`recit-${ctx.cat}-${ctx.v}`, g)] : [N, key(`recit-${ctx.cat}-${ctx.v}`, g)];
+      case "recit": return ctx.indoor && ctx.cache ? [N, key(`maison-${ctx.cache}`, g)] : [N, key(`recit-${ctx.cat}-${ctx.v}`, g)];
       case "lettre": return ctx.last ? [key(`derniere-${ctx.letter}`, g), key(`mot-${ctx.word}`, g)] : [key(`lettre-${ctx.letter}`, g), "gardien"];
       case "fin": return [N, key(`fin-${ctx.word}`, g), N, key("nomme", g)];
     }

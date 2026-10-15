@@ -237,8 +237,14 @@ async def main():
             await pg3.screenshot(path=str(ROOT / "dist" / "p7-maison-cachette.png"), full_page=True)
             await pg3.click("text=Lettre trouvée !")
             await pg3.wait_for_selector("text=Défi réussi", timeout=4000)
-            check(cards == "ELFIED" and "dans une chaussure" in hide and "dans une chaussure" in where,
+            found = await pg3.inner_text("#app")
+            await pg3.screenshot(path=str(ROOT / "dist" / "p7b-maison-recit.png"), full_page=True)
+            await pg3.click("text=Défi réussi")
+            riddle = await pg3.inner_text("#app")
+            check(cards == "ELFIED" and "dans une chaussure" in hide and "où vous voulez" not in hide and "dans une chaussure" in where,
                   f"chasse aux lettres à la maison : 6 cartes à imprimer ({cards}), cachettes listées, énigme puis récit")
+            check("La chaussure du chevalier" in found and "poulaines" in found and "marche de l'armure" in found and "poulaines" in riddle and "clocher" not in riddle,
+                  "à la maison : le récit, le défi et l'énigme parlent de la cachette (la chaussure)")
             sessions = json.loads(urllib.request.urlopen(BASE + "/__sessions").read())
             check(sessions[-1]["metadata"].get("ref") == "fete" and "?ref" not in pg3.url, "provenance « fete » suivie jusqu'au paiement")
             await ctx3.close()

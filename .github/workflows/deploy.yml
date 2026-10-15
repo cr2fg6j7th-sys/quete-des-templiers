@@ -67,10 +67,12 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: places-data
-          key: places-v2-${{ steps.month.outputs.m }}
+          key: places-v3-${{ steps.month.outputs.m }}
           # v2 (15/10/2026): village places too (crosses, water towers, lavoirs, mills, schools…).
-          # A v1 copy is used if the new extraction fails.
+          # v3 (15/10/2026): new ranking of the places (the score is stored in the tiles).
+          # An older copy is used if the new extraction fails.
           restore-keys: |
+            places-v3-
             places-v2-
             places-v1-
 
@@ -89,7 +91,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: places-data
-          key: places-v2-${{ steps.month.outputs.m }}
+          key: places-v3-${{ steps.month.outputs.m }}
 
       - name: Construire le site et le serveur
         if: steps.ready.outputs.ok == 'true'

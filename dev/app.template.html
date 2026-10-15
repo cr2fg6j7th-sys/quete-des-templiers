@@ -109,6 +109,8 @@ footer a{color:var(--muted)}
 .hero{display:flex;flex-direction:column;gap:12px;padding-top:8px}
 .hero .brand{font-family:var(--display);font-size:1.9rem;line-height:1;color:var(--rose)}
 .hero h1{font-family:var(--body);font-weight:700;font-size:1.8rem;line-height:1.15;color:var(--ink)}
+.music{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:6;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--rose);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12);padding:0;cursor:pointer}
+.music[aria-pressed="false"]{color:var(--muted)}
 .sticky{position:fixed;left:0;right:0;bottom:0;padding:18px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--stone) 35%);display:flex;justify-content:center;z-index:5}
 .sticky .btn{width:100%;max-width:528px;box-shadow:0 4px 14px rgba(27,37,71,.25)}
 .missive .btn.listen{border-color:var(--rose);color:var(--rose);background:var(--card)}
@@ -254,8 +256,8 @@ function speak(text){
     const parts=(text.match(/[^.!?…]+(?:[.!?…]+(?:\s*»)?)?\s*/g)||[text]).filter(p=>p.trim()&&p.trim()!=="»");
     let k=0;const next=()=>{if(run!==speakRun||k>=parts.length)return;
       const u=new SpeechSynthesisUtterance(parts[k++].trim());u.lang="fr-FR";if(frVoice)u.voice=frVoice;
-      u.rate=.78;u.pitch=.55;u.volume=.9;u.onend=()=>setTimeout(next,450);speechSynthesis.speak(u);};
-    next();return true;}catch(e){return false;}
+      u.rate=.78;u.pitch=.55;u.volume=.9;u.onend=()=>{if(k>=parts.length)talk(false);setTimeout(next,450);};speechSynthesis.speak(u);};
+    talk(true);next();return true;}catch(e){return false;}
 }
 /* Recorded voice (Gemini TTS, voice Algenib), served from the audio/ folder; phone voice only as a fallback. */
 const V=QuestVoice;
@@ -271,17 +273,76 @@ function playKeys(keys,fallbackText,onEnd){
   stopVoice();const run=++playRun;
   const clips=keys.map(clipUrl).filter(Boolean).map(u=>{const a=new Audio(u);a.preload="auto";return a;});
   let i=0;
-  const fail=()=>{if(run!==playRun)return;playRun++;if(onEnd)onEnd();if(!speak(fallbackText))note.textContent="La voix n'est pas disponible : lisez le message à voix haute.";};
+  const fail=()=>{if(run!==playRun)return;playRun++;talk(false);if(onEnd)onEnd();if(!speak(fallbackText))note.textContent="La voix n'est pas disponible : lisez le message à voix haute.";};
   const next=()=>{
     if(run!==playRun)return;
-    if(i>=clips.length){if(onEnd)onEnd();return;}
+    if(i>=clips.length){talk(false);if(onEnd)onEnd();return;}
     const a=clips[i++];curAudio=a;
     a.onended=()=>setTimeout(next,220);a.onerror=fail;
     const p=a.play();if(p&&p.catch)p.catch(fail);
   };
-  next();
+  talk(true);next();
 }
-function stopVoice(){try{speechSynthesis.cancel();speakRun++;}catch(e){}playRun++;try{if(curAudio){curAudio.pause();curAudio=null;}}catch(e){}}
+function stopVoice(){try{speechSynthesis.cancel();speakRun++;}catch(e){}playRun++;try{if(curAudio){curAudio.pause();curAudio=null;}}catch(e){}talk(false);}
+
+/* ---------- Background music: a quiet knightly loop on the first screens ----------
+   Browsers only let sound start after a touch, so it starts at the first touch or key, then loops
+   (Web Audio, without a gap). A round switch at the top right turns it off; the choice is kept.
+   It goes very quiet while the Grand Master speaks, and stops once the quest itself begins. */
+const MUSIC_URL="audio/musique/accueil.mp3",MUSIC_VOL=.2,MUSIC_UNDER=.035;
+const MUSIC_SCREENS=["home","setup","loading","preview","few","neterr"];
+let mCtx=null,mGain=null,mSrc=null,mBuf=null,mLoading=false,talking=false;
+const musicWanted=()=>{try{return localStorage.getItem("musique")!=="non";}catch(e){return true;}};
+const musicHere=()=>MUSIC_SCREENS.includes(render.cur||S.screen)&&!document.hidden;
+function talk(on){talking=on;musicLevel();}
+function musicLevel(){
+  if(!mGain)return;
+  const v=musicWanted()&&musicHere()&&mSrc?(talking?MUSIC_UNDER:MUSIC_VOL):0;
+  try{mGain.gain.cancelScheduledValues(mCtx.currentTime);mGain.gain.setTargetAtTime(v,mCtx.currentTime,v?.6:.25);}catch(e){}
+}
+// The MP3 encoder adds a few milliseconds of silence at both ends: cut it, so the loop has no hole.
+function trimEdges(b){
+  const d=b.getChannelData(0),n=d.length;let a=0,z=n-1;
+  while(a<n&&Math.abs(d[a])<1e-4)a++;while(z>a&&Math.abs(d[z])<1e-4)z--;
+  if(a===0&&z===n-1)return b;
+  const out=mCtx.createBuffer(b.numberOfChannels,z-a+1,b.sampleRate);
+  for(let c=0;c<b.numberOfChannels;c++)out.copyToChannel(b.getChannelData(c).subarray(a,z+1),c);
+  return out;
+}
+async function musicOn(){
+  if(!musicWanted()||!musicHere()||mSrc||mLoading)return;
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+  mLoading=true;
+  try{
+    if(!mCtx){mCtx=new AC();mGain=mCtx.createGain();mGain.gain.value=0;mGain.connect(mCtx.destination);}
+    if(mCtx.state!=="running")await mCtx.resume();
+    if(!mBuf){const r=await fetch(MUSIC_URL);if(!r.ok)throw new Error("musique");const raw=await r.arrayBuffer();
+      mBuf=trimEdges(await new Promise((ok,ko)=>mCtx.decodeAudioData(raw,ok,ko)));}
+    if(!mSrc&&musicWanted()){mSrc=mCtx.createBufferSource();mSrc.buffer=mBuf;mSrc.loop=true;mSrc.connect(mGain);mSrc.start();}
+  }catch(e){}
+  mLoading=false;musicLevel();musicSwitch();
+}
+function musicOff(){
+  if(!mSrc)return;const s=mSrc;mSrc=null;musicLevel();
+  setTimeout(()=>{try{s.stop();}catch(e){}},1500);
+}
+// Called after every screen: start, keep or stop the music.
+function musicScreen(){if(musicHere()&&musicWanted()){if(mCtx&&mCtx.state==="running")musicOn();}else musicOff();musicSwitch();}
+function musicSwitch(){
+  let b=document.getElementById("music");
+  if(!MUSIC_SCREENS.includes(render.cur||S.screen)){if(b)b.remove();return;}
+  if(!b){b=h("button",{class:"music",id:"music",type:"button",onclick:()=>{
+      const on=!(mSrc||mLoading);try{localStorage.setItem("musique",on?"oui":"non");}catch(x){}
+      if(on)musicOn();else musicOff();musicSwitch();}});
+    document.body.append(b);}
+  const on=!!mSrc||mLoading;
+  b.setAttribute("aria-pressed",String(on));b.setAttribute("aria-label",on?"Couper la musique":"Mettre la musique");b.title=b.getAttribute("aria-label");
+  b.innerHTML=on?'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>'
+    :'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z" opacity=".55"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+}
+// The first touch anywhere on the page starts it (if wanted, and on a first screen).
+for(const ev of ["pointerdown","keydown"])document.addEventListener(ev,e=>{if(!(e.target&&e.target.closest&&e.target.closest("#music")))musicOn();},{passive:true});
+document.addEventListener("visibilitychange",()=>{if(!mCtx)return;if(document.hidden){try{mCtx.suspend();}catch(e){}}else if(musicHere()&&musicWanted()){try{mCtx.resume();}catch(e){}musicLevel();}});
 
 /* ---------- DOM helpers ---------- */
 const app=document.getElementById("app");
@@ -515,10 +576,10 @@ function printDiplomas(companions){
 function hideCard(){
   const q=S.quest;
   return h("div",{class:"card adult"},h("h3",{text:"La chasse aux lettres, à préparer avant la fête (5 minutes)"}),
-    h("p",{class:"note",text:"Imprimez les cartes, ou écrivez chaque lettre en grand sur un papier plié en deux. Puis cachez-les, sans que les enfants vous voient :"}),
-    h("ol",{class:"rules"},...q.steps.map(st=>h("li",null,"lettre ",h("b",{text:st.letter})," : ",st.hide||"où vous voulez"))),
+    h("p",{class:"note",text:"Imprimez les cartes, ou écrivez chaque lettre en grand sur un papier plié en deux. Puis cachez chaque lettre à sa place, sans que les enfants vous voient : l'énigme et le récit du Grand Maître parlent de cette cachette."}),
+    h("ol",{class:"rules"},...q.steps.map(st=>h("li",null,"Lettre ",h("b",{text:st.letter})," : ",h("b",{text:st.hide}),st.home?` (récit : ${st.home.title.toLowerCase()})`:""))),
     h("button",{class:"btn ghost",type:"button",onclick:printLetters},"Imprimer les cartes des lettres"),
-    h("p",{class:"note",text:"Pas de canapé ou d'étagère à livres ? Un fauteuil ou une pile de magazines feront l'affaire : les énigmes du Grand Maître s'y prêtent."}));
+    h("p",{class:"note",text:"Respectez l'ordre : la première énigme mène à la première cachette, et ainsi de suite. Pas de canapé ? Le coussin d'un fauteuil fera l'affaire."}));
 }
 function printLetters(){
   const q=S.quest;
@@ -526,7 +587,7 @@ function printLetters(){
     const c=h("div",{class:"lc"});
     c.innerHTML=SEAL.replace('class="seal"','class="lc-seal"').replace("var(--rose)","#b8505c");
     c.append(h("div",{class:"lc-letter",text:st.letter}),h("p",{class:"lc-order",text:"ordre des gardiens du temple"}),
-      h("p",{class:"lc-where",text:`étape ${i+1} · à cacher ${st.hide||""}`}));
+      h("p",{class:"lc-where",text:`étape ${i+1} · à cacher ${st.hide}`}));
     return c;}));
   let box=document.getElementById("print");if(!box){box=h("div",{id:"print"});document.body.append(box);}
   box.replaceChildren(sheet);
@@ -919,7 +980,9 @@ function timerBlock(sec){
 function stepScreen(){
   const q=S.quest,i=S.step,st=q.steps[i],n=q.steps.length,P={P:st.P};
   const home=S.indoor&&st.hideId;
-  const title=S.phase==="travel"?(home?"Où est cachée la lettre ?":"Où aller ?"):fill("{P}",P);
+  // At home, the story, challenge and question go with the hiding place (the shoe, the fridge…).
+  const X=home&&st.home?st.home:null,Q=X||st;
+  const title=S.phase==="travel"?(home?"Où est cachée la lettre ?":"Où aller ?"):X?X.title:fill("{P}",P);
   const head=[shieldRow(),h("div",null,h("p",{class:"eyebrow",text:`étape ${i+1} sur ${n}`}),h("h2",{text:title}))];
   if(S.phase==="travel"&&home){
     return [...head,voiceCard(`Écoute bien, {N}. ${st.hideClue}`,"L'énigme de la cachette",null,V.message("indice",{g:S.hero,indoor:true,cache:st.hideId})),note,
@@ -943,20 +1006,20 @@ function stepScreen(){
       h("button",{class:"linkish",type:"button",onclick:()=>solve(i)},"Lieu fermé ou inaccessible ? Passer cette étape")];
   }
   if(S.phase==="arrived"){
-    return [...head,voiceCard(home?`{N}, bravo, tu l'as trouvée ! Maintenant, ferme les yeux, et imagine. ${st.story}`:st.story,home?"Le récit du Grand Maître":null,P,
-        V.message("recit",{g:S.hero,cat:st.cat,v:st.v||0,indoor:!!home,cache:st.hideId})),note,
-      h("div",{class:"card"},h("h3",{text:"Le défi des chevaliers"}),h("p",{text:fill(S.indoor?st.defiIn:st.defi,P)}),st.timer?timerBlock(st.timer):null),
+    return [...head,voiceCard(Q.story,home?"Le récit du Grand Maître":null,P,
+        V.message("recit",{g:S.hero,cat:st.cat,v:st.v||0,indoor:!!(home&&X),cache:st.hideId})),note,
+      h("div",{class:"card"},h("h3",{text:"Le défi des chevaliers"}),h("p",{text:X?X.defi:fill(S.indoor?st.defiIn:st.defi,P)}),Q.timer?timerBlock(Q.timer):null),
       !S.indoor&&h("p",{class:"note",text:"Pour l'adulte : "+st.adult}),
       h("button",{class:"btn",type:"button",onclick:()=>go({phase:"question"})},"Défi réussi : à l'énigme !")];
   }
   if(S.phase==="question"){
     const fb=h("p",{role:"status"});const box=h("div",{class:"choices"});
-    st.choices.forEach((c,ci)=>{const b=h("button",{class:"choice",type:"button",text:c});
-      b.addEventListener("click",()=>{if(ci===st.answer){b.classList.add("right");fb.className="ok";fb.textContent="Bonne réponse ! "+st.fact;box.querySelectorAll("button").forEach(x=>x.disabled=true);setTimeout(()=>solve(i),1400);}
+    Q.choices.forEach((c,ci)=>{const b=h("button",{class:"choice",type:"button",text:c});
+      b.addEventListener("click",()=>{if(ci===Q.answer){b.classList.add("right");fb.className="ok";fb.textContent="Bonne réponse ! "+Q.fact;box.querySelectorAll("button").forEach(x=>x.disabled=true);setTimeout(()=>solve(i),1400);}
         else{b.classList.add("wrong");fb.className="hint";fb.textContent="Pas tout à fait… essayez encore, ou demandez un indice.";}});
       box.append(b);});
-    return [...head,h("div",{class:"card"},h("h3",{text:"L'énigme"}),h("p",null,h("b",{text:st.q})),box,fb,
-      h("p",{class:"hint",text:S.hint>0?st.hints.slice(0,S.hint).map((x,k)=>`Indice ${k+1} : ${x}`).join("\n"):""}),
+    return [...head,h("div",{class:"card"},h("h3",{text:"L'énigme"}),h("p",null,h("b",{text:Q.q})),box,fb,
+      h("p",{class:"hint",text:S.hint>0?Q.hints.slice(0,S.hint).map((x,k)=>`Indice ${k+1} : ${x}`).join("\n"):""}),
       S.hint<3&&h("button",{class:"btn ghost",type:"button",onclick:()=>go({hint:S.hint+1})},`Demander un indice (${S.hint+1}/3)`))];
   }
   if(S.phase==="letter"){
@@ -1035,12 +1098,14 @@ function render(){
   let screen=S.screen;
   if(!S.preview&&!OPEN.includes(screen))screen="home";
   else if(!(S.unlocked&&S.quest)&&!OPEN.includes(screen)&&screen!=="preview")screen="preview";
+  render.cur=screen;
   const map={home:homeScreen,setup:setupScreen,loading:loadingScreen,few:fewScreen,neterr:netErrScreen,preview:previewScreen,unlocking:unlockingScreen,unlockerr:unlockErrScreen,
     guide:guideScreen,intro:introScreen,step:stepScreen,final:finalScreen,diploma:diplomaScreen};
   if(!render.seen){render.seen=true;if(screen==="home")hit("home");}
   if(S.unlocked&&S.quest)keepOffline();
   const tb=topbar();if(tb)app.append(tb);
   (map[screen]||homeScreen)().forEach(n=>{if(n)app.append(n);});
+  musicScreen();
 }
 
 /* ---------- Back from Stripe, or a reopen link ---------- */
@@ -1077,7 +1142,19 @@ const sid=qs.get("paid")||qs.get("quete");
 if(PAID&&sid){history.replaceState(null,"",location.pathname);unlockWith(sid);}
 else if(PAID&&qs.get("apercu")){history.replaceState(null,"",location.pathname);openShared(qs.get("apercu"),qs);}
 else if(qs.has("annule")){history.replaceState(null,"",location.pathname);if(S.preview)S.screen="preview";render();note.textContent="Paiement annulé : rien n'a été débité.";}
-else render();
+else{render();refreshQuest();}
+
+// A quest kept on this phone before 15/10/2026 has no hiding places nor home stories: rebuild it
+// (same places, same letters, progress kept).
+async function refreshQuest(){
+  const q=S.quest;if(!q||!q.steps||q.steps.every(st=>st.home))return;
+  try{
+    let nq=null;
+    if(PAID&&S.paid){const r=await api("api/unlock",{session:S.paid});if(r&&r.ok)nq=r.quest;}
+    else if(E)nq=q.indoorOnly?E.assemble(null,E.indoorStops()):E.assemble(q.start,q.steps.map(st=>({cat:st.cat,lat:st.lat,lon:st.lon,name:st.name,id:st.osm})));
+    if(nq&&nq.steps.length===q.steps.length&&S.quest===q){S.quest=nq;save();render();}
+  }catch(e){}
+}
 })();
 </script>
 </body>
