@@ -162,7 +162,7 @@ jobs:
           fi
           url=$(grep -o 'https://[^ ]*workers\.dev' /tmp/deploy.log | head -1)
           echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "::notice::Adresse du site : $url"
+          echo "::notice::Adresse du site : $(cat dist/site-url.txt) (adresse technique : $url)"
 
       - name: Clés du serveur
         if: steps.ready.outputs.ok == 'true'

@@ -7,7 +7,7 @@ Une quête d'anniversaire pour enfants de 7 à 10 ans, au prénom de l'enfant, g
 ## Deux versions
 
 - **Démo gratuite** (`index.html`, GitHub Pages) : tout tourne dans le téléphone, le bouton de déblocage est gratuit. À retirer le jour du lancement.
-- **Version payante** (Cloudflare) : le téléphone cherche les lieux publics, le serveur choisit les étapes et ne renvoie qu'un aperçu et un jeton chiffré. Après paiement Stripe, le serveur ouvre la quête. Le lien `?quete=…` rouvre la quête sur n'importe quel téléphone.
+- **Version payante** (Cloudflare, https://maquetelegendaire.fr depuis le 15 octobre 2026 ; www et l'adresse technique workers.dev renvoient vers elle, `?ref` compris) : le téléphone cherche les lieux publics, le serveur choisit les étapes et ne renvoie qu'un aperçu et un jeton chiffré. Après paiement Stripe, le serveur ouvre la quête. Le lien `?quete=…` rouvre la quête sur n'importe quel téléphone.
 
 ## Fichiers
 
