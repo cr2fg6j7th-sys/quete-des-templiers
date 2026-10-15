@@ -25,7 +25,11 @@ jobs:
       - name: Analyser
         run: |
           ls -la /tmp/insee
-          nat=$(ls /tmp/insee/*.csv | grep -i nat | head -1); dpt=$(ls /tmp/insee/*.csv | grep -i dpt | head -1)
+          nat=$(ls /tmp/insee/*.csv | grep -i nat | head -1)
+          # the light département file is one CSV per département: keep the Bas-Rhin and the Haut-Rhin
+          dpt=/tmp/insee/alsace.csv
+          f67=$(ls /tmp/insee/*.csv | grep -i "dpt.*67" | head -1); f68=$(ls /tmp/insee/*.csv | grep -i "dpt.*68" | head -1)
+          { cat "$f67"; tail -n +2 "$f68"; } > "$dpt"
           echo "::notice::Fichiers : $nat ($(head -1 "$nat" | head -c 80)) ; $dpt ($(head -1 "$dpt" | head -c 80))"
           if ! node dev/prenoms/analyse.mjs "$nat" "$dpt" > dev/prenoms/candidats.json 2> /tmp/resume.txt; then echo "::error::$(tail -c 1500 /tmp/resume.txt | tr '\n' ' ')"; exit 1; fi
           echo "::notice::Prénoms : $(tail -1 /tmp/resume.txt | head -c 900)"
