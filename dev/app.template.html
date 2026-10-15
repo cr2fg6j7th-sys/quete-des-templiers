@@ -286,7 +286,7 @@ function playKeys(keys,fallbackText,onEnd){
 function stopVoice(){try{speechSynthesis.cancel();speakRun++;}catch(e){}playRun++;try{if(curAudio){curAudio.pause();curAudio=null;}}catch(e){}talk(false);}
 
 /* ---------- Background music: a quiet knightly loop on the first screens ----------
-   Browsers only let sound start after a touch, so it starts at the first touch or key, then loops
+   Browsers only let sound start after a touch, so it starts at the end of the first touch, click or key, then loops
    (Web Audio, without a gap). A round switch at the top right turns it off; the choice is kept.
    It goes very quiet while the Grand Master speaks, and stops once the quest itself begins. */
 const MUSIC_URL="audio/musique/accueil.mp3",MUSIC_VOL=.2,MUSIC_UNDER=.035;
@@ -310,15 +310,19 @@ function trimEdges(b){
   return out;
 }
 async function musicOn(){
-  if(!musicWanted()||!musicHere()||mSrc||mLoading)return;
+  if(!musicWanted()||!musicHere())return;
   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-  mLoading=true;
+  // iPhone: play like the Grand Master's voice, even with the silent switch on
+  try{if(navigator.audioSession)navigator.audioSession.type="playback";}catch(e){}
+  if(!mCtx){mCtx=new AC();mGain=mCtx.createGain();mGain.gain.value=0;mGain.connect(mCtx.destination);}
+  // Phones only let sound start inside the touch itself: resume right away, every time it is needed.
+  if(mCtx.state!=="running"){try{const r=mCtx.resume();if(r&&r.then)r.then(musicLevel,()=>{});}catch(e){}}
+  if(mSrc||mLoading){musicLevel();return;}
+  mLoading=true;musicSwitch();
   try{
-    if(!mCtx){mCtx=new AC();mGain=mCtx.createGain();mGain.gain.value=0;mGain.connect(mCtx.destination);}
-    if(mCtx.state!=="running")await mCtx.resume();
     if(!mBuf){const r=await fetch(MUSIC_URL);if(!r.ok)throw new Error("musique");const raw=await r.arrayBuffer();
       mBuf=trimEdges(await new Promise((ok,ko)=>mCtx.decodeAudioData(raw,ok,ko)));}
-    if(!mSrc&&musicWanted()){mSrc=mCtx.createBufferSource();mSrc.buffer=mBuf;mSrc.loop=true;mSrc.connect(mGain);mSrc.start();}
+    if(!mSrc&&musicWanted()&&musicHere()){mSrc=mCtx.createBufferSource();mSrc.buffer=mBuf;mSrc.loop=true;mSrc.connect(mGain);mSrc.start(0);}
   }catch(e){}
   mLoading=false;musicLevel();musicSwitch();
 }
@@ -341,7 +345,8 @@ function musicSwitch(){
     :'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z" opacity=".55"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 }
 // The first touch anywhere on the page starts it (if wanted, and on a first screen).
-for(const ev of ["pointerdown","keydown"])document.addEventListener(ev,e=>{if(!(e.target&&e.target.closest&&e.target.closest("#music")))musicOn();},{passive:true});
+// (the end of a touch, a click or a key: the moments when phones allow sound to start)
+for(const ev of ["touchend","pointerup","click","keydown"])document.addEventListener(ev,e=>{if(!(e.target&&e.target.closest&&e.target.closest("#music")))musicOn();},{passive:true});
 document.addEventListener("visibilitychange",()=>{if(!mCtx)return;if(document.hidden){try{mCtx.suspend();}catch(e){}}else if(musicHere()&&musicWanted()){try{mCtx.resume();}catch(e){}musicLevel();}});
 
 /* ---------- DOM helpers ---------- */
