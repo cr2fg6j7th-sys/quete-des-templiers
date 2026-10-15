@@ -132,7 +132,8 @@ jobs:
         run: |
           acc="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT"
           have=$(curl -sS -H "Authorization: Bearer $CF_TOKEN" "$acc/workers/domains" | jq -r '[.result[]? | select(.service=="ma-quete-de-chevalier") | .hostname] | join(" ")')
-          want=$(grep -o 'pattern = "[^"]*", custom_domain = true' wrangler.toml | cut -d'"' -f2)
+          want=$(grep -v '^\s*#' wrangler.toml | grep -o 'pattern = "[^"]*", custom_domain = true' | cut -d'"' -f2)
+          [ -n "$want" ] || exit 0
           missing=$(for h in $want; do case " $have " in *" $h "*) ;; *) echo "$h";; esac; done)
           if [ -z "$missing" ]; then echo "::notice::Domaine du site déjà branché : $have"; exit 0; fi
           origins=$(printf '%s\n' $missing | jq -R '{hostname: .}' | jq -s -c .)
