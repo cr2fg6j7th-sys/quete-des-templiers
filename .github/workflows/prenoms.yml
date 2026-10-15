@@ -28,7 +28,8 @@ jobs:
           nat=$(ls /tmp/insee/*.csv | grep -i nat | head -1); dpt=$(ls /tmp/insee/*.csv | grep -i dpt | head -1)
           echo "::notice::Fichiers : $nat ($(head -1 "$nat" | head -c 80)) ; $dpt ($(head -1 "$dpt" | head -c 80))"
           if ! node dev/prenoms/analyse.mjs "$nat" "$dpt" > dev/prenoms/candidats.json 2> /tmp/resume.txt; then echo "::error::$(tail -c 1500 /tmp/resume.txt | tr '\n' ' ')"; exit 1; fi
-          echo "::notice::Prénoms : $(cat /tmp/resume.txt | head -c 900)"
+          echo "::notice::Prénoms : $(tail -1 /tmp/resume.txt | head -c 900)"
+          echo "::notice::Lecture : $(head -2 /tmp/resume.txt | tr '\n' ' ' | head -c 900)"
       - name: Enregistrer
         run: |
           git config user.name "github-actions[bot]"
