@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:"UnifrakturMaguntia";src:url(FONTS/UnifrakturMaguntia-Book.woff) format("woff")}
+@font-face{font-family:"Alegreya Sans";src:url(FONTS/AlegreyaSans-Regular.woff) format("woff");font-weight:400}
+@font-face{font-family:"Alegreya Sans";src:url(FONTS/AlegreyaSans-Italic.woff) format("woff");font-weight:400;font-style:italic}
+@font-face{font-family:"Alegreya Sans";src:url(FONTS/AlegreyaSans-Bold.woff) format("woff");font-weight:700}
+@font-face{font-family:"Alegreya Sans SC";src:url(FONTS/AlegreyaSansSC-Bold.woff) format("woff");font-weight:700}
+:root{--navy:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--wax:#b8505c;--or:#e0b55a;--line:#2d3452}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:radial-gradient(ellipse at 50% 38%,#1c2346 0%,var(--navy) 62%);color:var(--ink);font-family:"Alegreya Sans",sans-serif}
+#root{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding:0 90px;text-align:center}
+.top{position:absolute;top:150px;left:70px;right:70px;padding:30px 36px;border-radius:30px;background:var(--card);border:3px solid var(--line);font-weight:700;font-size:62px;line-height:1.18}
+.top b{color:var(--or)}
+.seal{width:200px;height:200px}
+.speaker{font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:44px;letter-spacing:3px;color:var(--or)}
+.name{font-family:"UnifrakturMaguntia",serif;font-size:140px;color:var(--rose);line-height:1}
+.line{font-size:70px;line-height:1.3;font-style:italic}
+.eyebrow{font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:50px;letter-spacing:3px;color:var(--or)}
+.big{font-weight:700;font-size:96px;line-height:1.12}
+.big em{font-style:normal;color:var(--rose)}
+.sub{font-size:64px;line-height:1.3;color:var(--ink)}
+.step{display:flex;align-items:center;gap:34px;text-align:left;width:100%;font-size:62px;line-height:1.2}
+.num{flex:none;width:110px;height:110px;border-radius:50%;background:var(--wax);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:60px}
+.brand{font-family:"UnifrakturMaguntia",serif;font-weight:400;font-size:136px;line-height:1.02}
+.cta{font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:58px;color:var(--or);letter-spacing:2px}
+.pill{font-weight:700;font-size:80px;padding:18px 44px;border:4px solid var(--or);border-radius:28px}
+.small{font-size:42px;color:var(--muted)}
+.letters{display:flex;gap:22px}
+.letters span{width:130px;height:170px;border-radius:18px;background:#f3ead6;color:var(--navy);font-family:"UnifrakturMaguntia",serif;font-size:120px;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const SEAL=`<svg class="seal" viewBox="-30 -30 60 60" aria-hidden="true"><circle r="26" fill="var(--wax)"/><circle r="17" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.2"/><path d="M-1.6-1.6-5-12H5L1.6-1.6 12-5V5L1.6 1.6 5 12H-5L-1.6 1.6-12 5V-5Z" fill="#fff" fill-opacity=".85"/></svg>`;
+// s: {kind, top, name, line, eyebrow, big, sub, steps, letters, cta, pill, small, justify, pad}
+function show(s){
+  const r=document.getElementById("root");
+  let html="";
+  if(s.top)html+=`<div class="top">${s.top}</div>`;
+  const body=[];
+  if(s.kind==="voice"){
+    body.push(SEAL,`<div class="speaker">Le Grand Maître</div>`);
+    if(s.name)body.push(`<div class="name">${s.name}</div>`);
+    if(s.line)body.push(`<div class="line">${s.line}</div>`);
+  }
+  if(s.seal)body.push(SEAL);
+  if(s.eyebrow)body.push(`<div class="eyebrow">${s.eyebrow}</div>`);
+  if(s.big)body.push(`<div class="big">${s.big}</div>`);
+  if(s.letters)body.push(`<div class="letters">${s.letters.split("").map(l=>`<span>${l}</span>`).join("")}</div>`);
+  if(s.sub)body.push(`<div class="sub">${s.sub}</div>`);
+  if(s.steps)body.push(s.steps.map((t,i)=>`<div class="step"><div class="num">${i+1}</div><div>${t}</div></div>`).join(""));
+  if(s.brand)body.push(`<div class="brand">Ma Quête Légendaire</div>`);
+  if(s.cta)body.push(`<div class="cta">${s.cta}</div>`);
+  if(s.pill)body.push(`<div class="pill">${s.pill}</div>`);
+  if(s.small)body.push(`<div class="small">${s.small}</div>`);
+  r.innerHTML=html+`<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:${s.justify||"center"};gap:${s.gap||56}px;padding:${s.pad||"0 90px"}">${body.join("")}</div>`;
+}
+</script>
+</body>
+</html>
