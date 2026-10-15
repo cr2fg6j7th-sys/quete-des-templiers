@@ -289,7 +289,8 @@ function stopVoice(){try{speechSynthesis.cancel();speakRun++;}catch(e){}playRun+
    Browsers only let sound start after a touch, so it starts at the end of the first touch, click or key, then loops
    (Web Audio, without a gap). A round switch at the top right turns it off; the choice is kept.
    It goes very quiet while the Grand Master speaks, and stops once the quest itself begins. */
-const MUSIC_URL="audio/musique/accueil.mp3",MUSIC_VOL=.2,MUSIC_UNDER=.035;
+// Low on purpose (15/10/2026, Nathan): it also plays when the phone is on silent, which no website can detect.
+const MUSIC_URL="audio/musique/accueil.mp3",MUSIC_VOL=.1,MUSIC_UNDER=.02;
 const MUSIC_SCREENS=["home","setup","loading","preview","few","neterr"];
 let mCtx=null,mGain=null,mSrc=null,mBuf=null,mLoading=false,talking=false;
 const musicWanted=()=>{try{return localStorage.getItem("musique")!=="non";}catch(e){return true;}};
@@ -309,14 +310,19 @@ function trimEdges(b){
   for(let c=0;c<b.numberOfChannels;c++)out.copyToChannel(b.getChannelData(c).subarray(a,z+1),c);
   return out;
 }
-async function musicOn(){
+// auto: the try at page opening. Most phones refuse sound before a first touch; then nothing is
+// downloaded and the music starts at the end of the first touch.
+async function musicOn(auto){
   if(!musicWanted()||!musicHere())return;
   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
   // iPhone: play like the Grand Master's voice, even with the silent switch on
   try{if(navigator.audioSession)navigator.audioSession.type="playback";}catch(e){}
-  if(!mCtx){mCtx=new AC();mGain=mCtx.createGain();mGain.gain.value=0;mGain.connect(mCtx.destination);}
+  if(!mCtx){mCtx=new AC();mGain=mCtx.createGain();mGain.gain.value=0;mGain.connect(mCtx.destination);
+    mCtx.onstatechange=()=>{musicLevel();musicSwitch();};}
   // Phones only let sound start inside the touch itself: resume right away, every time it is needed.
-  if(mCtx.state!=="running"){try{const r=mCtx.resume();if(r&&r.then)r.then(musicLevel,()=>{});}catch(e){}}
+  let resumed=Promise.resolve();
+  if(mCtx.state!=="running"){try{const r=mCtx.resume();if(r&&r.then)resumed=r.catch(()=>{});}catch(e){}}
+  if(auto){await Promise.race([resumed,new Promise(r=>setTimeout(r,600))]);if(mCtx.state!=="running")return;}
   if(mSrc||mLoading){musicLevel();return;}
   mLoading=true;musicSwitch();
   try{
@@ -326,6 +332,7 @@ async function musicOn(){
   }catch(e){}
   mLoading=false;musicLevel();musicSwitch();
 }
+const musicPlaying=()=>!!(mSrc&&mCtx&&mCtx.state==="running");
 function musicOff(){
   if(!mSrc)return;const s=mSrc;mSrc=null;musicLevel();
   setTimeout(()=>{try{s.stop();}catch(e){}},1500);
@@ -336,16 +343,18 @@ function musicSwitch(){
   let b=document.getElementById("music");
   if(!MUSIC_SCREENS.includes(render.cur||S.screen)){if(b)b.remove();return;}
   if(!b){b=h("button",{class:"music",id:"music",type:"button",onclick:()=>{
-      const on=!(mSrc||mLoading);try{localStorage.setItem("musique",on?"oui":"non");}catch(x){}
+      const on=!(musicPlaying()||mLoading);try{localStorage.setItem("musique",on?"oui":"non");}catch(x){}
       if(on)musicOn();else musicOff();musicSwitch();}});
     document.body.append(b);}
-  const on=!!mSrc||mLoading;
+  const on=musicPlaying()||mLoading;
   b.setAttribute("aria-pressed",String(on));b.setAttribute("aria-label",on?"Couper la musique":"Mettre la musique");b.title=b.getAttribute("aria-label");
   b.innerHTML=on?'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>'
     :'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z" opacity=".55"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 }
 // The first touch anywhere on the page starts it (if wanted, and on a first screen).
-// (the end of a touch, a click or a key: the moments when phones allow sound to start)
+// Try at once when the page opens (a computer that already knows the site may allow it)…
+window.addEventListener("load",()=>setTimeout(()=>musicOn(true),300));
+// …else at the end of the first touch, click or key: the moments when phones allow sound to start.
 for(const ev of ["touchend","pointerup","click","keydown"])document.addEventListener(ev,e=>{if(!(e.target&&e.target.closest&&e.target.closest("#music")))musicOn();},{passive:true});
 document.addEventListener("visibilitychange",()=>{if(!mCtx)return;if(document.hidden){try{mCtx.suspend();}catch(e){}}else if(musicHere()&&musicWanted()){try{mCtx.resume();}catch(e){}musicLevel();}});
 
