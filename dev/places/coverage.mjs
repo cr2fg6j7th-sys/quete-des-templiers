@@ -41,10 +41,12 @@ const POINTS = path.join(path.dirname(new URL(import.meta.url).pathname), "point
 const points = fs.existsSync(POINTS) ? JSON.parse(fs.readFileSync(POINTS, "utf-8")) : {};
 async function point(c) {
   if (points[c.code]) return points[c.code];
+  // The town hall's position from the official commune list, else the chef-lieu from the address base.
+  if (c.mairie && c.mairie.coordinates) { points[c.code] = [+c.mairie.coordinates[1].toFixed(5), +c.mairie.coordinates[0].toFixed(5), "mairie"]; return points[c.code]; }
   const b = await getJSON(`https://data.geopf.fr/geocodage/search?q=${encodeURIComponent(c.nom)}&type=municipality&citycode=${c.code}&limit=1`);
   const f = b && b.features && b.features[0];
   const p = f ? f.geometry.coordinates : c.centre && c.centre.coordinates;
-  if (p) points[c.code] = [+p[1].toFixed(5), +p[0].toFixed(5)];
+  if (p) points[c.code] = [+p[1].toFixed(5), +p[0].toFixed(5), f ? "ban" : "centre"];
   await sleep(40);
   return points[c.code];
 }
@@ -63,15 +65,15 @@ function rng(seed) { let s = seed >>> 0; return () => (s = (s * 1664525 + 101390
 
 const rows = [];
 for (const dep of ["67", "68"]) {
-  const list = await getJSON(`https://geo.api.gouv.fr/departements/${dep}/communes?fields=nom,code,centre,population`) || [];
-  for (const c of list) rows.push({ zone: dep, code: c.code, nom: c.nom, population: c.population || 0, centre: c.centre });
+  const list = await getJSON(`https://geo.api.gouv.fr/departements/${dep}/communes?fields=nom,code,centre,population,mairie`) || [];
+  for (const c of list) rows.push({ zone: dep, code: c.code, nom: c.nom, population: c.population || 0, centre: c.centre, mairie: c.mairie });
 }
 // France: 120 communes per size band, always the same ones (fixed seed, sorted by code first).
-const all = (await getJSON("https://geo.api.gouv.fr/communes?fields=nom,code,centre,population") || []).filter(c => c.centre).sort((a, b) => a.code.localeCompare(b.code));
+const all = (await getJSON("https://geo.api.gouv.fr/communes?fields=nom,code,centre,population,mairie") || []).filter(c => c.centre).sort((a, b) => a.code.localeCompare(b.code));
 const rand = rng(20261015);
 for (const b of ["moins de 500", "500 à 2 000", "2 000 à 10 000", "plus de 10 000"]) {
   const pool = all.filter(c => band(c.population || 0) === b && !["67", "68"].includes(c.code.slice(0, 2)));
-  for (let i = 0; i < 120 && pool.length; i++) { const c = pool.splice(Math.floor(rand() * pool.length), 1)[0]; rows.push({ zone: "France", code: c.code, nom: c.nom, population: c.population || 0, centre: c.centre }); }
+  for (let i = 0; i < 120 && pool.length; i++) { const c = pool.splice(Math.floor(rand() * pool.length), 1)[0]; rows.push({ zone: "France", code: c.code, nom: c.nom, population: c.population || 0, centre: c.centre, mairie: c.mairie }); }
 }
 
 const out = [];
@@ -79,7 +81,7 @@ for (const r of rows) {
   const p = await point(r);
   if (!p) continue;
   const s = study(p[0], p[1]);
-  out.push({ zone: r.zone, code: r.code, nom: r.nom, population: r.population, ...s });
+  out.push({ zone: r.zone, code: r.code, nom: r.nom, population: r.population, depart: p[2] || "?", ...s });
 }
 fs.writeFileSync(POINTS, JSON.stringify(points));
 
@@ -93,4 +95,5 @@ for (const r of out) {
 for (const s of Object.values(summary)) { s.part = Math.round(100 * s.quete / s.communes) + " %"; s.partSix = Math.round(100 * s.six / s.communes) + " %"; }
 const echecs = out.filter(r => r.zone !== "France" && !r.ok).sort((a, b) => b.population - a.population).map(r => `${r.nom} (${r.population} hab., ${r.found} lieux)`);
 console.log(JSON.stringify({ label, built: (() => { try { return JSON.parse(fs.readFileSync(path.join(dir, "index.json"), "utf-8")); } catch (e) { return null; } })(), summary, echecsAlsace: echecs, communes: out }, null, 1));
-console.error(Object.entries(summary).map(([k, s]) => `${k} : ${s.quete}/${s.communes} (${s.part})`).join(" ; "));
+const src = {}; for (const r of out) src[r.depart] = (src[r.depart] || 0) + 1;
+console.error("départs : " + JSON.stringify(src) + " ; " + Object.entries(summary).map(([k, s]) => `${k} : ${s.quete}/${s.communes} (${s.part})`).join(" ; "));
