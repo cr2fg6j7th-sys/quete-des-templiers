@@ -138,6 +138,12 @@ footer a{color:var(--muted)}
 .faq summary:focus-visible{outline:3px solid var(--or);outline-offset:2px}
 .faq details p{margin-top:8px;color:var(--muted)}
 .consent{flex-direction:row;align-items:flex-start;gap:12px;font-family:var(--body);letter-spacing:0;font-size:.95rem;line-height:1.4}
+.stars{display:flex;gap:6px}
+.stars button{font-size:2rem;line-height:1;background:none;border:0;color:var(--line);padding:2px 4px}
+.stars button.on{color:var(--or)}
+.avis .q{display:flex;flex-direction:column;gap:6px}
+.avis .qlab{font-family:var(--label);letter-spacing:.05em;font-size:.95rem}
+.avis textarea{font:inherit;font-family:var(--body);letter-spacing:0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink);width:100%;resize:vertical}
 .consent input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--rose)}
 .parchment{width:100%;height:auto;display:block;border-radius:8px;border:1px solid var(--line)}
 .check{flex-direction:row;align-items:center;gap:10px;font-family:var(--body);letter-spacing:0}
@@ -225,7 +231,7 @@ if("serviceWorker" in navigator)try{navigator.serviceWorker.register("sw.js").ca
 /* ---------- State ---------- */
 // preview: what is shown before paying; token: the sealed quest (paid build); quest: the full quest once unlocked;
 // paid: the Stripe session that unlocked it (also the key of the reopen link).
-const defaults={ref:"",name:"",hero:"m",kids:8,indoor:false,unlocked:false,screen:"home",start:null,town:"",preview:null,token:"",quest:null,paid:"",step:0,phase:"travel",solved:[],hint:0,voice:""};
+const defaults={ref:"",name:"",hero:"m",kids:8,indoor:false,unlocked:false,screen:"home",start:null,town:"",preview:null,token:"",quest:null,paid:"",step:0,phase:"travel",solved:[],hint:0,voice:"",tester:false,avis:false};
 let S=Object.assign({},defaults);
 try{const raw=localStorage.getItem(STORE);if(raw)S=Object.assign({},defaults,JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
@@ -443,7 +449,7 @@ async function makePreview(body){
   let r;try{r=await api("api/preview",payload,30000);}catch(e){r=await api("api/preview",payload,30000);}
   if(!r.ok)return r;
   if(r.price)PRICE=r.price;
-  return {ok:true,preview:{ok:true,indoorOnly:r.indoorOnly,count:r.count,walkM:r.walkM,minutes:r.minutes,teasers:r.teasers,price:r.price},quest:null,token:r.token};
+  return {ok:true,preview:{ok:true,indoorOnly:r.indoorOnly,count:r.count,walkM:r.walkM,minutes:r.minutes,teasers:r.teasers,price:r.price,testeur:!!r.testeur},quest:null,token:r.token};
 }
 
 // Demo build only: the same tiles as the server, chosen in the phone.
@@ -643,7 +649,7 @@ function inviteCard(){
 }
 
 /* ---------- New quest ---------- */
-const fresh={unlocked:false,paid:"",solved:[],step:0,phase:"travel",hint:0};
+const fresh={unlocked:false,paid:"",solved:[],step:0,phase:"travel",hint:0,tester:false,avis:false};
 async function startIndoor(){
   go({screen:"loading",start:null});
   try{const p=await makePreview({indoor:true});
@@ -896,12 +902,63 @@ function sharePreview(){
   };
   return h("div",null,h("button",{class:"linkish",type:"button",onclick:send},"Décider à deux ? Envoyer l'aperçu"),out);
 }
+// Before the opening (server variable TESTEURS): the quest is offered to tester families, who answer
+// a few questions at the end. Payment stays hidden until the variable is removed.
+function testerBlock(){
+  const open=async()=>{
+    btn.disabled=true;note.textContent="Ouverture de la quête…";
+    try{const r=await api("api/testeur",{token:S.token,ref:S.ref});
+      if(r.ok&&r.quest){go(Object.assign({},fresh,{quest:r.quest,token:"",unlocked:true,tester:true,start:r.quest.start,indoor:S.indoor||!!r.quest.indoorOnly,screen:"guide"}));return;}
+      note.textContent=r.reason==="token"?"Cette quête a expiré : créez-la à nouveau depuis le point de départ.":r.reason==="closed"?"L'avant-première est terminée : rechargez la page.":"La quête n'a pas pu s'ouvrir. Réessayez dans un instant.";}
+    catch(e){note.textContent="Le serveur ne répond pas. Vérifiez la connexion et réessayez.";}
+    btn.disabled=false;
+  };
+  const btn=h("button",{class:"btn",type:"button",onclick:open},"Devenir famille testeuse · quête offerte");
+  return [h("div",{class:"card"},h("p",{class:"eyebrow",text:"avant-première"}),h("h3",{text:"La quête ouvre le 7 novembre"}),
+    h("p",{text:"D'ici là, elle est offerte aux familles qui la testent. En échange : quelques questions rapides à la fin de la partie, une minute pour nous dire ce qui a plu et ce qui a coincé."})),
+    note,btn];
+}
+// The questionnaire at the end of a tester's quest (sent once; nothing is asked if they skip it).
+function avisCard(){
+  if(!S.tester)return null;
+  if(S.avis)return h("div",{class:"card adult"},h("h3",{text:"Merci pour votre avis !"}),h("p",{class:"note",text:"Il nous aide à préparer l'ouverture du 7 novembre."}));
+  const A={note:0,enfants:"",duree:"",prix:""};
+  const seg=(key,opts)=>{const box=h("div",{class:"seg",role:"group"});
+    opts.forEach(([v,t])=>{const b=h("button",{type:"button","aria-pressed":"false",text:t,onclick:()=>{A[key]=v;[...box.children].forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));}});box.append(b);});return box;};
+  const stars=h("div",{class:"stars",role:"group","aria-label":"Note sur 5"});
+  for(let i=1;i<=5;i++){const b=h("button",{type:"button","aria-label":i+" sur 5",text:"★",onclick:()=>{A.note=i;[...stars.children].forEach((x,j)=>x.classList.toggle("on",j<i));}});stars.append(b);}
+  const pref=h("textarea",{rows:2,maxlength:400,placeholder:"Le moment où ils ont le plus ri, crié, couru…"});
+  const coince=h("textarea",{rows:2,maxlength:600,placeholder:"Un indice pas clair, un lieu fermé, une étape trop longue…"});
+  const cite=h("input",{type:"checkbox",id:"citer"}),prenom=h("input",{type:"text",maxlength:30,placeholder:"Votre prénom (ex. : Julie, maman de Léo)"});
+  const out=h("p",{class:"note",role:"status"});
+  const send=async()=>{
+    if(!A.note&&!A.enfants&&!pref.value.trim()&&!coince.value.trim()){out.textContent="Répondez au moins à une question.";return;}
+    btn.disabled=true;out.textContent="Envoi…";
+    try{const r=await api("api/avis",{note:A.note,enfants:A.enfants,duree:A.duree,prix:A.prix,prefere:pref.value,coince:coince.value,
+        citer:cite.checked,prenom:prenom.value,maison:!!(S.indoor||S.quest.indoorOnly),etapes:S.quest.steps.length,enfantsN:S.kids,ville:S.town,ref:S.ref});
+      if(r.ok){S.avis=true;save();card.replaceWith(avisCard());return;}out.textContent="L'envoi n'a pas marché. Réessayez dans un instant.";}
+    catch(e){out.textContent="Pas de réseau : réessayez quand le téléphone est connecté.";}
+    btn.disabled=false;
+  };
+  const btn=h("button",{class:"btn",type:"button",onclick:send},"Envoyer mon avis");
+  const card=h("div",{class:"card adult avis"},h("p",{class:"eyebrow",text:"famille testeuse · 1 minute"}),h("h3",{text:"Votre avis sur la quête"}),
+    h("div",{class:"q"},h("span",{class:"qlab",text:"Votre note"}),stars),
+    h("div",{class:"q"},h("span",{class:"qlab",text:"Les enfants ont…"}),seg("enfants",[["adore","adoré"],["bien","bien aimé"],["bof","bof"]])),
+    h("div",{class:"q"},h("span",{class:"qlab",text:"La durée était…"}),seg("duree",[["court","trop courte"],["juste","juste bien"],["long","trop longue"]])),
+    h("label",null,"Leur moment préféré",pref),
+    h("label",null,"Ce qui a coincé",coince),
+    h("div",{class:"q"},h("span",{class:"qlab",text:"À 24,90 €, vous l'auriez achetée ?"}),seg("prix",[["oui","oui"],["peut-etre","peut-être"],["non","non"]])),
+    h("label",{class:"consent",for:"citer"},cite,h("span",null,"Vous acceptez qu'on cite votre avis sur le site, avec votre prénom seulement.")),
+    prenom,btn,out);
+  return card;
+}
 // Unlock: free in the demo build; consent + Stripe payment in the paid build.
 function unlockBlock(){
   if(S.unlocked&&S.quest)return [note,h("button",{class:"btn",type:"button",onclick:()=>go({screen:"guide"})},"Reprendre la quête")];
   if(!PAID)return [note,
     h("button",{class:"btn",type:"button",onclick:()=>go({unlocked:true,screen:"guide"})},`Débloquer la quête · ${PRICE}`),
     h("p",{class:"note",text:"Version de test : aucun paiement, le bouton débloque la quête directement."})];
+  if(S.preview&&S.preview.testeur)return testerBlock();
   const box=h("input",{type:"checkbox",id:"consent"});
   const pay=async()=>{
     if(!box.checked){note.textContent="Cochez d'abord la case ci-dessus pour accéder à la quête dès le paiement.";return;}
@@ -1076,6 +1133,7 @@ function diplomaScreen(){
       // A discreet signature: diploma photos shared by parents carry the name of the quest.
       (()=>{const s=h("div",{class:"gm"},h("span",{text:"Le Grand Maître"}));s.insertAdjacentHTML("afterbegin",sigSvg("","currentColor"));return s;})(),
       h("p",{class:"sign",text:"Ma Quête Légendaire"})),
+    avisCard(),
     printCard(false),
     h("div",{class:"card adult"},h("h3",{text:"Le diplôme en image"}),
       h("p",{class:"note",text:"À garder dans le téléphone ou à envoyer à la famille."}),
@@ -1144,7 +1202,7 @@ async function openShared(token,p){
   if(!r||!r.ok){go({screen:"home"});note.textContent="Cet aperçu n'a pas pu s'ouvrir : créez-en un nouveau ci-dessous.";return;}
   if(r.price)PRICE=r.price;
   go(Object.assign({},fresh,{ref:S.ref||"apercu",token:r.token,quest:null,start:null,screen:"preview",indoor:!!r.indoorOnly,
-    preview:{ok:true,indoorOnly:r.indoorOnly,count:r.count,walkM:r.walkM,minutes:r.minutes,teasers:r.teasers,price:r.price},
+    preview:{ok:true,indoorOnly:r.indoorOnly,count:r.count,walkM:r.walkM,minutes:r.minutes,teasers:r.teasers,price:r.price,testeur:!!r.testeur},
     name:(p.get("n")||"").slice(0,24),hero:p.get("h")==="f"?"f":"m",kids:Math.max(2,Math.min(15,parseInt(p.get("k"),10)||8)),town:(p.get("v")||"").slice(0,60)}));
 }
 

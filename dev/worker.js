@@ -5,7 +5,10 @@
      POST /api/checkout sealed token -> Stripe Checkout page
      POST /api/unlock   paid Stripe session -> full quest
      POST /api/hit      one anonymous count of a step of the visit (home page, preview, diploma…)
-     POST /api/stats    the counts, for the weekly report (key derived from the Stripe secret)
+     POST /api/stats    the counts and the testers' answers, for the weekly report (key derived from the Stripe secret)
+     POST /api/testeur  before the opening: sealed token -> full quest, free, for a family who tests it
+     POST /api/avis     before the opening: a tester's answers to the questionnaire at the end of the quest
+   The tester mode is on while the variable TESTEURS = "1" (wrangler.toml); removing it ends it everywhere.
    The token is encrypted (AES-GCM), so the places of a quest stay hidden until payment.
    Secrets: STRIPE_SECRET_KEY, QUEST_KEY. Variables: PRICE_CENTS, STRIPE_API (tests only).
    Optional binding: STATS (Workers KV) for the counts; without it, counting is simply off. */
@@ -20,7 +23,7 @@ const log = (evt, data) => console.log(JSON.stringify(Object.assign({ evt }, dat
 // Anonymous counts of the visit, one KV key per event: "day|event|ref|random", kept 400 days.
 // No IP address, no identifier, no cookie: only how many times each step happened, and the ref.
 const EVENTS = new Set(["home", "setup", "preview", "few", "nodata", "neterr", "checkout", "unlock", "diploma",
-  "invite", "diplome", "imprime", "share", "apercu", "apercu-ouvert", "horsligne", "geo-refus", "geo-echec"]);
+  "invite", "diplome", "imprime", "share", "apercu", "apercu-ouvert", "horsligne", "geo-refus", "geo-echec", "testeur", "avis"]);
 function count(env, ctx, evt, ref) {
   if (!env.STATS || !EVENTS.has(evt)) return;
   const day = new Date().toISOString().slice(0, 10);
@@ -68,6 +71,7 @@ function questOf(t) {
   return QuestEngine.assemble({ lat: t.a[0], lon: t.a[1] }, t.s.map(([cat, lat, lon, name, id]) => ({ cat, lat, lon, name, id })));
 }
 
+const testers = env => env.TESTEURS === "1";
 const priceCents = env => parseInt(env.PRICE_CENTS || "2490", 10);
 const priceLabel = env => (priceCents(env) / 100).toFixed(2).replace(".", ",") + " €";
 
@@ -132,7 +136,7 @@ async function preview(request, env, ctx) {
     quest = questOf(await unseal(b.token, env));
     if (!quest) return reply({ ok: false, reason: "token" }, 400);
     count(env, ctx, "apercu-ouvert", refOf(b));
-    return reply(Object.assign(QuestEngine.preview(quest), { token: b.token, price: priceLabel(env) }));
+    return reply(Object.assign(QuestEngine.preview(quest), { token: b.token, price: priceLabel(env), testeur: testers(env) }));
   }
   if (b.indoor) {
     quest = QuestEngine.assemble(null, QuestEngine.indoorStops());
@@ -151,7 +155,7 @@ async function preview(request, env, ctx) {
       if (!sel.ok) return reply(sel);
       quest = QuestEngine.assemble(start, sel.stops);
       token = await seal(pack(start, sel.stops), env);
-      return reply(Object.assign(QuestEngine.preview(quest), { token, price: priceLabel(env) }));
+      return reply(Object.assign(QuestEngine.preview(quest), { token, price: priceLabel(env), testeur: testers(env) }));
     }
     // 2. places fetched from Overpass, by the phone or (fallback) by this server
     if (b.fetch && !Array.isArray(b.elements)) {
@@ -167,7 +171,7 @@ async function preview(request, env, ctx) {
   }
   log("preview", { ok: true, indoor: !!b.indoor, steps: quest.steps.length, ref: refOf(b) });
   count(env, ctx, "preview", refOf(b));
-  return reply(Object.assign(QuestEngine.preview(quest), { token, price: priceLabel(env) }));
+  return reply(Object.assign(QuestEngine.preview(quest), { token, price: priceLabel(env), testeur: testers(env) }));
 }
 
 async function checkout(request, env, ctx) {
@@ -239,6 +243,45 @@ async function unlock(request, env, ctx) {
   return reply({ ok: true, quest, name: m.n || "", hero: m.h === "f" ? "f" : "m", kids: parseInt(m.k, 10) || 8, town: m.v || "" });
 }
 
+// Before the opening: a family who tests the quest gets it free, and answers a few questions at the end.
+async function testeur(request, env, ctx) {
+  if (!testers(env)) return reply({ ok: false, reason: "closed" }, 403);
+  const b = await readJSON(request);
+  const quest = questOf(await unseal(b && b.token, env));
+  if (!quest) return reply({ ok: false, reason: "token" }, 400);
+  log("testeur", { ref: refOf(b) });
+  count(env, ctx, "testeur", refOf(b));
+  return reply({ ok: true, quest });
+}
+
+// The questionnaire's answers, kept 400 days under "avis|<time>|<random>". No identifier: only what the
+// parent typed (a first name only if they agree to be quoted).
+const pick = (v, list) => list.includes(v) ? v : "";
+const txt = (v, n) => String(v || "").replace(/[\u0000-\u001f]+/g, " ").trim().slice(0, n);
+async function avis(request, env, ctx) {
+  if (!testers(env)) return reply({ ok: false, reason: "closed" }, 403);
+  const b = await readJSON(request);
+  if (!b || typeof b !== "object") return reply({ ok: false, reason: "bad" }, 400);
+  const a = {
+    note: Math.max(0, Math.min(5, parseInt(b.note, 10) || 0)),
+    enfants: pick(b.enfants, ["adore", "bien", "bof"]),
+    duree: pick(b.duree, ["court", "juste", "long"]),
+    prix: pick(b.prix, ["oui", "peut-etre", "non"]),
+    prefere: txt(b.prefere, 400), coince: txt(b.coince, 600),
+    citer: b.citer === true, prenom: b.citer === true ? txt(b.prenom, 30) : "",
+    maison: !!b.maison, etapes: Math.max(0, Math.min(6, parseInt(b.etapes, 10) || 0)),
+    enfantsN: Math.max(0, Math.min(15, parseInt(b.enfantsN, 10) || 0)), ville: txt(b.ville, 60), ref: refOf(b)
+  };
+  if (!a.note && !a.enfants && !a.prefere && !a.coince) return reply({ ok: false, reason: "empty" }, 400);
+  count(env, ctx, "avis", a.ref);
+  if (env.STATS) {
+    const p = env.STATS.put(`avis|${new Date().toISOString()}|${crypto.randomUUID().slice(0, 8)}`, JSON.stringify(a), { expirationTtl: 400 * 86400 });
+    if (ctx && ctx.waitUntil) ctx.waitUntil(p.catch(() => {})); else await p.catch(() => {});
+  }
+  log("avis", { note: a.note });
+  return reply({ ok: true });
+}
+
 // A step of the visit seen by the phone (sent with navigator.sendBeacon).
 async function hit(request, env, ctx) {
   const b = await readJSON(request);
@@ -264,7 +307,16 @@ async function stats(request, env) {
       cursor = page.list_complete ? null : page.cursor;
     } while (cursor);
   }
-  return reply({ ok: true, days });
+  // the testers' answers, newest first
+  const answers = [];
+  let cur;
+  do {
+    const page = await env.STATS.list({ prefix: "avis|", cursor: cur });
+    for (const k of page.keys) { const v = await env.STATS.get(k.name); if (v) answers.push(Object.assign({ date: k.name.split("|")[1] }, JSON.parse(v))); }
+    cur = page.list_complete ? null : page.cursor;
+  } while (cur && answers.length < 500);
+  answers.sort((x, y) => y.date.localeCompare(x.date));
+  return reply({ ok: true, days, avis: answers });
 }
 
 const SHORT = { "/tiktok": "tiktok", "/insta": "instagram", "/instagram": "instagram", "/pinterest": "pinterest", "/youtube": "youtube" };
@@ -289,6 +341,8 @@ export default {
         if (url.pathname === "/api/unlock") return await unlock(request, env, ctx);
         if (url.pathname === "/api/hit") return await hit(request, env, ctx);
         if (url.pathname === "/api/stats") return await stats(request, env);
+        if (url.pathname === "/api/testeur") return await testeur(request, env, ctx);
+        if (url.pathname === "/api/avis") return await avis(request, env, ctx);
       } catch (e) {
         console.log(String(e && e.stack || e));
         return reply({ ok: false, reason: "server" }, 500);

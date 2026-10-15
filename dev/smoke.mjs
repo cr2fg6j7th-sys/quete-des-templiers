@@ -111,6 +111,12 @@ try {
     c.json && c.json.ok && /^https:\/\/checkout\.stripe\.com\//.test(c.json.url) ? ok("page de paiement Stripe (mode test) créée") : ko(`paiement Stripe (HTTP ${c.status} ${JSON.stringify(c.json)})`);
     if (c.json && c.json.ok) c.json.branding === "ok" ? ok("page de paiement aux couleurs de Ma Quête Légendaire") : console.log(`::warning::Image de marque refusée par Stripe : ${c.json.branding}`);
   } else if (!testKey) console.log("::notice::Clé Stripe réelle : pas de page de paiement créée par le test");
+  // Before the opening (TESTEURS = "1" in wrangler.toml): the quest is offered to tester families.
+  const tp = await post("/api/preview", { indoor: true, ref: "smoke" });
+  if (tp.json && tp.json.testeur) {
+    const t = await post("/api/testeur", { token: tp.json.token, ref: "smoke" });
+    t.json && t.json.ok && t.json.quest ? ok("avant-première : quête offerte aux familles testeuses") : ko(`quête des testeurs (HTTP ${t.status})`);
+  } else if (tp.json && tp.json.ok) console.log("::notice::Avant-première terminée : le paiement est proposé");
 } catch (e) {
   ko(String(e));
 }

@@ -34,12 +34,14 @@ function summary(sessions) {
 
 // Anonymous counts of the visit, kept by the site (see /api/hit in dev/worker.js).
 const SITE = process.env.SITE_URL || "https://maquetelegendaire.fr";
+let avisList = [];
 async function visits() {
   const enc = new TextEncoder().encode("stats:" + key);
   const k = [...new Uint8Array(await crypto.subtle.digest("SHA-256", enc))].map(b => b.toString(16).padStart(2, "0")).join("");
   try {
     const r = await fetch(SITE + "/api/stats", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ key: k, days: 28 }) });
     const j = await r.json();
+    if (j.ok) avisList = (j.avis || []).filter(x => x.ref !== "smoke");
     return j.ok ? j.days : null;
   } catch (e) { return null; }
 }
@@ -97,6 +99,8 @@ ${row("Position refusée par le téléphone (« Partir d'ici »)", "geo-refus")}
 ${row("Position introuvable (« Partir d'ici »)", "geo-echec")}
 ${row("Aperçus envoyés à quelqu'un", "apercu")}
 ${row("Aperçus reçus et ouverts", "apercu-ouvert")}
+${row("Quêtes ouvertes par des familles testeuses (avant-première)", "testeur")}
+${row("Questionnaires des testeurs envoyés", "avis")}
 ${row("Pages de paiement ouvertes", "checkout")}
 ${row("Quêtes ouvertes après paiement (avec les réouvertures)", "unlock")}
 ${row("Voix enregistrée pour jouer sans réseau", "horsligne")}
@@ -111,5 +115,21 @@ Sur 28 jours : ${monthMonth} des visites créent un aperçu, et ${pct(T("checkou
 Visites de l'accueil par provenance, 28 jours : ${(() => { const by = {}; for (const [day, d] of Object.entries(days)) { if ((Date.now() - Date.parse(day + "T00:00:00Z")) / 86400000 >= 28) continue; for (const [ref, c] of Object.entries(d.home || {})) if (ref !== "smoke" && ref !== "demo") by[ref === "-" ? "direct" : ref] = (by[ref === "-" ? "direct" : ref] || 0) + c; } return fmt(by); })()} (diplome = QR code des diplômes, fete = partage après la fête).
 
 Démo gratuite (entourage), 28 jours : visites ${total(days, "home", 28, "demo")} · aperçus ${total(days, "preview", 28, "demo")} · diplômes ${total(days, "diploma", 28, "demo")}.
+`);
+}
+
+// The testers' answers (questionnaire at the end of the quest, before the opening).
+if (avisList.length) {
+  const L = { adore: "adoré", bien: "bien aimé", bof: "bof", court: "trop courte", juste: "juste bien", long: "trop longue", oui: "oui", "peut-etre": "peut-être", non: "non" };
+  const notes = avisList.filter(a => a.note), moy = notes.length ? (notes.reduce((t, a) => t + a.note, 0) / notes.length).toFixed(1).replace(".", ",") : "—";
+  const cnt = k => fmt(avisList.reduce((o, a) => (a[k] && (o[L[a[k]] || a[k]] = (o[L[a[k]] || a[k]] || 0) + 1), o), {}));
+  const cell = t => String(t || "").replace(/\|/g, "/").replace(/\s+/g, " ");
+  console.log(`## Avis des familles testeuses
+
+${avisList.length} questionnaire${avisList.length > 1 ? "s" : ""} depuis le début. Note moyenne : ${moy} sur 5. Les enfants ont : ${cnt("enfants")}. Durée : ${cnt("duree")}. Auraient acheté à 24,90 € : ${cnt("prix")}.
+
+${process.env.AVIS_DETAIL === "1" ? `| Date | Note | Enfants | Durée | Prix | Lieu | Moment préféré | Ce qui a coincé | Citable |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+${avisList.map(a => `| ${a.date.slice(0, 10)} | ${a.note || "—"} | ${L[a.enfants] || "—"} | ${L[a.duree] || "—"} | ${L[a.prix] || "—"} | ${a.maison ? "maison" : cell(a.ville) || "dehors"} (${a.etapes} étapes, ${a.enfantsN} enfants) | ${cell(a.prefere)} | ${cell(a.coince)} | ${a.citer ? "oui, " + cell(a.prenom || "sans prénom") : "non"} |`).join("\n")}` : "Le détail des réponses (textes libres, prénoms) n'est pas écrit ici tant que le dépôt est public : passer le dépôt en privé pour l'avoir dans ce rapport."}
 `);
 }

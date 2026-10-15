@@ -78,10 +78,12 @@ function fakeCheckout(url) {
 const kv = new Map();
 const STATS = {
   put: async (k, v) => { kv.set(k, v); },
+  get: async k => kv.has(k) ? kv.get(k) : null,
   list: async ({ prefix }) => ({ keys: [...kv.keys()].filter(k => k.startsWith(prefix || "")).map(name => ({ name })), list_complete: true })
 };
 const env = {
   STATS,
+  TESTEURS: process.env.TESTEURS || "",   // TESTEURS=1 node dev/serve.mjs: the tester mode (before the opening)
   QUEST_KEY: "cle-de-test", STRIPE_SECRET_KEY: "sk_test_local", STRIPE_API: `${base}/stripe`, PRICE_CENTS: "2490",
   ASSETS: { fetch: req => file(new URL(req.url).pathname) }
 };

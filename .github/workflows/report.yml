@@ -20,6 +20,8 @@ jobs:
       - name: Rapport Stripe
         env:
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          # the testers' written answers only go in the report when the repository is private
+          AVIS_DETAIL: ${{ github.event.repository.private && '1' || '' }}
         run: |
           mkdir -p marketing/rapports
           f="marketing/rapports/$(date -u +%Y-%m-%d).md"
