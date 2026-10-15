@@ -1,9 +1,11 @@
-// Checks the site once it is online: node dev/smoke.mjs https://…workers.dev
+// Checks the site once it is online: node dev/smoke.mjs https://maquetelegendaire.fr [https://…workers.dev]
 // Prints one GitHub annotation per check. In Stripe test mode it also opens a test payment page
 // (nothing is charged; unpaid pages expire on their own).
 import QuestGeo from "./geo.js";
 
 const site = process.argv[2].replace(/\/$/, "");
+// optional: the technical workers.dev address, which must send visitors to the main one
+const other = (process.argv[3] || "").replace(/\/$/, "");
 const testKey = /^(sk|rk)_test_/.test(process.env.STRIPE_SECRET_KEY || "");
 let failed = 0;
 // GitHub shows at most 10 notices per step: the passed checks are gathered into one line at the end.
@@ -27,6 +29,17 @@ try {
     if (!r.ok) missing.push(`${f} (HTTP ${r.status} ${r.headers.get("content-type") || ""})`);
   }
   missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, prénoms, polices, pages, image des liens, hors ligne)`);
+
+  // www and the workers.dev address send page visits to the main address, ?ref kept
+  const host = new URL(site).hostname;
+  for (const from of [other, host.startsWith("www.") || host.endsWith("workers.dev") ? "" : "https://www." + host]) {
+    if (!from || from === site) continue;
+    try {
+      const r = await fetch(from + "/?ref=smoke", { redirect: "manual" });
+      const loc = r.headers.get("location") || "";
+      r.status === 301 && loc === site + "/?ref=smoke" ? ok(`${new URL(from).hostname} renvoie vers ${host}`) : ko(`renvoi de ${from} (HTTP ${r.status} ${loc})`);
+    } catch (e) { ko(`renvoi de ${from} : ${e.message}`); }
+  }
 
   // Quests from our own copy of the places of France: a village, two dense city centres.
   let token = "";

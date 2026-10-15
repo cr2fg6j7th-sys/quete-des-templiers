@@ -17,9 +17,13 @@ routes = [
 [assets]
 directory = "./site"
 binding = "ASSETS"
+# Pages go through the worker first, so that www and the technical workers.dev address can send
+# visitors to maquetelegendaire.fr. Voice, fonts, places and images are served directly (free).
+run_worker_first = ["/*", "!/audio/*", "!/fonts/*", "!/places/*", "!/*.png", "!/*.ico", "!/*.svg", "!/sw.js"]
 
 [vars]
 PRICE_CENTS = "2490"
+SITE_HOST = "maquetelegendaire.fr"
 
 [observability]
 enabled = true

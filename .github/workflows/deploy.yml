@@ -92,6 +92,7 @@ jobs:
         run: |
           python3 dev/build.py --audio
           node dev/test.js
+          node dev/test-worker.mjs
           if [ -f places-data/index.json ]; then cp -r places-data site/places; echo "::notice::Lieux en ligne : $(cat places-data/index.json)"; fi
           # Town pages for Google, from the same places (a failure never blocks the deploy).
           if [ -f places-data/index.json ]; then
@@ -186,4 +187,4 @@ jobs:
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
         run: |
           sleep 30
-          node dev/smoke.mjs "${{ steps.deploy.outputs.url }}"
+          node dev/smoke.mjs "$(cat dist/site-url.txt)" "${{ steps.deploy.outputs.url }}"

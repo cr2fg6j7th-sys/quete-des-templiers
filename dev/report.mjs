@@ -33,7 +33,7 @@ function summary(sessions) {
 }
 
 // Anonymous counts of the visit, kept by the site (see /api/hit in dev/worker.js).
-const SITE = process.env.SITE_URL || "https://ma-quete-de-chevalier.pv6ggk8t2v.workers.dev";
+const SITE = process.env.SITE_URL || "https://maquetelegendaire.fr";
 async function visits() {
   const enc = new TextEncoder().encode("stats:" + key);
   const k = [...new Uint8Array(await crypto.subtle.digest("SHA-256", enc))].map(b => b.toString(16).padStart(2, "0")).join("");
