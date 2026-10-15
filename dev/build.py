@@ -130,7 +130,7 @@ urls = [SITE + "/"] + [f"{SITE}/{n}" for n in guide_pages]
 (site / "_headers").write_text("/places/*\n  Access-Control-Allow-Origin: *\n  Cache-Control: public, max-age=86400\n"
     "/sw.js\n  Cache-Control: no-cache\n", encoding="utf-8")
 if "--audio" in sys.argv:
-    shutil.copytree(root / "audio", site / "audio", ignore=shutil.ignore_patterns("manifest.json", "rapport-noms.json", "test"))
+    shutil.copytree(root / "audio", site / "audio", ignore=shutil.ignore_patterns("manifest.json", "rapport-noms.json", "sources.json", "rapport.json", "accueil-?.mp3", "test"))
 
 (root / "dist").mkdir(exist_ok=True)
 # The worker is one ES module: drop the Node-only require/module.exports fallbacks, which the

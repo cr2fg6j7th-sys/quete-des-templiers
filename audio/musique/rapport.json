@@ -7,14 +7,5 @@
   "volume_lufs": -11.6,
   "milieu_lufs": -12.2,
   "gain_db": -8.4
- },
- "accueil-b": {
-  "source_s": 90.4,
-  "debut_s": 1.0,
-  "fin_s": 87.8,
-  "boucle_s": 84.3,
-  "volume_lufs": -11.7,
-  "milieu_lufs": -12.1,
-  "gain_db": -8.3
  }
 }
