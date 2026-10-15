@@ -267,6 +267,8 @@ async function stats(request, env) {
   return reply({ ok: true, days });
 }
 
+const SHORT = { "/tiktok": "tiktok", "/insta": "instagram", "/instagram": "instagram", "/pinterest": "pinterest", "/youtube": "youtube" };
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -274,6 +276,11 @@ export default {
     // the path and the ?ref (QR codes, links already shared). The API answers on every address.
     if (env.SITE_HOST && url.hostname !== env.SITE_HOST && !url.pathname.startsWith("/api/") && (request.method === "GET" || request.method === "HEAD"))
       return Response.redirect("https://" + env.SITE_HOST + url.pathname + url.search, 301);
+    // Short addresses to say or type (videos, bios): maquetelegendaire.fr/tiktok -> /?ref=tiktok,
+    // so the visits are counted by origin even when the address is typed by hand.
+    const short = SHORT[url.pathname.replace(/\/+$/, "").toLowerCase()];
+    if (short && (request.method === "GET" || request.method === "HEAD"))
+      return Response.redirect(url.origin + "/?ref=" + short, 302);
     if (url.pathname.startsWith("/api/")) {
       if (request.method !== "POST") return reply({ ok: false, reason: "method" }, 405);
       try {

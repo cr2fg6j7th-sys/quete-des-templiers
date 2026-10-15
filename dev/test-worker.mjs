@@ -18,4 +18,12 @@ assert.notStrictEqual(api.status, 301, "the API is never redirected");
 const none = await go("https://ma-quete-de-chevalier.pv6ggk8t2v.workers.dev/", undefined);
 assert.strictEqual(await (await worker.fetch(new Request("https://x.workers.dev/"), { ASSETS: env.ASSETS }, {})).text(), "fichier", "without SITE_HOST nothing is redirected");
 assert.strictEqual(none.status, 301);
+// short addresses for the videos and bios
+for (const [path, ref] of [["/tiktok", "tiktok"], ["/TikTok/", "tiktok"], ["/insta", "instagram"], ["/pinterest", "pinterest"]]) {
+  const r = await go("https://maquetelegendaire.fr" + path);
+  assert.strictEqual(r.status, 302, path);
+  assert.strictEqual(r.headers.get("location"), "https://maquetelegendaire.fr/?ref=" + ref, path);
+}
+const viaWww = await go("https://www.maquetelegendaire.fr/tiktok");
+assert.strictEqual(viaWww.headers.get("location"), "https://maquetelegendaire.fr/tiktok", "www goes to the main address first");
 console.log("Adresses du site : tous les tests passent.");

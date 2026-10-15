@@ -30,6 +30,12 @@ try {
   }
   missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, musique, prénoms, polices, pages, image des liens, hors ligne)`);
 
+  // short address for the videos: /tiktok -> /?ref=tiktok
+  try {
+    const r = await fetch(site + "/tiktok", { redirect: "manual" });
+    r.status === 302 && (r.headers.get("location") || "").endsWith("/?ref=tiktok") ? ok("adresse courte /tiktok") : ko(`adresse courte /tiktok (HTTP ${r.status} ${r.headers.get("location") || ""})`);
+  } catch (e) { ko("adresse courte /tiktok : " + e.message); }
+
   // www and the workers.dev address send page visits to the main address, ?ref kept
   const host = new URL(site).hostname;
   for (const from of [other, host.startsWith("www.") || host.endsWith("workers.dev") ? "" : "https://www." + host]) {
