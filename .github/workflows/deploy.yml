@@ -130,7 +130,10 @@ jobs:
           # On failure, the end of wrangler's output becomes an annotation (readable without the full log).
           set -o pipefail
           if ! npx --yes $WRANGLER deploy 2>&1 | tee /tmp/deploy.log; then
-            tail -n 25 /tmp/deploy.log | sed -e 's/\x1b\[[0-9;]*m//g' | grep -v '^\s*$' | while IFS= read -r l; do echo "::error::$l"; done
+            # GitHub shows 10 notes per step: the error itself first, on one line, then the end of the output.
+            err=$(sed -e 's/\x1b\[[0-9;]*m//g' /tmp/deploy.log | grep -A12 -E 'ERROR|✘' | grep -v '^\s*$' | tr '\n' ' ' | head -c 1500)
+            [ -n "$err" ] && echo "::error::$err"
+            tail -n 8 /tmp/deploy.log | sed -e 's/\x1b\[[0-9;]*m//g' | grep -v '^\s*$' | while IFS= read -r l; do echo "::error::$l"; done
             exit 1
           fi
           url=$(grep -o 'https://[^ ]*workers\.dev' /tmp/deploy.log | head -1)
