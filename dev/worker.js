@@ -191,7 +191,7 @@ async function checkout(request, env, ctx) {
       `Quête d'anniversaire de ${name || "votre enfant"} : ${quest.steps.length} étapes${quest.indoorOnly ? " à la maison" : town ? " à " + town : ""}. Accès immédiat.`,
     success_url: origin + "/?paid={CHECKOUT_SESSION_ID}",
     cancel_url: origin + "/?annule=1",
-    "custom_text[submit][message]": "Vous avez demandé l'accès immédiat à la quête et renoncé au droit de rétractation (article L221-28 du Code de la consommation). Garantie : quête réussie ou remboursée.",
+    "custom_text[submit][message]": "Vous avez demandé l'accès immédiat à la quête et renoncé au droit de rétractation (article L221-28 du Code de la consommation).",
     "metadata[n]": name, "metadata[h]": hero, "metadata[k]": String(kids), "metadata[v]": town,
     "metadata[consent]": new Date().toISOString(), "metadata[ref]": refOf(b)
   };

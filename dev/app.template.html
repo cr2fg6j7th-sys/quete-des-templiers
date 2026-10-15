@@ -714,7 +714,7 @@ function homeScreen(){
       c.append(h("h3",{text:"Le Grand Maître a un message pour votre enfant"}),
         h("label",{for:"demo-name"},"Prénom de l'enfant",nameIn),seg,known,listen,words);return c;})(),
     cta,
-    h("p",{class:"note center",text:`Aperçu gratuit, puis ${PRICE} pour débloquer la quête. Paiement sécurisé. Quête réussie ou remboursée.`}),
+    h("p",{class:"note center",text:`Aperçu gratuit, puis ${PRICE} pour débloquer la quête. Paiement sécurisé.`}),
     h("section",{class:"block"},h("h2",{text:"Le jour de la fête"}),
       h("ol",{class:"route"},
         [["Avant","Vous indiquez le prénom et un point de départ : la place de l'église, la mairie, un parc. Le Grand Maître choisit 4 à 6 lieux publics à pied autour : église, fontaine, vieille porte, monument, parc."],
@@ -736,7 +736,7 @@ function homeScreen(){
       h("p",{class:"price",text:`${PRICE} la quête`}),
       h("p",{text:"Soit environ 3 € par enfant pour une fête de huit. Le Grand Maître anime la quête : pas d'animateur à payer, rien à préparer."}),
       h("p",{text:"L'aperçu est gratuit : vous voyez le nombre d'étapes, la distance et la durée avant de payer."}),
-      h("p",{text:"Si la fête ne s'est pas bien passée, écrivez-nous dans les 30 jours : nous vous remboursons, sans justificatif."}),
+      h("p",{text:"Un lieu fermé ? Vous passez l'étape. Un souci technique ? Écrivez-nous : nous vous aidons à jouer, et si la quête ne peut vraiment pas fonctionner, nous vous remboursons."}),
       priceCta),
     h("section",{class:"block"},h("h2",{text:"Questions fréquentes"}),fq),
     lastCta,
@@ -917,7 +917,7 @@ function unlockBlock(){
     h("label",{class:"consent",for:"consent"},box,h("span",null,"J'accepte les ",h("a",{href:"legal/cgv.html",target:"_blank",rel:"noopener"},"conditions de vente"),
       ". Je demande l'accès à la quête dès le paiement et je renonce ainsi à mon droit de rétractation.")),
     note,btn,
-    h("p",{class:"note",text:"Paiement sécurisé par Stripe : carte, Apple Pay ou Google Pay. Garantie : quête réussie ou remboursée."})];
+    h("p",{class:"note",text:"Paiement sécurisé par Stripe : carte, Apple Pay ou Google Pay."})];
 }
 function guideScreen(){
   const ratio=Math.ceil((S.kids||8)/5);const q=S.quest;

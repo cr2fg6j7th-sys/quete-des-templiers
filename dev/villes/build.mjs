@@ -195,7 +195,7 @@ ${top.length ? `<p>Parmi eux :</p>\n<ul class="lieux">\n${top.map(p => `<li>${es
 
 <div class="cta">
 <p><b>Créez la quête de votre enfant à ${esc(c.nom)}</b> : tapez son prénom et votre point de départ, l'aperçu est gratuit.</p>
-<p>La quête coûte 24,90 €, à payer après l'aperçu. Quête réussie ou remboursée.</p>
+<p>La quête coûte 24,90 €, à payer après l'aperçu.</p>
 <a class="btn" href="./?ref=${ref}">Créer l'aperçu gratuit</a>
 </div>
 
