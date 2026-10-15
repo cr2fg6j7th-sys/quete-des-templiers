@@ -19,7 +19,7 @@ try {
   const home = await fetch(site + "/");
   const html = await home.text();
   home.ok && html.includes("Ma Quête Légendaire") && html.includes("QUEST_VOICE_KEYS") ? ok("page d'accueil") : ko(`page d'accueil (HTTP ${home.status})`);
-  const files = ["/audio/voix/prologue-dehors-m.mp3", "/audio/noms/lea.mp3", "/audio/noms.json", "/fonts/AlegreyaSans-Regular.woff", "/legal/cgv.html", "/anniversaire-chevalier.html",
+  const files = ["/audio/voix/prologue-dehors-m.mp3", "/audio/voix/maison-chaussure.mp3", "/audio/musique/accueil.mp3", "/audio/noms/lea.mp3", "/audio/noms.json", "/fonts/AlegreyaSans-Regular.woff", "/legal/cgv.html", "/anniversaire-chevalier.html",
     "/sw.js", "/og.png", "/icon.svg", "/favicon.ico", "/apple-touch-icon.png", "/stripe-icon.png", "/stripe-logo.png", "/robots.txt", "/sitemap.xml"];
   const missing = [];
   for (const f of files) {
@@ -28,7 +28,7 @@ try {
     for (let i = 0; i < 3 && !r.ok; i++) { await new Promise(res => setTimeout(res, 10000)); r = await fetch(site + f); }
     if (!r.ok) missing.push(`${f} (HTTP ${r.status} ${r.headers.get("content-type") || ""})`);
   }
-  missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, prénoms, polices, pages, image des liens, hors ligne)`);
+  missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, musique, prénoms, polices, pages, image des liens, hors ligne)`);
 
   // www and the workers.dev address send page visits to the main address, ?ref kept
   const host = new URL(site).hostname;
