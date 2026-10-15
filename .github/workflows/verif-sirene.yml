@@ -1,0 +1,29 @@
+# Reads the public business register (Annuaire des entreprises) for the seller's SIREN: status,
+# activity and town of the registered address (the street is only compared, never printed: public repo).
+name: Vérification Sirene
+
+on:
+  push:
+    branches: [verif-stripe]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Lire le répertoire
+        run: |
+          node - <<'EOF'
+          const r = await fetch("https://recherche-entreprises.api.gouv.fr/search?q=934282054");
+          const j = await r.json();
+          const e = (j.results || []).find(x => x.siren === "934282054");
+          if (!e) { console.log(`::notice::SIREN introuvable dans l'annuaire (HTTP ${r.status}, ${j.total_results ?? "?"} résultats) : fiche peut-être non diffusible`); process.exit(0); }
+          const s = e.siege || {};
+          const addr = [s.adresse, s.geo_adresse, s.libelle_voie].filter(Boolean).join(" ").toUpperCase();
+          console.log(`::notice::Sirene : ${e.nature_juridique === "1000" ? "entrepreneur individuel" : "nature " + e.nature_juridique}, état ${s.etat_administratif || e.etat_administratif || "?"}, créé le ${e.date_creation || "?"}, activité ${e.activite_principale || "?"} (section ${e.section_activite_principale || "?"}), siège à ${s.code_postal || "?"} ${s.libelle_commune || "?"}, rue des Chaudrons : ${addr ? (addr.includes("CHAUDRON") ? "oui" : "non") : "adresse non publiée"}, SIRET du siège ${s.siret === "93428205400014" ? "identique" : "différent"}`);
+          EOF
