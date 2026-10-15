@@ -1,0 +1,36 @@
+# Which first names to record next (INSEE file of first names, France and Alsace). Started by hand;
+# the result is saved in dev/prenoms/candidats.json.
+name: Prénoms à enregistrer
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Fichier des prénoms de l'INSEE
+        run: |
+          mkdir -p /tmp/insee && cd /tmp/insee
+          curl -sSfL --retry 3 -o nat.zip https://www.insee.fr/fr/statistiques/fichier/8894961/prenoms-2024-nat_csv.zip
+          curl -sSfL --retry 3 -o dpt.zip https://www.insee.fr/fr/statistiques/fichier/8894961/prenoms-2024-dpt-allege_csv.zip
+          unzip -o -q nat.zip && unzip -o -q dpt.zip && ls -la
+      - name: Analyser
+        run: |
+          nat=$(ls /tmp/insee/*nat*.csv | head -1); dpt=$(ls /tmp/insee/*dpt*.csv | head -1)
+          head -2 "$nat"; head -2 "$dpt"
+          node dev/prenoms/analyse.mjs "$nat" "$dpt" > dev/prenoms/candidats.json 2> /tmp/resume.txt
+          echo "::notice::Prénoms : $(cat /tmp/resume.txt | head -c 900)"
+      - name: Enregistrer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dev/prenoms
+          git diff --cached --quiet || (git commit -m "Prénoms à enregistrer (INSEE)" && git pull --rebase -q && git push)
