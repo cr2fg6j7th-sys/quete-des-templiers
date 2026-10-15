@@ -31,6 +31,18 @@ jobs:
           n=$(echo "$r" | jq '.result | length')
           if [ "$n" = "0" ]; then echo "::warning::Cloudflare : aucun domaine $D sur ce compte (ou la clé ne voit pas ce domaine)"; exit 0; fi
           echo "$r" | jq -r '.result[0] | "::notice::Cloudflare : \(.name) trouvé, statut « \(.status) », offre « \(.plan.name) », serveurs de noms à mettre chez OVH : \(.name_servers | join(" et ")) ; serveurs actuels vus par Cloudflare : \((.original_name_servers // []) | join(", "))"'
+          # What the Cloudflare key may do on this domain (read-only probes), and the DNS records
+          # Cloudflare copied from OVH (they must make way for the site's own records).
+          zid=$(echo "$r" | jq -r '.result[0].id')
+          dns=$(curl -s -H "Authorization: Bearer $CF_TOKEN" "https://api.cloudflare.com/client/v4/zones/$zid/dns_records?per_page=100")
+          if [ "$(echo "$dns" | jq -r .success)" = "true" ]; then
+            echo "::notice::Enregistrements DNS chez Cloudflare : $(echo "$dns" | jq -r '[.result[] | "\(.type) \(.name) → \(.content)"] | if length==0 then "aucun" else join(" | ") end')"
+          else
+            echo "::warning::La clé ne peut pas lire les enregistrements DNS : $(echo "$dns" | jq -c '[.errors[]?.message]')"
+          fi
+          wd=$(curl -s -H "Authorization: Bearer $CF_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/domains")
+          rt=$(curl -s -H "Authorization: Bearer $CF_TOKEN" "https://api.cloudflare.com/client/v4/zones/$zid/workers/routes")
+          echo "::notice::Clé Cloudflare : domaines des Workers $( [ "$(echo "$wd" | jq -r .success)" = true ] && echo "lisibles ($(echo "$wd" | jq -r '[.result[]?.hostname] | join(", ") | if .=="" then "aucun" else . end'))" || echo "illisibles $(echo "$wd" | jq -c '[.errors[]?.message]')" ) ; routes $( [ "$(echo "$rt" | jq -r .success)" = true ] && echo lisibles || echo "illisibles $(echo "$rt" | jq -c '[.errors[]?.message]')" )"
       - name: Registre .fr (AFNIC)
         env:
           D: ${{ inputs.domaine }}
