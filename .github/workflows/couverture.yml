@@ -42,3 +42,12 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add marketing/couverture dev/places/points-communes.json
           git diff --cached --quiet || (git commit -m "Couverture des communes : ${{ inputs.label }}" && git pull --rebase -q && git push)
+      # The Alsace tiles and the start points, on a side branch, so the engine can be tuned offline.
+      - name: Copie alsacienne pour les essais
+        run: |
+          mkdir -p /tmp/lieux && cp dev/places/points-communes.json /tmp/lieux/ && cp places-data/index.json /tmp/lieux/
+          for f in places-data/*_*.json; do k=$(basename "$f" .json); a=${k%_*}; b=${k#*_}; [ "$a" -ge 473 ] && [ "$a" -le 491 ] && [ "$b" -ge 68 ] && [ "$b" -le 82 ] && cp "$f" /tmp/lieux/; done
+          cd /tmp/lieux && git init -q && git checkout -q -b "lieux-${{ inputs.cle }}" && git add . \
+            && git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -qm "Lieux d'Alsace (${{ inputs.cle }})" \
+            && git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "lieux-${{ inputs.cle }}"
+          echo "::notice::Lieux d'Alsace copiés sur la branche lieux-${{ inputs.cle }} ($(ls /tmp/lieux | wc -l) fichiers)"
