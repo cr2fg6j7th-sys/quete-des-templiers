@@ -12,6 +12,7 @@ from pypdf import PdfReader, PdfWriter
 from pypdf.generic import RectangleObject
 import make as M
 from parchemin_texture import parchment
+from cavalier import rider_svg
 
 H, ROOT, OUT, PREV, BLEED = M.H, M.ROOT, M.OUT, M.PREV, M.BLEED
 INK, WAX, PAPER = "#3a2212", "#8f2a24", "#f2e4c2"
@@ -82,7 +83,7 @@ body{position:relative;font-family:"Alegreya Sans",sans-serif;color:var(--ink)}
 h1{font-family:"UnifrakturMaguntia",serif;font-weight:400;line-height:1.02;color:var(--ink)}
 h1 .ini{color:var(--wax)}
 .sub{font-style:italic;color:var(--ink)}
-.knight,.keep,.hill{position:absolute;display:block}
+.knight,.keep,.hill,.rider{position:absolute;display:block}
 .card{position:absolute;display:flex;align-items:center;background:rgba(251,243,223,.78);border:.4mm solid var(--ink);color:var(--ink)}
 .card::after{content:"";position:absolute;inset:.8mm;border:.15mm solid rgba(58,34,18,.6);pointer-events:none}
 .card .qr{flex:none;display:block;position:relative;z-index:1}
@@ -115,18 +116,19 @@ def a6(paper):
 .brand{font-size:13.5pt}.oyez{font-size:9.6pt}
 h1{font-size:27pt}h1 .ini{font-size:33pt}.sub{font-size:10.6pt;margin-top:1.4mm}
 .keep{left:35.5mm;top:56mm;width:34mm;height:52.7mm}
-.knight{top:71.5mm;width:17.5mm;height:37.5mm}.k1{left:12mm}.k2{right:12mm}
+.knight{top:71.5mm;width:17.5mm;height:37.5mm}.k1{left:12mm}
+.rider{right:8.7mm;top:72.6mm;width:28.6mm;height:36mm}
 .hill{left:7.5mm;right:7.5mm;width:90mm;top:103.5mm;height:6mm}
 .card{left:9mm;right:9mm;top:110mm;height:25.4mm;padding:1.8mm 2.4mm;gap:2.8mm}
 .card .qr{width:21.8mm;height:21.8mm}
 .card .kick{font-size:6.8pt}.card .say{font-size:8.8pt;margin-top:1.1mm;padding-right:9mm}.card .url{font-size:9.8pt;margin-top:1.6mm}
-.seal{right:5.5mm;top:103mm;width:14mm;height:18.2mm}
+.seal{right:5mm;top:105.8mm;width:14mm;height:18.2mm}
 .facts{top:136.3mm;font-size:6.5pt}
 """
     body = f"""<div class="trim">
 {rule(7, w, h)}
 {HEAD.format(b=9.5, o=15.6, r=18.9, t=29, rib=M.ribbon_svg(M.RIBBON_TXT, 9.2, -4, WAX, "#5e1a16", "#f8ead0", hk=2.35))}
-{keep("keep")}{knight("knight k1")}{knight("knight k2", flip=True)}{hill("hill")}
+{keep("keep")}{knight("knight k1")}{rider_svg()}{hill("hill")}
 <div class="card">{qr(M.SITE + "/?ref=f-comptoir")}<div>
   <div class="kick">Aperçu gratuit</div>
   <div class="say">Scannez, tapez son prénom&#8239;: le Grand Maître l'appelle&#8239;!</div>
@@ -142,7 +144,8 @@ def a5_recto(paper):
 .brand{font-size:19pt}.oyez{font-size:13.4pt}
 h1{font-size:38pt}h1 .ini{font-size:46pt}.sub{font-size:14.6pt;margin-top:2mm}
 .keep{left:50mm;top:80mm;width:48mm;height:74.4mm}
-.knight{top:101mm;width:24.5mm;height:52.5mm}.k1{left:18mm}.k2{right:18mm}
+.knight{top:101mm;width:24.5mm;height:52.5mm}.k1{left:18mm}
+.rider{right:9.8mm;top:103.6mm;width:39mm;height:49.1mm}
 .hill{left:10mm;right:10mm;width:128mm;top:147mm;height:8.5mm}
 .points{position:absolute;left:0;right:0;top:156.6mm;text-align:center;font-style:italic;font-size:10pt;color:var(--ink)}
 .points b{color:var(--wax);font-style:normal;margin:0 2.2mm}
@@ -158,7 +161,7 @@ h1{font-size:38pt}h1 .ini{font-size:46pt}.sub{font-size:14.6pt;margin-top:2mm}
     body = f"""<div class="trim">
 {rule(8.5, w, h)}
 {HEAD.format(b=13.5, o=23.1, r=28.1, t=42.3, rib=M.ribbon_svg(M.RIBBON_TXT, 13, -5.6, WAX, "#5e1a16", "#f8ead0", hk=2.35))}
-{keep("keep")}{knight("knight k1")}{knight("knight k2", flip=True)}{hill("hill")}
+{keep("keep")}{knight("knight k1")}{rider_svg()}{hill("hill")}
 <div class="points">Au prénom de l'enfant<b>✦</b>Prête en 2 minutes<b>✦</b>Il pleut&#8239;? À la maison</div>
 <div class="card">{qr(M.SITE + "/?ref=f-restaurant")}<div>
   <div class="kick">Aperçu gratuit</div>
