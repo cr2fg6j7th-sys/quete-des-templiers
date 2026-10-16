@@ -194,8 +194,8 @@ h2 .ini{color:var(--wax);font-size:34pt}
 .blanks{font-size:15pt;font-weight:800;letter-spacing:2.2mm;align-self:stretch;margin:.6mm 0 1.2mm}
 .sec{font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:9.2pt;letter-spacing:.06em;color:var(--wax);align-self:stretch;border-top:.3mm dashed rgba(58,34,18,.5);padding-top:2mm}
 .tiles{display:flex;gap:2mm;align-self:stretch}
-.tiles span{width:8.6mm;height:10mm;border-radius:1mm;background:rgba(255,250,236,.85);border:.4mm solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:"UnifrakturMaguntia",serif;font-size:16pt}
-.tiles i{width:8.6mm;height:10mm;border-bottom:.5mm solid var(--ink)}
+.tiles span{width:10mm;height:11.6mm;border-radius:1mm;background:rgba(255,250,236,.85);border:.4mm solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:"Alegreya Sans",sans-serif;font-weight:900;font-size:21pt;line-height:1;padding-top:.6mm}
+.tiles i{width:10mm;height:10mm;border-bottom:.5mm solid var(--ink)}
 .shield{flex:1 1 0;min-height:0;width:100%}
 .foot{position:absolute;left:10mm;right:10mm;bottom:9mm;display:flex;align-items:center;justify-content:space-between;font-size:8.6pt}
 .foot .brand{font-size:12pt}
