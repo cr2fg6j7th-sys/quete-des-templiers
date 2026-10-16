@@ -272,9 +272,9 @@ h2{font-family:"UnifrakturMaguntia",serif;font-weight:400;font-size:27pt;line-he
 .riddle{font-style:italic;font-size:10.2pt;line-height:1.32;align-self:stretch}
 .blanks{font-size:15pt;font-weight:800;letter-spacing:2.2mm;align-self:stretch;margin:.6mm 0 1.2mm}
 .sec{font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:9.4pt;letter-spacing:.06em;color:var(--wax);align-self:stretch;border-top:.3mm dashed #b9ae95;padding-top:2mm}
-.tiles{display:flex;gap:2mm;align-self:stretch}
-.tiles span{width:10mm;height:11.6mm;border-radius:1.4mm;background:#f3ead6;border:.4mm solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:"Alegreya Sans",sans-serif;font-weight:900;font-size:21pt;line-height:1;padding-top:.6mm}
-.tiles i{width:10mm;height:10mm;border-bottom:.5mm solid var(--ink)}
+.tiles{display:flex;gap:1.2mm;align-self:stretch;justify-content:center}
+.tiles span{width:7mm;height:10mm;border-radius:1.4mm;background:#f3ead6;border:.4mm solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:"Alegreya Sans",sans-serif;font-weight:900;font-size:18pt;line-height:1;padding-top:.5mm}
+.tiles i{width:7mm;height:9mm;border-bottom:.5mm solid var(--ink)}
 .shield{flex:1 1 0;min-height:0;width:100%}
 .foot{position:absolute;left:8mm;right:8mm;bottom:5.5mm;display:flex;align-items:center;justify-content:space-between;color:var(--ink);font-size:8.6pt}
 .foot .brand{color:var(--ink);font-size:12pt}
@@ -293,15 +293,15 @@ h2{font-family:"UnifrakturMaguntia",serif;font-weight:400;font-size:27pt;line-he
   <div class="box"><span class="num">2 · Les mots cachés</span><div class="words">{letters}</div>
     <div class="ask">Trouve&#8239;: <b>ÉPÉE · ROI · CASQUE · TOUR · DRAGON</b> <i>(de gauche à droite, de haut en bas ou en biais)</i></div></div>
   <div class="box"><span class="num">3 · L'énigme du Grand Maître</span>
-    <div class="riddle">«&#8239;Je suis la tour la plus haute et la plus solide du château. Qui suis-je&#8239;?&#8239;»</div>
+    <div class="riddle">«&#8239;Je suis la plus haute et la plus solide des tours&#8239;: le seigneur s'y réfugie en cas d'attaque. <span style="white-space:nowrap">Qui suis-je&#8239;?&#8239;»</span></div>
     <div class="blanks">_ _ _ _ _ _</div>
     <div class="sec">Le mot secret</div>
-    <div class="ask">Remets les lettres dans l'ordre&#8239;: c'est l'arme du chevalier.</div>
-    <div class="tiles"><span>P</span><span>E</span><span>É</span><span>É</span></div>
-    <div class="tiles"><i></i><i></i><i></i><i></i></div></div>
+    <div class="ask">Remets les lettres dans l'ordre&#8239;: c'est la maison du roi.</div>
+    <div class="tiles"><span>U</span><span>H</span><span>T</span><span>Â</span><span>C</span><span>E</span><span>A</span></div>
+    <div class="tiles"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
   <div class="box"><span class="num">4 · Ton blason</span><div class="ask">Colorie-le, puis écris ta devise sur la banderole.</div>{shield}</div>
 </div>
-<div class="foot"><div class="ans">Réponses&#8239;: le donjon · ÉPÉE</div><div><span class="brand">Ma Quête Légendaire</span> · maquetelegendaire.fr</div></div>
+<div class="foot"><div class="ans">Réponses&#8239;: le donjon · CHÂTEAU</div><div><span class="brand">Ma Quête Légendaire</span> · maquetelegendaire.fr</div></div>
 </div>"""
     return page(w, h, css, body, bg="paper")
 
