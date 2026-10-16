@@ -196,14 +196,13 @@ h2 .ini{color:var(--wax);font-size:34pt}
 .tiles{display:flex;gap:2mm;align-self:stretch}
 .tiles span{width:8.6mm;height:10mm;border-radius:1mm;background:rgba(255,250,236,.85);border:.4mm solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:"UnifrakturMaguntia",serif;font-size:16pt}
 .tiles i{width:8.6mm;height:10mm;border-bottom:.5mm solid var(--ink)}
-.shield{width:34mm;height:39mm}
-.motto{align-self:stretch;border-bottom:.4mm dashed var(--ink);height:6mm;font-size:8pt;color:var(--sepia);display:flex;align-items:flex-end}
+.shield{flex:1 1 0;min-height:0;width:100%}
 .foot{position:absolute;left:10mm;right:10mm;bottom:9mm;display:flex;align-items:center;justify-content:space-between;font-size:8.6pt}
 .foot .brand{font-size:12pt}
 .foot .ans{transform:rotate(180deg);color:var(--sepia);font-size:7.6pt}
 """
     maze = (H / "svg" / "labyrinthe-1.svg").read_text().replace("<svg ", '<svg class="maze" ', 1).replace("#1b2547", INK).replace("#b8505c", M.SEAL_PATH and WAX)
-    shield = (H / "svg" / "blason.svg").read_text().replace("<svg ", '<svg class="shield" ', 1).replace("#1b2547", INK).replace('fill="#fff"', 'fill="#fdf7e8"')
+    shield = (H / "svg" / "armoiries.svg").read_text().replace("<svg ", '<svg class="shield" ', 1).replace("#1b2547", INK).replace('fill="#fff"', 'fill="#fdf7e8"')
     letters = "".join(f"<span>{c}</span>" for row in M.GRID for c in row)
     body = f"""<div class="trim">
 <div class="center" style="top:10mm"><h2><span class="ini">L</span>es épreuves du chevalier</h2>
@@ -219,7 +218,7 @@ h2 .ini{color:var(--wax);font-size:34pt}
     <div class="ask">Remets les lettres dans l'ordre&#8239;: c'est l'arme du chevalier.</div>
     <div class="tiles"><span>P</span><span>E</span><span>É</span><span>É</span></div>
     <div class="tiles"><i></i><i></i><i></i><i></i></div></div>
-  <div class="box"><span class="num">4 · Ton blason</span><div class="ask">Colorie-le et invente ta devise.</div>{shield}<div class="motto">Ma devise&#8239;:</div></div>
+  <div class="box"><span class="num">4 · Ton blason</span><div class="ask">Colorie-le, puis écris ta devise sur la banderole.</div>{shield}</div>
 </div>
 <div class="foot"><div class="ans">Réponses&#8239;: le donjon · ÉPÉE</div><div><span class="brand">Ma Quête Légendaire</span> · maquetelegendaire.fr</div></div>
 </div>"""

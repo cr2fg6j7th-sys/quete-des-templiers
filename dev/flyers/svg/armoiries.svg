@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-24 -16 248 280" fill="#fff" stroke="#1b2547" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+<!-- A coat of arms to colour: plumed helm on a twisted wreath, leafy mantling, a shield with a
+     border of roundels, four quarters (tower with its flag, fleur-de-lis on a lattice, crossed
+     swords on a lattice, crown), a central cross, and a banner in front to write the motto on. -->
+<defs>
+<clipPath id="arm-q2"><path d="M100 80H152V142H100Z"/></clipPath>
+<clipPath id="arm-q3"><path d="M48 142H100V220C74 203 48 182 48 142Z"/></clipPath>
+</defs>
+<!-- mantling: three leafy lobes on each side, with fold lines -->
+<g id="arm-mantle">
+<path d="M80 36C58 26 34 30 20 46 28 52 38 52 46 48 32 58 18 72 8 92 20 94 30 90 38 84 30 100 20 116 16 136 26 134 34 128 40 120L60 72 78 60Z"/>
+<path d="M76 42C58 36 40 40 28 48M68 50C50 58 32 72 18 88M50 70C40 84 30 104 24 128" fill="none" stroke-width="1.1"/>
+<path d="M20 46C16 40 20 34 26 36M8 92C2 88 2 80 8 78M16 136C10 134 8 126 13 122" fill="none" stroke-width="1.2"/>
+</g>
+<g transform="translate(200 0) scale(-1 1)">
+<path d="M80 36C58 26 34 30 20 46 28 52 38 52 46 48 32 58 18 72 8 92 20 94 30 90 38 84 30 100 20 116 16 136 26 134 34 128 40 120L60 72 78 60Z"/>
+<path d="M76 42C58 36 40 40 28 48M68 50C50 58 32 72 18 88M50 70C40 84 30 104 24 128" fill="none" stroke-width="1.1"/>
+<path d="M20 46C16 40 20 34 26 36M8 92C2 88 2 80 8 78M16 136C10 134 8 126 13 122" fill="none" stroke-width="1.2"/>
+</g>
+<!-- plume: five feathers with their quills -->
+<path d="M100 22C84 20 70 8 70-2 80 2 92 10 100 22Z"/>
+<path d="M100 22C116 20 130 8 130-2 120 2 108 10 100 22Z"/>
+<path d="M100 22C88 14 82 0 86-10 94-4 98 8 100 22Z"/>
+<path d="M100 22C112 14 118 0 114-10 106-4 102 8 100 22Z"/>
+<path d="M100 22C96 10 96-4 100-14 104-4 104 10 100 22Z"/>
+<path d="M100 22 74 1M100 22 126 1M100 22 88-6M100 22 112-6M100 22V-9" fill="none" stroke-width=".9"/>
+<!-- helm -->
+<path d="M78 32Q100 18 122 32L124 68H76Z"/>
+<path d="M98.4 26V68H101.6V26" stroke-width="1.1"/>
+<path d="M82 42H96V46H82ZM104 42H118V46H104Z" fill="#1b2547" stroke-width="1"/>
+<g fill="#1b2547" stroke="none"><circle cx="86" cy="55" r="1.5"/><circle cx="91" cy="59" r="1.5"/><circle cx="86" cy="63" r="1.5"/><circle cx="114" cy="55" r="1.5"/><circle cx="109" cy="59" r="1.5"/><circle cx="114" cy="63" r="1.5"/></g>
+<!-- twisted wreath on top of the helm -->
+<path d="M82 21H118A4.5 4.5 0 0 1 118 30H82A4.5 4.5 0 0 1 82 21Z" stroke-width="1.4"/>
+<path d="M88 21 84 30M95 21 91 30M102 21 98 30M109 21 105 30M116 21 112 30" fill="none" stroke-width="1.1"/>
+<!-- shield, its border of roundels -->
+<path d="M38 70H162V142C162 188 132 212 100 232 68 212 38 188 38 142Z" stroke-width="2"/>
+<path d="M48 80H152V142C152 182 126 203 100 220 74 203 48 182 48 142Z"/>
+<g stroke-width="1.1"><circle cx="58" cy="75" r="3"/><circle cx="79" cy="75" r="3"/><circle cx="100" cy="75" r="3"/><circle cx="121" cy="75" r="3"/><circle cx="142" cy="75" r="3"/>
+<circle cx="43" cy="96" r="3"/><circle cx="43" cy="120" r="3"/><circle cx="43" cy="144" r="3"/><circle cx="46" cy="168" r="3"/><circle cx="56" cy="190" r="3"/><circle cx="72" cy="208" r="3"/>
+<circle cx="157" cy="96" r="3"/><circle cx="157" cy="120" r="3"/><circle cx="157" cy="144" r="3"/><circle cx="154" cy="168" r="3"/><circle cx="144" cy="190" r="3"/><circle cx="128" cy="208" r="3"/></g>
+<!-- lattice in quarters 2 and 3 -->
+<g fill="none" stroke-width=".9" clip-path="url(#arm-q2)"><path d="M84 80 156 152M100 80 172 152M116 80 188 152M132 80 204 152M148 80 220 152M68 80 140 152M168 80 96 152M152 80 80 152M136 80 64 152M120 80 48 152M104 80 32 152M184 80 112 152M200 80 128 152"/></g>
+<g fill="none" stroke-width=".9" clip-path="url(#arm-q3)"><path d="M32 142 112 222M48 142 128 222M64 142 144 222M80 142 160 222M16 142 96 222M0 142 80 222M-16 142 64 222M116 142 36 222M100 142 20 222M84 142 4 222M68 142-12 222M132 142 52 222M148 142 68 222"/></g>
+<!-- quarters -->
+<path d="M100 80V220M48 142H152" fill="none" stroke-width="1.4"/>
+<!-- 1: a tower with its flag -->
+<g stroke-width="1.2"><path d="M74 96V84" fill="none"/><path d="M74 84 88 87 74 91Z"/>
+<path d="M60 138V106H88V138Z"/><path d="M58 106V97H64V101H69V97H75V101H80V97H86V101H90V106Z"/>
+<path d="M69 138V129A5 5 0 0 1 79 129V138Z"/><path d="M72 111H76V118H72Z"/>
+<path d="M60 113H69M79 113H88M60 122H88M60 130H69M79 130H88M66 106V113M82 106V113M64 113V122M84 113V122M70 122V129M78 122V129M66 130V138M82 130V138" fill="none" stroke-width=".9"/></g>
+<!-- 2: a fleur-de-lis -->
+<g stroke-width="1.3"><path d="M126 86C120 96 118 104 122 114L126 118 130 114C134 104 132 96 126 86Z"/>
+<path d="M122 114C114 117 105 111 107 102 109 95 116 97 115 103 114 108 118 110 121 109Z"/>
+<path d="M130 114C138 117 147 111 145 102 143 95 136 97 137 103 138 108 134 110 131 109Z"/>
+<path d="M116 117H136V123H116Z"/>
+<path d="M126 123 122.5 133 126 136 129.5 133Z"/><path d="M120 123C115 127 113 131 115 135 119 133 121 128 122 123Z"/><path d="M132 123C137 127 139 131 137 135 133 133 131 128 130 123Z"/></g>
+<!-- 3: two crossed swords -->
+<g stroke-width="1.2"><g transform="rotate(-38 75 176)"><path d="M72.5 150H77.5V186H72.5Z"/><path d="M75 144 77.5 150H72.5Z"/><path d="M75 151V184" fill="none" stroke-width=".8"/><path d="M66 186H84V190H66Z"/><path d="M73 190H77V198H73Z"/><circle cx="75" cy="201" r="3"/></g>
+<g transform="rotate(38 75 176)"><path d="M72.5 150H77.5V186H72.5Z"/><path d="M75 144 77.5 150H72.5Z"/><path d="M75 151V184" fill="none" stroke-width=".8"/><path d="M66 186H84V190H66Z"/><path d="M73 190H77V198H73Z"/><circle cx="75" cy="201" r="3"/></g></g>
+<!-- 4: a crown -->
+<g stroke-width="1.3"><path d="M110 178 108 156 117 167 126 151 135 167 144 156 142 178Z"/><path d="M110 178H142V187H110Z"/>
+<circle cx="108" cy="153" r="3"/><circle cx="126" cy="148" r="3"/><circle cx="144" cy="153" r="3"/>
+<path d="M126 160 129 165 126 170 123 165Z" stroke-width="1"/><circle cx="117" cy="172" r="1.8" stroke-width="1"/><circle cx="135" cy="172" r="1.8" stroke-width="1"/>
+<circle cx="118" cy="182.5" r="1.8" stroke-width="1"/><circle cx="126" cy="182.5" r="1.8" stroke-width="1"/><circle cx="134" cy="182.5" r="1.8" stroke-width="1"/></g>
+<!-- central roundel with a cross -->
+<circle cx="100" cy="142" r="11" stroke-width="1.5"/>
+<path d="M98 134H102V140H108V144H102V150H98V144H92V140H98Z" stroke-width="1.1"/>
+<!-- banner in front of the shield's point: write the motto here -->
+<path d="M8 226H-20L-10 243-20 260H8Z"/><path d="M192 226H220L210 243 220 260H192Z"/>
+<path d="M-2 214Q100 240 202 214V250Q100 276 -2 250Z"/>
+<path d="M-2 250 8 260V248M202 250 192 260V248" stroke-width="1.3"/>
+</svg>

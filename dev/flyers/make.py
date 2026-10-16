@@ -275,15 +275,14 @@ h2{font-family:"UnifrakturMaguntia",serif;font-weight:400;font-size:27pt;line-he
 .tiles{display:flex;gap:2mm;align-self:stretch}
 .tiles span{width:8.6mm;height:10mm;border-radius:1.4mm;background:#f3ead6;border:.4mm solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:"UnifrakturMaguntia",serif;font-size:16pt}
 .tiles i{width:8.6mm;height:10mm;border-bottom:.5mm solid var(--ink)}
-.shield{width:34mm;height:39mm}
-.motto{align-self:stretch;border-bottom:.4mm dashed var(--ink);height:6mm;font-size:8pt;color:var(--muted);display:flex;align-items:flex-end}
+.shield{flex:1 1 0;min-height:0;width:100%}
 .foot{position:absolute;left:8mm;right:8mm;bottom:5.5mm;display:flex;align-items:center;justify-content:space-between;color:var(--ink);font-size:8.6pt}
 .foot .brand{color:var(--ink);font-size:12pt}
 .foot .ans{transform:rotate(180deg);color:var(--muted);font-size:7.6pt}
 """
     maze = (H / "svg" / "labyrinthe-1.svg").read_text()
     maze = maze.replace("<svg ", '<svg class="maze" ', 1)
-    shield = (H / "svg" / "blason.svg").read_text().replace("<svg ", '<svg class="shield" ', 1)
+    shield = (H / "svg" / "armoiries.svg").read_text().replace("<svg ", '<svg class="shield" ', 1)
     letters = "".join(f"<span>{c}</span>" for row in GRID for c in row)
     body = f"""<div class="trim">
 <div class="head"></div>
@@ -300,7 +299,7 @@ h2{font-family:"UnifrakturMaguntia",serif;font-weight:400;font-size:27pt;line-he
     <div class="ask">Remets les lettres dans l'ordre&#8239;: c'est l'arme du chevalier.</div>
     <div class="tiles"><span>P</span><span>E</span><span>É</span><span>É</span></div>
     <div class="tiles"><i></i><i></i><i></i><i></i></div></div>
-  <div class="box"><span class="num">4 · Ton blason</span><div class="ask">Colorie-le et invente ta devise.</div>{shield}<div class="motto">Ma devise&#8239;:</div></div>
+  <div class="box"><span class="num">4 · Ton blason</span><div class="ask">Colorie-le, puis écris ta devise sur la banderole.</div>{shield}</div>
 </div>
 <div class="foot"><div class="ans">Réponses&#8239;: le donjon · ÉPÉE</div><div><span class="brand">Ma Quête Légendaire</span> · maquetelegendaire.fr</div></div>
 </div>"""
