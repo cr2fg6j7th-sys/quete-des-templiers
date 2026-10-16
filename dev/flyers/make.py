@@ -135,6 +135,7 @@ h1 em{font-style:normal;color:var(--gold)}
 .card .say{font-weight:800;line-height:1.08}
 .card .url{font-weight:900;color:var(--ink);letter-spacing:-.005em;line-height:1}
 .facts{position:absolute;left:0;right:0;text-align:center;color:#e9dfc6;line-height:1.25}
+.litter{position:absolute;left:0;right:0;text-align:center;color:rgba(233,223,198,.62);line-height:1;letter-spacing:.02em}
 """
 
 def page(w, h, css, body, bg="night"):
@@ -220,6 +221,7 @@ h1{font-size:27pt}
 .card .say{font-size:9.6pt;margin-top:1.3mm}
 .card .url{font-size:10.4pt;margin-top:1.8mm}
 .facts{top:137.6mm;font-size:6.6pt}
+.litter{top:140.7mm;font-size:4.8pt}
 """
     body = f"""<div class="trim">
 {stars([(13,36,2.6,.9),(87,37,2.2,.8),(9,47,1.6,.6),(91,52,2.8,.85),(22,63,1.8,.7),(79,66,1.6,.6),(30,10.5,1.4,.5),(70,11,1.4,.5)])}
@@ -236,6 +238,7 @@ h1{font-size:27pt}
   <div class="say">Scannez, tapez son prénom&#8239;: le Grand Maître l'appelle&#8239;!</div>
   <div class="url">maquetelegendaire.fr</div></div></div>
 <div class="facts">4 à 15 enfants · environ 1 h · 24,90&#8239;€ pour tout le groupe</div>
+<div class="litter">Ne pas jeter sur la voie publique</div>
 </div>"""
     return page(w, h, css, body.replace("<QR/>", qr(SITE + "/?ref=f-comptoir")))
 
@@ -264,6 +267,7 @@ h1{font-size:38pt}
 .card .say{font-size:12.6pt;margin-top:1.6mm}
 .card .url{font-size:14pt;margin-top:2.4mm}
 .facts{top:195.6mm;font-size:8.4pt}
+.litter{top:199.9mm;font-size:6pt}
 """
     badge = ('<div class="badge"><svg viewBox="-30 -30 60 60" aria-hidden="true">'
              f'<path d="{SEAL_PATH}" transform="translate(1.2 1.6)" fill="#5e1f2a"/><path d="{SEAL_PATH}" fill="#b8505c"/>'
@@ -286,6 +290,7 @@ h1{font-size:38pt}
   <div class="say">Scannez, tapez le prénom de votre enfant&#8239;: le Grand Maître l'appelle&#8239;!</div>
   <div class="url">maquetelegendaire.fr</div></div></div>
 <div class="facts">4 à 15 enfants · environ 1 h · 24,90&#8239;€ pour tout le groupe, sans animateur</div>
+<div class="litter">Ne pas jeter sur la voie publique</div>
 </div>"""
     return page(w, h, css, body.replace("<QR/>", qr(SITE + "/?ref=f-restaurant")))
 
