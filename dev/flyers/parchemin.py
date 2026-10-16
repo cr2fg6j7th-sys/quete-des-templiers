@@ -13,6 +13,7 @@ from pypdf.generic import RectangleObject
 import make as M
 from parchemin_texture import parchment
 from cavalier import rider_svg
+BIN_ICON = M.BIN_ICON
 
 H, ROOT, OUT, PREV, BLEED = M.H, M.ROOT, M.OUT, M.PREV, M.BLEED
 INK, WAX, PAPER = "#3a2212", "#8f2a24", "#f2e4c2"
@@ -95,6 +96,8 @@ h1 .ini{color:var(--wax)}
 .seal .stxt{position:absolute;left:0;right:0;top:0;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fbefd6;line-height:1}
 .facts{position:absolute;left:0;right:0;text-align:center;color:var(--ink);line-height:1.25}
 .litter{position:absolute;left:0;right:0;text-align:center;color:var(--sepia);line-height:1;letter-spacing:.02em}
+.litter{display:flex;justify-content:center;align-items:center;gap:.35em}
+.litter .bin{flex:none;width:1.4em;height:1.4em}
 """
 
 def page(w, h, css, body, paper_img):
@@ -126,10 +129,10 @@ h1{font-size:27pt}h1 .ini{font-size:33pt}.sub{font-size:10.6pt;margin-top:1.4mm}
 .card .kick{font-size:6.8pt}.card .say{font-size:8.8pt;margin-top:1.1mm;padding-right:9mm}.card .url{font-size:9.8pt;margin-top:1.6mm}
 .seal{right:5mm;top:105.8mm;width:14mm;height:18.2mm}
 .facts{top:135.8mm;font-size:6.5pt}
-.litter{top:138.75mm;font-size:4.6pt}
+.litter{top:138.4mm;font-size:4.6pt}
 """
     body = f"""<div class="trim">
-{rule(7, w, h, bottom=6)}
+{rule(7, w, h, bottom=5.5)}
 {HEAD.format(b=9.5, o=15.6, r=18.9, t=29, rib=M.ribbon_svg(M.RIBBON_TXT, 9.2, -4, WAX, "#5e1a16", "#f8ead0", hk=2.35))}
 {keep("keep")}{knight("knight k1")}{rider_svg()}{hill("hill")}
 <div class="card">{qr(M.SITE + "/?ref=f-comptoir")}<div>
@@ -138,7 +141,7 @@ h1{font-size:27pt}h1 .ini{font-size:33pt}.sub{font-size:10.6pt;margin-top:1.4mm}
   <div class="url">maquetelegendaire.fr</div></div></div>
 {seal("seal")}
 <div class="facts">4 à 15 enfants · environ 1 h · 24,90&#8239;€ pour tout le groupe</div>
-<div class="litter">Ne pas jeter sur la voie publique</div>
+<div class="litter">{BIN_ICON}Ne pas jeter sur la voie publique</div>
 </div>"""
     return page(w, h, css, body, paper)
 
@@ -161,10 +164,10 @@ h1{font-size:38pt}h1 .ini{font-size:46pt}.sub{font-size:14.6pt;margin-top:2mm}
 .seal .b2{font-weight:900;font-size:12.4pt;margin:.6mm 0 .4mm}
 .seal .b3{font-size:6.8pt;font-style:italic}
 .facts{top:195.2mm;font-size:8.2pt}
-.litter{top:199.2mm;font-size:5.6pt}
+.litter{top:198.6mm;font-size:5.6pt}
 """
     body = f"""<div class="trim">
-{rule(8.5, w, h, bottom=7)}
+{rule(8.5, w, h, bottom=6.5)}
 {HEAD.format(b=13.5, o=23.1, r=28.1, t=42.3, rib=M.ribbon_svg(M.RIBBON_TXT, 13, -5.6, WAX, "#5e1a16", "#f8ead0", hk=2.35))}
 {keep("keep")}{knight("knight k1")}{rider_svg()}{hill("hill")}
 <div class="points">Au prénom de l'enfant<b>✦</b>Prête en 2 minutes<b>✦</b>Il pleut&#8239;? À la maison</div>
@@ -174,7 +177,7 @@ h1{font-size:38pt}h1 .ini{font-size:46pt}.sub{font-size:14.6pt;margin-top:2mm}
   <div class="url">maquetelegendaire.fr</div></div></div>
 {seal("seal", '<span class="b1">Les enfants&#8239;:</span><span class="b2">jeux au dos</span><span class="b3">retourne-moi&#8239;!</span>')}
 <div class="facts">4 à 15 enfants · environ 1 h · 24,90&#8239;€ pour tout le groupe, sans animateur</div>
-<div class="litter">Ne pas jeter sur la voie publique</div>
+<div class="litter">{BIN_ICON}Ne pas jeter sur la voie publique</div>
 </div>"""
     return page(w, h, css, body, paper)
 

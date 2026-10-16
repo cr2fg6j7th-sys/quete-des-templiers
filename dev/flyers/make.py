@@ -136,6 +136,8 @@ h1 em{font-style:normal;color:var(--gold)}
 .card .url{font-weight:900;color:var(--ink);letter-spacing:-.005em;line-height:1}
 .facts{position:absolute;left:0;right:0;text-align:center;color:#e9dfc6;line-height:1.25}
 .litter{position:absolute;left:0;right:0;text-align:center;color:rgba(233,223,198,.62);line-height:1;letter-spacing:.02em}
+.litter{display:flex;justify-content:center;align-items:center;gap:.35em}
+.litter .bin{flex:none;width:1.4em;height:1.4em}
 """
 
 def page(w, h, css, body, bg="night"):
@@ -200,6 +202,9 @@ def ribbon_svg(text, pt, sag, band, tail, ink, cls="ribbon", hk=2.15):
             f'<text font-family="Alegreya Sans SC" font-weight="700" font-size="{fs:.3f}" letter-spacing="{.05 * fs:.3f}" fill="{ink}" dy="{.33 * fs:.3f}">'
             f'<textPath href="#rib-line" startOffset="50%" text-anchor="middle">{text}</textPath></text></svg>')
 
+# small "don't litter" pictogram (a figure dropping paper into a bin), drawn here, coloured by the text
+BIN_ICON = '<svg class="bin" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5.6" cy="3.6" r="2.3"/><path d="M3.9 6.9h3.3l1.5 7.9H5Z"/><path d="M5.1 14.2 3.2 22.6h2.2l2-6.4 1.3 6.4h2.2L9 14.2Z"/><path d="M6.6 7.7l6.9 2.4-.5 1.6-7-2.2Z"/><path d="M15.2 9.6l2.2.6-.6 2.2-2.2-.6Z"/><path d="M13.3 13.4h9.4v1.3h-9.4Z"/><path d="M14 15.4h8l-1.2 7.8h-5.6Z"/></svg>'
+
 def frame(inset, w, h):
     c = "".join(f'<div class="corner" style="left:{x}mm;top:{y}mm"></div>' for x in (inset, w - inset) for y in (inset, h - inset))
     return f'<div class="frame" style="left:{inset}mm;top:{inset}mm;right:{inset}mm;bottom:{inset}mm"></div>{c}'
@@ -220,8 +225,8 @@ h1{font-size:27pt}
 .card .kick{font-size:7pt}
 .card .say{font-size:9.6pt;margin-top:1.3mm}
 .card .url{font-size:10.4pt;margin-top:1.8mm}
-.facts{top:137.6mm;font-size:6.6pt}
-.litter{top:140.7mm;font-size:4.8pt}
+.facts{top:137.2mm;font-size:6.6pt}
+.litter{top:139.5mm;font-size:4.8pt}
 """
     body = f"""<div class="trim">
 {stars([(13,36,2.6,.9),(87,37,2.2,.8),(9,47,1.6,.6),(91,52,2.8,.85),(22,63,1.8,.7),(79,66,1.6,.6),(30,10.5,1.4,.5),(70,11,1.4,.5)])}
@@ -238,7 +243,7 @@ h1{font-size:27pt}
   <div class="say">Scannez, tapez son prénom&#8239;: le Grand Maître l'appelle&#8239;!</div>
   <div class="url">maquetelegendaire.fr</div></div></div>
 <div class="facts">4 à 15 enfants · environ 1 h · 24,90&#8239;€ pour tout le groupe</div>
-<div class="litter">Ne pas jeter sur la voie publique</div>
+<div class="litter">{BIN_ICON}Ne pas jeter sur la voie publique</div>
 </div>"""
     return page(w, h, css, body.replace("<QR/>", qr(SITE + "/?ref=f-comptoir")))
 
@@ -267,7 +272,7 @@ h1{font-size:38pt}
 .card .say{font-size:12.6pt;margin-top:1.6mm}
 .card .url{font-size:14pt;margin-top:2.4mm}
 .facts{top:195.6mm;font-size:8.4pt}
-.litter{top:199.9mm;font-size:6pt}
+.litter{top:199.3mm;font-size:6pt}
 """
     badge = ('<div class="badge"><svg viewBox="-30 -30 60 60" aria-hidden="true">'
              f'<path d="{SEAL_PATH}" transform="translate(1.2 1.6)" fill="#5e1f2a"/><path d="{SEAL_PATH}" fill="#b8505c"/>'
@@ -290,7 +295,7 @@ h1{font-size:38pt}
   <div class="say">Scannez, tapez le prénom de votre enfant&#8239;: le Grand Maître l'appelle&#8239;!</div>
   <div class="url">maquetelegendaire.fr</div></div></div>
 <div class="facts">4 à 15 enfants · environ 1 h · 24,90&#8239;€ pour tout le groupe, sans animateur</div>
-<div class="litter">Ne pas jeter sur la voie publique</div>
+<div class="litter">{BIN_ICON}Ne pas jeter sur la voie publique</div>
 </div>"""
     return page(w, h, css, body.replace("<QR/>", qr(SITE + "/?ref=f-restaurant")))
 
