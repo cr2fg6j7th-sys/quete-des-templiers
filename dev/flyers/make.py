@@ -121,7 +121,7 @@ body{position:relative;font-family:"Alegreya Sans",sans-serif;color:var(--cream)
 .star{position:absolute;transform:translate(-50%,-50%)}
 .center{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;text-align:center}
 .brand{font-family:"UnifrakturMaguntia",serif;color:var(--cream);line-height:1}
-.ribbon{position:relative;z-index:0;display:inline-block;background:var(--wax);color:#fff;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;letter-spacing:.12em;line-height:1}
+.ribbon{position:relative;z-index:0;display:inline-block;background:var(--wax);color:#fff;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;letter-spacing:.05em;line-height:1;white-space:nowrap}
 .ribbon::before,.ribbon::after{content:"";position:absolute;top:22%;bottom:-22%;width:2.4mm;background:#8f3a45;z-index:-1}
 h1{font-weight:900;line-height:1;letter-spacing:-.01em;color:var(--cream)}
 h1 em{font-style:normal;color:var(--gold)}
@@ -153,7 +153,7 @@ def a6():
     w, h = 105, 148
     css = """
 .brand{font-size:15pt}
-.ribbon{font-size:7.2pt;padding:1.5mm 3.4mm 1.3mm}
+.ribbon{font-size:6.9pt;padding:1.5mm 3mm 1.3mm}
 .ribbon::before{left:-1.9mm;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,45% 50%)}
 .ribbon::after{right:-1.9mm;clip-path:polygon(0 0,100% 0,55% 50%,100% 100%,0 100%)}
 h1{font-size:27pt}
@@ -177,7 +177,7 @@ h1{font-size:27pt}
 {CASTLE}
 {frame(4, w, h)}
 <div class="center" style="top:8.6mm"><div class="brand">Ma Quête Légendaire</div></div>
-<div class="center" style="top:16.4mm"><span class="ribbon">Anniversaire · 7 à 10 ans</span></div>
+<div class="center" style="top:16.4mm"><span class="ribbon">Pour des fêtes d'enfants réussies · de 7 à 10 ans</span></div>
 <div class="center" style="top:24mm"><h1>Une vraie quête<br><em>de chevaliers</em></h1><div class="sub">dans les rues de votre ville</div></div>
 <div class="card"><QR/><div>
   <div class="kick">Aperçu gratuit</div>
@@ -192,7 +192,7 @@ def a5_recto():
     w, h = 148, 210
     css = """
 .brand{font-size:21pt}
-.ribbon{font-size:10pt;padding:2.1mm 4.8mm 1.8mm}
+.ribbon{font-size:9.6pt;padding:2.1mm 4.4mm 1.8mm}
 .ribbon::before{left:-2.2mm;width:3.2mm;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,45% 50%)}
 .ribbon::after{right:-2.2mm;width:3.2mm;clip-path:polygon(0 0,100% 0,55% 50%,100% 100%,0 100%)}
 h1{font-size:38pt}
@@ -228,7 +228,7 @@ h1{font-size:38pt}
 {CASTLE}
 {frame(5, w, h)}
 <div class="center" style="top:11.5mm"><div class="brand">Ma Quête Légendaire</div></div>
-<div class="center" style="top:22.5mm"><span class="ribbon">Anniversaire · 7 à 10 ans</span></div>
+<div class="center" style="top:22.5mm"><span class="ribbon">Pour des fêtes d'enfants réussies · de 7 à 10 ans</span></div>
 <div class="center" style="top:33mm"><h1>Une vraie quête<br><em>de chevaliers</em></h1><div class="sub">dans les rues de votre ville</div></div>
 {badge}
 <div class="points"><span>Au prénom de l'enfant</span><span>Prête en 2 minutes</span><span>Il pleut&#8239;? À la maison</span></div>
