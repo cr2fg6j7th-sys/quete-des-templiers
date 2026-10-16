@@ -79,10 +79,6 @@ body{position:relative;font-family:"Alegreya Sans",sans-serif;color:var(--ink)}
 .center{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;text-align:center}
 .brand{font-family:"UnifrakturMaguntia",serif;color:var(--wax);line-height:1}
 .oyez{font-style:italic;color:var(--sepia);line-height:1}
-.ribbon{position:relative;z-index:0;display:inline-block;background:var(--wax);color:#f8ead0;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;letter-spacing:.05em;line-height:1;white-space:nowrap}
-.ribbon::before,.ribbon::after{content:"";position:absolute;top:22%;bottom:-22%;width:2.4mm;background:#5e1a16;z-index:-1}
-.ribbon::before{clip-path:polygon(0 0,100% 0,100% 100%,0 100%,45% 50%)}
-.ribbon::after{clip-path:polygon(0 0,100% 0,55% 50%,100% 100%,0 100%)}
 h1{font-family:"UnifrakturMaguntia",serif;font-weight:400;line-height:1.02;color:var(--ink)}
 h1 .ini{color:var(--wax)}
 .sub{font-style:italic;color:var(--ink)}
@@ -110,14 +106,13 @@ def rule(inset, w, h):
 
 HEAD = """<div class="center" style="top:{b}mm"><div class="brand">Ma Quête Légendaire</div></div>
 <div class="center" style="top:{o}mm"><div class="oyez">Oyez, oyez, jeunes chevaliers&#8239;!</div></div>
-<div class="center" style="top:{r}mm"><span class="ribbon">Pour des fêtes d'enfants réussies · de 7 à 10 ans</span></div>
+<div class="center" style="top:{r}mm">{rib}</div>
 <div class="center" style="top:{t}mm"><h1><span class="ini">U</span>ne vraie quête<br>de chevaliers</h1><div class="sub">dans les rues de votre ville</div></div>"""
 
 def a6(paper):
     w, h = 105, 148
     css = """
 .brand{font-size:13.5pt}.oyez{font-size:9.6pt}
-.ribbon{font-size:6.9pt;padding:1.5mm 3mm 1.3mm}.ribbon::before{left:-1.9mm}.ribbon::after{right:-1.9mm}
 h1{font-size:27pt}h1 .ini{font-size:33pt}.sub{font-size:10.6pt;margin-top:1.4mm}
 .keep{left:35.5mm;top:56mm;width:34mm;height:52.7mm}
 .knight{top:71.5mm;width:17.5mm;height:37.5mm}.k1{left:12mm}.k2{right:12mm}
@@ -130,7 +125,7 @@ h1{font-size:27pt}h1 .ini{font-size:33pt}.sub{font-size:10.6pt;margin-top:1.4mm}
 """
     body = f"""<div class="trim">
 {rule(7, w, h)}
-{HEAD.format(b=10.2, o=16.6, r=20.6, t=27.6)}
+{HEAD.format(b=9.5, o=15.6, r=18.9, t=29, rib=M.ribbon_svg(M.RIBBON_TXT, 9.2, -4, WAX, "#5e1a16", "#f8ead0", hk=2.35))}
 {keep("keep")}{knight("knight k1")}{knight("knight k2", flip=True)}{hill("hill")}
 <div class="card">{qr(M.SITE + "/?ref=f-comptoir")}<div>
   <div class="kick">Aperçu gratuit</div>
@@ -145,7 +140,6 @@ def a5_recto(paper):
     w, h = 148, 210
     css = """
 .brand{font-size:19pt}.oyez{font-size:13.4pt}
-.ribbon{font-size:9.6pt;padding:2mm 4.4mm 1.8mm}.ribbon::before{left:-2.4mm;width:3.2mm}.ribbon::after{right:-2.4mm;width:3.2mm}
 h1{font-size:38pt}h1 .ini{font-size:46pt}.sub{font-size:14.6pt;margin-top:2mm}
 .keep{left:50mm;top:80mm;width:48mm;height:74.4mm}
 .knight{top:101mm;width:24.5mm;height:52.5mm}.k1{left:18mm}.k2{right:18mm}
@@ -163,7 +157,7 @@ h1{font-size:38pt}h1 .ini{font-size:46pt}.sub{font-size:14.6pt;margin-top:2mm}
 """
     body = f"""<div class="trim">
 {rule(8.5, w, h)}
-{HEAD.format(b=14.5, o=24.5, r=30.5, t=38.5)}
+{HEAD.format(b=13.5, o=23.1, r=28.1, t=42.3, rib=M.ribbon_svg(M.RIBBON_TXT, 13, -5.6, WAX, "#5e1a16", "#f8ead0", hk=2.35))}
 {keep("keep")}{knight("knight k1")}{knight("knight k2", flip=True)}{hill("hill")}
 <div class="points">Au prénom de l'enfant<b>✦</b>Prête en 2 minutes<b>✦</b>Il pleut&#8239;? À la maison</div>
 <div class="card">{qr(M.SITE + "/?ref=f-restaurant")}<div>

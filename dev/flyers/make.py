@@ -121,8 +121,6 @@ body{position:relative;font-family:"Alegreya Sans",sans-serif;color:var(--cream)
 .star{position:absolute;transform:translate(-50%,-50%)}
 .center{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;text-align:center}
 .brand{font-family:"UnifrakturMaguntia",serif;color:var(--cream);line-height:1}
-.ribbon{position:relative;z-index:0;display:inline-block;background:var(--wax);color:#fff;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;letter-spacing:.05em;line-height:1;white-space:nowrap}
-.ribbon::before,.ribbon::after{content:"";position:absolute;top:22%;bottom:-22%;width:2.4mm;background:#8f3a45;z-index:-1}
 h1{font-weight:900;line-height:1;letter-spacing:-.01em;color:var(--cream)}
 h1 em{font-style:normal;color:var(--gold)}
 .sub{font-style:italic;color:#f3e6c6}
@@ -144,6 +142,63 @@ def page(w, h, css, body, bg="night"):
     return (f'<!doctype html><html lang="fr"><head><meta charset="utf-8"><style>{FONTS}{css0}{css}</style></head>'
             f'<body><div class="bleed {bg}"></div>{body}</body></html>')
 
+# ---------- curved ribbon (16/10, Nathan: rounded and a touch bigger) ----------
+# The band follows a gentle curve, its ends cut square to the curve, with a darker folded tail
+# tucked behind each end. sag > 0: the middle dips (smile); sag < 0: the middle rises (arch).
+# Sizes in mm; the text follows the band's centre line.
+from fontTools.ttLib import TTFont
+_SC = TTFont(str(ROOT / "fonts" / "AlegreyaSansSC-Bold.woff"))
+
+def _text_mm(text, pt, spacing=.05):
+    cmap, hm = _SC.getBestCmap(), _SC["hmtx"]
+    em = sum(hm[cmap[ord(c)]][0] for c in text) / _SC["head"].unitsPerEm + spacing * len(text)
+    return em * pt * 25.4 / 72
+
+RIBBON_TXT = "Pour des fêtes d'enfants réussies · de 7 à 10 ans"
+
+def ribbon_svg(text, pt, sag, band, tail, ink, cls="ribbon", hk=2.15):
+    fs = pt * 25.4 / 72
+    h = hk * fs                                    # band height
+    L = _text_mm(text, pt) + 2 * .95 * h           # band length along the curve
+    def pts(W, n=80):
+        c = 2 * sag                                # quadratic control point: middle moves by sag
+        out = []
+        for i in range(n + 1):
+            t = i / n
+            x = W * t
+            y = 2 * (1 - t) * t * c
+            dx, dy = W, 2 * c * (1 - 2 * t)
+            k = (dx * dx + dy * dy) ** .5
+            out.append((x, y, dx / k, dy / k))
+        return out
+    W = L
+    for _ in range(30):                            # chord so that the arc length is L
+        p = pts(W)
+        arc = sum(((p[i + 1][0] - p[i][0]) ** 2 + (p[i + 1][1] - p[i][1]) ** 2) ** .5 for i in range(len(p) - 1))
+        W *= L / arc
+    p = pts(W)
+    top = [(x + ty * h / 2, y - tx * h / 2) for x, y, tx, ty in p]      # normal "down" is (-ty, tx)
+    bot = [(x - ty * h / 2, y + tx * h / 2) for x, y, tx, ty in p]
+    def tail_poly(x, y, tx, ty, out):
+        ox, oy = tx * out, ty * out                # outward direction
+        nx, ny = -ty, tx                           # down
+        off, Lt, tuck, notch = .32 * h, .5 * h, .6 * h, .3 * h
+        loc = [(-tuck, -h / 2), (Lt, -h / 2), (Lt - notch, 0), (Lt, h / 2), (-tuck, h / 2)]
+        return [(x + nx * off + ox * u + nx * v, y + ny * off + oy * u + ny * v) for u, v in loc]
+    t1 = tail_poly(*p[0], -1); t2 = tail_poly(*p[-1], 1)
+    allp = top + bot + t1 + t2
+    x0, x1 = min(a for a, _ in allp) - .2, max(a for a, _ in allp) + .2
+    y0, y1 = min(b for _, b in allp) - .2, max(b for _, b in allp) + .2
+    f = lambda q: " ".join(f"{a:.2f},{b:.2f}" for a, b in q)
+    mid = "M" + " L".join(f"{x:.2f},{y:.2f}" for x, y, _, _ in p)
+    return (f'<svg class="{cls}" viewBox="{x0:.2f} {y0:.2f} {x1 - x0:.2f} {y1 - y0:.2f}" '
+            f'style="width:{x1 - x0:.2f}mm;height:{y1 - y0:.2f}mm;display:block;overflow:visible" aria-label="{text}">'
+            f'<polygon points="{f(t1)}" fill="{tail}"/><polygon points="{f(t2)}" fill="{tail}"/>'
+            f'<polygon points="{f(top + bot[::-1])}" fill="{band}"/>'
+            f'<path id="rib-line" d="{mid}" fill="none"/>'
+            f'<text font-family="Alegreya Sans SC" font-weight="700" font-size="{fs:.3f}" letter-spacing="{.05 * fs:.3f}" fill="{ink}" dy="{.33 * fs:.3f}">'
+            f'<textPath href="#rib-line" startOffset="50%" text-anchor="middle">{text}</textPath></text></svg>')
+
 def frame(inset, w, h):
     c = "".join(f'<div class="corner" style="left:{x}mm;top:{y}mm"></div>' for x in (inset, w - inset) for y in (inset, h - inset))
     return f'<div class="frame" style="left:{inset}mm;top:{inset}mm;right:{inset}mm;bottom:{inset}mm"></div>{c}'
@@ -153,9 +208,6 @@ def a6():
     w, h = 105, 148
     css = """
 .brand{font-size:15pt}
-.ribbon{font-size:6.9pt;padding:1.5mm 3mm 1.3mm}
-.ribbon::before{left:-1.9mm;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,45% 50%)}
-.ribbon::after{right:-1.9mm;clip-path:polygon(0 0,100% 0,55% 50%,100% 100%,0 100%)}
 h1{font-size:27pt}
 .sub{font-size:11pt;margin-top:1.6mm}
 .emblem{top:54mm;width:39mm;height:39mm}
@@ -170,15 +222,15 @@ h1{font-size:27pt}
 .facts{top:137.6mm;font-size:6.6pt}
 """
     body = f"""<div class="trim">
-{stars([(14,22,2.6,.9),(86,26,2.2,.8),(9,47,1.6,.6),(91,52,2.8,.85),(22,63,1.8,.7),(79,66,1.6,.6),(30,10.5,1.4,.5),(70,11,1.4,.5)])}
+{stars([(13,36,2.6,.9),(87,37,2.2,.8),(9,47,1.6,.6),(91,52,2.8,.85),(22,63,1.8,.7),(79,66,1.6,.6),(30,10.5,1.4,.5),(70,11,1.4,.5)])}
 <div class="glow"></div>
 {emblem()}
 <div class="ground"></div>
 {CASTLE}
 {frame(4, w, h)}
 <div class="center" style="top:8.6mm"><div class="brand">Ma Quête Légendaire</div></div>
-<div class="center" style="top:16.4mm"><span class="ribbon">Pour des fêtes d'enfants réussies · de 7 à 10 ans</span></div>
-<div class="center" style="top:24mm"><h1>Une vraie quête<br><em>de chevaliers</em></h1><div class="sub">dans les rues de votre ville</div></div>
+<div class="center" style="top:15.4mm">{ribbon_svg(RIBBON_TXT, 9.2, -4, "#b8505c", "#8f3a45", "#fff", hk=2.35)}</div>
+<div class="center" style="top:26mm"><h1>Une vraie quête<br><em>de chevaliers</em></h1><div class="sub">dans les rues de votre ville</div></div>
 <div class="card"><QR/><div>
   <div class="kick">Aperçu gratuit</div>
   <div class="say">Scannez, tapez son prénom&#8239;: le Grand Maître l'appelle&#8239;!</div>
@@ -192,9 +244,6 @@ def a5_recto():
     w, h = 148, 210
     css = """
 .brand{font-size:21pt}
-.ribbon{font-size:9.6pt;padding:2.1mm 4.4mm 1.8mm}
-.ribbon::before{left:-2.2mm;width:3.2mm;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,45% 50%)}
-.ribbon::after{right:-2.2mm;width:3.2mm;clip-path:polygon(0 0,100% 0,55% 50%,100% 100%,0 100%)}
 h1{font-size:38pt}
 .sub{font-size:15pt;margin-top:2.2mm}
 .emblem{top:69.5mm;width:56mm;height:56mm}
@@ -221,15 +270,15 @@ h1{font-size:38pt}
              '<circle r="21.5" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width=".9" stroke-dasharray="2 1.6"/></svg>'
              '<div><span class="b1">Les enfants&#8239;:</span><span class="b2">jeux au dos</span><span class="b3">retourne-moi&#8239;!</span></div></div>')
     body = f"""<div class="trim">
-{stars([(13,30,3.6,.9),(87,34,3,.8),(8,64,2.2,.6),(20,88,2.4,.7),(30,14.5,1.9,.5),(70,15,1.9,.5),(92,100,2,.6)])}
+{stars([(11,48,3.6,.9),(89,46,3,.8),(8,64,2.2,.6),(20,88,2.4,.7),(30,14.5,1.9,.5),(70,15,1.9,.5),(92,100,2,.6)])}
 <div class="glow"></div>
 {emblem()}
 <div class="ground"></div>
 {CASTLE}
 {frame(5, w, h)}
-<div class="center" style="top:11.5mm"><div class="brand">Ma Quête Légendaire</div></div>
-<div class="center" style="top:22.5mm"><span class="ribbon">Pour des fêtes d'enfants réussies · de 7 à 10 ans</span></div>
-<div class="center" style="top:33mm"><h1>Une vraie quête<br><em>de chevaliers</em></h1><div class="sub">dans les rues de votre ville</div></div>
+<div class="center" style="top:10.5mm"><div class="brand">Ma Quête Légendaire</div></div>
+<div class="center" style="top:19.6mm">{ribbon_svg(RIBBON_TXT, 13, -5.6, "#b8505c", "#8f3a45", "#fff", hk=2.35)}</div>
+<div class="center" style="top:34mm"><h1>Une vraie quête<br><em>de chevaliers</em></h1><div class="sub">dans les rues de votre ville</div></div>
 {badge}
 <div class="points"><span>Au prénom de l'enfant</span><span>Prête en 2 minutes</span><span>Il pleut&#8239;? À la maison</span></div>
 <div class="card"><QR/><div>
