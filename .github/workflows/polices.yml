@@ -1,0 +1,28 @@
+# Fetches the heavy weights of Alegreya Sans (OFL) from the Google Fonts repository into fonts/,
+# for the printed flyers. Runs on a push to the "polices" branch only (never redeploys the site).
+name: Polices des flyers
+
+on:
+  push:
+    branches: [polices]
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Télécharger
+        run: |
+          for f in AlegreyaSans-ExtraBold AlegreyaSans-Black AlegreyaSans-BlackItalic; do
+            curl -sSfL --retry 3 -o "fonts/$f.ttf" "https://raw.githubusercontent.com/google/fonts/main/ofl/alegreyasans/$f.ttf"
+          done
+          ls -la fonts
+      - name: Enregistrer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add fonts
+          git diff --cached --quiet || (git commit -m "Polices Alegreya Sans ExtraBold et Black (OFL) pour les flyers" && git push)
