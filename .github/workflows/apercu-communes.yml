@@ -1,0 +1,22 @@
+# Temporary (branch "communes" only, removed before going live): the commune field against the real
+# public APIs, screenshots pushed to the branch sonde-communes (folder apercu/).
+name: Aperçu communes
+on:
+  push:
+    branches: [communes]
+permissions:
+  contents: write
+jobs:
+  apercu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: pip install playwright && python -m playwright install --with-deps chromium
+      - run: python3 dev/build.py && python3 dev/e2e_communes.py
+      - run: |
+          cp -r dist/apercu /tmp/apercu
+          git config user.name "apercu"; git config user.email "apercu@users.noreply.github.com"
+          git fetch -q origin sonde-communes && git checkout -q sonde-communes
+          rm -rf apercu && cp -r /tmp/apercu apercu && git add apercu && git commit -q -m "Aperçu communes [skip ci]" && git push -q origin sonde-communes
