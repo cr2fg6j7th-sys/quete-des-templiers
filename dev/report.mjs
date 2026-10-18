@@ -23,7 +23,7 @@ async function list(path, params) {
 
 const euros = cents => (cents / 100).toFixed(2).replace(".", ",") + " €";
 function summary(sessions) {
-  const real = sessions.filter(s => (s.metadata || {}).ref !== "smoke");
+  const real = sessions.filter(s => !["smoke", "moi"].includes((s.metadata || {}).ref));
   const paid = real.filter(s => s.payment_status === "paid");
   const byRef = {};
   for (const s of paid) { const r = (s.metadata || {}).ref || "direct"; byRef[r] = (byRef[r] || 0) + 1; }
@@ -41,16 +41,17 @@ async function visits() {
   try {
     const r = await fetch(SITE + "/api/stats", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ key: k, days: 28 }) });
     const j = await r.json();
-    if (j.ok) avisList = (j.avis || []).filter(x => x.ref !== "smoke");
+    if (j.ok) avisList = (j.avis || []).filter(x => x.ref !== "smoke" && x.ref !== "moi");
     return j.ok ? j.days : null;
   } catch (e) { return null; }
 }
-// sum of an event over the last n days, without the automatic checks ("smoke") and the free demo ("demo")
+// sum of an event over the last n days, without the automatic checks ("smoke"), the free demo ("demo")
+// and Nathan's own devices ("moi", opened once with the link ?moi=…)
 function total(days, evt, n, only) {
   let t = 0;
   for (const [day, d] of Object.entries(days)) {
     if ((Date.now() - Date.parse(day + "T00:00:00Z")) / 86400000 >= n) continue;
-    for (const [ref, c] of Object.entries(d[evt] || {})) if (only ? ref === only : ref !== "smoke" && ref !== "demo") t += c;
+    for (const [ref, c] of Object.entries(d[evt] || {})) if (only ? ref === only : ref !== "smoke" && ref !== "demo" && ref !== "moi") t += c;
   }
   return t;
 }
@@ -86,7 +87,7 @@ else {
   const monthMonth = pct(T("preview", 28), T("home", 28));
   console.log(`## Parcours des visiteurs
 
-Comptes anonymes du site (sans les vérifications automatiques ni la démo).
+Comptes anonymes du site (sans les vérifications automatiques, la démo ni les appareils de Nathan).
 
 | | 7 derniers jours | 28 derniers jours |
 | --- | --- | --- |
@@ -112,9 +113,11 @@ ${row("Partages de la quête après la fête", "share")}
 
 Sur 28 jours : ${monthMonth} des visites créent un aperçu, et ${pct(T("checkout", 28), T("preview", 28))} des aperçus ouvrent la page de paiement. Diplômes atteints : ${T("diploma", 28)} en 28 jours, pour ${all.paid} quête${all.paid > 1 ? "s" : ""} payée${all.paid > 1 ? "s" : ""} depuis le début. Avec de petits nombres, ces parts bougent beaucoup d'une semaine à l'autre.
 
-Visites de l'accueil par provenance, 28 jours : ${(() => { const by = {}; for (const [day, d] of Object.entries(days)) { if ((Date.now() - Date.parse(day + "T00:00:00Z")) / 86400000 >= 28) continue; for (const [ref, c] of Object.entries(d.home || {})) if (ref !== "smoke" && ref !== "demo") by[ref === "-" ? "direct" : ref] = (by[ref === "-" ? "direct" : ref] || 0) + c; } return fmt(by); })()} (diplome = QR code des diplômes, fete = partage après la fête).
+Visites de l'accueil par provenance, 28 jours : ${(() => { const by = {}; for (const [day, d] of Object.entries(days)) { if ((Date.now() - Date.parse(day + "T00:00:00Z")) / 86400000 >= 28) continue; for (const [ref, c] of Object.entries(d.home || {})) if (ref !== "smoke" && ref !== "demo" && ref !== "moi") by[ref === "-" ? "direct" : ref] = (by[ref === "-" ? "direct" : ref] || 0) + c; } return fmt(by); })()} (diplome = QR code des diplômes, fete = partage après la fête).
 
 Démo gratuite (entourage), 28 jours : visites ${total(days, "home", 28, "demo")} · aperçus ${total(days, "preview", 28, "demo")} · diplômes ${total(days, "diploma", 28, "demo")}.
+
+Appareils de Nathan (lien personnel, non comptés ci-dessus), 7 jours : visites ${total(days, "home", 7, "moi")} · aperçus ${total(days, "preview", 7, "moi")} · pages de paiement ${total(days, "checkout", 7, "moi")}.
 `);
 }
 
