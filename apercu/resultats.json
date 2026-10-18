@@ -1,0 +1,89 @@
+{
+ "obernai_label": "",
+ "obernai": [
+  "Obernai · 0,1 km",
+  "Bernardswiller · 1,7 km",
+  "Niedernai · 2,7 km",
+  "Bischoffsheim · 2,8 km",
+  "Goxwiller · 3,2 km",
+  "Bœrsch · 3,6 km"
+ ],
+ "be": [
+  "Bernardswiller (67210)1,7 km",
+  "Bernardvillé (67140)12 km",
+  "Bergbieten (67310)13 km",
+  "Benfeld (67230)13 km",
+  "Belmont (67130)19 km",
+  "Bellefosse (67130)21 km"
+ ],
+ "bern": [
+  "Bernardswiller (67210)1,7 km",
+  "Bernardvillé (67140)12 km",
+  "Bernolsheim (67170)36 km",
+  "Bernin (38190)",
+  "Bernay (27300)",
+  "Bernis (30620)"
+ ],
+ "sai": [
+  "Sai (61200)",
+  "Saint-Nabor (67530)4,7 km",
+  "Saint-Pierre (67140)8,9 km",
+  "Saint-Pierre-Bois (67220)17 km",
+  "Saint-Maurice (67220)19 km",
+  "Saint-Martin (67220)19 km"
+ ],
+ "stras": [
+  "Strasbourg (67000)23 km"
+ ],
+ "strasbourg": {
+  "nom": "Strasbourg",
+  "cp": "67000",
+  "lat": 48.5734,
+  "lon": 7.752,
+  "code": "67482"
+ },
+ "hidden": [
+  "commune_nom=Strasbourg",
+  "commune_code_postal=67000",
+  "commune_lat=48.5734",
+  "commune_lon=7.752"
+ ],
+ "chip": {
+  "nom": "Bernardswiller",
+  "cp": "67210",
+  "lat": 48.453,
+  "lon": 7.4642,
+  "code": "67031"
+ },
+ "errors_obernai": [],
+ "colmar_label": "Près de chez vous :",
+ "colmar": [
+  "Colmar · 0,0 km",
+  "Horbourg-Wihr · 2,6 km",
+  "Ingersheim · 4,6 km",
+  "Andolsheim · 4,7 km",
+  "Wettolsheim · 5,1 km",
+  "Wintzenheim · 5,1 km"
+ ],
+ "errors_colmar": [],
+ "saint-die_label": "Près de chez vous :",
+ "saint-die": [
+  "Saint-Dié-des-Vosges · 0,3 km",
+  "Sainte-Marguerite · 2,8 km",
+  "Remomeix · 4,3 km",
+  "Nayemont-les-Fosses · 4,4 km",
+  "Pair-et-Grandrupt · 4,9 km",
+  "Taintrux · 5,4 km"
+ ],
+ "errors_saint-die": [],
+ "paris_label": "Près de chez vous :",
+ "paris": [
+  "Paris · 0,0 km",
+  "Gentilly · 4,6 km",
+  "Le Pré-Saint-Gervais · 4,7 km",
+  "Bagnolet · 4,9 km",
+  "Le Kremlin-Bicêtre · 4,9 km",
+  "Saint-Mandé · 5,1 km"
+ ],
+ "errors_paris": []
+}
