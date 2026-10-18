@@ -4,6 +4,8 @@
 import asyncio, json, re, subprocess, sys, tempfile
 from pathlib import Path
 from playwright.async_api import async_playwright
+sys.path.insert(0, str(Path(__file__).parent))
+from clean import clean
 
 ROOT = Path(__file__).resolve().parents[1].parent
 AUDIO = ROOT / "audio"
@@ -90,6 +92,7 @@ async def render(slug, g, label):
         subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-framerate", str(FPS), "-i", str(tmp / "f%04d.png"), "-i", str(audio),
                         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-preset", "medium", "-crf", "20", "-c:a", "copy", "-shortest",
                         "-movflags", "+faststart", str(out)], check=True)
+        clean(out)
         print(out.name, f"{total:.1f} s")
 
 if __name__ == "__main__":

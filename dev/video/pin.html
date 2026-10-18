@@ -27,6 +27,10 @@ h1.sans{font-family:"Alegreya Sans",sans-serif;font-weight:700;font-size:94px;li
 .items svg{width:66px;height:76px}
 .foot{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;border-top:3px solid currentColor;padding-top:30px;opacity:.95}
 .brand{font-family:"UnifrakturMaguntia",serif;font-size:62px;line-height:1}
+.fact{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.fact .num{font-weight:700;font-size:250px;line-height:.95;letter-spacing:-4px}
+.fact .unit{font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:56px;letter-spacing:2px}
+.fact .num.word{font-family:"UnifrakturMaguntia",serif;font-weight:400;font-size:190px;letter-spacing:0}
 .cta{font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:36px;letter-spacing:1px;text-align:right}
 </style>
 </head>
@@ -46,6 +50,7 @@ function pin(cfg){
   if(cfg.art==="seal")art=SEAL(c.rose);
   else if(cfg.art==="route")art=ROUTE(c);
   else if(cfg.art==="items")art=`<div class="items">${cfg.items.map((t,i)=>`<div>${SHIELD(cfg.numbered?i+1:"",c.or,c.card,c.rose)}<span>${t}</span></div>`).join("")}</div>`;
+  else if(cfg.art==="fact")art=`<div class="fact"><div class="num accent${cfg.word?" word":""}">${cfg.num}</div><div class="unit gold">${cfg.unit}</div></div>`;
   else if(cfg.art==="quote")art=`<p class="sub" style="font-style:italic;border-left:8px solid ${c.or};padding-left:34px">${cfg.quote}</p>`;
   document.getElementById("root").innerHTML=`<div class="pin ${cfg.theme}">
     <div class="kicker gold">${cfg.kicker}</div>
