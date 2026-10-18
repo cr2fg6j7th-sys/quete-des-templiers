@@ -1,4 +1,4 @@
-# Ten Pinterest pins (1000x1500) and their texts: python3 dev/video/pins.py -> dist/pins/
+# Pinterest pins (1000x1500) and their texts: python3 dev/video/pins.py -> dist/pins/
 import asyncio, csv, json
 from pathlib import Path
 from playwright.async_api import async_playwright
@@ -43,6 +43,10 @@ PINS = [
          quote="« Oyez, oyez ! Le chevalier Léo convoque ses compagnons d'armes… »", cta="Le texte complet",
          pt="Texte d'invitation d'anniversaire chevalier à copier",
          pd="Un texte d'invitation d'anniversaire chevalier à copier, avec le déroulé de la fête et des idées de costumes faits maison.", link=GUIDE),
+    dict(theme="stone", kicker="Il pleut le jour J ?", title="Anniversaire chevalier à la maison", art="items", small=True,
+         items=["L'atelier blason", "Le dragon endormi", "Le pont-levis", "La chasse aux lettres"], cta="Le guide complet",
+         pt="Anniversaire chevalier à la maison quand il pleut : jeux et déroulé",
+         pd="Un anniversaire chevalier de 2 h à l'intérieur pour les 7-10 ans : la pièce à préparer, cinq jeux de chevaliers, l'atelier blason, une chasse aux lettres et l'adoubement.", link="anniversaire-chevalier-a-la-maison.html"),
 ]
 
 async def main():
