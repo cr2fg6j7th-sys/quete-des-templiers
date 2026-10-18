@@ -87,6 +87,29 @@ button{cursor:pointer}
 .choice.wrong{border-color:var(--rose);background:var(--rose-soft)}
 .choice.right{border-color:var(--ok);color:var(--ok);font-weight:700}
 .result{font:inherit;text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink)}
+/* Town of the party: field with its list of communes, nearby communes as buttons */
+.town{display:flex;flex-direction:column;gap:12px}
+.combo{position:relative}
+.combo input{font-family:var(--body);letter-spacing:0}
+.listbox{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:4;margin:0;padding:4px;list-style:none;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 28px rgba(27,37,71,.18);max-height:min(55vh,330px);overflow:auto}
+.listbox li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 12px;border-radius:8px;cursor:pointer;line-height:1.3}
+.listbox li[aria-selected="true"],.listbox li:hover{background:var(--rose-soft)}
+.listbox .nm{min-width:0;overflow-wrap:anywhere}
+.listbox .d,.chip .d{color:var(--muted);font-size:.85rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.near{display:flex;flex-direction:column;gap:8px}
+.near-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.near-lab{font-family:var(--label);font-size:.95rem;letter-spacing:.05em}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:.95rem;line-height:1.2;padding:8px 12px;min-height:40px;border-radius:999px;border:1px solid var(--line);background:var(--stone);color:var(--ink);text-align:left}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--stone);border-color:var(--ink)}
+.chip[aria-pressed="true"] .d{color:inherit;opacity:.8}
+.locate{font:inherit;font-family:var(--label);font-size:.9rem;letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;min-height:40px;border-radius:999px;border:1px solid var(--rose);background:transparent;color:var(--rose)}
+.locate[disabled]{opacity:.6}
+.chip:focus-visible,.locate:focus-visible,.more summary:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.chosen{color:var(--ok);font-weight:700}
+.more{border-top:1px solid var(--line);padding-top:10px}
+.more summary{cursor:pointer;font-size:.95rem;color:var(--muted)}
+.more-in{display:flex;flex-direction:column;gap:10px;margin-top:10px}
 .hint{font-size:.95rem;color:var(--muted);white-space:pre-line}
 .names{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
 .qlab{font-family:var(--label);letter-spacing:.05em;font-size:.95rem}
@@ -242,7 +265,7 @@ if("serviceWorker" in navigator)try{navigator.serviceWorker.register("sw.js").ca
 /* ---------- State ---------- */
 // preview: what is shown before paying; token: the sealed quest (paid build); quest: the full quest once unlocked;
 // paid: the Stripe session that unlocked it (also the key of the reopen link).
-const defaults={ref:"",name:"",hero:"m",kids:8,compagnons:[],indoor:false,unlocked:false,screen:"home",start:null,town:"",preview:null,token:"",quest:null,paid:"",step:0,phase:"travel",solved:[],hint:0,voice:"",tester:false,avis:false};
+const defaults={ref:"",name:"",hero:"m",kids:8,compagnons:[],indoor:false,unlocked:false,screen:"home",start:null,town:"",commune:null,preview:null,token:"",quest:null,paid:"",step:0,phase:"travel",solved:[],hint:0,voice:"",tester:false,avis:false};
 let S=Object.assign({},defaults);
 try{const raw=localStorage.getItem(STORE);if(raw)S=Object.assign({},defaults,JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
@@ -406,10 +429,10 @@ function shieldRow(){
     row.append(w);});
   return row;
 }
-function footer(){return h("footer",null,"Lieux : © contributeurs OpenStreetMap (licence ODbL). Recherche d'adresse : Base Adresse Nationale (IGN) et Nominatim.",h("br"),
+function footer(){return h("footer",null,"Lieux : © contributeurs OpenStreetMap (licence ODbL). Communes et adresses : Base Adresse Nationale et API Géo (Licence Ouverte 2.0), Nominatim.",h("br"),
   h("a",{href:"anniversaire-chevalier.html"},"Guide : organiser un anniversaire chevalier"),h("br"),
   h("a",{href:"anniversaire-chevalier-a-la-maison.html"},"Guide : anniversaire chevalier à la maison quand il pleut"),h("br"),
-  h("a",{href:"legal/cgv.html"},"Conditions de vente")," · ",h("a",{href:"legal/mentions-legales.html"},"Mentions légales")," · ",h("a",{href:"legal/confidentialite.html"},"Confidentialité"),
+  h("a",{href:"legal/cgv.html"},"Conditions de vente")," · ",h("a",{href:"legal/mentions-legales.html"},"Mentions légales")," · ",h("a",{href:"legal/confidentialite.html"},"Confidentialité")," · ",h("a",{href:"legal/credits.html"},"Crédits"),
   ME&&h("br"),ME&&h("span",{class:"me",text:"Appareil de Nathan : visites non comptées."}));}
 
 /* ---------- Network ---------- */
@@ -419,11 +442,14 @@ function townOf(a){a=a||{};return a.village||a.town||a.city||a.municipality||a.h
 // Address search, asked to both services at once: the national address base knows every street
 // number, OpenStreetMap knows parks and monuments. Sure addresses first, then OpenStreetMap, then the rest.
 // One search per tap on "Chercher" (no search-as-you-type: Nominatim's usage policy).
-async function searchPlaces(q){
+// near: the chosen commune, if any: results around it come first.
+async function searchPlaces(q,near){
   const e=encodeURIComponent(q);
+  const bias=near&&isFinite(near.lat)?`&lat=${r2(near.lat)}&lon=${r2(near.lon)}`:"";
+  const box=near&&isFinite(near.lat)?`&viewbox=${r2(near.lon-0.08)},${r2(near.lat+0.05)},${r2(near.lon+0.08)},${r2(near.lat-0.05)}`:"";
   const [ban,osm]=await Promise.allSettled([
-    getJSON(`${GEOPF}/search?q=${e}&limit=5`,null,8000),
-    getJSON(`${NOMINATIM}/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=fr&accept-language=fr&q=${e}`,null,10000)]);
+    getJSON(`${GEOPF}/search?q=${e}&limit=5${bias}`,null,8000),
+    getJSON(`${NOMINATIM}/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=fr&accept-language=fr&q=${e}${box}`,null,10000)]);
   if(ban.status==="rejected"&&osm.status==="rejected")throw ban.reason;
   const sure=[],rest=[],out=[];
   if(ban.status==="fulfilled")for(const f of (ban.value&&ban.value.features)||[]){
@@ -437,6 +463,87 @@ async function reverseTown(lat,lon){
   try{const r=await getJSON(`${GEOPF}/reverse?lon=${lon}&lat=${lat}&limit=1`,null,6000);const p=r&&r.features&&r.features[0]&&r.features[0].properties;if(p&&p.city)return p.city;}catch(e){}
   try{const r=await getJSON(`${NOMINATIM}/reverse?format=jsonv2&zoom=14&accept-language=fr&lat=${lat}&lon=${lon}`,null,10000);return townOf(r.address);}catch(e){return "";}
 }
+/* ---------- Communes: the town of the party, suggested around the visitor ---------- */
+// Search: Base Adresse Nationale (IGN Géoplateforme, the former api-adresse.data.gouv.fr), type=municipality.
+// Nearby: API Géo, every commune of the visitor's département (and of a neighbour less than 15 km away),
+// sorted by distance to its town hall, where the quest then starts. Both under Licence Ouverte 2.0. Without them, the field stays a plain text field.
+const GEO_API="https://geo.api.gouv.fr";
+const OBERNAI={lat:48.4620,lon:7.4824};
+const NEAR_KM=15;
+// pos: where suggestions are centred; located: the visitor's own position (else Obernai).
+const CM={pos:OBERNAI,located:false,lists:new Map(),deps:new Map(),search:new Map(),ban:new Map(),around:new Map()};
+function km(a,b){const r=Math.PI/180,dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;
+  const x=Math.sin(dLa/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2;return 2*6371.0088*Math.asin(Math.min(1,Math.sqrt(x)));}
+const fold=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[-'’]/g," ").replace(/\s+/g," ").trim();
+const kmText=d=>(d<10?d.toFixed(1).replace(".",","):String(Math.round(d)))+" km";
+// Positions sent to the public services are rounded to about a kilometre.
+const r2=x=>Math.round(x*100)/100;
+// The point d km from p, heading deg degrees from north.
+function offset(p,d,deg){const r=Math.PI/180,R=6371.0088,b=deg*r,la=p.lat*r,lo=p.lon*r,a=d/R;
+  const la2=Math.asin(Math.sin(la)*Math.cos(a)+Math.cos(la)*Math.sin(a)*Math.cos(b));
+  const lo2=lo+Math.atan2(Math.sin(b)*Math.sin(a)*Math.cos(la),Math.cos(a)-Math.sin(la)*Math.sin(la2));return {lat:la2/r,lon:lo2/r};}
+function cacheGet(k){try{const v=sessionStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}}
+function cachePut(k,v){try{sessionStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+// Département of a point ("" at sea or abroad).
+function depAt(p){const k=r2(p.lat)+","+r2(p.lon);
+  if(!CM.deps.has(k))CM.deps.set(k,getJSON(`${GEO_API}/communes?lat=${r2(p.lat)}&lon=${r2(p.lon)}&fields=codeDepartement`,null,6000)
+    .then(r=>(Array.isArray(r)&&r[0]&&r[0].codeDepartement)||"").catch(e=>{CM.deps.delete(k);throw e;}));
+  return CM.deps.get(k);}
+// Every commune of a département: {nom, code, cp, lat, lon, m, f (folded name)}. The position is the
+// town hall's (m: true), else the middle of the commune's area, sometimes out in the fields.
+function depCommunes(dep){
+  if(!CM.lists.has(dep))CM.lists.set(dep,(async()=>{
+    let L=cacheGet("mql-communes-"+dep);
+    if(!L){const r=await getJSON(`${GEO_API}/departements/${dep}/communes?fields=nom,code,codesPostaux,centre,mairie`,null,10000);
+      L=(Array.isArray(r)?r:[]).map(c=>{const pt=(c.mairie&&c.mairie.coordinates)||(c.centre&&c.centre.coordinates);
+        return pt&&{nom:c.nom,code:c.code,cp:(c.codesPostaux||[])[0]||"",lon:pt[0],lat:pt[1],m:!!(c.mairie&&c.mairie.coordinates)};}).filter(Boolean);
+      cachePut("mql-communes-"+dep,L);}
+    return L.map(c=>Object.assign({},c,{f:fold(c.nom)}));
+  })().catch(e=>{CM.lists.delete(dep);throw e;}));
+  return CM.lists.get(dep);}
+// The communes around p, nearest first, each with its distance d in km. The visitor's département,
+// plus any département reached by one of 12 points 15 km around (a boundary less than 15 km away).
+function communesAround(p){const k=r2(p.lat)+","+r2(p.lon);
+  if(!CM.around.has(k))CM.around.set(k,(async()=>{
+    const own=await depAt(p);if(!own)return [];
+    const ring=await Promise.allSettled(Array.from({length:12},(x,i)=>depAt(offset(p,NEAR_KM,i*30))));
+    const deps=new Set([own]);for(const r of ring)if(r.status==="fulfilled"&&r.value)deps.add(r.value);
+    const lists=await Promise.allSettled([...deps].map(depCommunes));
+    const all=[];for(const r of lists)if(r.status==="fulfilled")all.push(...r.value);
+    return all.map(c=>Object.assign({},c,{d:km(p,c)})).sort((a,b)=>a.d-b.d);
+  })().catch(e=>{CM.around.delete(k);throw e;}));
+  return CM.around.get(k);}
+// Communes whose name starts with the text (or one of its words does), from the national search
+// (3 letters or more) and the communes around; exact name first, then the nearest. Up to 6.
+async function suggestCommunes(text){
+  const f=fold(text);if(f.length<2)return [];
+  const p=CM.pos,local=[];
+  try{for(const c of await communesAround(p))if(c.f.startsWith(f)||c.f.includes(" "+f))local.push(Object.assign({src:"geo"},c));}catch(e){}
+  let ban=[];
+  if(f.length>=3){const k=f+"|"+r2(p.lat)+","+r2(p.lon);
+    if(!CM.search.has(k))CM.search.set(k,getJSON(`${GEOPF}/search?q=${encodeURIComponent(text.trim())}&type=municipality&limit=6&lat=${r2(p.lat)}&lon=${r2(p.lon)}`,null,6000)
+      .then(r=>((r&&r.features)||[]).map(x=>{const q=x.properties||{},c=x.geometry&&x.geometry.coordinates;
+        return c&&{src:"ban",nom:q.city||q.name,code:q.citycode||"",cp:q.postcode||"",lon:+c[0],lat:+c[1]};}).filter(Boolean))
+      .catch(e=>{CM.search.delete(k);return [];}));
+    ban=(await CM.search.get(k)).map(c=>Object.assign(c,{f:fold(c.nom),d:km(p,c)}));}
+  const out=[];
+  // a commune known both ways keeps API Géo's entry: its position is the town hall
+  for(const c of [...local,...ban])if(!out.some(o=>(o.code&&o.code===c.code)||(o.f===c.f&&o.cp===c.cp)))out.push(c);
+  return out.sort((a,b)=>(b.f===f)-(a.f===f)||a.d-b.d).slice(0,6);
+}
+// The town hall of a commune found by the national search (its own point can be a kilometre away).
+function mairiePoint(c){const k=c.code||c.f;
+  if(!CM.ban.has(k))CM.ban.set(k,(c.code?getJSON(`${GEO_API}/communes/${c.code}?fields=mairie,centre`,null,5000):Promise.reject())
+    .then(r=>{const pt=r&&((r.mairie&&r.mairie.coordinates)||(r.centre&&r.centre.coordinates));return pt?{lat:+pt[1],lon:+pt[0]}:null;}).catch(()=>null));
+  return CM.ban.get(k);}
+const communeLabel=c=>c?`${c.nom}${c.cp?` (${c.cp})`:""}`:"";
+// The visitor's position, asked on a tap only; Obernai when refused, unavailable or too slow.
+function locateCommune(){return new Promise(res=>{
+  if(!("geolocation" in navigator))return res(false);
+  try{navigator.geolocation.getCurrentPosition(p=>{CM.pos={lat:p.coords.latitude,lon:p.coords.longitude};CM.located=true;res(true);},
+    ()=>{CM.pos=OBERNAI;CM.located=false;res(false);},{enableHighAccuracy:false,timeout:10000,maximumAge:600000});}catch(e){res(false);}
+});}
+
 // Places around the start, from the public OpenStreetMap servers (n = how many to try).
 async function fetchPlaces(lat,lon,n){
   const body="data="+encodeURIComponent(G.overpassQuery(lat,lon));let last=null;
@@ -797,6 +904,93 @@ function homeScreen(){
   ];
 }
 
+// "Ville ou village": suggestions as you type (from 2 letters, 250 ms after the last key), the nearest
+// communes as one-tap buttons, and "Me localiser". The chosen commune (name, postcode, position) is kept
+// in S.commune and in the form's hidden fields. Without the services, it is a plain text field:
+// "Créer l'aperçu" then runs the ordinary address search on what was typed.
+function communeField(searchInto){
+  const LID="commune-list";
+  const input=h("input",{type:"text",id:"commune",name:"ville",placeholder:"Ex. : Bernardswiller",autocomplete:"off",autocapitalize:"words",spellcheck:"false",enterkeyhint:"go",
+    role:"combobox","aria-autocomplete":"list","aria-expanded":"false","aria-controls":LID});
+  input.value=communeLabel(S.commune);
+  const list=h("ul",{id:LID,class:"listbox",role:"listbox","aria-label":"Communes proposées",hidden:true});
+  const hid={nom:h("input",{type:"hidden",name:"commune_nom"}),cp:h("input",{type:"hidden",name:"commune_code_postal"}),
+    lat:h("input",{type:"hidden",name:"commune_lat"}),lon:h("input",{type:"hidden",name:"commune_lon"})};
+  const chosen=h("p",{class:"chosen",role:"status"});
+  const nearLab=h("span",{class:"near-lab"}),chips=h("div",{class:"chips"});
+  const locBtn=h("button",{type:"button",class:"locate"});
+  locBtn.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
+  const locText=h("span",{text:"Me localiser"});locBtn.append(locText);
+  const near=h("div",{class:"near",hidden:true},h("div",{class:"near-head"},nearLab,locBtn),chips);
+  const btn=h("button",{class:"btn",type:"submit"});
+  const fallback=h("div",{class:"choices"});
+  let items=[],active=-1,seq=0,timer=0,pending=null;
+
+  const showChosen=()=>{const c=S.commune;
+    hid.nom.value=c?c.nom:"";hid.cp.value=c?c.cp:"";hid.lat.value=c?String(c.lat):"";hid.lon.value=c?String(c.lon):"";
+    chosen.hidden=!c;chosen.textContent=c?`✓ Départ : mairie de ${communeLabel(c)}`:"";
+    chips.querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",String(!!c&&b.dataset.code===c.code)));
+    btn.textContent=c?`Créer l'aperçu à ${c.nom}`:"Créer l'aperçu gratuit";};
+  const close=()=>{list.hidden=true;input.setAttribute("aria-expanded","false");input.removeAttribute("aria-activedescendant");active=-1;};
+  const mark=i=>{active=i;[...list.children].forEach((li,j)=>li.setAttribute("aria-selected",String(j===i)));
+    if(i>=0){input.setAttribute("aria-activedescendant",list.children[i].id);list.children[i].scrollIntoView({block:"nearest"});}
+    else input.removeAttribute("aria-activedescendant");};
+  const show=r=>{items=r;
+    list.replaceChildren(...r.map((c,i)=>{const li=h("li",{id:`${LID}-${i}`,role:"option","aria-selected":"false"},
+        h("span",{class:"nm"},h("b",{text:c.nom}),c.cp?` (${c.cp})`:""),c.d<=100?h("span",{class:"d",text:kmText(c.d)}):null);
+      li.addEventListener("mousedown",e=>e.preventDefault());   // keep the focus in the field
+      li.addEventListener("click",()=>pick(c,"liste"));return li;}));
+    if(r.length){list.hidden=false;input.setAttribute("aria-expanded","true");mark(-1);}else close();};
+  const pick=(c,how)=>{close();clearTimeout(timer);seq++;
+    S.commune={nom:c.nom,cp:c.cp||"",lat:c.lat,lon:c.lon,code:c.code||""};save();
+    input.value=communeLabel(S.commune);fallback.replaceChildren();note.textContent="";showChosen();hit("commune-"+how);
+    // the quest starts at the town hall: known for the communes around, asked for the others
+    pending=c.m?null:mairiePoint(c).then(b=>{const s=S.commune;
+      if(b&&s&&s.nom===c.nom&&s.code===(c.code||"")){Object.assign(s,{lat:b.lat,lon:b.lon});save();showChosen();}});};
+  const create=async()=>{
+    if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}
+    if(!S.commune){const v=input.value.trim();
+      if(fold(v).length<2){note.textContent="Choisissez la ville ou le village de la fête.";input.focus();return;}
+      // typed but not chosen: the commune of that exact name if suggestions answer, else an address search
+      const bare=fold(v.replace(/\s*\(\d{5}\)\s*$/,""));
+      const exact=(await suggestCommunes(v).catch(()=>[])).find(c=>c.f===bare);
+      if(exact)pick(exact,"tapee");else{searchInto(v,fallback);return;}}
+    if(pending){btn.disabled=true;await Promise.race([pending,new Promise(r=>setTimeout(r,4000))]);btn.disabled=false;}
+    startFrom(S.commune.lat,S.commune.lon,S.commune.nom);};
+  const fillNear=async()=>{let L=[];
+    try{L=(await communesAround(CM.pos)).filter(c=>c.d<=NEAR_KM).slice(0,6);}catch(e){}
+    nearLab.textContent=CM.located?"Près de chez vous :":"Autour d'Obernai :";
+    chips.replaceChildren(...L.map(c=>h("button",{type:"button",class:"chip","data-code":c.code,"aria-pressed":"false",onclick:()=>pick(c,"proche")},
+      c.nom,h("span",{class:"d",text:` · ${kmText(c.d)}`}))));
+    near.hidden=!L.length;showChosen();};
+
+  input.addEventListener("input",()=>{
+    if(S.commune&&input.value!==communeLabel(S.commune)){S.commune=null;pending=null;save();showChosen();}
+    clearTimeout(timer);const v=input.value,my=++seq;
+    if(fold(v).length<2){items=[];close();return;}
+    timer=setTimeout(async()=>{const r=await suggestCommunes(v).catch(()=>[]);if(my===seq&&document.activeElement===input)show(r);},250);});
+  input.addEventListener("keydown",e=>{
+    if(e.key==="ArrowDown"&&items.length){e.preventDefault();if(list.hidden)show(items);mark(Math.min(items.length-1,active+1));}
+    else if(e.key==="ArrowUp"&&!list.hidden){e.preventDefault();mark(Math.max(-1,active-1));}
+    else if(e.key==="Enter"&&!list.hidden&&active>=0){e.preventDefault();pick(items[active],"liste");}
+    else if(e.key==="Escape"&&!list.hidden){e.preventDefault();close();}});
+  input.addEventListener("blur",()=>setTimeout(close,150));
+  input.addEventListener("focus",()=>{if(items.length&&!S.commune&&fold(input.value).length>=2)show(items);});
+  locBtn.addEventListener("click",async()=>{locBtn.disabled=true;locText.textContent="Localisation…";
+    const ok=await locateCommune();hit(ok?"localiser-ok":"localiser-echec");
+    locText.textContent="Me localiser";locBtn.disabled=false;
+    note.textContent=ok?"":"Position indisponible : voici les communes autour d'Obernai.";
+    items=[];await fillNear();});
+  // position already allowed on an earlier visit: no question asked, the list is simply nearer
+  try{if(!CM.located&&navigator.permissions)navigator.permissions.query({name:"geolocation"})
+    .then(s=>{if(s.state==="granted")locateCommune().then(ok=>{if(ok)fillNear();});}).catch(()=>{});}catch(e){}
+  showChosen();fillNear();
+  const form=h("form",{class:"town",novalidate:true,onsubmit:e=>{e.preventDefault();create();}},
+    h("div",{class:"combo"},h("label",{for:"commune"},"Ville ou village",input),list),
+    near,chosen,hid.nom,hid.cp,hid.lat,hid.lon,btn,fallback);
+  return {nodes:form};
+}
+
 function setupScreen(){
   const nameIn=h("input",{type:"text",id:"hero-name",value:S.name,maxlength:"24",autocomplete:"off",placeholder:"Ex. : Léo"});
   nameIn.addEventListener("input",()=>{S.name=nameIn.value.trim();save();});
@@ -805,16 +999,18 @@ function setupScreen(){
   const seg=h("div",{class:"seg",role:"group","aria-label":"Héros ou héroïne"},
     h("button",{type:"button","aria-pressed":String(S.hero==="m"),onclick:()=>{S.hero="m";save();seg.querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-pressed",String(i===0)));}},"Chevalier"),
     h("button",{type:"button","aria-pressed":String(S.hero==="f"),onclick:()=>{S.hero="f";save();seg.querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-pressed",String(i===1)));}},"Chevalière"));
-  const q=h("input",{type:"search",id:"start-q",placeholder:"Ex. : place de l'église, Rosheim",autocomplete:"off"});
+  const q=h("input",{type:"search",id:"start-q",placeholder:"Ex. : place de l'église",autocomplete:"off"});
   const results=h("div",{class:"choices"});
-  const doSearch=async()=>{
-    const v=q.value.trim();if(v.length<3){note.textContent="Tapez une adresse, un parc ou une ville.";return;}
-    note.textContent="Recherche…";results.replaceChildren();
-    try{const r=await searchPlaces(v);note.textContent=r.length?"Choisissez le point de départ :":"Aucun lieu trouvé. Essayez avec le nom de la ville.";
-      r.forEach(x=>results.append(h("button",{class:"result",type:"button",text:x.label,onclick:()=>startFrom(x.lat,x.lon,x.town)})));}
+  // Address search: one search per tap (Nominatim's usage policy), around the chosen commune if any.
+  const searchInto=async(v,box)=>{
+    note.textContent="Recherche…";box.replaceChildren();
+    try{const r=await searchPlaces(v,S.commune);note.textContent=r.length?"Choisissez le point de départ :":"Aucun lieu trouvé. Essayez avec le nom de la ville.";
+      r.forEach(x=>box.append(h("button",{class:"result",type:"button",text:x.label,onclick:()=>startFrom(x.lat,x.lon,x.town)})));}
     catch(e){note.textContent="La recherche d'adresse ne répond pas. Vérifiez la connexion et réessayez.";}
   };
+  const doSearch=()=>{const v=q.value.trim();if(v.length<3){note.textContent="Tapez une adresse, un parc ou une place.";return;}searchInto(v,results);};
   q.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doSearch();}});
+  const town=communeField(searchInto);
   const here=()=>{
     if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}
     if(!("geolocation" in navigator)){note.textContent="Ce téléphone ne donne pas sa position : cherchez plutôt une adresse ci-dessous.";return;}
@@ -834,11 +1030,15 @@ function setupScreen(){
       h("div",{class:"row"},h("label",{for:"hero-name"},"Prénom",nameIn),h("label",{for:"kids"},"Nombre d'enfants",kidsIn)),
       h("label",null,"Le héros de la fête",seg)),
     h("div",{class:"card"},h("h3",{text:"Où commence la quête ?"}),
-      h("p",{class:"note",text:"Choisissez un point central : la place de l'église, la mairie, un parc. La quête se construit dans un rayon d'environ 700 mètres."}),
-      h("button",{class:"btn ghost",type:"button",onclick:here},"Partir d'ici (ma position)"),
-      h("label",{for:"start-q"},"Ou chercher une adresse",q),
-      h("button",{class:"btn",type:"button",onclick:doSearch},"Chercher"),
-      results),
+      h("p",{class:"note",text:"Choisissez la ville ou le village de la fête : la quête part de la mairie et se construit dans un rayon d'environ 700 mètres."}),
+      town.nodes,
+      h("details",{class:"more"},h("summary",null,"Préciser le point de départ (facultatif)"),
+        h("div",{class:"more-in"},
+          h("p",{class:"note",text:"Une place, un parc, une adresse : la quête partira de là."}),
+          h("label",{for:"start-q"},"Chercher une adresse",q),
+          h("button",{class:"btn ghost",type:"button",onclick:doSearch},"Chercher"),
+          results,
+          h("button",{class:"btn ghost",type:"button",onclick:here},"Ou partir d'ici (ma position exacte)")))),
     note,
     h("button",{class:"linkish",type:"button",onclick:()=>{if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}startIndoor();}},"Il pleut ? Créer une quête à jouer à la maison"),
     footer()
