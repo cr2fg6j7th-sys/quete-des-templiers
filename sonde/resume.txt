@@ -1,38 +1,7 @@
 HTTP/2 200 
-access-control-allow-origin: *
-access-control-allow-credentials: true
-access-control-allow-methods: GET, PUT, POST, DELETE, PATCH, OPTIONS
-access-control-allow-headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,Content-Disposition,Content-Length,X-Community
-access-control-max-age: 1728000
-location: https://data.geopf.fr/geocodage/search/?q=bern&type=municipality&limit=6&lat=48.462&lon=7.4824
-HTTP/2 200 
 access-control-allow-origin: https://maquetelegendaire.fr
 HTTP/2 200 
 access-control-allow-origin: https://maquetelegendaire.fr
-HTTP/2 200 
-access-control-allow-origin: https://maquetelegendaire.fr
-HTTP/2 200 
-access-control-allow-origin: https://maquetelegendaire.fr
-HTTP/2 200 
-access-control-allow-origin: https://maquetelegendaire.fr
-HTTP/2 200 
-access-control-allow-origin: *
-access-control-allow-credentials: true
-access-control-allow-methods: GET, PUT, POST, DELETE, PATCH, OPTIONS
-access-control-allow-headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,Content-Disposition,Content-Length,X-Community
-access-control-max-age: 1728000
-HTTP/2 400 
-access-control-allow-origin: *
-access-control-allow-credentials: true
-access-control-allow-methods: GET, PUT, POST, DELETE, PATCH, OPTIONS
-access-control-allow-headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,Content-Disposition,Content-Length,X-Community
-access-control-max-age: 1728000
-HTTP/2 200 
-access-control-allow-origin: *
-access-control-allow-credentials: true
-access-control-allow-methods: GET, PUT, POST, DELETE, PATCH, OPTIONS
-access-control-allow-headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,Content-Disposition,Content-Length,X-Community
-access-control-max-age: 1728000
 HTTP/2 200 
 access-control-allow-origin: *
 access-control-allow-credentials: true

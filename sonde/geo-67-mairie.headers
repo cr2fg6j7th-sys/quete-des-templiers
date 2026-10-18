@@ -1,12 +1,12 @@
 HTTP/2 200 
 server: nginx/1.29.5
-date: Sun, 18 Oct 2026 16:17:07 GMT
+date: Sun, 18 Oct 2026 16:24:00 GMT
 content-type: application/json; charset=utf-8
-content-length: 60527
+content-length: 90154
 x-powered-by: Express
 access-control-allow-origin: https://maquetelegendaire.fr
 vary: Origin
-etag: W/"ec6f-Ko4npFQGcEcyhHPjtPPI/M62J2I"
+etag: W/"1602a-iPyIKjlO3a8zEQawSEUeqL2GDcU"
 cache-control: public, max-age=3600, immutable
-x-cache-status: HIT
+x-cache-status: MISS
 
