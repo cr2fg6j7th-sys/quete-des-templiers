@@ -1,13 +1,13 @@
 {
- "obernai_label": "",
  "obernai": [
-  "Obernai · 0,1 km",
+  "Obernai · < 1 km",
   "Bernardswiller · 1,7 km",
   "Niedernai · 2,7 km",
   "Bischoffsheim · 2,8 km",
   "Goxwiller · 3,2 km",
   "Bœrsch · 3,6 km"
  ],
+ "obernai_label": "Autour d'Obernai :",
  "be": [
   "Bernardswiller (67210)1,7 km",
   "Bernardvillé (67140)12 km",
@@ -25,12 +25,20 @@
   "Bernis (30620)"
  ],
  "sai": [
-  "Sai (61200)",
   "Saint-Nabor (67530)4,7 km",
   "Saint-Pierre (67140)8,9 km",
   "Saint-Pierre-Bois (67220)17 km",
   "Saint-Maurice (67220)19 km",
-  "Saint-Martin (67220)19 km"
+  "Saint-Martin (67220)19 km",
+  "Saint-Blaise-la-Roche (67420)25 km"
+ ],
+ "metz": [
+  "Metz (57000)",
+  "Metzeral (68380)59 km",
+  "Metzing (57980)81 km",
+  "Metzeresche (57920)",
+  "Metzervisse (57940)",
+  "Metz-en-Couture (62124)"
  ],
  "stras": [
   "Strasbourg (67000)23 km"
@@ -58,7 +66,7 @@
  "errors_obernai": [],
  "colmar_label": "Près de chez vous :",
  "colmar": [
-  "Colmar · 0,0 km",
+  "Colmar · < 1 km",
   "Horbourg-Wihr · 2,6 km",
   "Ingersheim · 4,6 km",
   "Andolsheim · 4,7 km",
@@ -68,7 +76,7 @@
  "errors_colmar": [],
  "saint-die_label": "Près de chez vous :",
  "saint-die": [
-  "Saint-Dié-des-Vosges · 0,3 km",
+  "Saint-Dié-des-Vosges · < 1 km",
   "Sainte-Marguerite · 2,8 km",
   "Remomeix · 4,3 km",
   "Nayemont-les-Fosses · 4,4 km",
@@ -78,7 +86,7 @@
  "errors_saint-die": [],
  "paris_label": "Près de chez vous :",
  "paris": [
-  "Paris · 0,0 km",
+  "Paris · < 1 km",
   "Gentilly · 4,6 km",
   "Le Pré-Saint-Gervais · 4,7 km",
   "Bagnolet · 4,9 km",
