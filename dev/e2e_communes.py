@@ -35,11 +35,12 @@ async def main():
         async with async_playwright() as p:
             b = await p.chromium.launch()
             ctx, pg, errs = await page(b)
-            res["obernai_label"] = await pg.text_content(".near-lab"); res["obernai"] = await chips(pg)
+            res["obernai"] = await chips(pg); res["obernai_label"] = await pg.text_content(".near-lab")
             await pg.screenshot(path=str(OUT / "1-autour-obernai.png"), full_page=True)
             res["be"] = await typed(pg, "be"); await pg.screenshot(path=str(OUT / "2-be.png"))
             res["bern"] = await typed(pg, "bern"); await pg.screenshot(path=str(OUT / "3-bern.png"))
             res["sai"] = await typed(pg, "sai")
+            res["metz"] = await typed(pg, "metz")
             res["stras"] = await typed(pg, "stras")
             await pg.keyboard.press("ArrowDown"); await pg.keyboard.press("Enter"); await pg.wait_for_timeout(1500)
             res["strasbourg"] = await pg.evaluate("JSON.parse(localStorage.getItem('quete-templiers-v3')).commune")
