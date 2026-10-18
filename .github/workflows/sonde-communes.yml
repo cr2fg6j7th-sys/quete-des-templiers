@@ -1,0 +1,30 @@
+# Temporary probe (branch sonde-communes only): what the commune APIs answer, and their CORS headers.
+name: Sonde communes
+on:
+  push:
+    branches: [sonde-communes]
+permissions:
+  contents: read
+jobs:
+  sonde:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir out
+          O="Origin: https://maquetelegendaire.fr"
+          get(){ curl -s -m 20 -D "out/$1.headers" -H "$O" -o "out/$1.json" -w "$1 %{http_code} %{time_total}s %{size_download}o\n" "$2" || echo "$1 FAIL"; }
+          get geopf-bern  "https://data.geopf.fr/geocodage/search?q=bern&type=municipality&limit=6&lat=48.462&lon=7.4824"
+          get geopf-ob    "https://data.geopf.fr/geocodage/search?q=ob&type=municipality&limit=6&lat=48.462&lon=7.4824"
+          get geopf-stra  "https://data.geopf.fr/geocodage/search?q=stras&type=municipality&limit=6&lat=48.462&lon=7.4824"
+          get geopf-saint "https://data.geopf.fr/geocodage/search?q=saint&type=municipality&limit=6&lat=48.462&lon=7.4824"
+          get ban-bern    "https://api-adresse.data.gouv.fr/search/?q=bern&type=municipality&limit=6&lat=48.462&lon=7.4824"
+          get geo-dep     "https://geo.api.gouv.fr/communes?lat=48.462&lon=7.4824&fields=codeDepartement"
+          get geo-67      "https://geo.api.gouv.fr/departements/67/communes?fields=nom,codesPostaux,centre"
+          get geo-68      "https://geo.api.gouv.fr/departements/68/communes?fields=nom,codesPostaux,centre"
+          get geo-88      "https://geo.api.gouv.fr/departements/88/communes?fields=nom,codesPostaux,centre"
+          get geo-dep-voisins "https://geo.api.gouv.fr/departements?fields=nom,code"
+          grep -i -h "^access-control\|^HTTP\|^location" out/*.headers | sort | uniq -c
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sonde
+          path: out
