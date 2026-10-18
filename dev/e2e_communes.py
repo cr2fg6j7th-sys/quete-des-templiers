@@ -35,7 +35,8 @@ async def main():
         async with async_playwright() as p:
             b = await p.chromium.launch()
             ctx, pg, errs = await page(b)
-            res["obernai"] = await chips(pg); res["obernai_label"] = await pg.text_content(".near-lab")
+            await pg.wait_for_timeout(2000)
+            res["sans_position_puces_cachees"] = await pg.eval_on_selector(".chips", "e=>e.hidden")
             await pg.screenshot(path=str(OUT / "1-autour-obernai.png"), full_page=True)
             res["be"] = await typed(pg, "be"); await pg.screenshot(path=str(OUT / "2-be.png"))
             res["bern"] = await typed(pg, "bern"); await pg.screenshot(path=str(OUT / "3-bern.png"))
@@ -46,17 +47,18 @@ async def main():
             res["strasbourg"] = await pg.evaluate("JSON.parse(localStorage.getItem('quete-templiers-v3')).commune")
             res["hidden"] = await pg.eval_on_selector_all("form.town input[type=hidden]", "e=>e.map(x=>x.name+'='+x.value)")
             await pg.screenshot(path=str(OUT / "4-strasbourg.png"), full_page=True)
-            await pg.click(".chip >> nth=1"); await pg.wait_for_timeout(300)
-            res["chip"] = await pg.evaluate("JSON.parse(localStorage.getItem('quete-templiers-v3')).commune")
-            await pg.screenshot(path=str(OUT / "5-puce.png"), full_page=True)
             res["errors_obernai"] = errs; await ctx.close()
             for name, geo in (("colmar", {"latitude": 48.0794, "longitude": 7.3585}), ("saint-die", {"latitude": 48.2847, "longitude": 6.9496}), ("paris", {"latitude": 48.8566, "longitude": 2.3522})):
                 ctx, pg, errs = await page(b, geo=geo)
                 await pg.click(".locate"); await pg.wait_for_timeout(1500)
                 res[name + "_label"] = await pg.text_content(".near-lab"); res[name] = await chips(pg)
                 await pg.screenshot(path=str(OUT / f"6-{name}.png"), full_page=True)
+                if name == "colmar":
+                    await pg.click(".chip >> nth=1"); await pg.wait_for_timeout(300)
+                    res["chip"] = await pg.evaluate("JSON.parse(localStorage.getItem('quete-templiers-v3')).commune")
+                    await pg.screenshot(path=str(OUT / "5-puce.png"), full_page=True)
                 res["errors_" + name] = errs; await ctx.close()
-            ctx, pg, errs = await page(b, scheme="dark"); await chips(pg); await typed(pg, "ober")
+            ctx, pg, errs = await page(b, scheme="dark"); await typed(pg, "ober")
             await pg.screenshot(path=str(OUT / "7-sombre.png")); await ctx.close()
             await b.close()
     finally:

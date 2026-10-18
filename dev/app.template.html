@@ -470,7 +470,8 @@ async function reverseTown(lat,lon){
 const GEO_API="https://geo.api.gouv.fr";
 const OBERNAI={lat:48.4620,lon:7.4824};
 const NEAR_KM=15;
-// pos: where suggestions are centred; located: the visitor's own position (else Obernai).
+// pos: where suggestions are centred; located: the visitor's own position. Not located: the typed
+// suggestions are still ranked from Obernai (no distance shown), and no commune is listed around.
 const CM={pos:OBERNAI,located:false,lists:new Map(),deps:new Map(),search:new Map(),ban:new Map(),around:new Map()};
 function km(a,b){const r=Math.PI/180,dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;
   const x=Math.sin(dLa/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2;return 2*6371.0088*Math.asin(Math.min(1,Math.sqrt(x)));}
@@ -923,7 +924,8 @@ function communeField(searchInto){
   const locBtn=h("button",{type:"button",class:"locate"});
   locBtn.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
   const locText=h("span",{text:"Me localiser"});locBtn.append(locText);
-  const near=h("div",{class:"near",hidden:true},h("div",{class:"near-head"},nearLab,locBtn),chips);
+  const nearMsg=h("p",{class:"note",role:"status",hidden:true});
+  const near=h("div",{class:"near"},h("div",{class:"near-head"},nearLab,locBtn),chips,nearMsg);
   const btn=h("button",{class:"btn",type:"submit"});
   const fallback=h("div",{class:"choices"});
   let items=[],active=-1,seq=0,timer=0,pending=null;
@@ -939,7 +941,7 @@ function communeField(searchInto){
     else input.removeAttribute("aria-activedescendant");};
   const show=r=>{items=r;
     list.replaceChildren(...r.map((c,i)=>{const li=h("li",{id:`${LID}-${i}`,role:"option","aria-selected":"false"},
-        h("span",{class:"nm"},h("b",{text:c.nom}),c.cp?` (${c.cp})`:""),c.d<=100?h("span",{class:"d",text:kmText(c.d)}):null);
+        h("span",{class:"nm"},h("b",{text:c.nom}),c.cp?` (${c.cp})`:""),CM.located&&c.d<=100?h("span",{class:"d",text:kmText(c.d)}):null);
       li.addEventListener("mousedown",e=>e.preventDefault());   // keep the focus in the field
       li.addEventListener("click",()=>pick(c,"liste"));return li;}));
     if(r.length){list.hidden=false;input.setAttribute("aria-expanded","true");mark(-1);}else close();};
@@ -959,12 +961,15 @@ function communeField(searchInto){
       if(exact)pick(exact,"tapee");else{searchInto(v,fallback);return;}}
     if(pending){btn.disabled=true;await Promise.race([pending,new Promise(r=>setTimeout(r,4000))]);btn.disabled=false;}
     startFrom(S.commune.lat,S.commune.lon,S.commune.nom);};
+  // the communes around are shown only once the visitor is located: before, only the button
   const fillNear=async()=>{let L=[];
-    try{L=(await communesAround(CM.pos)).filter(c=>c.d<=NEAR_KM).slice(0,6);}catch(e){}
-    nearLab.textContent=CM.located?"Près de chez vous :":"Autour d'Obernai :";
+    if(CM.located)try{L=(await communesAround(CM.pos)).filter(c=>c.d<=NEAR_KM).slice(0,6);}catch(e){}
+    nearLab.textContent="Près de chez vous :";nearLab.hidden=!L.length;
     chips.replaceChildren(...L.map(c=>h("button",{type:"button",class:"chip","data-code":c.code,"aria-pressed":"false",onclick:()=>pick(c,"proche")},
       c.nom,h("span",{class:"d",text:` · ${kmText(c.d)}`}))));
-    near.hidden=!L.length;showChosen();};
+    chips.hidden=!L.length;
+    if(CM.located&&!L.length){nearMsg.textContent="Aucune commune trouvée autour de vous : tapez le nom de votre ville ou de votre village.";nearMsg.hidden=false;}
+    showChosen();};
 
   input.addEventListener("input",()=>{
     if(S.commune&&input.value!==communeLabel(S.commune)){S.commune=null;pending=null;save();showChosen();}
@@ -981,7 +986,7 @@ function communeField(searchInto){
   locBtn.addEventListener("click",async()=>{locBtn.disabled=true;locText.textContent="Localisation…";
     const ok=await locateCommune();hit(ok?"localiser-ok":"localiser-echec");
     locText.textContent="Me localiser";locBtn.disabled=false;
-    note.textContent=ok?"":"Position indisponible : voici les communes autour d'Obernai.";
+    nearMsg.hidden=ok;nearMsg.textContent=ok?"":"Position indisponible : tapez le nom de votre ville ou de votre village.";
     items=[];await fillNear();});
   // position already allowed on an earlier visit: no question asked, the list is simply nearer
   try{if(!CM.located&&navigator.permissions)navigator.permissions.query({name:"geolocation"})
