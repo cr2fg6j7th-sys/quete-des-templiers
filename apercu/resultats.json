@@ -1,47 +1,39 @@
 {
- "obernai": [
-  "Obernai · < 1 km",
-  "Bernardswiller · 1,7 km",
-  "Niedernai · 2,7 km",
-  "Bischoffsheim · 2,8 km",
-  "Goxwiller · 3,2 km",
-  "Bœrsch · 3,6 km"
- ],
- "obernai_label": "Autour d'Obernai :",
+ "sans_position_puces_cachees": true,
  "be": [
-  "Bernardswiller (67210)1,7 km",
-  "Bernardvillé (67140)12 km",
-  "Bergbieten (67310)13 km",
-  "Benfeld (67230)13 km",
-  "Belmont (67130)19 km",
-  "Bellefosse (67130)21 km"
+  "Bernardswiller (67210)",
+  "Bernardvillé (67140)",
+  "Bergbieten (67310)",
+  "Benfeld (67230)",
+  "Belmont (67130)",
+  "Bellefosse (67130)"
  ],
  "bern": [
-  "Bernardswiller (67210)1,7 km",
-  "Bernardvillé (67140)12 km",
-  "Bernolsheim (67170)36 km",
+  "Bernardswiller (67210)",
+  "Bernardvillé (67140)",
+  "Bernolsheim (67170)",
   "Bernin (38190)",
   "Bernay (27300)",
   "Bernis (30620)"
  ],
  "sai": [
-  "Saint-Nabor (67530)4,7 km",
-  "Saint-Pierre (67140)8,9 km",
-  "Saint-Pierre-Bois (67220)17 km",
-  "Saint-Maurice (67220)19 km",
-  "Saint-Martin (67220)19 km",
-  "Saint-Blaise-la-Roche (67420)25 km"
+  "Saint-Nabor (67530)",
+  "Saint-Pierre (67140)",
+  "Saint-Pierre-Bois (67220)",
+  "Saint-Maurice (67220)",
+  "Saint-Martin (67220)",
+  "Saint-Blaise-la-Roche (67420)"
  ],
  "metz": [
   "Metz (57000)",
-  "Metzeral (68380)59 km",
-  "Metzing (57980)81 km",
+  "Metzeral (68380)",
+  "Metzing (57980)",
   "Metzeresche (57920)",
   "Metzervisse (57940)",
   "Metz-en-Couture (62124)"
  ],
  "stras": [
-  "Strasbourg (67000)23 km"
+  "Strasbourg (67000)"
  ],
  "strasbourg": {
   "nom": "Strasbourg",
@@ -56,13 +48,6 @@
   "commune_lat=48.5734",
   "commune_lon=7.752"
  ],
- "chip": {
-  "nom": "Bernardswiller",
-  "cp": "67210",
-  "lat": 48.453,
-  "lon": 7.4642,
-  "code": "67031"
- },
  "errors_obernai": [],
  "colmar_label": "Près de chez vous :",
  "colmar": [
@@ -73,6 +58,13 @@
   "Wettolsheim · 5,1 km",
   "Wintzenheim · 5,1 km"
  ],
+ "chip": {
+  "nom": "Horbourg-Wihr",
+  "cp": "68180",
+  "lat": 48.0808,
+  "lon": 7.3929,
+  "code": "68145"
+ },
  "errors_colmar": [],
  "saint-die_label": "Près de chez vous :",
  "saint-die": [
