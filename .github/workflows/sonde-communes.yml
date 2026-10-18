@@ -4,11 +4,13 @@ on:
   push:
     branches: [sonde-communes]
 permissions:
-  contents: read
+  contents: write
 jobs:
   sonde:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'Résultats de la sonde')"
     steps:
+      - uses: actions/checkout@v4
       - run: |
           mkdir out
           O="Origin: https://maquetelegendaire.fr"
@@ -24,7 +26,7 @@ jobs:
           get geo-88      "https://geo.api.gouv.fr/departements/88/communes?fields=nom,codesPostaux,centre"
           get geo-dep-voisins "https://geo.api.gouv.fr/departements?fields=nom,code"
           grep -i -h "^access-control\|^HTTP\|^location" out/*.headers | sort | uniq -c
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sonde
-          path: out
+          grep -i -h "^access-control\|^HTTP\|^location" out/*.headers > out/resume.txt || true
+          git config user.name "sonde"; git config user.email "sonde@users.noreply.github.com"
+          git fetch -q origin sonde-communes && git checkout -q sonde-communes
+          rm -rf sonde && mv out sonde && git add sonde && git commit -q -m "Résultats de la sonde [skip ci]" && git push -q origin sonde-communes
