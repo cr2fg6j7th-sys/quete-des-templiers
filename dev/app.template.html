@@ -88,6 +88,10 @@ button{cursor:pointer}
 .choice.right{border-color:var(--ok);color:var(--ok);font-weight:700}
 .result{font:inherit;text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink)}
 .hint{font-size:.95rem;color:var(--muted);white-space:pre-line}
+.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.qlab{font-family:var(--label);letter-spacing:.05em;font-size:.95rem}
+.dip-images{display:flex;flex-direction:column;gap:14px}
+.dip-image{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9;width:max-content;max-width:calc(100% - 32px);background:var(--ink);color:var(--stone);border-radius:12px;padding:12px 16px;font-size:.95rem;box-shadow:0 6px 20px rgba(27,37,71,.3);text-align:center}
 footer .me{color:var(--ok)}
 .ok{color:var(--ok);font-weight:700}
@@ -238,7 +242,7 @@ if("serviceWorker" in navigator)try{navigator.serviceWorker.register("sw.js").ca
 /* ---------- State ---------- */
 // preview: what is shown before paying; token: the sealed quest (paid build); quest: the full quest once unlocked;
 // paid: the Stripe session that unlocked it (also the key of the reopen link).
-const defaults={ref:"",name:"",hero:"m",kids:8,indoor:false,unlocked:false,screen:"home",start:null,town:"",preview:null,token:"",quest:null,paid:"",step:0,phase:"travel",solved:[],hint:0,voice:"",tester:false,avis:false};
+const defaults={ref:"",name:"",hero:"m",kids:8,compagnons:[],indoor:false,unlocked:false,screen:"home",start:null,town:"",preview:null,token:"",quest:null,paid:"",step:0,phase:"travel",solved:[],hint:0,voice:"",tester:false,avis:false};
 let S=Object.assign({},defaults);
 try{const raw=localStorage.getItem(STORE);if(raw)S=Object.assign({},defaults,JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
@@ -594,7 +598,8 @@ function printDiplomas(companions){
   const hero=S.name||g("Jeune chevalier","Jeune chevalière");
   const pages=[diplomaSheet({by:"Par ce diplôme, le Grand Maître nomme",name:hero,title:g("Chevalier","Chevalière")+" de l'Ordre des Gardiens du Temple",
     line:`pour avoir ouvert le Sceau du Temple${where}, le ${date}, avec ses compagnons d'armes.`})];
-  if(companions)for(let i=1;i<(S.kids||8);i++)pages.push(diplomaSheet({by:"Diplôme de bravoure décerné à",title:"Membre de l'Ordre des Gardiens du Temple",
+  // one per companion: the first name typed for them, or a line to write it by hand
+  if(companions)for(const name of companionSlots())pages.push(diplomaSheet({by:"Diplôme de bravoure décerné à",name,title:"Membre de l'Ordre des Gardiens du Temple",
     line:`pour avoir aidé ${S.name||"le héros de la fête"} à ouvrir le Sceau du Temple${where}, le ${date}.`}));
   let box=document.getElementById("print");if(!box){box=h("div",{id:"print"});document.body.append(box);}
   box.replaceChildren(...pages);
@@ -623,17 +628,49 @@ function printLetters(){
   hit("imprime");
   try{window.print();}catch(e){}
 }
+// The companions: one field per child besides the hero (S.kids - 1, more if needed), kept in the phone.
+const MAXC=20;
+function companionSlots(){const n=Math.min(MAXC,Math.max(1,(S.kids||8)-1,(S.compagnons||[]).length));
+  return Array.from({length:n},(x,i)=>((S.compagnons||[])[i]||"").trim());}
+function companionLines(name){
+  const q=S.quest||{},today=partyDate(),where=S.town&&!q.indoorOnly?` à ${S.town}`:"";
+  return [{t:"ordre des gardiens du temple",f:"label",s:38,c:"#a87a1f"},{t:"Diplôme de bravoure décerné à",f:"body",s:46,gap:30},
+    {t:name,f:"display",s:128,c:"#b8505c",gap:20},
+    {t:"Membre de l'Ordre\ndes Gardiens du Temple",f:"bold",s:50,gap:16},
+    {t:`pour avoir aidé ${S.name||"le héros de la fête"} à ouvrir le Sceau du Temple${where}, le ${today}.`,f:"italic",s:42,c:"#5b6482",gap:36}];
+}
+const fileSlug=t=>String(t).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"compagnon";
+// before: in the guide, to print before the party. After the quest: also each companion's diploma as an image,
+// to send to their parents.
 function printCard(before){
-  const n=Math.max(1,(S.kids||8)-1);
   const box=h("input",{type:"checkbox",id:"dip-all"});box.checked=S.dipAll!==false;
   box.addEventListener("change",()=>{S.dipAll=box.checked;save();});
-  return h("div",{class:"card adult"},h("h3",{text:before?"Les diplômes, à imprimer avant la fête":"Le diplôme à imprimer"}),
+  const grid=h("div",{class:"names"}),more=h("button",{class:"linkish",type:"button"},"Ajouter un compagnon");
+  const images=h("div",{class:"dip-images"}),made=new Map();   // name -> its image maker, kept while the names change
+  const setName=(i,v)=>{const a=companionSlots();a[i]=v;while(a.length&&!a[a.length-1]&&a.length>Math.max(1,(S.kids||8)-1))a.pop();S.compagnons=a;save();};
+  const drawImages=()=>{if(before)return;
+    const names=[...new Set(companionSlots().filter(Boolean))];
+    images.replaceChildren(...(names.length?names.map(n=>{
+      if(!made.has(n))made.set(n,h("div",{class:"dip-image"},...imageMaker(`Créer le diplôme ${/^[aeiouyàâäéèêëîïôöùûü]/i.test(n)?"d'":"de "}${n}`,`diplome-${fileSlug(n)}.png`,()=>companionLines(n),"diplome",{qr:true,sign:true})));
+      return made.get(n);}):[h("p",{class:"note",text:"Tapez les prénoms ci-dessus : le diplôme de chacun apparaîtra ici."})]));};
+  const drawGrid=()=>{const slots=companionSlots();
+    grid.replaceChildren(...slots.map((v,i)=>{
+      const inp=h("input",{type:"text",maxlength:"24",autocomplete:"off",autocapitalize:"words",spellcheck:"false",placeholder:`Compagnon ${i+1}`,"aria-label":`Prénom du compagnon ${i+1}`});
+      inp.value=v;inp.addEventListener("input",()=>setName(i,inp.value.trim()));inp.addEventListener("change",drawImages);
+      return inp;}));
+    more.hidden=slots.length>=MAXC;};
+  more.addEventListener("click",()=>{const a=companionSlots();a.push("");S.compagnons=a;save();drawGrid();grid.lastChild&&grid.lastChild.focus();});
+  drawGrid();drawImages();
+  return h("div",{class:"card adult"},h("h3",{text:before?"Les diplômes, à imprimer avant la fête":"Les diplômes des chevaliers"}),
     h("p",{class:"note",text:before
       ?`Au format A4, à remettre à la fin, quand le Grand Maître nomme ${S.name||"votre enfant"} ${g("chevalier","chevalière")}. Chaque compagnon peut repartir avec le sien : c'est leur souvenir de la fête.`
       :`Au format A4, pour ${S.name||"votre enfant"} et ses compagnons. Une photo ${S.name?"de "+S.name:""} avec son diplôme fait un beau souvenir : si vous la partagez sur les réseaux, ajoutez ${TAG} ou identifiez ${IG}.`}),
-    h("label",{class:"check",for:"dip-all"},box,`Ajouter un diplôme pour chaque compagnon (${n}, prénom à écrire à la main)`),
+    h("p",{class:"qlab",text:"Les prénoms des compagnons"}),grid,more,
+    h("p",{class:"note",text:"Un diplôme par compagnon, à son prénom. Laissez une case vide : son diplôme aura une ligne pour écrire le prénom à la main."}),
+    h("label",{class:"check",for:"dip-all"},box,"Imprimer aussi les diplômes des compagnons"),
     h("button",{class:"btn ghost",type:"button",onclick:()=>printDiplomas(box.checked)},"Imprimer les diplômes"),
-    h("p",{class:"note",text:"Sur téléphone : Imprimer, ou « Enregistrer en PDF » pour l'imprimer ailleurs."}));
+    h("p",{class:"note",text:"Sur téléphone : Imprimer, ou « Enregistrer en PDF » pour l'imprimer ailleurs."}),
+    !before&&h("p",{class:"qlab",text:"Leurs diplômes en image, à envoyer à leurs parents"}),!before&&images);
 }
 const longDate=d=>{try{return new Date(d+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});}catch(e){return d;}};
 function inviteCard(){
