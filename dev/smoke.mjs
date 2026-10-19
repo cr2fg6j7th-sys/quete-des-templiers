@@ -102,7 +102,10 @@ try {
   }
 
   const bad = await post("/api/checkout", { token: "faux", consent: true });
-  bad.status === 400 ? ok("jeton trafiqué refusé") : ko(`jeton trafiqué (HTTP ${bad.status})`);
+  // before the opening the payment route is closed first (403 « closed »): the forged token is checked after it
+  bad.status === 400 ? ok("jeton trafiqué refusé")
+    : bad.status === 403 && bad.json && bad.json.reason === "closed" ? ok("jeton trafiqué refusé (paiement fermé avant l'ouverture)")
+    : ko(`jeton trafiqué (HTTP ${bad.status})`);
   const unpaid = await post("/api/unlock", { session: "cs_test_inexistant1234567890" });
   unpaid.status === 404 ? ok("session inconnue refusée") : ko(`session inconnue (HTTP ${unpaid.status})`);
 
