@@ -62,6 +62,7 @@ async def main():
             check("Le jour de la fête" in await pg.inner_text("body"), "accueil : présentation avant le formulaire")
             await pg.click("button.big >> nth=0")
             await pg.fill("#hero-name", "Michael")
+            await pg.evaluate("document.querySelectorAll('details.more').forEach(d=>d.open=true)")   # "Préciser le point de départ"
             await pg.fill("#start-q", "place de l'église Bourg-Test")
             await pg.click("button:has-text('Chercher')")
             await pg.wait_for_selector("text=Rue de l'Église 67999 Autre-Bourg", timeout=8000)
@@ -254,9 +255,11 @@ async def main():
             await pgG.route("**/data.geopf.fr/**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(ban)))
             await pgG.goto(BASE + "/")
             await pgG.click("button.big >> nth=0")
+            await pgG.evaluate("document.querySelectorAll('details.more').forEach(d=>d.open=true)")   # "Préciser le point de départ"
             await pgG.click("text=Partir d'ici")
             check("Indiquez d'abord le prénom" in await pgG.inner_text("body"), "« Partir d'ici » sans prénom : demande le prénom d'abord")
             await pgG.fill("#hero-name", "Lina")
+            await pgG.evaluate("document.querySelectorAll('details.more').forEach(d=>d.open=true)")   # "Préciser le point de départ"
             await pgG.click("text=Partir d'ici")
             await pgG.wait_for_selector("text=Ce qui vous attend", timeout=10000)
             stG = json.loads(await pgG.evaluate("localStorage.getItem('quete-templiers-v3')"))
@@ -268,9 +271,11 @@ async def main():
             await pgD.evaluate("void (navigator.geolocation.getCurrentPosition=(ok,ko)=>setTimeout(()=>ko({code:1}),50))")
             await pgD.click("button.big >> nth=0")
             await pgD.fill("#hero-name", "Lina")
+            await pgD.evaluate("document.querySelectorAll('details.more').forEach(d=>d.open=true)")   # "Préciser le point de départ"
             await pgD.click("text=Partir d'ici")
             await pgD.wait_for_selector("text=refuse de donner la position", timeout=5000)
             await pgD.evaluate("void (navigator.geolocation.getCurrentPosition=(ok,ko)=>setTimeout(()=>ko({code:3}),50))")
+            await pgD.evaluate("document.querySelectorAll('details.more').forEach(d=>d.open=true)")   # "Préciser le point de départ"
             await pgD.click("text=Partir d'ici")
             await pgD.wait_for_selector("text=La position n'a pas été trouvée", timeout=5000)
             check(True, "« Partir d'ici » : position refusée ou introuvable, message clair et recherche d'adresse proposée")
@@ -285,6 +290,7 @@ async def main():
             await pg4.goto(BASE + "/")
             await pg4.click("button.big >> nth=0")
             await pg4.fill("#hero-name", "Léo")
+            await pg4.evaluate("document.querySelectorAll('details.more').forEach(d=>d.open=true)")   # "Préciser le point de départ"
             await pg4.fill("#start-q", "place de l'église Bourg-Test")
             await pg4.click("button:has-text('Chercher')")
             await pg4.click("text=Place de l'Église, Bourg-Test")

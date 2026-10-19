@@ -175,6 +175,8 @@ async function preview(request, env, ctx) {
 }
 
 async function checkout(request, env, ctx) {
+  // Before the opening (TESTEURS = "1"), no payment at all, even with the real Stripe key in place.
+  if (testers(env)) return reply({ ok: false, reason: "closed" }, 403);
   const b = await readJSON(request);
   if (!b || b.consent !== true) return reply({ ok: false, reason: "consent" }, 400);
   const t = await unseal(b.token, env);

@@ -106,7 +106,12 @@ try {
   const unpaid = await post("/api/unlock", { session: "cs_test_inexistant1234567890" });
   unpaid.status === 404 ? ok("session inconnue refusée") : ko(`session inconnue (HTTP ${unpaid.status})`);
 
-  if (testKey && token) {
+  // Before the opening the server refuses every payment, whatever the key (no call to Stripe).
+  const tp0 = await post("/api/preview", { indoor: true, ref: "smoke" });
+  if (token && tp0.json && tp0.json.testeur) {
+    const c = await post("/api/checkout", { token, consent: true, name: "Test", hero: "m", kids: 8, town: "Rosheim", ref: "smoke" });
+    c.status === 403 && c.json && c.json.reason === "closed" ? ok("paiement fermé pendant l'avant-première") : ko(`paiement ouvert pendant l'avant-première (HTTP ${c.status})`);
+  } else if (testKey && token) {
     const c = await post("/api/checkout", { token, consent: true, name: "Test", hero: "m", kids: 8, town: "Rosheim", ref: "smoke" });
     c.json && c.json.ok && /^https:\/\/checkout\.stripe\.com\//.test(c.json.url) ? ok("page de paiement Stripe (mode test) créée") : ko(`paiement Stripe (HTTP ${c.status} ${JSON.stringify(c.json)})`);
     if (c.json && c.json.ok) c.json.branding === "ok" ? ok("page de paiement aux couleurs de Ma Quête Légendaire") : console.log(`::warning::Image de marque refusée par Stripe : ${c.json.branding}`);
