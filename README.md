@@ -31,4 +31,6 @@ L'action « Mise en ligne (Cloudflare) » publie la version payante à chaque mo
 
 ## Données
 
-Lieux : © contributeurs OpenStreetMap, licence ODbL, via l'API Overpass. Recherche d'adresse : Nominatim.
+Lieux : © contributeurs OpenStreetMap, licence ODbL, via l'API Overpass. Communes et adresses : Base Adresse Nationale (data.geopf.fr, l'ancienne api-adresse.data.gouv.fr) et API Géo (geo.api.gouv.fr), Licence Ouverte 2.0 ; Nominatim. Crédits complets : `dev/legal/credits.html`.
+
+`dev/e2e_communes.py` vérifie le champ « Ville ou village » avec les vraies API (captures dans `dist/apercu/`).
