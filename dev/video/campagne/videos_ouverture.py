@@ -136,3 +136,45 @@ VIDEOS.update({
   "maison-oreiller": anecdote("En voyage, les chevaliers dormaient sur… <b>leur selle</b> ?", "Une lettre cachée <b>sous l'oreiller</b>", "maison-oreiller",
       "Il pleut ? La quête vient à la maison", "Six lettres à cacher en 5 minutes."),
 })
+
+
+# ---- Metricool, 25 to 30 Nov: 4 more videos, after the last November pin (23/11). The free plan counts
+# Instagram + TikTok as 2; if it really counts them as 1 (Nathan, 19/10), these go out, otherwise they don't,
+# and nothing scheduled before them is affected.
+VIDEOS.update({
+  "devinez-le-lieu": ([
+    ("card", {"eyebrow": "Petit jeu", "big": "Devinez le lieu <em>avant les enfants</em>", "sub": "Trois indices du Grand Maître.", "seal": True}, 2.8),
+    ("voice", "indice-mill-0", {"top": "Indice <b>n° 1</b>"}, LINES_OF("indice-mill-0")),
+    ("voice", "indice-library-0", {"top": "Indice <b>n° 2</b>"}, LINES_OF("indice-library-0")),
+    ("voice", "indice-castle-0", {"top": "Indice <b>n° 3</b>"}, LINES_OF("indice-castle-0")),
+    ("card", {"big": "Un moulin, une bibliothèque, un château", "sub": "Les indices changent avec les lieux de votre ville."}, 3.2),
+    end_open(),
+  ], 0),
+  "prenoms-hiver": ([
+    ("card", {"top": "Et ces prénoms-là, <b>il les connaît ?</b>", "seal": True}, 2.2),
+    ("name", "hugo", "Hugo", {"top": "Et ces prénoms-là, <b>il les connaît ?</b>"}),
+    ("name", "lina", "Lina", {"top": "Et ces prénoms-là, <b>il les connaît ?</b>"}),
+    ("name", "sacha", "Sacha", {"top": "Et ces prénoms-là, <b>il les connaît ?</b>"}),
+    ("name", "manon", "Manon", {"top": "Et ces prénoms-là, <b>il les connaît ?</b>"}),
+    ("name", "ethan", "Ethan", {"top": "Et ces prénoms-là, <b>il les connaît ?</b>"}),
+    ("name", "camille", "Camille", {"top": "Et ces prénoms-là, <b>il les connaît ?</b>"}),
+    ("voice", "nomme-m", {"top": "Et à la fin <b>de la quête</b>"}, LINES_OF("nomme-m")),
+    ("card", {"big": "1 500 prénoms, et celui de votre enfant ?", "sub": "Tapez-le sur le site, et écoutez le Grand Maître."}, 3.0),
+    end_open(),
+  ], 0),
+  "maison-hiver": ([
+    ("card", {"eyebrow": "Anniversaire en hiver", "big": "Froid, nuit, pluie… <em>la quête vient à la maison</em>", "seal": True}, 3.0),
+    ("voice", "cachette-canape", {"top": "Où est cachée <b>la lettre ?</b>"}, LINES_OF("cachette-canape")),
+    ("card", {"big": "Sous un coussin du canapé !", "sub": "6 cachettes, une énigme pour chacune, et une anecdote quand on trouve."}, 3.2),
+    end_open(),
+  ], 0),
+  "mot-epee": ([
+    ("card", {"top": "Les enfants ont gagné <b>4 lettres</b>", "letters": "EEPE", "sub": "Un mot de chevalier… vous le trouvez ?"}, 3.0),
+    ("voice", "mot-EPEE-f", {"top": "Le Grand Maître <b>donne un indice</b>"}, LINES_OF("mot-EPEE-f")),
+    ("card", {"letters": "ÉPÉE", "big": "Trouvé !"}, 1.8),
+    ("voice", "fin-EPEE-f", {"top": "Le Sceau du Temple <b>s'ouvre</b>"},
+     "Tu as retrouvé le mot secret : ÉPÉE.|Tu as retrouvé le mot secret : ÉPÉE.|L'épée de la chevalière protège les plus faibles.|Le Sceau du Temple est ouvert !", 4),
+    ("card", {"big": "4, 5 ou 6 lettres", "sub": "Le mot secret change avec le nombre d'étapes : ÉPÉE, BRAVE, FIDÈLE…"}, 3.0),
+    end_open(),
+  ], 0),
+})
