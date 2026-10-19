@@ -28,6 +28,8 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:radial-gradient(
 .cta{font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:58px;color:var(--or);letter-spacing:2px}
 .pill{font-weight:700;font-size:80px;padding:18px 44px;border:4px solid var(--or);border-radius:28px}
 .small{font-size:42px;color:var(--muted)}
+.pill.sm{font-size:62px;padding:16px 36px}
+.pic{border-radius:18px;box-shadow:0 14px 40px rgba(0,0,0,.45);display:block}
 .letters{display:flex;gap:22px}
 .letters span{width:130px;height:170px;border-radius:18px;background:#f3ead6;color:var(--navy);font-family:"UnifrakturMaguntia",serif;font-size:120px;display:flex;align-items:center;justify-content:center}
 </style>
@@ -38,7 +40,7 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:radial-gradient(
 const SEAL=`<svg class="seal" viewBox="-30 -30 60 60" aria-hidden="true"><circle r="26" fill="var(--wax)"/><circle r="17" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.2"/><path d="M-1.6-1.6-5-12H5L1.6-1.6 12-5V5L1.6 1.6 5 12H-5L-1.6 1.6-12 5V-5Z" fill="#fff" fill-opacity=".85"/></svg>`;
 // s: {kind, top, name, line, eyebrow, big, sub, steps, letters, cta, pill, small, justify, pad}
 // French punctuation: a non-breaking space before ! ? : ; » and after «, so a sign never starts a line.
-const nb=t=>typeof t==="string"?t.replace(/ ([!?:;»])/g,"\u00a0$1").replace(/« /g,"«\u00a0"):t;
+const nb=t=>typeof t==="string"?t.replace(/(\d) (?=[^\s\d])/g,"$1\u00a0").replace(/ ([!?:;»])/g,"\u00a0$1").replace(/« /g,"«\u00a0"):t;
 function show(s){
   s=Object.fromEntries(Object.entries(s).map(([k,v])=>[k,Array.isArray(v)?v.map(nb):nb(v)]));
   const r=document.getElementById("root");
@@ -53,12 +55,13 @@ function show(s){
   if(s.seal)body.push(SEAL);
   if(s.eyebrow)body.push(`<div class="eyebrow">${s.eyebrow}</div>`);
   if(s.big)body.push(`<div class="big">${s.big}</div>`);
+  if(s.img)body.push(`<img class="pic" src="${s.img}" style="width:${s.imgw||620}px">`);
   if(s.letters)body.push(`<div class="letters">${s.letters.split("").map(l=>`<span>${l}</span>`).join("")}</div>`);
   if(s.sub)body.push(`<div class="sub">${s.sub}</div>`);
   if(s.steps)body.push(s.steps.map((t,i)=>`<div class="step"><div class="num">${i+1}</div><div>${t}</div></div>`).join(""));
   if(s.brand)body.push(`<div class="brand">Ma Quête Légendaire</div>`);
   if(s.cta)body.push(`<div class="cta">${s.cta}</div>`);
-  if(s.pill)body.push(`<div class="pill">${s.pill}</div>`);
+  if(s.pill)body.push(`<div class="pill${s.pillSmall?" sm":""}">${s.pill}</div>`);
   if(s.small)body.push(`<div class="small">${s.small}</div>`);
   r.innerHTML=html+`<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:${s.justify||"center"};gap:${s.gap||56}px;padding:${s.pad||"0 90px"}">${body.join("")}</div>`;
 }

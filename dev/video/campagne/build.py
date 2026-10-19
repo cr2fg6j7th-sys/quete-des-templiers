@@ -28,7 +28,13 @@ def spans(f):
     return out
 
 def sentences(text):
-    return [s.strip() for s in re.findall(r"[^.!?…]+(?:[.!?…]+|$)", text) if s.strip()]
+    out = []
+    for s in re.findall(r"[^.!?…]+(?:[.!?…]+|$)", text):
+        s = s.strip()
+        if not s: continue
+        if out and not re.search(r"\w", s): out[-1] += "\u00a0" + s if s[0] in "»" else s   # a lone closing quote stays with its sentence
+        else: out.append(s)
+    return out
 
 def timed_captions(f, text):
     """(start, end) of each sentence inside the clip, start = first speech."""
@@ -59,8 +65,8 @@ def plan_parts(parts):
         elif p[0] == "voice":
             _, clip, slide, text, *rng = p
             f = VOIX / f"{clip}.mp3"
-            if rng:   # only the first spoken spans of the clip, one sentence each
-                sp = spans(f)[:rng[0]]; sent = sentences(text)[:rng[0]]
+            if rng:   # only the first spoken spans of the clip: one sentence each, or one "|" piece each
+                sp = spans(f)[:rng[0]]; sent = (text.split("|") if "|" in text else sentences(text))[:rng[0]]
                 s0, s1 = sp[0][0], sp[-1][1]
                 caps = [(a - s0, b2 - s0, x) for (a, b2), x in zip(sp, sent)]
             else:
