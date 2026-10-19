@@ -1,4 +1,4 @@
-# Publications à faire à la main (19 octobre – 6 novembre 2026)
+# Publications à faire à la main (19 octobre – 20 novembre 2026)
 
 Demande de Nathan (18/10, 11 h 49) : « augmente le nombre de posts sur les réseaux, je les posterai moi, on peut poster plusieurs fois par jour ». Puis (12 h 04) : une page avec une ligne par publication, dans l'ordre des dates, un bouton pour enregistrer la vidéo dans sa pellicule, et la légende à copier sur la même ligne.
 
@@ -7,7 +7,9 @@ Demande de Nathan (18/10, 11 h 49) : « augmente le nombre de posts sur les rés
 ## Rythme
 - Instagram (Reel) + TikTok : 2 vidéos par jour (avec celles de Metricool), en général 12 h 15 et 18 h, ou 10 h et 18 h le week-end.
 - Pinterest : 2 épingles par jour, 13 h et 21 h (ou 20 h 30).
-- Au total 68 publications à la main : 31 vidéos et 37 épingles. Tout se publie dans les applis, hors Metricool (quota gratuit d'octobre plein ; en novembre, 16 places restent pour l'ouverture du 7/11).
+- Au total 68 publications à la main jusqu'au 6/11 : 31 vidéos et 37 épingles.
+- Du 7 au 20/11 (après l'ouverture) : 42 publications à la main, 1 vidéo d'anecdote et 2 épingles par jour (14 vidéos, 28 épingles), à des heures volontairement irrégulières, en plus des 8 vidéos d'ouverture que Metricool publie seul.
+- Tout se publie dans les applis, hors Metricool : son quota gratuit est plein en octobre et en novembre (20 sur 20).
 
 ## Ce qui a changé le 18/10
 - Légendes : « (Voix créée par IA) » retiré partout, à la demande de Nathan, qui active lui-même l'étiquette des réseaux (Instagram « Étiquette IA », TikTok « Contenu généré par IA »). Retiré aussi des 6 vidéos encore programmées dans Metricool (19, 21, 23, 24, 27 et 30/10), qui gardent l'étiquette IA activée.
@@ -20,8 +22,24 @@ Demande de Nathan (18/10, 11 h 49) : « augmente le nombre de posts sur les rés
 - 31 nouvelles épingles, n° 12 à 42 (marketing/epingles/, textes dans epingles.csv) : anecdotes « Le saviez-vous ? », idées du guide (costumes, gâteau château, potion, noms de chevalier, sécurité), du guide à la maison (dragon endormi, couleurs du blason, énigmes de cachettes, pont-levis et joute, règles du château, conseil des chevaliers, mot secret), anniversaires 7, 9 et 10 ans, chevalière, Toussaint, mercredi, et 4 pages de villes (Obernai, Molsheim, Mutzig, Ottrott).
 - Appel à l'action : « Familles testeuses recherchées avant l'ouverture du 7 novembre : écrivez CHEVALIER » jusqu'au 30/10, puis « Encore quelques jours… », et le 6/11 « Dernier jour… Ouverture demain ! ».
 
+## Ouverture du 7 novembre (ajouté le 19/10)
+Demande de Nathan (19/10, 20 h 53) : « tu peux t'occuper des vidéos d'ouverture du 7 novembre… les mettre dans Metricool… saturer l'espace de la façon la plus réelle possible pour pas qu'on te prenne pour un robot ».
+- Metricool (Instagram Reel + TikTok, étiquette IA activée, TikTok « votre marque ») : 8 vidéos, 16 places, novembre plein (20/20 avec les 4 épingles du 2, 9, 16 et 23/11). Heures irrégulières, légendes toutes différentes, sans « (Voix créée par IA) » :
+  - sam. 7/11, 9 h 42 : « La quête est ouverte » (ouverture.mp4)
+  - sam. 7/11, 18 h 17 : comment ça marche, 5 étapes et diplôme pour chaque enfant (comment-ca-marche-2.mp4)
+  - dim. 8/11, 10 h 36 : Jules, Inès, Noah, Mia, Tom, Zoé… 1 500 prénoms (prenoms.mp4)
+  - mar. 10/11, 18 h 08 : novembre, nuit à 17 h, la quête à la maison (maison-novembre.mp4)
+  - jeu. 12/11, 12 h 21 : l'adoubement et un diplôme pour chaque compagnon (diplomes.mp4)
+  - sam. 14/11, 10 h 53 : énigme LEDIFE → FIDÈLE (mot-fidele.mp4)
+  - mar. 17/11, 18 h 34 : le calcul des parents, 3,11 € par enfant pour 8 enfants (prix.mp4)
+  - ven. 20/11, 17 h 46 : Obernai, Molsheim, Mutzig, Ottrott… et votre village ? (votre-ville.mp4)
+- À la main : 14 vidéos d'anecdotes avec la fin « Aperçu gratuit » (cheval, fontaine de Rome, statue de la Liberté verte, jaune d'œuf, cochons au marché, lavande, châteaux en hauteur, coquille des pèlerins, sans GPS, château d'eau, pompiers, Tuuut, dés des archéologues, selle-oreiller) et 28 épingles n° 43 à 70 (15 pages de villages vérifiées en ligne : Dorlisheim, Urmatt, Blaesheim, Westhouse, Ergersheim, Dinsheim-sur-Bruche, Hangenbieten, Ernolsheim-Bruche, Niedernai, Scharrachbergheim-Irmstett, Stotzheim, Breuschwickersheim, Westhoffen, Hipsheim, Innenheim ; et 13 anecdotes).
+- Appel à l'action à partir du 7/11 : l'aperçu gratuit sur maquetelegendaire.fr (lien en bio), et non plus « CHEVALIER ».
+- Fichiers : marketing/videos-ouverture/ (outil dev/video/campagne/videos_ouverture.py, `python3 dev/video/campagne/build.py --set ouverture`), marketing/epingles/epingle-43.png à 70.
+- Le 19/10, la vidéo de Jade (26/10, 18 h, Metricool) avait encore « (Voix créée par IA) » dans sa légende : retiré.
+
 ## Chaque jour
-Répondre aux commentaires et messages « CHEVALIER » avec le lien https://maquetelegendaire.fr.
+Répondre aux commentaires et messages (« CHEVALIER », prénoms, villages) avec le lien https://maquetelegendaire.fr.
 
 ## Le planning complet
 
@@ -95,3 +113,45 @@ Répondre aux commentaires et messages « CHEVALIER » avec le lien https://maqu
 | ven. 6 nov. | 13 h | Pinterest | Chasse au trésor : le mot secret à retrouver à la fin (tableau Chasse au trésor enfant) | marketing/epingles/epingle-41.png |
 | ven. 6 nov. | 18 h | Instagram + TikTok | Chloé, approche… | marketing/videos/grand-maitre-chloe.mp4 |
 | ven. 6 nov. | 21 h | Pinterest | Activité du mercredi pour enfants de 7 à 10 ans : une quête de chevaliers (tableau Chasse au trésor enfant) | marketing/epingles/epingle-42.png |
+| sam. 7 nov. | 12 h 40 | Pinterest | Anniversaire chevalier à Dorlisheim : une quête dans le village (tableau Anniversaire chevalier) | marketing/epingles/epingle-43.png |
+| sam. 7 nov. | 13 h 55 | Instagram + TikTok | Combien boit un cheval ? | marketing/videos-ouverture/anecdote-cheval.mp4 |
+| sam. 7 nov. | 21 h 05 | Pinterest | Anecdote pour enfants : les pièces de la fontaine de Rome (tableau Chasse au trésor enfant) | marketing/epingles/epingle-44.png |
+| dim. 8 nov. | 13 h 10 | Pinterest | Chasse au trésor de chevaliers à Urmatt pour un anniversaire (tableau Anniversaire chevalier) | marketing/epingles/epingle-45.png |
+| dim. 8 nov. | 17 h 50 | Instagram + TikTok | Un million d'euros dans une fontaine | marketing/videos-ouverture/anecdote-rome.mp4 |
+| dim. 8 nov. | 20 h 40 | Pinterest | Pourquoi la statue de la Liberté est verte ? Anecdote pour enfants (tableau Chasse au trésor enfant) | marketing/epingles/epingle-46.png |
+| lun. 9 nov. | 12 h 50 | Pinterest | Anniversaire chevalier à Blaesheim : une chasse au trésor dans le village (tableau Anniversaire chevalier) | marketing/epingles/epingle-47.png |
+| lun. 9 nov. | 18 h 05 | Instagram + TikTok | La statue de la Liberté était cuivrée | marketing/videos-ouverture/anecdote-verte.mp4 |
+| lun. 9 nov. | 21 h | Pinterest | Anecdote du Moyen Âge pour enfants : la peinture au jaune d'œuf (tableau Chasse au trésor enfant) | marketing/epingles/epingle-48.png |
+| mar. 10 nov. | 12 h 20 | Instagram + TikTok | Peindre avec du jaune d'œuf | marketing/videos-ouverture/anecdote-oeuf.mp4 |
+| mar. 10 nov. | 13 h 05 | Pinterest | Anniversaire chevalier à Westhouse : une quête dans le village (tableau Anniversaire chevalier) | marketing/epingles/epingle-49.png |
+| mar. 10 nov. | 20 h 50 | Pinterest | Anecdote pour enfants : le marché au Moyen Âge (tableau Chasse au trésor enfant) | marketing/epingles/epingle-50.png |
+| mer. 11 nov. | 10 h 30 | Instagram + TikTok | Des cochons au marché | marketing/videos-ouverture/anecdote-marche.mp4 |
+| mer. 11 nov. | 12 h 30 | Pinterest | Chasse au trésor d'anniversaire à Ergersheim (tableau Anniversaire chevalier) | marketing/epingles/epingle-51.png |
+| mer. 11 nov. | 21 h 10 | Pinterest | Anecdote pour enfants : la lavande des châteaux forts (tableau Chasse au trésor enfant) | marketing/epingles/epingle-52.png |
+| jeu. 12 nov. | 13 h | Pinterest | Anniversaire chevalier à Dinsheim-sur-Bruche : une chasse au trésor (tableau Anniversaire chevalier) | marketing/epingles/epingle-53.png |
+| jeu. 12 nov. | 18 h 10 | Instagram + TikTok | La lavande contre les puces | marketing/videos-ouverture/anecdote-lavande.mp4 |
+| jeu. 12 nov. | 20 h 35 | Pinterest | Pourquoi les châteaux forts étaient en hauteur ? Anecdote pour enfants (tableau Chasse au trésor enfant) | marketing/epingles/epingle-54.png |
+| ven. 13 nov. | 12 h 45 | Pinterest | Anniversaire chevalier à Hangenbieten : une quête dans le village (tableau Anniversaire chevalier) | marketing/epingles/epingle-55.png |
+| ven. 13 nov. | 18 h | Instagram + TikTok | Pourquoi les châteaux étaient en hauteur | marketing/videos-ouverture/anecdote-horizon.mp4 |
+| ven. 13 nov. | 21 h 05 | Pinterest | Anecdote pour enfants : la coquille des pèlerins de Compostelle (tableau Chasse au trésor enfant) | marketing/epingles/epingle-56.png |
+| sam. 14 nov. | 13 h 15 | Pinterest | Anniversaire chevalier à Ernolsheim-Bruche : une chasse au trésor (tableau Anniversaire chevalier) | marketing/epingles/epingle-57.png |
+| sam. 14 nov. | 17 h 45 | Instagram + TikTok | La coquille des pèlerins | marketing/videos-ouverture/anecdote-coquille.mp4 |
+| sam. 14 nov. | 20 h 55 | Pinterest | Comment se repérer sans GPS au Moyen Âge ? Anecdote pour enfants (tableau Chasse au trésor enfant) | marketing/epingles/epingle-58.png |
+| dim. 15 nov. | 10 h 15 | Instagram + TikTok | Sans GPS au Moyen Âge | marketing/videos-ouverture/anecdote-gps.mp4 |
+| dim. 15 nov. | 12 h 55 | Pinterest | Anniversaire chevalier à Niedernai : une quête dans le village (tableau Anniversaire chevalier) | marketing/epingles/epingle-59.png |
+| dim. 15 nov. | 20 h 30 | Pinterest | Anecdote pour enfants : combien d'eau dans un château d'eau ? (tableau Chasse au trésor enfant) | marketing/epingles/epingle-60.png |
+| lun. 16 nov. | 12 h 35 | Pinterest | Anniversaire chevalier à Scharrachbergheim-Irmstett (tableau Anniversaire chevalier) | marketing/epingles/epingle-61.png |
+| lun. 16 nov. | 18 h 20 | Instagram + TikTok | Un château plein d'eau | marketing/videos-ouverture/anecdote-baignoires.mp4 |
+| lun. 16 nov. | 21 h | Pinterest | Anecdote pour enfants : les pompiers, chevaliers d'aujourd'hui (tableau Chasse au trésor enfant) | marketing/epingles/epingle-62.png |
+| mar. 17 nov. | 12 h 10 | Instagram + TikTok | Les pompiers, chevaliers d'aujourd'hui | marketing/videos-ouverture/anecdote-pompiers.mp4 |
+| mar. 17 nov. | 13 h 10 | Pinterest | Anniversaire chevalier à Stotzheim : une chasse au trésor dans le village (tableau Anniversaire chevalier) | marketing/epingles/epingle-63.png |
+| mar. 17 nov. | 20 h 45 | Pinterest | Anecdote pour enfants : comment les guetteurs donnaient l'alerte (tableau Chasse au trésor enfant) | marketing/epingles/epingle-64.png |
+| mer. 18 nov. | 12 h 30 | Pinterest | Anniversaire chevalier à Breuschwickersheim : une quête dans le village (tableau Anniversaire chevalier) | marketing/epingles/epingle-65.png |
+| mer. 18 nov. | 14 h | Instagram + TikTok | Tuuut ! L'alerte des guetteurs | marketing/videos-ouverture/anecdote-tuuut.mp4 |
+| mer. 18 nov. | 21 h 15 | Pinterest | Anecdote pour enfants : les jeux retrouvés par les archéologues (tableau Chasse au trésor enfant) | marketing/epingles/epingle-66.png |
+| jeu. 19 nov. | 13 h | Pinterest | Anniversaire chevalier à Westhoffen : une quête dans le village (tableau Anniversaire chevalier) | marketing/epingles/epingle-67.png |
+| jeu. 19 nov. | 18 h 15 | Instagram + TikTok | Des dés retrouvés dans les ruines | marketing/videos-ouverture/anecdote-des.mp4 |
+| jeu. 19 nov. | 20 h 50 | Pinterest | Anecdote de chevalier pour enfants : dormir en voyage (tableau Chasse au trésor enfant) | marketing/epingles/epingle-68.png |
+| ven. 20 nov. | 12 h 30 | Instagram + TikTok | La selle en guise d'oreiller | marketing/videos-ouverture/maison-oreiller.mp4 |
+| ven. 20 nov. | 13 h 20 | Pinterest | Chasse au trésor d'anniversaire à Hipsheim (tableau Anniversaire chevalier) | marketing/epingles/epingle-69.png |
+| ven. 20 nov. | 21 h | Pinterest | Anniversaire chevalier à Innenheim : une quête dans le village (tableau Anniversaire chevalier) | marketing/epingles/epingle-70.png |
