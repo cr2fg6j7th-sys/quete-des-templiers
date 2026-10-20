@@ -7,3 +7,4 @@ places-data.new/
 __pycache__/
 dev/video/campagne/out/
 dev/video/campagne/_slides.html
+dev/video/campagne/_hook*.html
