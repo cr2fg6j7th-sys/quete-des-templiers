@@ -20,12 +20,18 @@ TAIL = 1.4        # call to action after the last word
 GAP = 0.18        # between two kept pieces
 
 CTA_TEST = {"text": "Quête offerte aux familles testeuses", "small": "écrivez CHEVALIER en commentaire"}
-ASK = {"fact": "💬 Devinez en commentaire avant la fin !", "name": "💬 Le prénom de votre enfant en commentaire"}
+ASK = {"fact": "💬 Devinez en commentaire avant la fin !", "name": "💬 Son prénom en commentaire !"}
 CTA_OPEN = {"text": "Aperçu gratuit · lien en bio", "small": "maquetelegendaire.fr"}
 
 
 def words_of(text):
-    return text.split()
+    """Words, with French spaced punctuation (« ! », « ? », « : », « » ») glued to the word before."""
+    out = []
+    for w in text.split():
+        if out and not re.search(r"\w", w) and w != "«": out[-1] += "\u00a0" + w
+        elif out and out[-1] == "«": out[-1] += "\u00a0" + w
+        else: out.append(w)
+    return out
 
 
 def align(clip):
@@ -105,7 +111,7 @@ def chunk(words):
         if n and (n >= 3 or letters + len(w["w"]) > 15):
             k += 1; n = 0; letters = 0
         w["chunk"] = k; n += 1; letters += len(w["w"])
-        if re.search(r"[.!?…:;,]$", w["w"]) and i + 1 < len(words):
+        if re.search(r"[.!?…:;,»]$", w["w"]) and i + 1 < len(words):
             k += 1; n = 0; letters = 0
     return words
 
