@@ -47,7 +47,7 @@ async def render(slug, hook):
             "[v][m]amix=inputs=2:duration=first:normalize=0[o]", "-map", "[o]", "-c:a", "aac", "-b:a", "160k", str(a)], check=True)
         out = OUT / f"{slug}.mp4"
         subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-framerate", str(FPS), "-i", str(tmp / "f/f%04d.jpg"), "-i", str(a),
-            "-vf", "fps=30,format=yuv420p", "-c:v", "libx264", "-crf", "20", "-preset", "medium", "-c:a", "copy", "-shortest",
+            "-vf", "fps=30,format=yuv420p", "-c:v", "libx264", "-crf", "27", "-preset", "slow", "-c:a", "copy", "-shortest",
             "-movflags", "+faststart", str(out)], check=True)
         clean(out)
         subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-ss", "0.3", "-i", str(out), "-frames:v", "1", "-q:v", "3", str(OUT / f"{slug}.jpg")], check=True)
