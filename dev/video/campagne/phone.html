@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:"Alegreya Sans";src:url(FONTS/AlegreyaSans-Bold.woff) format("woff");font-weight:700}
+@font-face{font-family:"UnifrakturMaguntia";src:url(FONTS/UnifrakturMaguntia-Book.woff) format("woff")}
+*{margin:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+/* world = the wide overhead photo, 1152 x 2048 px */
+#world{position:absolute;left:0;top:0;width:1152px;height:2048px;transform-origin:0 0}
+#wide{position:absolute;left:0;top:0;width:1152px;height:2048px}
+#close{position:absolute;opacity:0}
+#shadow{position:absolute;border-radius:16px;background:rgba(40,25,10,.55);filter:blur(7px)}
+#phone{position:absolute;border-radius:15.5px;background:linear-gradient(135deg,#4a4d52,#1c1d20 40%,#2b2d31 70%,#55585e);padding:1.6px}
+#bez{width:100%;height:100%;border-radius:14px;background:#050506;padding:3.2px}
+#scr{position:relative;width:100%;height:100%;border-radius:11px;overflow:hidden;background:#f0f0f4}
+#scr img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover}
+#isl{position:absolute;left:50%;top:3.2%;width:30%;height:3.6%;margin-left:-15%;border-radius:99px;background:#000;z-index:5}
+#glass{position:absolute;inset:0;z-index:6;background:linear-gradient(115deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 38%,rgba(255,255,255,0) 70%,rgba(255,255,255,.07) 100%);pointer-events:none}
+.btn{position:absolute;background:#2a2c30;border-radius:1px}
+/* the site again at the end, with its address */
+#url{position:absolute;left:6%;right:6%;bottom:4.5%;z-index:4;height:7.5%;border-radius:99px;background:rgba(255,255,255,.96);box-shadow:0 2px 8px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;gap:4%;font-family:"Alegreya Sans",sans-serif;font-weight:700;color:#1b2547;font-size:7.2px;opacity:0}
+#url svg{width:7px;height:7px}
+#urlglow{position:absolute;inset:-3px;border-radius:99px;border:2px solid #e0b55a;opacity:0}
+#hook{position:absolute;top:200px;left:60px;right:60px;padding:34px 40px;border-radius:34px;background:rgba(29,36,67,.94);border:3px solid #323a5e;color:#f4f1fa;
+  font-family:"Alegreya Sans",sans-serif;font-weight:700;font-size:76px;line-height:1.12;text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.45);z-index:20}
+#hook b{color:#f0c25e}
+</style></head><body>
+<div id="hook"></div>
+<div id="world">
+  <img id="wide" src="img/phone/wide.jpg">
+  <img id="close" src="img/phone/close.jpg">
+  <div id="shadow"></div>
+  <div id="phone"><div id="bez"><div id="scr"><img id="a" src="img/phone/home.jpg"><img id="b" src="img/phone/home.jpg" style="opacity:0"><div id="isl"></div>
+    <div id="url"><div id="urlglow"></div><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2" fill="#1b2547"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#1b2547" stroke-width="2.4" fill="none"/></svg><span>maquetelegendaire.fr</span></div>
+    <div id="glass"></div></div></div></div>
+</div>
+<script>
+// phone in world coordinates (iPhone 16 ratio 71.6 x 147.6 mm), on the linen runner
+const P={x:573,y:1440,w:104};P.h=P.w*147.6/71.6;
+const ph=document.getElementById("phone");
+Object.assign(ph.style,{left:(P.x-P.w/2)+"px",top:(P.y-P.h/2)+"px",width:P.w+"px",height:P.h+"px"});
+const sh=document.getElementById("shadow");
+Object.assign(sh.style,{left:(P.x-P.w/2+5)+"px",top:(P.y-P.h/2+7)+"px",width:P.w+"px",height:P.h+"px"});
+// side buttons
+[[ -1.2, .20,.09],[-1.2,.31,.09],[ -1.2,.15,.04]].forEach(([dx,t,h])=>{const b=document.createElement("div");b.className="btn";Object.assign(b.style,{left:(P.x-P.w/2+dx)+"px",top:(P.y-P.h/2+P.h*t)+"px",width:"1.4px",height:(P.h*h)+"px"});document.getElementById("world").append(b)});
+{const b=document.createElement("div");b.className="btn";Object.assign(b.style,{left:(P.x+P.w/2-.2)+"px",top:(P.y-P.h/2+P.h*.26)+"px",width:"1.4px",height:(P.h*.13)+"px"});document.getElementById("world").append(b)}
+// close plate: its linen runner (860 px wide) = the runner of the wide photo (300 px)
+const CS=300/860, cw=1152*CS, chh=2048*CS, cl=document.getElementById("close");
+Object.assign(cl.style,{left:(P.x-cw/2)+"px",top:(P.y-chh/2)+"px",width:cw+"px",height:chh+"px"});
+const ease=x=>{x=Math.min(Math.max(x,0),1);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const lerp=(a,b,t)=>a+(b-a)*t;
+let S;
+const nb=t=>t.replace(/ ([!?:;»])/g,"\u00a0$1").replace(/« /g,"«\u00a0");
+function setup(s){S=s;document.getElementById("hook").innerHTML=nb(s.hook||"");if(!s.hook)document.getElementById("hook").style.display="none"}
+// camera: z = zoom (frame width in world px = 1080/z), rotation in degrees, centre (cx, cy)
+function cam(z,rot,cx,cy){
+  const w=document.getElementById("world");
+  w.style.transform=`translate(540px,960px) rotate(${rot}deg) scale(${z}) translate(${-cx}px,${-cy}px)`;
+  // the close plate takes over when the wide photo would be blurry
+  cl.style.opacity=Math.min(Math.max((z-2.6)/1.2,0),1);
+}
+async function frame(t,src){
+  const Z0=1.16, Z1=1080/(P.w*1.28);
+  const {down,hold,vid,site,up}=S; const t1=down,t2=t1+hold,t3=t2+vid,t4=t3+site,t5=t4+up;
+  let z,rot,cx,cy;
+  const far={cx:576,cy:1024,rot:-7}, near={cx:P.x,cy:P.y,rot:0};
+  if(t<t1){const e=ease(t/t1);z=Z0*Math.pow(Z1/Z0,e);rot=lerp(far.rot,0,e);cx=lerp(far.cx,P.x,e);cy=lerp(far.cy,P.y,e);}
+  else if(t<t4){const e=(t-t1)/(t4-t1);z=Z1*(1+0.035*e);rot=0.6*Math.sin(e*Math.PI);cx=P.x;cy=P.y;}
+  else {const e=ease((t-t4)/up);z=Z1*1.035*Math.pow(Z0/(Z1*1.035),e);rot=lerp(0,7,e);cx=lerp(P.x,far.cx,e);cy=lerp(P.y,far.cy,e);}
+  cam(z,rot,cx,cy);
+  const hk=document.getElementById("hook"),hq=ease((t-(t2-0.35))/0.3);hk.style.opacity=1-hq;hk.style.transform=`scale(${(1+0.012*Math.sin(t*2.2)).toFixed(4)})`;
+  // screen: home page, then the TikTok video (slides up from the bottom), then the site with its address
+  const a=document.getElementById("a"),b=document.getElementById("b"),u=document.getElementById("url"),g=document.getElementById("urlglow");
+  if(t<t2-0.35){a.src.endsWith("home.jpg")||(a.src="img/phone/home.jpg");a.style.transform=`translateY(${-Math.max(0,t-t1+0.3)*0.0}%)`;b.style.opacity=0;u.style.opacity=0;}
+  else if(t<t3){
+    const q=ease((t-(t2-0.35))/0.35);
+    a.src.endsWith("home.jpg")||(a.src="img/phone/home.jpg"); a.style.transform=`scale(${1-0.08*q})`; a.style.opacity=1-q;
+    if(src&&!b.src.endsWith(src)){b.src=src;await b.decode().catch(()=>{});}
+    b.style.opacity=1;b.style.transform=`translateY(${(1-q)*100}%)`;u.style.opacity=0;
+  } else {
+    const q=ease((t-t3)/0.4);
+    a.src.endsWith("home.jpg")||(a.src="img/phone/home.jpg");a.style.opacity=q;a.style.transform="none";
+    b.style.opacity=1-q;b.style.transform=`scale(${1+0.06*q})`;
+    const r=ease((t-t3-0.35)/0.35);u.style.opacity=r;u.style.transform=`translateY(${(1-r)*30}%) scale(${0.9+0.1*r})`;
+    g.style.opacity=0.6+0.4*Math.sin((t-t3)*5);
+  }
+  await new Promise(r=>requestAnimationFrame(()=>r()));
+}
+</script></body></html>

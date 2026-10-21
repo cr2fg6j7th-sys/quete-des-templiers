@@ -8,3 +8,4 @@ __pycache__/
 dev/video/campagne/out/
 dev/video/campagne/_slides.html
 dev/video/campagne/_hook*.html
+dev/video/campagne/_phone_*.html
