@@ -16,12 +16,13 @@ from videos_toussaint import LINES_OF
 HERE = Path(__file__).parent
 OUT = HERE / "out" / "hook"
 FPS = 20          # rendered frames per second (the file is 30 fps)
-TAIL = 1.4        # call to action after the last word
+TAIL = 3.9        # the answer stays 0.9 s, then the end card (link + what the quest is)
 GAP = 0.18        # between two kept pieces
 
-CTA_TEST = {"text": "Quête offerte aux familles testeuses", "small": "écrivez CHEVALIER en commentaire"}
+CTA_TEST = {"text": "Offerte aux familles testeuses", "small": "écrivez CHEVALIER"}
 ASK = {"fact": "💬 Devinez en commentaire avant la fin !", "name": "💬 Son prénom en commentaire !"}
-CTA_OPEN = {"text": "Aperçu gratuit · lien en bio", "small": "maquetelegendaire.fr"}
+CTA_OPEN = {"text": "Aperçu gratuit de votre quête", "small": "24,90 €"}
+Q = {"fact": "Vous aviez trouvé ? Bravo, chevalier !", "name": "Votre enfant mérite sa quête !"}
 
 
 def words_of(text):
@@ -156,7 +157,7 @@ def plan(v):
     starts = {}
     for w in words: starts.setdefault(w["chunk"], w["t0"])
     chunks = [starts[k] for k in sorted(starts)]
-    cta = dict(v.get("cta", CTA_TEST), at=round(voice_end + 0.1, 3))
+    cta = dict(v.get("cta", CTA_TEST), q=Q[v["kind"]], at=round(voice_end + 0.9, 3))
     return audio, {"ask": v.get("ask", ASK[v["kind"]]), "hook": v["hook"], "total": round(total, 3), "words": words, "chunks": chunks, "cta": cta}
 
 
