@@ -10,6 +10,7 @@ sys.path.insert(0, str(HERE.parent)); sys.path.insert(0, str(HERE.parent / "camp
 from build import build_audio, spans, VOIX, NOMS, REPO
 from hook import time_words, chunk
 from clean import clean
+from boucle import boucle
 
 OUT = HERE / "out"
 FPS = 24
@@ -131,6 +132,7 @@ async def render(slug):
                         "-vf", "fps=30,format=yuv420p", "-c:v", "libx264", "-preset", "medium", "-crf", "21", "-c:a", "copy",
                         "-t", f"{cfg['total']:.3f}", "-movflags", "+faststart", str(out)], check=True)
         clean(out)
+        boucle(out); clean(out)   # seamless loop
     page.unlink()
     print(slug, f"{cfg['total']:.1f} s", flush=True)
 

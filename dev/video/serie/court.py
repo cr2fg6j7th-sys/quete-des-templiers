@@ -11,6 +11,7 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent)); sys.path.insert(0, str(HERE.parent / "campagne"))
 from build import build_audio, spans, VOIX, NOMS, REPO
 from clean import clean
+from boucle import boucle
 
 OUT = HERE / "out"
 FPS = 24
@@ -213,6 +214,17 @@ FAQ = {
         [box("S'ouvre dans le <b>navigateur</b> du téléphone", 0.1, 560), box("Le lien se partage à <b>un autre adulte</b>", 0.35, 780),
          dict(cls="parch", html='<div class="q"><b>Oyez, oyez !</b><br>Léo t\'invite à sa quête de chevaliers<br>samedi à 14 h</div>', at=0.6, style="top:1020px")],
         "Préparez-la <b>dès ce soir</b>", "leo", "Léo", dim=0.2),
+    "activite-vacances": lambda: faq("presentation", IMG / "ville.jpg", "Vacances de la Toussaint :<br><b>on fait quoi demain ?</b>",
+        [tag("<b>1</b> · Fontaine : une énigme", 0.2, 150, 1450), tag("<b>2</b> · Église : un défi", 0.4, 420, 990),
+         box("1 heure dehors, <b>sans écran</b>", 0.55, 1230),
+         dict(cls="pill", html="<div>Quête <b>offerte</b> jusqu'au 6 novembre</div>", at=0.75, anim="pop", style="top:1560px")],
+        "Offerte jusqu'au 6 novembre :<br><b>écrivez CHEVALIER</b>", "jules", "Jules", dim=0.1,
+        path=dict(pts=TOWN_PATH, t0=0.8, t1=5.0)),
+    "activite-mercredi": lambda: faq("presentation", IMG / "village.jpg", "Mercredi après-midi…<br><b>encore les écrans ?</b>",
+        [tag("<b>1</b> · Église", 0.15, 300, 640), tag("<b>2</b> · Fontaine", 0.3, 600, 1100),
+         box("Une quête de chevaliers<br><b>dans votre quartier</b>", 0.45, 1260),
+         dict(cls="pill", html="<div>Quête <b>offerte</b> jusqu'au 6 novembre</div>", at=0.7, anim="pop", style="top:1560px")],
+        "Offerte jusqu'au 6 novembre :<br><b>écrivez CHEVALIER</b>", "lina", "Lina", dim=0.1),
     "faq-prix": lambda: faq("prix", IMG / "cherche.jpg", "Combien ça coûte ?",
         [rcpt("Ma Quête Légendaire", [("Aperçu de la quête", "Gratuit"), ("Quête complète", "24,90 €"), ("Enfants", "4 à 15"), ("Durée", "≈ 1 h")], 0.05, 520),
          box("Anniversaire, fête, <b>mercredi entre copains</b>", 0.6, 1160)],
@@ -258,6 +270,7 @@ async def render(slug):
                         "-vf", "fps=30,format=yuv420p", "-c:v", "libx264", "-preset", "medium", "-crf", "21", "-c:a", "copy",
                         "-t", f"{cfg['total']:.3f}", "-movflags", "+faststart", str(out)], check=True)
         clean(out)
+        boucle(out); clean(out)   # seamless loop
     page.unlink()
     print(slug, f"{cfg['total']:.1f} s", flush=True)
 

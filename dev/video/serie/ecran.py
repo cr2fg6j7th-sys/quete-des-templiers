@@ -9,6 +9,7 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent)); sys.path.insert(0, str(HERE.parent / "campagne"))
 from build import build_audio, VOIX, NOMS, REPO
 from clean import clean
+from boucle import boucle
 from court import Seq, line
 
 OUT = HERE / "out"
@@ -100,6 +101,7 @@ async def render(slug):
                         "-vf", "fps=30,format=yuv420p", "-c:v", "libx264", "-preset", "medium", "-crf", "22", "-c:a", "copy",
                         "-t", f"{cfg['total']:.3f}", "-movflags", "+faststart", str(out)], check=True)
         clean(out)
+        boucle(out); clean(out)   # seamless loop
     page.unlink()
     print(slug, f"{cfg['total']:.1f} s", flush=True)
 
