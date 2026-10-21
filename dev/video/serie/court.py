@@ -152,6 +152,74 @@ def rue():
     return cfg, seq.p
 
 
+
+def faq(key, bg, hook_html, items, end_top, name, name_label, dim=0.45, cam=None, **kw):
+    """Parents' question videos: the question as a big hook from frame 0, the Grand Maître answers at once
+    (audio/video/faq-<key>.mp3), the answer's points appear while he speaks, then the site end card."""
+    seq = Seq(); f = line(f"faq-{key}")
+    v0 = 0.35; v = length(f); seq.at(v0, f)
+    beats = [hook(hook_html, 0, None)]
+    for it in items:
+        it = dict(it); fr = it.pop("at"); it.setdefault("anim", "up"); it["t0"] = round(v0 + fr * v, 2)
+        beats.append(it)
+    end_at = v0 + v + 0.6; total = end_at + END
+    end_voice(seq, end_at, name)
+    cfg = base(bg, total, end_at, end_top, name_label, beats, cam=cam or [[0, 1.15, 540, 960], [total, 1.0, 540, 960]], dim=dim, **kw)
+    return cfg, seq.p
+
+
+def box(html, at, top, **k): return dict(cls="box", html=html, at=at, style=f"top:{top}px", **k)
+def typ(n, html, at, top, win=False): return dict(cls="type" + (" win" if win else ""), html=f'<span class="n">{n}</span><span>{html}</span>', at=at, style=f"top:{top}px")
+def tag(html, at, x, y): return dict(cls="tag gold", html=html, at=at, inScene=True, anim="pop", style=f"left:{x}px;top:{y}px")
+def rcpt(title, rows, at, top, strike=None):
+    h = f"<h3>{title}</h3>" + "".join(f'<div class="row"><span>{a}</span><span>{b}</span><i></i></div>' for a, b in rows)
+    d = dict(cls="rcpt", html=h, at=at, style=f"top:{top}px")
+    if strike: d["strike"] = strike
+    return d
+
+
+TOWN_PATH = [[540, 1760], [542, 1483], [552, 1300], [571, 1128], [576, 1040], [700, 960], [770, 760], [660, 640]]
+
+FAQ = {
+    "faq-presentation": lambda: faq("presentation", IMG / "ville.jpg", "Parents : <b>je m'occupe</b><br>de l'anniversaire.",
+        [tag("<b>1</b> · Fontaine : une énigme", 0.25, 150, 1450), tag("<b>2</b> · Église : un défi", 0.45, 420, 990),
+         tag("<b>3</b> · Le mot secret", 0.65, 420, 600),
+         box("<b>1 prénom</b> + <b>1 adresse</b><br>= une quête de chevaliers", 0.8, 1560)],
+        "Essayez avec <b>son prénom</b>", "louise", "Louise", dim=0.1,
+        path=dict(pts=TOWN_PATH, t0=0.8, t1=5.5)),
+    "faq-preparer": lambda: faq("preparer", PHONE / "wide.jpg", "Ce qu'il faut <b>préparer</b> :",
+        [rcpt("À faire", [("Imprimer les indices", ""), ("Cacher les indices", ""), ("Écrire les énigmes", "")], 0.0, 560, strike=[1.3, 2.0, 2.7]),
+         box("Un petit trésor dans votre sac.<br><b>C'est tout.</b>", 0.5, 1200)],
+        "Prête en <b>2 minutes</b> :<br>tapez son prénom", "gabriel", "Gabriel", dim=0.15),
+    "faq-pluie": lambda: faq("pluie", IMG / "pluie.jpg", "Il pleut <b>le jour J</b> ?",
+        [box("<b>Mode maison</b> : 6 cartes à cacher", 0.2, 600), box("<b>5 minutes</b> de préparation", 0.45, 820),
+         box("Énigmes et défis <b>faits pour l'intérieur</b>", 0.7, 1040)],
+        "Dehors ou dedans :<br><b>tapez son prénom</b>", "jade", "Jade", dim=0.35),
+    "faq-securite": lambda: faq("securite", IMG / "ville.jpg", "10 enfants dans la rue…<br><b>c'est prudent ?</b>",
+        [typ(1, "À pied, autour du <b>point de départ</b>", 0.1, 560), typ(2, "Que des <b>lieux publics</b>, on n'entre nulle part", 0.35, 775),
+         typ(3, "<b>1 adulte</b> pour 5 enfants environ", 0.6, 990), typ(4, "Défis sur une <b>place</b> ou dans un <b>parc</b>", 0.8, 1205, True)],
+        "Un parcours <b>tout près</b><br>de chez vous", "arthur", "Arthur", dim=0.55),
+    "faq-village": lambda: faq("village", IMG / "village.jpg", "Petit village ?<br><b>Ça marche aussi.</b>",
+        [tag("<b>1</b> · Église", 0.15, 300, 640), tag("<b>2</b> · Fontaine", 0.3, 600, 1100), tag("<b>3</b> · Vieille maison", 0.45, 120, 1010),
+         tag("<b>4</b> · Mairie", 0.6, 700, 1180), box("<b>Aperçu gratuit</b> : vous savez<br>avant de payer", 0.75, 1520)],
+        "Testez <b>votre village</b><br>avec son prénom", "hugo", "Hugo", dim=0.1),
+    "faq-prenom": lambda: faq("prenom", IMG / "gateau.jpg", "Prénom rare ?<br><b>Pas de souci.</b>",
+        [dict(cls="name", html="Gabriel", at=0.0, t1=1.2, anim="slam", din=0.12, style="top:640px"),
+         dict(cls="name", html="Inès", at=0.12, t1=2.4, anim="slam", din=0.12, style="top:640px"),
+         dict(cls="big", html="+ de <b>1 000</b> prénoms", at=0.3, anim="pop", style="top:660px"),
+         dict(cls="parch", html='<div class="q"><b>Diplôme de chevalier</b><br>décerné à</div><div style="font-family:UnifrakturMaguntia,serif;font-size:120px;line-height:1.1;color:#8e1f24">Kaïs</div>', at=0.6, style="top:960px")],
+        "Tapez son prénom :<br><b>écoutez-le</b>", "ines", "Inès", dim=0.5),
+    "faq-appli": lambda: faq("appli", PHONE / "wide.jpg", "<b>Pas d'appli</b><br>à installer.",
+        [box("S'ouvre dans le <b>navigateur</b> du téléphone", 0.1, 560), box("Le lien se partage à <b>un autre adulte</b>", 0.35, 780),
+         dict(cls="parch", html='<div class="q"><b>Oyez, oyez !</b><br>Léo t\'invite à sa quête de chevaliers<br>samedi à 14 h</div>', at=0.6, style="top:1020px")],
+        "Préparez-la <b>dès ce soir</b>", "leo", "Léo", dim=0.2),
+    "faq-prix": lambda: faq("prix", IMG / "cherche.jpg", "Combien ça coûte ?",
+        [rcpt("Ma Quête Légendaire", [("Aperçu de la quête", "Gratuit"), ("Quête complète", "24,90 €"), ("Enfants", "4 à 15"), ("Durée", "≈ 1 h")], 0.05, 520),
+         box("Anniversaire, fête, <b>mercredi entre copains</b>", 0.6, 1160)],
+        "Commencez par<br><b>l'aperçu gratuit</b>", "emma", "Emma", dim=0.45),
+}
+
+
 VIDEOS = {
     "defi-herse": lambda: defi(IMG / "ville.jpg", "J'ai des <b>dents</b>, mais je ne mords jamais. Je garde la porte du château. <b>Qui suis-je&nbsp;?</b>",
                                "La <b>herse</b> !", "La grille à dents qui fermait la porte du château", "lucas"),
@@ -193,6 +261,8 @@ async def render(slug):
     page.unlink()
     print(slug, f"{cfg['total']:.1f} s", flush=True)
 
+
+VIDEOS.update(FAQ)
 
 if __name__ == "__main__":
     for k in sys.argv[1:] or list(VIDEOS):
