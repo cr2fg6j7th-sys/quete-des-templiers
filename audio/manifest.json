@@ -134,7 +134,15 @@
     "video/budget": "https://v3b.fal.media/files/b/0aaf4bbd/YWQfkppClqYgz6pNsQTI9_gemini_tts_output.wav",
     "video/parents": "https://v3b.fal.media/files/b/0aaf4bbd/5FQ2U6Y12xpJCo_CtbuDh_gemini_tts_output.wav",
     "video/rue": "https://v3b.fal.media/files/b/0aaf4bbd/RYWtI7H1brWA0j7wF7yhf_gemini_tts_output.wav",
-    "video/defi-intro": "https://v3b.fal.media/files/b/0aaf4bbd/EKqHiISARvJUlrB21ZnQ5_gemini_tts_output.wav"
+    "video/defi-intro": "https://v3b.fal.media/files/b/0aaf4bbd/EKqHiISARvJUlrB21ZnQ5_gemini_tts_output.wav",
+    "video/faq-presentation": "https://v3b.fal.media/files/b/0aaf4c7b/r4yq4X2K8J9feeY1-yOaF_gemini_tts_output.wav",
+    "video/faq-preparer": "https://v3b.fal.media/files/b/0aaf4c7b/fILXQegYob8grrbHnpFvE_gemini_tts_output.wav",
+    "video/faq-pluie": "https://v3b.fal.media/files/b/0aaf4c7b/hsXIHbdvRgyyWAnL6bgLH_gemini_tts_output.wav",
+    "video/faq-securite": "https://v3b.fal.media/files/b/0aaf4c7b/LrJQHeJKKLo7K3MPo8JGN_gemini_tts_output.wav",
+    "video/faq-village": "https://v3b.fal.media/files/b/0aaf4c7b/lWmJO3KGqiKOgCyEUet9-_gemini_tts_output.wav",
+    "video/faq-prenom": "https://v3b.fal.media/files/b/0aaf4c7b/FyeMAUi_wWxHDXnWa5Z2K_gemini_tts_output.wav",
+    "video/faq-appli": "https://v3b.fal.media/files/b/0aaf4c7b/CCOT5PPBO5dfWp9fYLGDz_gemini_tts_output.wav",
+    "video/faq-prix": "https://v3b.fal.media/files/b/0aaf4c7b/3YkEgAOA4yUOGQ6W7Dc2h_gemini_tts_output.wav"
   },
   "batches": [
     {
