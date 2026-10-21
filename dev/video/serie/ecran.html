@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+/* Screen videos (from 21 Oct 2026): real screens of the site on a phone lying on the linen, taps, short
+   captions, invented place names blurred, and the site address at the end. */
+@font-face{font-family:"UnifrakturMaguntia";src:url(FONTS/UnifrakturMaguntia-Book.woff) format("woff")}
+@font-face{font-family:"Alegreya Sans";src:url(FONTS/AlegreyaSans-Regular.woff) format("woff");font-weight:400}
+@font-face{font-family:"Alegreya Sans";src:url(FONTS/AlegreyaSans-Bold.woff) format("woff");font-weight:700}
+@font-face{font-family:"Alegreya Sans SC";src:url(FONTS/AlegreyaSansSC-Bold.woff) format("woff");font-weight:700}
+:root{--navy:#11152a;--card:#1b2547;--ink:#fffaf0;--or:#f0c25e;--wax:#b8505c;--line:#323a5e}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#d9d2c4;font-family:"Alegreya Sans",sans-serif}
+#lin{position:absolute;inset:0;width:1080px;height:1920px;object-fit:cover}
+#cam{position:absolute;inset:0;transform-origin:0 0}
+#phone{position:absolute;left:170px;top:330px;width:740px;height:1480px;border-radius:96px;background:#0d0f17;padding:20px;box-shadow:0 50px 100px rgba(0,0,0,.45)}
+#scr{position:relative;width:700px;height:1440px;border-radius:78px;overflow:hidden;background:#eef0f6}
+.s{position:absolute;left:0;top:0;width:700px;opacity:0}
+.s img{display:block;width:700px}
+.s.card{height:1440px;display:flex;align-items:center;justify-content:center;background:#e8e2d4}
+.s.card img{width:640px;box-shadow:0 14px 40px rgba(0,0,0,.25)}
+.s.card .wrap{position:relative;width:640px}
+.bl{position:absolute;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(240,240,245,.25);border-radius:10px}
+.tap{position:absolute;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;border:8px solid rgba(240,194,94,.95);background:rgba(240,194,94,.25);opacity:0}
+.typed{position:absolute;font-family:"Alegreya Sans",sans-serif;color:#1b2547;background:#eff1f6}
+.typed u{text-decoration:none;border-right:3px solid #1b2547;margin-left:2px}
+#hook{position:absolute;left:50px;right:50px;top:70px;padding:24px 30px 28px;border-radius:30px;background:var(--card);border:3px solid var(--line);color:var(--ink);font-weight:700;font-size:66px;line-height:1.08;text-align:center;box-shadow:0 14px 40px rgba(0,0,0,.35)}
+#hook b{color:var(--or)}
+.cap{position:absolute;left:70px;right:70px;top:1560px;display:flex;justify-content:center;opacity:0}
+.cap div{padding:18px 30px 22px;border-radius:24px;background:rgba(17,21,42,.92);color:var(--ink);font-weight:700;font-size:60px;line-height:1.08;text-align:center}
+.cap b{color:var(--or)}
+#chrono{position:absolute;right:60px;top:300px;padding:10px 24px;border-radius:22px;background:var(--wax);color:#fff;font-weight:700;font-size:64px;font-variant-numeric:tabular-nums;opacity:0;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#end{position:absolute;left:0;right:0;top:1500px;display:flex;justify-content:center;opacity:0}
+#end div{padding:22px 40px;border-radius:999px;background:var(--navy);color:var(--ink);font-weight:700;font-size:58px;box-shadow:0 14px 40px rgba(0,0,0,.4)}
+#end b{color:var(--or)}
+#bar{position:absolute;left:90px;right:90px;bottom:16px;height:9px;border-radius:5px;background:rgba(17,21,42,.2);overflow:hidden}
+#bar i{display:block;height:100%;width:0;background:var(--wax)}
+</style>
+</head>
+<body>
+<img id="lin">
+<div id="cam"><div id="phone"><div id="scr"></div></div></div>
+<div id="hook"></div>
+<div id="caps"></div>
+<div id="chrono">0:00</div>
+<div id="end"><div><b>maquetelegendaire.fr</b> · aperçu gratuit</div></div>
+<div id="bar"><i></i></div>
+<script>
+let C;
+const $=id=>document.getElementById(id);
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const ease=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;
+function setup(cfg){
+  C=cfg; $('lin').src=cfg.lin; $('hook').innerHTML=cfg.hook;
+  cfg.screens.forEach((s,i)=>{
+    const k=s.card?640/s.w:700/1170;
+    const d=document.createElement('div'); d.className='s'+(s.card?' card':''); d.id='s'+i;
+    const host=s.card?'<div class="wrap">':'';
+    d.innerHTML=host+`<img src="${s.img}">`+(s.blur||[]).map(b=>`<div class="bl" style="left:${b[0]*k}px;top:${b[1]*k}px;width:${(b[2]-b[0])*k}px;height:${(b[3]-b[1])*k}px"></div>`).join('')
+      +(s.taps||[]).map((p,j)=>`<div class="tap" id="t${i}_${j}" style="left:${p[0]*k}px;top:${p[1]*k}px"></div>`).join('')
+      +(s.typed?`<div class="typed" id="ty${i}" style="left:${s.typed.x*k}px;top:${s.typed.y*k}px;width:${s.typed.w*k}px;height:${s.typed.h*k}px;font-size:${s.typed.fs*k}px;line-height:${s.typed.h*k}px;padding-left:${14*k}px"></div>`:'')
+      +(s.card?'</div>':'');
+    $('scr').append(d);
+  });
+  cfg.caps.forEach((c,i)=>$('caps').insertAdjacentHTML('beforeend',`<div class="cap" id="c${i}"><div>${c.html}</div></div>`));
+}
+function frame(t){
+  const K=C.cam; let a=K[0],b=K[K.length-1];
+  for(let i=0;i<K.length-1;i++) if(t>=K[i][0]&&t<=K[i+1][0]){a=K[i];b=K[i+1];break}
+  const u=b[0]>a[0]?ease(cl((t-a[0])/(b[0]-a[0]))):0;
+  const s=a[1]+(b[1]-a[1])*u,cx=a[2]+(b[2]-a[2])*u,cy=a[3]+(b[3]-a[3])*u;
+  $('cam').style.transform=`translate(${540-cx*s}px,${1000-cy*s}px) scale(${s})`;
+  C.screens.forEach((sc,i)=>{
+    const e=$("s"+i), on=t>=sc.t0&&t<sc.t1+0.16, fi=cl((t-sc.t0)/0.15);
+    e.style.opacity=on?fi:0; e.style.zIndex=i;
+    if(!sc.card){const k=700/1170, y0=(sc.scroll||0), y1=(sc.scrollTo??y0); const p=ease(cl((t-sc.t0-(sc.sd||0.3))/(sc.sl||1.2)));
+      e.style.transform=`translateY(${-(y0+(y1-y0)*p)*k}px)`;}
+    (sc.taps||[]).forEach((p,j)=>{const q=(t-p[2])/0.5; const el=$(`t${i}_${j}`); el.style.opacity=q>0&&q<1?1-q:0; el.style.transform=`scale(${0.6+0.6*cl(q)})`;});
+    if(sc.typed){const n=Math.floor(cl((t-sc.typed.t)/0.5)*sc.typed.text.length); $('ty'+i).innerHTML=(t>=sc.typed.t?sc.typed.text.slice(0,n):'')+(Math.floor(t*3)%2?'<u></u>':'');}
+  });
+  C.caps.forEach((c,i)=>{const e=$('c'+i); const o=t>=c.t0&&t<c.t1?Math.min(cl((t-c.t0)/0.18),cl((c.t1-t)/0.15)):0; e.style.opacity=o; e.style.transform=`translateY(${30*(1-cl((t-c.t0)/0.25))}px)`;});
+  if(C.chrono){const [a0,a1,v0,v1]=C.chrono; const o=t>=a0&&t<C.endAt?1:0; const v=Math.round(v0+(v1-v0)*cl((t-a0)/(a1-a0))); $('chrono').style.opacity=o; $('chrono').textContent=Math.floor(v/60)+':'+String(v%60).padStart(2,'0');}
+  const e=cl((t-C.endAt)/0.25); $('end').style.opacity=e; $('end').style.transform=`scale(${0.8+0.2*e})`;
+  $('bar').firstElementChild.style.width=(100*cl(t/C.total))+'%';
+}
+</script>
+</body>
+</html>
