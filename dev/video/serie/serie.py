@@ -22,7 +22,7 @@ S_PRET = (34.87, 35.33, "Es-tu prêt ?")
 # Recorded for the series (audio/video/rue.mp3, pauses shortened by court.line):
 from court import line
 S_RUE = (None, None, "Pour vous, une rue ordinaire. Pour votre enfant, le jour de son anniversaire : une vraie aventure de chevalier.", line("rue"))
-TAIL = 4.2
+TAIL = 2.8
 
 
 def end_card(q, nxt):

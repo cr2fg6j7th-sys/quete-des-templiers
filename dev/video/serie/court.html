@@ -127,12 +127,12 @@ function frame(t){
     e.style.opacity=o; if(tf) e.style.transform=tf;
     if(b.strike) e.querySelectorAll('.row i').forEach((x,k)=>{x.style.transform=`scaleX(${ease(cl((t-b.strike[k])/0.3))})`});
   });
-  const E=C.end, e=cl((t-C.endAt)/0.3);
+  const E=C.end, e=cl((t-C.endAt)/0.2);
   $('end').style.opacity=e;
-  $('phone').style.transform=`scale(${1.25-0.25*ease(cl((t-C.endAt)/0.8))})`;
-  const n=Math.floor(cl((t-C.endAt-0.5)/0.6)*E.name.length);
-  $('typed').innerHTML=(t>C.endAt+0.3?E.name.slice(0,n):'')+(Math.floor(t*3)%2?'<u></u>':'');
-  const g=cl((t-C.endAt-1.3)/0.3); $('listen').style.boxShadow=`0 0 0 ${10*g}px rgba(240,194,94,${0.9*g})`;
+  $('phone').style.transform=`scale(${1.25-0.25*ease(cl((t-C.endAt)/0.5))})`;
+  const n=Math.floor(cl((t-C.endAt-0.15)/0.35)*E.name.length);
+  $('typed').innerHTML=(t>C.endAt+0.1?E.name.slice(0,n):'')+(Math.floor(t*3)%2?'<u></u>':'');
+  const g=cl((t-C.endAt-0.6)/0.25); $('listen').style.boxShadow=`0 0 0 ${10*g}px rgba(240,194,94,${0.9*g})`;
 }
 </script>
 </body>
