@@ -21,7 +21,7 @@ S_DEFIS = (30.42, 34.25, "Relève mes défis, et rapporte-moi les lettres.")
 S_PRET = (34.87, 35.33, "Es-tu prêt ?")
 # Recorded for the series (audio/video/rue.mp3, pauses shortened by court.line):
 from court import line
-S_RUE = (None, None, "Pour un chevalier, chaque rue cache une aventure. Suis le chemin doré !", line("rue"))
+S_RUE = (None, None, "Pour vous, une rue ordinaire. Pour votre enfant, le jour de son anniversaire : une vraie aventure de chevalier.", line("rue"))
 TAIL = 4.2
 
 
