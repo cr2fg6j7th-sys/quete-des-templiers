@@ -18,6 +18,21 @@ IMG = HERE / "img"
 PHONE = HERE.parent / "campagne/img/phone"
 PRO = VOIX / "prologue-dehors-m.mp3"
 END = 3.6   # end card length
+TTS = REPO / "audio/video"   # lines recorded for these videos (manifest keys video/…)
+
+
+def line(key):
+    """A recorded line with its long pauses shortened and a slightly quicker pace (out/voix/<key>.mp3)."""
+    out = OUT / "voix" / f"{key}.mp3"
+    if not out.exists():
+        out.parent.mkdir(parents=True, exist_ok=True)
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(TTS / f"{key}.mp3"), "-af",
+                        "silenceremove=stop_periods=-1:stop_duration=0.22:stop_threshold=-40dB,atempo=1.1", str(out)], check=True)
+    return out
+
+
+def length(f):
+    return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(f)]))
 
 
 class Seq:
@@ -49,10 +64,11 @@ def hook(html, t0=0, t1=None, top=150):
     return dict(cls="hook", html=html, t0=t0, t1=t1, style=f"top:{top}px", din=0.01)
 
 
-def defi(bg, riddle, answer, why, name, gender="m"):
-    seq = Seq(); seq.at(0.25, VOIX / f"vocatif-{gender}.mp3")
+def defi(bg, riddle, answer, why, name, gender="m", key="herse"):
+    seq = Seq(); seq.at(0.25, line(f"defi-intro-{gender}"))      # « Jeune chevalier, voici mon énigme. Trouveras-tu la réponse avant la fin ? »
     c0, rv = 2.2, 7.2
-    end_at = 9.6; total = end_at + END
+    rep_end = seq.at(rv + 0.15, line(f"defi-{key}"))               # « La herse ! Bien trouvé, jeune chevalier. »
+    end_at = max(9.6, rep_end + 0.3); total = end_at + END
     beats = [hook('<span class="eb">Défi du Grand Maître</span>Ton enfant trouve en <b>5 secondes</b> ?', 0, rv),
              dict(cls="parch", html=f'<div class="q">{riddle}</div>', t0=0.45, t1=rv, anim="up", style="top:640px"),
              dict(cls="pill", html="<div>Réponse en commentaire avant la fin !</div>", t0=1.1, t1=rv, anim="pop", style="top:1150px")]
@@ -74,9 +90,9 @@ def roulette(bg, names, labels, final, final_label, gender):
     for n, lab in zip(names, labels):
         a = t; t = seq.at(t, name_clip(n)) + 0.12
         beats.append(dict(cls="name", html=lab, t0=a, t1=t - 0.02, anim="slam", din=0.12, style="top:760px"))
-    beats.append(dict(cls="big", html="Pas <b>le sien</b> ?", t0=t, t1=t + 1.1, anim="pop", style="top:780px"))
-    end_at = t + 1.1; total = end_at + END
-    end_voice(seq, end_at, final)
+    beats.append(dict(cls="big", html="Pas <b>le sien</b> ?", t0=t, t1=t + 1.6, anim="pop", style="top:780px"))
+    v_end = seq.at(t + 0.1, line("roulette-fin"))    # « Ton prénom n'est pas passé ? Dis-le à tes parents : je t'appellerai, toi aussi. »
+    end_at = t + 1.6; total = max(end_at + END, v_end + 0.5)
     cfg = base(bg, total, end_at, "Tape-le :<br><b>il l'appelle par son prénom</b>", final_label, beats,
                cam=[[0, 1.1, 540, 900], [total, 1.0, 540, 960]], dim=0.5)
     return cfg, seq.p
@@ -87,12 +103,12 @@ def budget():
     rows = [("Trampoline park", "≈ 250 €"), ("Animateur, 2 h", "≈ 200 €"), ("Bowling + goûter", "≈ 180 €")]
     rc = '<h3>Anniversaire · 10 enfants</h3>' + "".join(f'<div class="row"><span>{a}</span><span>{b}</span><i></i></div>' for a, b in rows)
     beats = [hook("Anniversaire de 10 enfants :<br><b>le budget</b>…", 0, None),
-             dict(cls="rcpt", html=rc, t0=0.35, t1=5.0, anim="up", strike=[2.0, 2.9, 3.8], style="top:620px"),
-             dict(cls="big", html="Ce que j'ai fait <b>à la place</b>", t0=5.0, anim="pop", style="top:600px;font-size:96px"),
-             dict(cls="box", html="Une <b>quête de chevaliers</b> dans les rues du village", t0=5.8, anim="up", style="top:900px"),
-             dict(cls="box", html="<b>24,90 €</b> · rien à préparer,<br>rien à imprimer", t0=6.6, anim="up", style="top:1230px")]
-    seq.at(5.9, VOIX / "nomme-m.mp3", 5.90, 8.21)       # « Joyeux anniversaire ! »
-    end_at = 8.9; total = end_at + END
+             dict(cls="rcpt", html=rc, t0=0.35, t1=4.2, anim="up", strike=[1.6, 2.3, 3.0], style="top:620px"),
+             dict(cls="big", html="Ce que j'ai fait <b>à la place</b>", t0=4.2, anim="pop", style="top:600px;font-size:96px"),
+             dict(cls="box", html="Une <b>quête de chevaliers</b> dans les rues du village", t0=5.0, anim="up", style="top:900px"),
+             dict(cls="box", html="<b>24,90 €</b> · rien à préparer,<br>rien à imprimer", t0=5.8, anim="up", style="top:1230px")]
+    v_end = seq.at(4.4, line("budget"))     # « Pas besoin d'une fortune : pour un chevalier, toute sa ville devient une quête. »
+    end_at = max(8.9, v_end + 0.3); total = end_at + END
     end_voice(seq, end_at, "jules")
     cfg = base(PHONE / "wide.jpg", total, end_at, "Essayez : <b>aperçu gratuit</b><br>avec son prénom", "Jules", beats,
                cam=[[0, 1.0, 540, 960], [total, 1.12, 540, 900]], dim=0.15)
@@ -108,8 +124,8 @@ def parents():
         beats.append(dict(cls="type" + (" win" if k == 3 else ""), html=f'<span class="n">{k + 1}</span><span>{s}</span>',
                           t0=0.9 + 1.55 * k, anim="up", style=f"top:{520 + 215 * k}px"))
     beats.append(dict(cls="pill", html="<div>Tu es lequel ? Réponds en commentaire</div>", t0=6.4, anim="pop", style="top:1420px"))
-    seq.at(5.55, VOIX / "vocatif-m.mp3")
-    end_at = 8.9; total = end_at + END
+    v_end = seq.at(5.6, line("parents"))   # « Et celui-là… je le nomme Chevalier de l'anniversaire ! »
+    end_at = max(8.9, v_end + 0.3); total = end_at + END
     end_voice(seq, end_at, "zoe")
     cfg = base(IMG / "ville.jpg", total, end_at, "Deviens le <b>n° 4</b> :<br>tape son prénom", "Zoé", beats,
                cam=[[0, 1.1, 560, 1000], [total, 1.0, 540, 960]], dim=0.55)
@@ -126,8 +142,8 @@ def rue():
         beats.append(dict(cls="tag plain", html=s, inScene=True, t0=0.5 + 0.5 * k, t1=sw, anim="pop", style=f"left:{x}px;top:{y}px"))
     for k, (x, y, s) in enumerate(gold):
         beats.append(dict(cls="tag gold", html=s, inScene=True, t0=sw + 0.9 + 1.4 * k, anim="pop", style=f"left:{x}px;top:{y}px"))
-    seq.at(sw + 0.4, PRO, 21.21, 26.66)    # « Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'un chevalier courageux. »
-    end_at = sw + 0.4 + 5.45 + 0.5; total = end_at + END
+    v_end = seq.at(sw + 0.4, line("rue"))   # « Pour un chevalier, chaque rue cache une aventure. Suis le chemin doré ! »
+    end_at = v_end + 0.4; total = end_at + END
     end_voice(seq, end_at, "hugo")
     cfg = base(IMG / "ville.jpg", total, end_at, "La quête se crée avec<br><b>les vrais lieux</b> autour de chez vous", "Hugo", beats,
                cam=[[0, 1.12, 540, 1150], [sw, 1.12, 540, 1150], [sw + 1.5, 1.0, 540, 960], [total, 1.0, 540, 960]],
@@ -140,7 +156,7 @@ VIDEOS = {
     "defi-herse": lambda: defi(IMG / "ville.jpg", "J'ai des <b>dents</b>, mais je ne mords jamais. Je garde la porte du château. <b>Qui suis-je&nbsp;?</b>",
                                "La <b>herse</b> !", "La grille à dents qui fermait la porte du château", "lucas"),
     "defi-trou": lambda: defi(IMG / "cherche.jpg", "Plus on m'en <b>enlève</b>, plus je deviens <b>grand</b>. <b>Qui suis-je&nbsp;?</b>",
-                              "Un <b>trou</b> !", "Comme les douves creusées autour du château", "ines", "f"),
+                              "Un <b>trou</b> !", "Comme les douves creusées autour du château", "ines", "f", "trou"),
     "prenoms-garcons": lambda: roulette(IMG / "gateau.jpg", ["gabriel", "leo", "raphael", "louis", "arthur", "jules", "adam", "mael"],
                                         ["Gabriel", "Léo", "Raphaël", "Louis", "Arthur", "Jules", "Adam", "Maël"], "noah", "Noah", "m"),
     "prenoms-filles": lambda: roulette(IMG / "ville.jpg", ["jade", "louise", "ambre", "alba", "emma", "rose", "alice", "romy"],

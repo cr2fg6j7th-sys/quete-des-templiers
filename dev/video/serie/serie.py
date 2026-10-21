@@ -19,6 +19,9 @@ S_APPROCHE = (0.0, 0.76, "Approche.")
 S_ANNIV = (21.24, 26.6, "Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'un chevalier courageux.")
 S_DEFIS = (30.42, 34.25, "Relève mes défis, et rapporte-moi les lettres.")
 S_PRET = (34.87, 35.33, "Es-tu prêt ?")
+# Recorded for the series (audio/video/rue.mp3, pauses shortened by court.line):
+from court import line
+S_RUE = (None, None, "Pour un chevalier, chaque rue cache une aventure. Suis le chemin doré !", line("rue"))
 TAIL = 4.2
 
 
@@ -43,9 +46,10 @@ def voice(seq, name="leo", label="Léo,"):
         elif len(it) == 1:
             audio.append((None, 0, it[0])); t += it[0]
         else:
-            a, b, text = it
-            audio.append((PRO, a - 0.03, b + 0.06))
-            inner = [(x, y) for x, y in spans(PRO) if y > a and x < b]
+            a, b, text = it[:3]; f = it[3] if len(it) > 3 else PRO
+            if a is None: sp = spans(f); a, b = sp[0][0] + 0.03, sp[-1][1]
+            audio.append((f, a - 0.03, b + 0.06))
+            inner = [(x, y) for x, y in spans(f) if y > a and x < b]
             inner = [(max(x, a), min(y, b)) for x, y in inner]
             words += time_words(text, inner, t + 0.03); t += b - a + 0.09
     names = [w for w in words if w.get("name")]
@@ -80,7 +84,7 @@ def lettre():
 
 
 def gateau():
-    audio, words, ve = voice(["name", (0.25,), S_ANNIV, (0.4,), S_DEFIS])
+    audio, words, ve = voice(["name", (0.25,), S_ANNIV, (0.4,), S_RUE])
     first_end = [x for x in words if x["w"].startswith("courageux")][0]["t1"]
     sw = first_end + 0.35
     total = ve + TAIL
