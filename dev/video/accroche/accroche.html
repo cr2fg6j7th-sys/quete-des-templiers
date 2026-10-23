@@ -22,7 +22,7 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0b0e1d}
 .sub{top:1090px;font-weight:700;font-size:96px;line-height:1.08;padding:0 70px}
 .sub2{top:1220px;font-weight:700;font-size:96px;line-height:1.08;padding:0 70px;color:#ff9aa5}
 .label{top:250px}
-.label span{display:inline-block;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:64px;letter-spacing:5px;color:#11152a;background:#e9c46a;padding:10px 34px 14px;border-radius:14px}
+.label span{display:inline-block;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:58px;letter-spacing:5px;color:#11152a;background:#e9c46a;padding:10px 34px 14px;border-radius:14px}
 .big{top:840px;font-weight:700;font-size:124px;line-height:1.04;padding:0 60px;text-wrap:balance}
 .big em{font-style:normal;color:#ff9aa5}
 #seal{position:absolute;left:50%;width:420px;height:420px;margin-left:-210px;transform-origin:50% 50%}
@@ -122,7 +122,7 @@ function frame(t){
     fx = impact(t, c.t2 - 0.15);
   }
   if (c.type === "defi"){
-    const lab = document.getElementById("label"); const p = clamp(t / .12); lab.style.transform = `scale(${(1.5 - .5 * ease(p)).toFixed(3)})`;
+    const lab = document.getElementById("label"); const p = clamp(t / .12); lab.style.transform = `scale(${(1.15 - .15 * ease(p)).toFixed(3)})`;
     document.getElementById("big").style.opacity = 1;
     const b = document.getElementById("big"); b.style.transform = `scale(${(1.12 - .12 * ease(t / .2)).toFixed(3)})`;
     const ck = document.getElementById("clock"); ck.textContent = "⏱ " + (c.seconds - Math.floor(t / (c.dur / c.seconds))) ;

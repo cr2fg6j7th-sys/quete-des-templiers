@@ -33,7 +33,7 @@ def sound_events(c):
         ev += [(x, "tick" if i % 2 else "tock", 0.9) for i, x in enumerate(ticks_roulette(c["land"]))]
         ev += [(c["land"] - 0.03, "thud", 1.0)]
     elif k == "alerte":
-        ev += [(0.0, "tuuut", 1.0), (0.12, "thud", 0.75), (c["t1"], "tick", 0.6), (c["t2"], "tock", 0.6)]
+        ev += [(0.0, "tuuut", 0.6), (0.12, "thud", 0.7), (c["t1"], "tick", 0.6), (c["t2"], "tock", 0.6)]
     elif k == "ans":
         ev += [(0.02, "heart", 0.9), (c["t2"] - 0.03, "thud", 1.0)]
     elif k == "defi":

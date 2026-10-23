@@ -7,6 +7,8 @@ from pathlib import Path
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 
+BOYS = ["Gabriel", "Léo", "Hugo", "Jules", "Noah", "Tom", "Louis", "Maël", "Nathan", "Sacha", "Arthur", "Lucas"]
+GIRLS = ["Jade", "Louise", "Inès", "Mia", "Ambre", "Zoé", "Lina", "Manon", "Rose", "Alice", "Emma", "Chloé"]
 KIDS = ["Jade", "Léo", "Inès", "Hugo", "Louise", "Gabriel", "Mia", "Noah", "Ambre", "Jules", "Zoé", "Tom", "Lina", "Nathan", "Manon", "Sacha"]
 ADULTS = ["Sophie", "Nicolas", "Julie", "Thomas", "Céline", "Julien", "Aurélie", "Sébastien", "Émilie", "Maxime", "Laura", "Kevin", "Camille"]
 KW_KID = "Grand jeu chevalier enfant"
@@ -18,7 +20,10 @@ KW_VILLAGE = "Jeu de piste dans votre village"
 
 
 def roulette(final, top="Il s'arrête sur <em>UN</em> prénom.", kw=KW_KID, names=KIDS):
-    return dict(type="roulette", dur=1.6, land=1.05, sealTop=520, names=[n for n in names if n != final], final=final, top=top, kw=kw)
+    others = [n for n in names if n != final]
+    # a real first name opens the roulette too, so the first frame (the cover) already shows it
+    first = [final] if "?" not in final else []
+    return dict(type="roulette", dur=1.6, land=1.05, sealTop=520, names=first + others, final=final, top=top, kw=kw)
 
 
 def alerte(sub, sub2, kw=KW_PISTE, huge="ALERTE."):
@@ -44,7 +49,7 @@ PLAN = {
     "10-25-1200-serie-activite-vacances": alerte("Demain, vacances.", "Rien de prévu ?", "Grand jeu chevalier enfant · vacances"),
     "10-25-1745-serie-faq-prenom": roulette("Le vôtre ?", "Prénom rare ? <em>Il le connaît</em> peut-être.", KW_ADULTE,
                                            ["Ysée", "Ulysse", "Maëlys", "Kenzo", "Nahia", "Eliott", "Swann", "Maddie", "Côme", "Aliénor", "Thelma", "Gaspard"]),
-    "10-26-1145-serie-prenoms-garcons": roulette("Votre fils ?"),
+    "10-26-1145-serie-prenoms-garcons": roulette("Votre fils ?", names=BOYS),
     "10-26-1745-serie-ecran-2-minutes": alerte("Ses 40 ans samedi.", "Rien de prêt ?", KW_ADULTE),
     "10-27-1215-rose-approche": roulette("Rose"),
     "10-27-1745-serie-faq-presentation": alerte("Anniversaire samedi.", "Rien de prêt ?"),
@@ -52,7 +57,7 @@ PLAN = {
     "10-28-1745-serie-defi-herse": defi(),
     "10-29-1145-serie-budget": alerte("10 enfants.", "Et votre budget ?"),
     "10-29-1800-emma-approche": roulette("Emma"),
-    "10-30-1145-serie-prenoms-filles": roulette("Votre fille ?"),
+    "10-30-1145-serie-prenoms-filles": roulette("Votre fille ?", names=GIRLS),
     "10-30-1745-serie-faq-preparer": alerte("J-3 avant la fête.", "Rien de prêt ?"),
     "10-31-1000-le-meunier-fantome-halloween": defi("DÉFI HALLOWEEN"),
     "10-31-1800-adam-approche": roulette("Adam"),
