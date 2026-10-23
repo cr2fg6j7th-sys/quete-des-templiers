@@ -39,7 +39,7 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0b0e1d}
 .qtop em{font-style:normal;color:#ff9aa5}
 .clock{top:1440px;font-weight:700;font-size:70px;color:#e9c46a;font-variant-numeric:tabular-nums}
 </style></head>
-<body><div id="stage"><div id="red"></div><svg id="map"></svg><div id="shake"><svg id="cracks"></svg><div id="root"></div></div><div id="flash"></div></div>
+<body><div id="stage"><div id="red"></div><div id="pulse" style="position:absolute;inset:0;box-shadow:inset 0 0 260px 90px rgba(184,32,43,.95);opacity:0"></div><svg id="map"></svg><div id="shake"><svg id="cracks"></svg><div id="root"></div></div><div id="flash"></div></div>
 <script>
 const BORD = "BORD";
 const SEAL = `<svg id="seal" viewBox="-30 -30 60 60"><path d="${BORD}" fill="#a33f4b" stroke="#7d2a35" stroke-width=".6"/><circle r="17.5" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.2"/><path d="M-1.6-1.6-5-12H5L1.6-1.6 12-5V5L1.6 1.6 5 12H-5L-1.6 1.6-12 5V-5Z" fill="#fff" fill-opacity=".88"/></svg>`;
@@ -53,15 +53,17 @@ function setup(cfg){
   C = cfg;
   const r = document.getElementById("root");
   let h = "";
-  if (cfg.top) h += `<div class="abs top" id="top">${nb(cfg.top)}</div>`;
-  if (cfg.type === "roulette") h += `${SEAL}<div class="abs name" id="name"></div>`;
+  if (cfg.top) h += `<div class="abs ${cfg.qstyle ? "qtop" : "top"}" id="top">${nb(cfg.top)}</div>`;
+  if (cfg.type === "roulette") h += `${SEAL}<div class="abs name" id="name"></div>` + (cfg.sub2 ? `<div class="abs sub2" id="sub2" style="top:1290px">${nb(cfg.sub2)}</div>` : "");
   if (cfg.type === "alerte") h += `${SEAL}<div class="abs huge" id="huge">${nb(cfg.huge || "ALERTE.")}</div><div class="abs sub" id="sub">${nb(cfg.sub)}</div><div class="abs sub2" id="sub2">${nb(cfg.sub2)}</div>`;
   if (cfg.type === "ans") h += `${SEAL}<div class="abs huge" id="huge">${nb(cfg.huge)}</div><div class="abs sub2" id="sub2">${nb(cfg.sub2)}</div>`;
-  if (cfg.type === "defi") h += `<div class="abs label" id="label"><span>${nb(cfg.label)}</span></div>${SEAL}<div class="abs big" id="big">${nb(cfg.big)}</div><div class="abs clock" id="clock"></div>`;
+  if (cfg.type === "defi") h += `<div class="abs label" id="label"><span>${nb(cfg.label)}</span></div>${SEAL}<div class="abs big" id="big">${nb(cfg.big)}</div>` + (cfg.seconds ? `<div class="abs clock" id="clock"></div>` : "") + (cfg.sub2 ? `<div class="abs sub2" id="sub2">${nb(cfg.sub2)}</div>` : "");
   if (cfg.type === "village") h += `${SEAL}<div class="abs sub2" id="sub2">${nb(cfg.sub2)}</div>`;
   if (cfg.type === "question") h += `<div class="abs qtop" id="qtop">${nb(cfg.q)}</div><div id="cal"><div class="rings"><i></i><i></i></div><div class="hd">${nb(cfg.cal || "Anniversaire")}</div><div class="d" id="day"></div></div>${SEAL}<div class="abs sub2" id="sub2" style="top:1420px">${nb(cfg.sub2)}</div>`;
   h += `<div class="abs kw" id="kw">${nb(cfg.kw)}</div><div class="abs brand">Ma Quête Légendaire</div>`;
   r.innerHTML = h;
+  const at = (id, top) => { const e = document.getElementById(id); if (e && top != null) e.style.top = top + "px"; };
+  at("sub2", cfg.sub2Top); at("big", cfg.bigTop); at("huge", cfg.hugeTop); at("name", cfg.nameTop); at("clock", cfg.clockTop);
   const seal = document.getElementById("seal");
   const sz = cfg.sealSize ?? 420;
   if (seal){ seal.style.top = (cfg.sealTop ?? 520) + "px"; seal.style.width = seal.style.height = sz + "px"; seal.style.marginLeft = (-sz / 2) + "px"; }
@@ -111,11 +113,12 @@ function frame(t){
   if (c.type === "roulette"){
     // names flicker like a slot machine, slowing down, then the final one lands with the seal
     const names = c.names, el = document.getElementById("name");
-    let acc = 0, i = 0, d = 0.055;
-    while (acc + d <= t && i < names.length){ acc += d; i++; d *= 1.17; }
+    let acc = 0, i = 0, d = c.d0 || 0.055;
+    while (acc + d <= t && i < names.length){ acc += d; i++; d *= (c.grow || 1.17); }
     const landed = t >= c.land;
     if (landed){ el.textContent = nb(c.final); el.classList.add("final"); el.style.transform = `scale(${(1.25 - .25 * ease((t - c.land) / .15)).toFixed(3)})`; el.style.filter = "none"; }
     else { el.classList.remove("final"); el.textContent = names[i % names.length]; const ph = i === 0 ? 1 : clamp((t - acc) / d); el.style.transform = `translateY(${((1 - ease(ph)) * 120).toFixed(0)}px)`; el.style.filter = `blur(${((1 - ph) * 6).toFixed(1)}px)`; }
+    if (c.sub2) show("sub2", t >= c.t2, 30, c.t2);
     fx = impact(t, c.land - 0.15);
   }
   if (c.type === "alerte"){
@@ -134,14 +137,26 @@ function frame(t){
     const lab = document.getElementById("label"); const p = clamp(t / .12); lab.style.transform = `scale(${(1.15 - .15 * ease(p)).toFixed(3)})`;
     document.getElementById("big").style.opacity = 1;
     const b = document.getElementById("big"); b.style.transform = `scale(${(1.12 - .12 * ease(t / .2)).toFixed(3)})`;
-    const ck = document.getElementById("clock"); ck.textContent = "⏱ " + (c.seconds - Math.floor(t / (c.dur / c.seconds))) ;
-    fx = impact(t, 0.02);
+    const ck = document.getElementById("clock");
+    if (c.land){
+      // hybrid: the clock runs down to the seal, which lands on 0
+      if (ck){ const left = Math.max(0, c.seconds - Math.floor(t / (c.land / c.seconds))); ck.textContent = "⏱ " + left; ck.style.color = left === 0 ? "#ff9aa5" : ""; }
+      if (c.sub2) show("sub2", t >= c.t2, 30, c.t2);
+      fx = impact(t, c.land - 0.15);
+    } else {
+      if (ck) ck.textContent = "⏱ " + (c.seconds - Math.floor(t / (c.dur / c.seconds)));
+      fx = impact(t, 0.02);
+    }
   }
   if (c.type === "question"){
     // a calendar counts down to the birthday (J-7 ... J-1), then the seal hits it
     const q = document.getElementById("qtop"); q.style.opacity = 1; q.style.transform = `scale(${(1.08 - .08 * ease(t / .25)).toFixed(3)})`;
-    const days = c.days || 7, k = Math.min(days - 1, Math.floor(t / c.step));
-    document.getElementById("day").textContent = "J-" + (days - k);
+    const days = c.days || 7, labels = c.labels || null, n = labels ? labels.length : days, k = Math.min(n - 1, Math.floor(t / c.step));
+    const dl = document.getElementById("day"); dl.textContent = labels ? labels[k] : "J-" + (days - k);
+    const L = dl.textContent.length;
+    if (L > 5){ dl.style.fontSize = "112px"; dl.style.marginTop = "110px"; }
+    else if (L > 3){ dl.style.fontSize = "160px"; dl.style.marginTop = "84px"; }
+    else { dl.style.fontSize = ""; dl.style.marginTop = ""; }
     const cal = document.getElementById("cal"); const flip = clamp((t - k * c.step) / .08);
     cal.style.transform = `rotate(${(-3 + 6 * rnd(k)).toFixed(1)}deg) scale(${t >= c.land ? (1.06 - .06 * ease((t - c.land) / .15)).toFixed(3) : (0.96 + .04 * ease(flip)).toFixed(3)})`;
     show("sub2", t >= c.t2, 30, c.t2);
@@ -152,6 +167,8 @@ function frame(t){
     show("sub2", t >= c.t2, 30, c.t2);
     fx = impact(t, c.land - 0.15);
   }
+  // heartbeat: a red pulse at the edges on each beat, stronger as the beats speed up
+  if (c.beats){ const bs = c.beats.filter(x => x <= t), lb = bs.length ? bs[bs.length - 1] : -9; const pu = Math.max(0, 1 - (t - lb) / .28) * (.3 + .6 * bs.length / c.beats.length); document.getElementById("pulse").style.opacity = pu.toFixed(3); }
   const k = fx.shake * 26;
   st.style.transform = `translate(${((rnd(Math.floor(t * 60)) - .5) * k).toFixed(1)}px,${((rnd(Math.floor(t * 60) + 5) - .5) * k).toFixed(1)}px)`;
   document.getElementById("flash").style.opacity = fx.flash.toFixed(3);

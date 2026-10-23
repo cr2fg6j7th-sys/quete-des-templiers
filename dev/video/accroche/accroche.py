@@ -8,7 +8,7 @@
 #   defi      « DÉFI PARENTS » : plus fort que votre enfant ? + a countdown (anecdotes, riddles)
 #   village   a street map dives in, the seal falls on it: « Il y a une quête ici. »
 #   python3 dev/video/accroche/accroche.py BASE.mp4 OUT.mp4 '<json cfg>'    (or import and call make())
-import asyncio, json, subprocess, sys, tempfile
+import asyncio, json, os, subprocess, sys, tempfile
 from pathlib import Path
 from playwright.async_api import async_playwright
 
@@ -19,10 +19,10 @@ FPS = 30
 SR = 44100
 
 
-def ticks_roulette(land):
-    out, acc, d = [], 0.0, 0.055
+def ticks_roulette(land, d0=0.055, grow=1.17):
+    out, acc, d = [], 0.0, d0
     while acc + d <= land - 0.15:
-        acc += d; out.append(acc); d *= 1.17
+        acc += d; out.append(acc); d *= grow
     return out
 
 
@@ -30,21 +30,28 @@ def sound_events(c):
     """(time, sound, gain) for the intro, in step with what accroche.html draws."""
     k, ev = c["type"], []
     if k == "roulette":
-        ev += [(x, "tick" if i % 2 else "tock", 0.9) for i, x in enumerate(ticks_roulette(c["land"]))]
+        ev += [(x, "tick" if i % 2 else "tock", 0.9) for i, x in enumerate(ticks_roulette(c["land"], c.get("d0", 0.055), c.get("grow", 1.17)))]
         ev += [(c["land"] - 0.03, "thud", 1.0)]
     elif k == "alerte":
-        ev += [(0.0, "tuuut", 0.6), (0.12, "thud", 0.7), (c["t1"], "tick", 0.6), (c["t2"], "tock", 0.6)]
+        ev += ([(0.0, "tuuut", 0.6)] if c.get("tuuut", True) else []) + [(0.12, "thud", 0.7), (c["t1"], "tick", 0.6), (c["t2"], "tock", 0.6)]
     elif k == "ans":
-        ev += [(0.02, "heart", 0.9), (c["t2"] - 0.03, "thud", 1.0)]
+        ev += ([] if c.get("beats") else [(0.02, "heart", 0.9)]) + [(c["t2"] - 0.03, "thud", 1.0)]
     elif k == "defi":
-        ev += [(0.12, "thud", 1.0)] + [(0.45 + i * 0.3, "tick" if i % 2 else "tock", 0.7) for i in range(int((c["dur"] - 0.45) / 0.3) + 1)]
+        if c.get("land"):   # hybrid: one tick per second of the clock, the seal on 0
+            s = c.get("seconds", 0)
+            ev += [(i * c["land"] / s, "tick" if i % 2 else "tock", 0.8) for i in range(s)] if s else []
+            ev += [(c["land"] - 0.03, "thud", 1.0)]
+        else:
+            ev += [(0.12, "thud", 1.0)] + [(0.45 + i * 0.3, "tick" if i % 2 else "tock", 0.7) for i in range(int((c["dur"] - 0.45) / 0.3) + 1)]
     elif k == "question":
-        n = c.get("days", 7)
+        n = len(c["labels"]) if c.get("labels") else c.get("days", 7)
         ev += [(i * c["step"], "tick" if i % 2 else "tock", 0.75) for i in range(n) if i * c["step"] < c["land"] - 0.1]
         ev += [(c["land"] - 0.03, "thud", 1.0), (c["t2"], "tock", 0.5)]
         ev += [(b, "heartbig", 0.7 + 0.1 * i) for i, b in enumerate(c.get("beats", [0.05, 0.75, 1.35, 1.95, 2.4]))]
     elif k == "village":
         ev += [(0.0, "whoosh", 0.9), (c["land"] - 0.03, "thud", 1.0)]
+    if k != "question":          # the question hook has its own heartbeats; the others take them from the config
+        ev += [(b, "heartbig", 0.6 + 0.5 * i / max(1, len(c.get("beats", [])) - 1)) for i, b in enumerate(c.get("beats", []))]
     return ev
 
 
@@ -61,7 +68,7 @@ def intro_audio(c, out):
 
 
 async def intro_frames(c, tmp):
-    page = HERE / "_accroche.html"
+    page = HERE / f"_accroche-{os.getpid()}.html"     # one per process: two renders can run side by side
     bord = (REPO / "dev/flyers/svg/sceau-bord.txt").read_text().strip()
     page.write_text((HERE / "accroche.html").read_text().replace("FONTS/", (REPO / "fonts").as_uri() + "/").replace('"BORD"', json.dumps(bord)))
     async with async_playwright() as p:
