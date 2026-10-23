@@ -12,17 +12,29 @@ def dur(f):
     return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(f)]))
 
 
+def has_audio(f):
+    return bool(subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries", "stream=index", "-of", "csv=p=0", str(f)],
+                               capture_output=True, text=True).stdout.strip())
+
+
 def boucle(path, l=L):
+    """The input is read twice (no split/asplit: acrossfade on two branches of one asplit never got its frames,
+    and the sound was silently dropped until 23 Oct 2026). The sound is padded to the picture's length first."""
     path = Path(path)
     T = dur(path)
     tmp = path.with_name(path.stem + ".boucle" + path.suffix)
-    fc = (f"[0:v]split[a][b];[a]trim={l}:{T},setpts=PTS-STARTPTS[main];[b]trim=0:{l},setpts=PTS-STARTPTS[head];"
-          f"[main][head]xfade=transition=fade:duration={l}:offset={T - 2 * l:.3f},format=yuv420p[v];"
-          f"[0:a]asplit[c][d];[c]atrim={l}:{T},asetpts=PTS-STARTPTS[am];[d]atrim=0:{l},asetpts=PTS-STARTPTS[ah];"
-          f"[am][ah]acrossfade=d={l}:c1=tri:c2=tri[au]")
-    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(path), "-filter_complex", fc, "-map", "[v]", "-map", "[au]",
-                    "-c:v", "libx264", "-preset", "medium", "-crf", "22", "-c:a", "aac", "-b:a", "160k",
+    fc = (f"[0:v]trim={l}:{T},setpts=PTS-STARTPTS[main];[1:v]trim=0:{l},setpts=PTS-STARTPTS[head];"
+          f"[main][head]xfade=transition=fade:duration={l}:offset={T - 2 * l:.3f},format=yuv420p[v]")
+    maps = ["-map", "[v]"]
+    if has_audio(path):
+        fc += (f";[0:a]apad=whole_dur={T:.3f},atrim={l}:{T:.3f},asetpts=PTS-STARTPTS[am];"
+               f"[1:a]atrim=0:{l},asetpts=PTS-STARTPTS[ah];[am][ah]acrossfade=d={l}:c1=tri:c2=tri[au]")
+        maps += ["-map", "[au]", "-c:a", "aac", "-b:a", "160k"]
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(path), "-i", str(path), "-filter_complex", fc, *maps,
+                    "-c:v", "libx264", "-preset", "medium", "-crf", "22",
                     "-map_metadata", "-1", "-movflags", "+faststart", str(tmp)], check=True)
+    if has_audio(path) and not has_audio(tmp):
+        raise RuntimeError(f"boucle: sound lost in {path}")
     tmp.replace(path)
     return T - l
 
