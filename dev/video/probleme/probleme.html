@@ -60,6 +60,7 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0b0e1d}
 <body><div id="stage">
   <div class="scene" id="s1">
     <div class="bg" style="background-image:url(IMG_WIDE)"></div><div class="dim" style="background:rgba(11,14,29,.55)"></div>
+    <div id="pulse" style="position:absolute;inset:0;box-shadow:inset 0 0 260px 90px rgba(184,32,43,.95);opacity:0"></div>
     <div class="abs kw">Idée anniversaire enfant · jeu de piste</div>
     <div class="abs head">Organiser l'anniversaire <em>de son enfant</em>…</div>
     <div id="note"><h3>Anniversaire de Léo<small>samedi, 10 copains</small></h3><div id="items"></div></div>
@@ -120,7 +121,12 @@ function frame(t){
       const ts = T.strike + i * .15; el.querySelector("span").style.setProperty("--s", clamp((t - ts) / .12).toFixed(3)); el.querySelector("i").style.opacity = t >= ts + .05 ? 1 : 0; });
     // stress: the note shakes a little more as the list grows
     const n = its.length, k = t < T.seal ? clamp((t - T.items[0]) / (T.items[n - 1] - T.items[0] + .5)) * 7 : 0;
-    $("note").style.transform = `rotate(${((rnd(Math.floor(t * 20)) - .5) * k * .35).toFixed(2)}deg) translateX(${((rnd(Math.floor(t * 20) + 3) - .5) * k).toFixed(1)}px) scale(${t >= T.seal ? (1 - .06 * ease((t - T.seal) / .2)).toFixed(3) : 1})`;
+    // heartbeat: a red pulse at the edges and the note beating, stronger as the beats speed up
+    const bs = c.beats.filter(x => x <= t), lb = bs.length ? bs[bs.length - 1] : -9, bi = bs.length / c.beats.length;
+    const pu = t < T.seal ? Math.max(0, 1 - (t - lb) / .28) * (.35 + .65 * bi) : 0;
+    $("pulse").style.opacity = pu.toFixed(3);
+    $("s1").querySelector(".bg").style.filter = `saturate(${(1 - .3 * pu).toFixed(2)})`;
+    $("note").style.transform = `scale(${(1 + .035 * pu).toFixed(4)}) rotate(${((rnd(Math.floor(t * 20)) - .5) * k * .35).toFixed(2)}deg) translateX(${((rnd(Math.floor(t * 20) + 3) - .5) * k).toFixed(1)}px) scale(${t >= T.seal ? (1 - .06 * ease((t - T.seal) / .2)).toFixed(3) : 1})`;
     vis("sigh", t, T.sigh, T.seal);
     const seal = $("seal"), p = clamp((t - (T.seal - .15)) / .15);
     seal.style.opacity = t < T.seal - .15 ? 0 : 1; seal.style.transform = `scale(${(2.6 - 1.6 * ease(p)).toFixed(3)}) rotate(${(-14 + 14 * ease(p)).toFixed(1)}deg)`;
@@ -132,7 +138,7 @@ function frame(t){
   // scene 2: the phone, the first name typed
   if (scene("s2", t, T.phone, T.ville)){
     $("phone").style.transform = `translateY(${((1 - ease((t - T.phone) / .35)) * 220).toFixed(1)}px) scale(${(1 + (t - T.phone) * .012).toFixed(4)})`;
-    const name = c.name, n = Math.max(0, Math.min(name.length, Math.floor((t - T.type) / .14) + 1));
+    const name = c.name, n = Math.max(0, Math.min(name.length, Math.floor((t - T.type) / .18) + 1));
     $("tt").textContent = t >= T.type ? name.slice(0, n) : ""; $("caret").style.opacity = Math.floor(t * 2.5) % 2 ? 1 : 0; $("typed").style.opacity = t >= T.type - .1 ? 1 : 0;
     const tp = (t - T.tap) / .5; const tap = $("tap"); tap.style.opacity = tp >= 0 && tp < 1 ? (1 - tp).toFixed(2) : 0; tap.style.transform = `scale(${(.6 + tp * .9).toFixed(2)})`;
   }

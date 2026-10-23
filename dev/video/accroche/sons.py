@@ -69,6 +69,16 @@ def heart():
     return x
 
 
+def heart_big():
+    """A heavier heartbeat for urgency: lower, longer, with a soft knock on each beat."""
+    d = 0.62; tt = t(d); x = np.zeros_like(tt)
+    for st, amp in ((0.0, 1.0), (0.2, 0.8)):
+        i = int(st * SR); tl = tt[: len(tt) - i]
+        x[i:] += (np.sin(2 * np.pi * (48 * np.exp(-tl * 5) + 34) * tl) * np.exp(-tl * 9) * amp
+                  + lowpass(rng.normal(0, 1, len(tl)), 0.08) * np.exp(-tl * 40) * amp * 0.8)
+    return x
+
+
 def tuuut():
     src = REPO / "audio/voix/recit-tower-0.mp3"
     out = OUT / "tuuut.wav"
@@ -80,4 +90,5 @@ def tuuut():
 if __name__ == "__main__":
     save("thud", thud()); save("tick", tick(), 0.5); save("tock", tick(False), 0.45)
     save("whoosh", whoosh(), 0.6); save("heart", heart(), 0.85); tuuut()
+    save("heartbig", heart_big(), 0.97)
     print(sorted(p.name for p in OUT.iterdir()))

@@ -38,6 +38,11 @@ def defi(label="DÉFI PARENTS", big="Plus fort que <em>votre enfant</em> ?", kw=
     return dict(type="defi", dur=1.4, seconds=3, sealTop=400, label=label, big=big, kw=kw)
 
 
+def question(q, sub2, kw=KW_PISTE, cal="Anniversaire", days=7):
+    """« Ton enfant a bientôt son anniversaire ? »: a calendar counts down J-7 ... J-1, then the seal hits it."""
+    return dict(type="question", dur=2.7, step=0.2, days=days, land=1.48, t2=1.68, sealTop=1050, sealSize=300, q=q, sub2=sub2, cal=cal, kw=kw)
+
+
 def village(kw=KW_VILLAGE, sub2="… même dans votre village."):
     return dict(type="village", dur=1.6, land=0.75, t2=0.95, sealTop=640, top="Il y a une quête <em>ici.</em>", sub2=sub2, kw=kw)
 

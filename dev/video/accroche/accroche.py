@@ -38,6 +38,11 @@ def sound_events(c):
         ev += [(0.02, "heart", 0.9), (c["t2"] - 0.03, "thud", 1.0)]
     elif k == "defi":
         ev += [(0.12, "thud", 1.0)] + [(0.45 + i * 0.3, "tick" if i % 2 else "tock", 0.7) for i in range(int((c["dur"] - 0.45) / 0.3) + 1)]
+    elif k == "question":
+        n = c.get("days", 7)
+        ev += [(i * c["step"], "tick" if i % 2 else "tock", 0.75) for i in range(n) if i * c["step"] < c["land"] - 0.1]
+        ev += [(c["land"] - 0.03, "thud", 1.0), (c["t2"], "tock", 0.5)]
+        ev += [(b, "heartbig", 0.7 + 0.1 * i) for i, b in enumerate(c.get("beats", [0.05, 0.75, 1.35, 1.95, 2.4]))]
     elif k == "village":
         ev += [(0.0, "whoosh", 0.9), (c["land"] - 0.03, "thud", 1.0)]
     return ev

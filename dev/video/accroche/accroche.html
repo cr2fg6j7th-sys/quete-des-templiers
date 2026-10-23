@@ -30,6 +30,13 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0b0e1d}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 #red{position:absolute;inset:0;background:#a33f4b;opacity:0}
 #map{position:absolute;inset:0;width:1080px;height:1920px}
+#cal{position:absolute;left:50%;top:700px;width:460px;height:500px;margin-left:-230px;background:#fffaf0;border-radius:34px;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden;color:#1b2547;text-align:center}
+#cal .hd{background:#a33f4b;color:#fffaf0;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:50px;letter-spacing:4px;padding:26px 0 30px}
+#cal .rings{position:absolute;top:-18px;left:0;right:0;display:flex;justify-content:space-around;padding:0 70px}
+#cal .rings i{width:26px;height:60px;border-radius:13px;background:#1b2547;display:block}
+#cal .d{font-weight:700;font-size:230px;line-height:1;margin-top:46px;font-variant-numeric:tabular-nums}
+.qtop{top:250px;font-weight:700;font-size:100px;line-height:1.04;padding:0 60px;text-wrap:balance}
+.qtop em{font-style:normal;color:#ff9aa5}
 .clock{top:1440px;font-weight:700;font-size:70px;color:#e9c46a;font-variant-numeric:tabular-nums}
 </style></head>
 <body><div id="stage"><div id="red"></div><svg id="map"></svg><div id="shake"><svg id="cracks"></svg><div id="root"></div></div><div id="flash"></div></div>
@@ -52,12 +59,14 @@ function setup(cfg){
   if (cfg.type === "ans") h += `${SEAL}<div class="abs huge" id="huge">${nb(cfg.huge)}</div><div class="abs sub2" id="sub2">${nb(cfg.sub2)}</div>`;
   if (cfg.type === "defi") h += `<div class="abs label" id="label"><span>${nb(cfg.label)}</span></div>${SEAL}<div class="abs big" id="big">${nb(cfg.big)}</div><div class="abs clock" id="clock"></div>`;
   if (cfg.type === "village") h += `${SEAL}<div class="abs sub2" id="sub2">${nb(cfg.sub2)}</div>`;
+  if (cfg.type === "question") h += `<div class="abs qtop" id="qtop">${nb(cfg.q)}</div><div id="cal"><div class="rings"><i></i><i></i></div><div class="hd">${nb(cfg.cal || "Anniversaire")}</div><div class="d" id="day"></div></div>${SEAL}<div class="abs sub2" id="sub2" style="top:1420px">${nb(cfg.sub2)}</div>`;
   h += `<div class="abs kw" id="kw">${nb(cfg.kw)}</div><div class="abs brand">Ma Quête Légendaire</div>`;
   r.innerHTML = h;
   const seal = document.getElementById("seal");
-  if (seal) seal.style.top = (cfg.sealTop ?? 520) + "px";
+  const sz = cfg.sealSize ?? 420;
+  if (seal){ seal.style.top = (cfg.sealTop ?? 520) + "px"; seal.style.width = seal.style.height = sz + "px"; seal.style.marginLeft = (-sz / 2) + "px"; }
   // cracks: jagged lines from the seal centre, revealed at the impact
-  const cx = 540, cy = (cfg.sealTop ?? 520) + 210;
+  const cx = 540, cy = (cfg.sealTop ?? 520) + sz / 2;
   let s = "";
   for (let k = 0; k < 9; k++){
     let a = (k / 9) * Math.PI * 2 + rnd(k) * 0.5, x = cx + Math.cos(a) * 200, y = cy + Math.sin(a) * 200, d = `M${x.toFixed(0)},${y.toFixed(0)}`;
@@ -127,6 +136,16 @@ function frame(t){
     const b = document.getElementById("big"); b.style.transform = `scale(${(1.12 - .12 * ease(t / .2)).toFixed(3)})`;
     const ck = document.getElementById("clock"); ck.textContent = "⏱ " + (c.seconds - Math.floor(t / (c.dur / c.seconds))) ;
     fx = impact(t, 0.02);
+  }
+  if (c.type === "question"){
+    // a calendar counts down to the birthday (J-7 ... J-1), then the seal hits it
+    const q = document.getElementById("qtop"); q.style.opacity = 1; q.style.transform = `scale(${(1.08 - .08 * ease(t / .25)).toFixed(3)})`;
+    const days = c.days || 7, k = Math.min(days - 1, Math.floor(t / c.step));
+    document.getElementById("day").textContent = "J-" + (days - k);
+    const cal = document.getElementById("cal"); const flip = clamp((t - k * c.step) / .08);
+    cal.style.transform = `rotate(${(-3 + 6 * rnd(k)).toFixed(1)}deg) scale(${t >= c.land ? (1.06 - .06 * ease((t - c.land) / .15)).toFixed(3) : (0.96 + .04 * ease(flip)).toFixed(3)})`;
+    show("sub2", t >= c.t2, 30, c.t2);
+    fx = impact(t, c.land - 0.15);
   }
   if (c.type === "village"){
     const m = document.getElementById("map"); m.style.transform = `scale(${(2.2 - 1.2 * ease(t / c.land)).toFixed(3)})`; m.style.transformOrigin = "50% 38%";

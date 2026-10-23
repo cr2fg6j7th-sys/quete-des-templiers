@@ -12,7 +12,7 @@ REPO = HERE.parents[2]
 sys.path[:0] = [str(HERE.parent / "campagne"), str(HERE.parent / "accroche"), str(HERE.parent)]
 from build import build_audio, VOIX, NOMS
 from accroche import make as with_hook
-from plan import alerte
+from plan import alerte, question
 FPS = 30
 SONS = HERE.parent / "accroche/sons"
 OUT = REPO / "marketing/videos-probleme"
@@ -22,26 +22,28 @@ PHONE = HERE.parent / "campagne/img/phone"
 VIDEOS = {
     "anniversaire-casse-tete": dict(
         name="Léo", name_clip="leo",
-        hook=alerte("Samedi : 10 enfants.", "Et rien de prêt ?"),
+        hook=question("Ton enfant a bientôt <em>son anniversaire</em> ?", "Et rien de prêt ?", "Idée anniversaire enfant · jeu de piste"),
         items=["Inviter les copains", "Trouver une activité (sans écrans)", "Imprimer et cacher les indices",
                "Écrire les énigmes", "Les occuper 2 heures", "Et s'il pleut ?"],
-        t=dict(items=[0.4, 1.0, 1.6, 2.2, 2.8, 3.4], sigh=3.9, seal=4.8, strike=5.0, phone=6.3, type=6.6, tap=7.15,
-               ville=9.8, tags=[10.1, 10.6, 11.1], step=11.8, end=14.0),
-        voice=[(7.3, "name", None, None), (8.15, "prologue-dehors-m", 0.0, 5.69), (14.4, "nomme-m", 5.92, 8.21)],
-        caps=[(7.3, 8.1, '<span class="n">Léo</span>,'), (8.15, 9.45, "Approche."),
-              (9.52, 13.95, "Je suis le Grand Maître de l'Ordre des Gardiens du Temple."), (14.4, 16.75, "Joyeux anniversaire !")],
-        total=17.2),
+        # slow enough to read every line (Nathan, 23/10 16:13), with a heartbeat that speeds up until the seal falls
+        t=dict(items=[0.7, 1.6, 2.5, 3.4, 4.3, 5.2], sigh=6.1, seal=7.7, strike=7.9, phone=10.2, type=10.6, tap=11.45,
+               ville=14.9, tags=[15.3, 16.0, 16.7], step=17.5, end=20.2),
+        beats=[0.25, 1.15, 1.95, 2.7, 3.35, 3.95, 4.5, 5.0, 5.45, 5.85, 6.2, 6.5, 6.78, 7.03, 7.26, 7.47],
+        voice=[(11.65, "name", None, None), (12.5, "prologue-dehors-m", 0.0, 5.69), (20.7, "nomme-m", 5.92, 8.21)],
+        caps=[(11.65, 12.45, '<span class="n">Léo</span>,'), (12.5, 13.8, "Approche."),
+              (13.87, 18.3, "Je suis le Grand Maître de l'Ordre des Gardiens du Temple."), (20.7, 23.05, "Joyeux anniversaire !")],
+        total=24.0),
 }
 
 
 def sfx(c):
     T = c["t"]; ev = []
-    beats = [0.3, 1.0, 1.6, 2.1, 2.6, 3.0, 3.4, 3.75, 4.1, 4.4]
-    ev += [(b, "heart", 0.45 + 0.5 * i / len(beats)) for i, b in enumerate(beats)]
+    beats = c["beats"]
+    ev += [(b, "heartbig", 0.9 + 0.7 * i / len(beats)) for i, b in enumerate(beats)]
     ev += [(x, "tock", 0.7) for x in T["items"]]
     ev += [(T["seal"] - 0.03, "thud", 1.0)] + [(T["strike"] + i * 0.15 + 0.05, "tick", 0.55) for i in range(len(c["items"]))]
     ev += [(T["phone"] - 0.05, "whoosh", 0.7), (T["ville"] - 0.05, "whoosh", 0.6), (T["end"] - 0.05, "whoosh", 0.6)]
-    ev += [(T["type"] + i * 0.14, "tick", 0.45) for i in range(len(c["name"]))] + [(T["tap"], "tock", 0.6)]
+    ev += [(T["type"] + i * 0.18, "tick", 0.45) for i in range(len(c["name"]))] + [(T["tap"], "tock", 0.6)]
     return ev
 
 
@@ -58,7 +60,7 @@ def audio(c, tmp):
     for i, (at, s, g) in enumerate(ev):
         ins += ["-i", str(SONS / f"{s}.wav")]
         fl.append(f"[{i + 1}:a]aresample=44100,adelay={int(at * 1000)}:all=1,volume={g}[e{i}]")
-    fl.append("[b]" + "".join(f"[e{i}]" for i in range(len(ev))) + f"amix=inputs={len(ev) + 1}:normalize=0:duration=first,alimiter=limit=0.95[a]")
+    fl.append("[b]" + "".join(f"[e{i}]" for i in range(len(ev))) + f"amix=inputs={len(ev) + 1}:normalize=0:duration=first,alimiter=limit=0.85[a]")
     out = tmp / "mix.m4a"
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", *ins, "-filter_complex", ";".join(fl), "-map", "[a]", "-c:a", "aac", "-b:a", "192k", str(out)], check=True)
     return out
