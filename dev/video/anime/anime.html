@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:"UnifrakturMaguntia";src:url(FONTS/UnifrakturMaguntia-Book.woff) format("woff")}
+@font-face{font-family:"Alegreya Sans";font-weight:400;src:url(FONTS/AlegreyaSans-Regular.woff) format("woff")}
+@font-face{font-family:"Alegreya Sans";font-weight:500;src:url(FONTS/AlegreyaSans-Medium.woff) format("woff")}
+@font-face{font-family:"Alegreya Sans";font-weight:700;src:url(FONTS/AlegreyaSans-Bold.woff) format("woff")}
+@font-face{font-family:"Alegreya Sans";font-style:italic;src:url(FONTS/AlegreyaSans-Italic.woff) format("woff")}
+@font-face{font-family:"Alegreya Sans SC";font-weight:700;src:url(FONTS/AlegreyaSansSC-Bold.woff) format("woff")}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#0b0e1d}
+#stage{position:absolute;inset:0;overflow:hidden;font-family:"Alegreya Sans",sans-serif;color:#fffaf0}
+#sky{position:absolute;inset:-60px;background:radial-gradient(ellipse 85% 60% at 50% 40%,#26305c 0%,#161c3a 55%,#0a0d1c 100%)}
+#stars{position:absolute;inset:0}
+#vign{position:absolute;inset:0;box-shadow:inset 0 0 260px 60px rgba(0,0,0,.55)}
+#pulse{position:absolute;inset:0;box-shadow:inset 0 0 260px 90px rgba(184,32,43,.9);opacity:0}
+.el{position:absolute;left:0;right:0;opacity:0;text-align:center}
+.kw{top:96px;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:40px;letter-spacing:3px;color:#e9c46a}
+.title{top:160px;padding:0 60px;font-weight:700;font-size:84px;line-height:1.04;text-wrap:balance;text-shadow:0 6px 30px rgba(0,0,0,.6)}
+.title em{font-style:normal;color:#ff9aa5}
+.bubble div{display:inline-block;background:#b8202b;color:#fff;border-radius:999px;padding:18px 38px;font-weight:700;font-size:44px;box-shadow:0 14px 34px rgba(0,0,0,.5)}
+.parch{left:60px;right:60px;background:linear-gradient(160deg,#f7ecd0 0%,#efdcb0 60%,#e6cf9b 100%);color:#3b2a14;border-radius:22px;padding:34px;box-shadow:0 30px 80px rgba(0,0,0,.55),inset 0 0 0 5px #fff6df,inset 0 0 0 9px #8a5a2b}
+.parch svg{display:block;width:100%;height:auto}
+/* word grid */
+.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:0;position:relative;margin:0 auto;width:840px}
+.grid span{height:105px;line-height:105px;font-weight:700;font-size:64px;color:#3b2a14}
+.hl{position:absolute;height:84px;border-radius:42px;border:7px solid #b8202b;background:rgba(184,32,43,.12);transform-origin:42px 42px}
+.words{margin-top:22px;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:44px;letter-spacing:2px;color:#8a5a2b}
+.words b{color:#3b2a14;transition:none}
+.words b.done{text-decoration:line-through;text-decoration-color:#b8202b;text-decoration-thickness:6px;color:#9a8a6a}
+/* code */
+.code{display:flex;justify-content:center;gap:22px}
+.code .c{width:170px}
+.code .n{font-weight:700;font-size:104px;color:#3b2a14;height:130px}
+.code .l{height:190px;line-height:190px;border-bottom:7px solid #8a5a2b;font-family:"UnifrakturMaguntia",serif;font-size:160px;color:#b8202b}
+.hint{margin-top:30px;font-size:46px;font-weight:500;color:#5c4320}
+.hint b{color:#b8202b}
+/* riddle */
+.riddle{font-style:italic;font-weight:500;font-size:68px;line-height:1.2;color:#3b2a14;padding:10px 6px}
+.riddle .eb{display:block;font-style:normal;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:40px;letter-spacing:3px;color:#b8202b;margin-bottom:14px}
+.answer{font-family:"UnifrakturMaguntia",serif;font-size:130px;line-height:1;color:#ff9aa5;text-shadow:0 8px 30px rgba(0,0,0,.7)}
+.mid{padding:0 80px;font-weight:700;font-size:62px;line-height:1.1;text-shadow:0 6px 24px rgba(0,0,0,.7)}
+.mid em{font-style:normal;color:#e9c46a}
+.box div{display:inline-block;max-width:940px;background:rgba(17,21,42,.9);border:4px solid #e9c46a;border-radius:24px;padding:24px 36px;font-size:54px;font-weight:500;line-height:1.14}
+.box b{color:#e9c46a}
+/* seal countdown */
+.seal{left:50%;width:250px;height:250px;margin-left:-125px}
+.seal svg{position:absolute;inset:0}
+.seal span{position:absolute;inset:0;line-height:250px;font-weight:700;font-size:130px;color:#fff;text-shadow:0 4px 12px rgba(0,0,0,.5)}
+/* list */
+.item{left:70px;right:70px;text-align:left;display:flex;gap:30px;align-items:flex-start;background:#fffaf0;color:#1b2547;border-radius:24px;padding:26px 32px;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.item .n{flex:none;width:86px;height:86px;border-radius:50%;background:#b8202b;color:#fff;font-weight:700;font-size:56px;line-height:86px;text-align:center}
+.item h4{font-weight:700;font-size:56px;line-height:1.05;color:#8e1f24}
+.item p{font-size:40px;line-height:1.18;font-weight:500;margin-top:8px;color:#2a3150}
+.cap{top:1690px;padding:0 70px;font-style:italic;font-size:56px;line-height:1.15;text-shadow:0 4px 20px rgba(0,0,0,.9),0 0 4px rgba(0,0,0,.9)}
+.save{top:1560px}
+.save div{display:inline-block;border:4px solid #e9c46a;color:#e9c46a;border-radius:999px;padding:14px 34px;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:40px;letter-spacing:2px;background:rgba(10,13,28,.6)}
+/* end card */
+#end{position:absolute;inset:0;opacity:0;background:radial-gradient(ellipse 80% 55% at 50% 42%,#232b55 0%,#141a35 55%,#0a0d1c 100%)}
+#end .a{position:absolute;left:0;right:0;text-align:center}
+.brand{top:430px;font-family:"UnifrakturMaguntia",serif;font-size:150px;line-height:1.02}
+.endsub{top:800px;font-weight:700;font-size:72px;line-height:1.1;padding:0 70px}
+.endsub em{font-style:normal;color:#ff9aa5}
+.url{top:1060px}
+.url span{display:inline-block;border:4px solid #e9c46a;border-radius:20px;padding:18px 38px;font-weight:700;font-size:62px}
+.url small{display:block;margin-top:14px;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:40px;letter-spacing:3px;color:#e9c46a}
+.cta{top:1360px;padding:0 60px}
+.cta span{display:inline-block;background:#b8202b;border-radius:28px;padding:22px 40px;font-weight:700;font-size:50px;line-height:1.15}
+#bar{position:absolute;left:0;bottom:0;height:10px;background:#e9c46a;width:0}
+#flash{position:absolute;inset:0;background:#fff;opacity:0}
+</style></head>
+<body><div id="stage">
+<div id="sky"></div><svg id="stars" width="1080" height="1920"></svg><div id="pulse"></div><div id="vign"></div>
+<div id="els"></div>
+<div id="end"><div class="a brand">Ma Quête<br>Légendaire</div><div class="a endsub" id="endsub"></div>
+<div class="a url"><span>maquetelegendaire.fr</span><small>Aperçu gratuit · lien en bio</small></div>
+<div class="a cta" id="cta"></div></div>
+<div id="flash"></div><div id="bar"></div>
+</div>
+<script>
+const SEAL = 'SEALSVG';
+let C, E = [];
+const $ = (h) => { const d = document.createElement('div'); d.innerHTML = h; return d.firstElementChild; };
+const clamp = (x) => Math.max(0, Math.min(1, x));
+const ease = (x) => 1 - Math.pow(1 - clamp(x), 3);
+
+function stars() {
+  let s = 7, r = () => (s = (s * 9301 + 49297) % 233280) / 233280, h = '';
+  for (let i = 0; i < 90; i++) h += `<circle cx="${r() * 1080}" cy="${r() * 1920}" r="${0.8 + r() * 2.2}" fill="#fffaf0" opacity="${0.15 + r() * 0.5}"/>`;
+  document.getElementById('stars').innerHTML = h;
+}
+
+function setup(cfg) {
+  C = cfg; stars();
+  const box = document.getElementById('els');
+  for (const e of cfg.els) {
+    let node;
+    if (e.type === 'seal') node = $(`<div class="el seal" style="${e.style || ''}">${SEAL}<span>${e.html}</span></div>`);
+    else node = $(`<div class="el ${e.cls || ''}" style="${e.style || ''}">${e.html || ''}</div>`);
+    box.appendChild(node); e.node = node;
+    if (e.type === 'maze') initMaze(e);
+    if (e.type === 'grid') initGrid(e);
+    if (e.type === 'blason') initBlason(e);
+  }
+  document.getElementById('endsub').innerHTML = cfg.end.sub;
+  document.getElementById('cta').innerHTML = `<span>${cfg.end.cta}</span>`;
+}
+
+function initMaze(e) {
+  const svg = e.node.querySelector('svg');
+  const pts = e.path.map(([r, c]) => [c * 22 + 11, r * 22 + 11]);
+  pts.unshift([-14, 11]); pts.push([212, 187]);
+  const d = 'M' + pts.map(p => p.join(' ')).join('L');
+  svg.insertAdjacentHTML('beforeend', `<path id="trace" d="${d}" fill="none" stroke="#c9302c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle id="tok" r="7.5" fill="#e9b94a" stroke="#7a1b1b" stroke-width="2.4"/>`);
+  e.tr = svg.querySelector('#trace'); e.tok = svg.querySelector('#tok'); e.len = e.tr.getTotalLength();
+  e.tr.style.strokeDasharray = e.len; e.tr.style.strokeDashoffset = e.len;
+}
+
+function initGrid(e) {
+  const g = e.node.querySelector('.grid');
+  const cw = 105;
+  e.hls = e.words.map(([r, c, dr, dc, n]) => {
+    const len = (n - 1) * cw * Math.hypot(dr, dc) + 84;
+    const ang = Math.atan2(dr, dc) * 180 / Math.PI;
+    const h = $(`<div class="hl" style="left:${c * cw + 10.5}px;top:${r * cw + 10.5}px;width:84px;transform:rotate(${ang}deg)"></div>`);
+    h.dataset.len = len; g.appendChild(h); return h;
+  });
+  e.wb = [...e.node.querySelectorAll('.words b')];
+}
+
+function initBlason(e) {
+  const svg = e.node.querySelector('svg');
+  e.fills = [];
+  svg.querySelectorAll('path,circle').forEach(p => {
+    const f = p.getAttribute('fill') || p.closest('[fill]')?.getAttribute('fill') || '#fff';
+    if (f === 'none' || f === '#1b2547') return;
+    p.setAttribute('fill', '#fffdf6'); e.fills.push(p);
+  });
+}
+
+function vis(e, t) {
+  const tin = (e.din || 0.28) <= 0.02 ? 1 : clamp((t - e.t0) / (e.din || 0.28));
+  const tout = e.t1 == null ? 1 : clamp((e.t1 - t) / 0.2);
+  return Math.min(tin, tout);
+}
+
+function frame(t) {
+  const endA = clamp((t - C.end.at) / 0.3);
+  for (const e of C.els) {
+    const n = e.node, v = vis(e, t);
+    n.style.opacity = t < e.t0 ? 0 : v;
+    let tf = '';
+    if (e.anim === 'up') tf = `translateY(${(1 - ease((t - e.t0) / 0.35)) * 60}px)`;
+    if (e.anim === 'pop') { const k = clamp((t - e.t0) / 0.3); tf = `scale(${0.6 + 0.4 * ease(k) + 0.08 * Math.sin(Math.PI * k)})`; }
+    if (e.anim === 'slam') { const k = clamp((t - e.t0) / 0.22); tf = `scale(${2.2 - 1.2 * ease(k)})`; }
+    if (e.type === 'seal') { const k = clamp((t - e.t0) / 0.25); tf = `scale(${1.5 - 0.5 * ease(k)}) rotate(${(1 - ease(k)) * -14}deg)`; }
+    n.style.transform = tf;
+    if (e.type === 'maze') {
+      const k = ease((t - e.ts) / (e.te - e.ts)) * (t >= e.ts ? 1 : 0);
+      e.tr.style.strokeDashoffset = e.len * (1 - k);
+      const p = e.tr.getPointAtLength(e.len * k); e.tok.setAttribute('cx', p.x); e.tok.setAttribute('cy', p.y);
+    }
+    if (e.type === 'grid') e.hls.forEach((h, i) => {
+      const k = ease((t - e.times[i]) / 0.4);
+      h.style.width = (84 + (h.dataset.len - 84) * k) + 'px'; h.style.opacity = t >= e.times[i] ? 1 : 0;
+      e.wb[i].classList.toggle('done', t >= e.times[i] + 0.3);
+    });
+    if (e.type === 'code') e.node.querySelectorAll('.l').forEach((l, i) => {
+      const k = clamp((t - e.times[i]) / 0.2); l.firstChild.style.opacity = k; l.firstChild.style.display = 'inline-block';
+      l.firstChild.style.transform = `scale(${1.8 - 0.8 * ease(k)})`;
+    });
+    if (e.type === 'blason') {
+      const k = clamp((t - e.ts) / (e.te - e.ts)), N = e.fills.length;
+      e.fills.forEach((p, i) => { const on = k * N > i; p.setAttribute('fill', on ? e.colors[i % e.colors.length] : '#fffdf6'); });
+    }
+  }
+  // voice captions
+  for (const [i, c] of (C.caps || []).entries()) {
+    let n = document.getElementById('cap' + i);
+    if (!n) { n = $(`<div class="el cap" id="cap${i}">${c[2]}</div>`); document.getElementById('els').appendChild(n); }
+    n.style.opacity = t >= c[0] && t < c[1] ? 1 : 0;
+  }
+  // heartbeat pulse during countdowns
+  let pu = 0; for (const b of C.beats || []) { const d = t - b; if (d >= 0 && d < 0.5) pu = Math.max(pu, 1 - d / 0.5); }
+  document.getElementById('pulse').style.opacity = pu * 0.8;
+  let fl = 0; for (const f of C.flashes || []) { const d = t - f; if (d >= 0 && d < 0.25) fl = Math.max(fl, 1 - d / 0.25); }
+  document.getElementById('flash').style.opacity = fl * 0.7;
+  document.getElementById('sky').style.transform = `scale(${1 + 0.06 * t / C.total})`;
+  document.getElementById('end').style.opacity = endA;
+  document.getElementById('end').style.transform = `scale(${1.04 - 0.04 * ease((t - C.end.at) / 0.5)})`;
+  document.getElementById('bar').style.width = (1080 * t / C.total) + 'px';
+}
+</script></body></html>
