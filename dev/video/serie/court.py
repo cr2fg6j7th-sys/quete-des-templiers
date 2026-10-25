@@ -70,7 +70,7 @@ def defi(bg, riddle, answer, why, name, gender="m", key="herse"):
     c0, rv = 1.4, 4.4
     rep_end = seq.at(rv + 0.15, line(f"defi-{key}"))               # « La herse ! Des énigmes comme celle-là attendent votre enfant, dans les rues de votre ville. »
     end_at = rep_end + 0.25; total = end_at + END
-    beats = [hook('<span class="eb">Défi du Grand Maître</span>Votre enfant trouve en <b>3 secondes</b> ?', 0, rv),
+    beats = [hook('<span class="eb">Défi parents</span>Votre enfant trouve en <b>3 secondes</b> ?', 0, rv),
              dict(cls="parch", html=f'<div class="q">{riddle}</div>', t0=0.45, t1=rv, anim="up", style="top:640px"),
              dict(cls="pill", html="<div>Réponse en commentaire avant la fin !</div>", t0=1.1, t1=rv, anim="pop", style="top:1150px")]
     for k in range(3):

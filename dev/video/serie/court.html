@@ -66,6 +66,9 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:var(--navy);colo
 #offer{position:absolute;left:0;right:0;top:1730px;display:flex;justify-content:center;opacity:0}
 #offer div{font-weight:700;font-size:38px;padding:10px 26px;border-radius:999px;background:var(--wax);color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 #offer b{color:#ffe7a8}
+#share{position:absolute;left:0;right:0;top:395px;display:flex;justify-content:center;opacity:0}
+#share div{font-weight:700;font-size:40px;padding:12px 28px;border-radius:999px;background:var(--navy);color:var(--ink);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+#share b{color:var(--or)}
 #bar{position:absolute;left:90px;right:90px;bottom:16px;height:9px;border-radius:5px;background:rgba(255,255,255,.15);overflow:hidden}
 #bar i{display:block;height:100%;width:0;background:var(--or)}
 </style>
@@ -85,6 +88,7 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:var(--navy);colo
 <div id="end"><img class="lin" id="lin"><div id="endtop"></div>
   <div id="phone"><div id="scr"><img id="shot"><div id="typed"></div><div id="listen"></div></div></div>
   <div id="url"><div><b>maquetelegendaire.fr</b> · lien en bio</div></div>
+  <div id="share"><div><b>Envoyez-la</b> à un parent qui prépare un anniversaire</div></div>
   <div id="offer"><div>Quête <b>offerte</b> jusqu'au 6 novembre · écrivez <b>CHEVALIER</b></div></div>
 </div>
 <div id="bar"><i></i></div>
@@ -137,7 +141,7 @@ function frame(t){
   $('phone').style.transform=`scale(${1.25-0.25*ease(cl((t-C.endAt)/0.5))})`;
   const n=Math.floor(cl((t-C.endAt-0.15)/0.35)*E.name.length);
   $('typed').innerHTML=(t>C.endAt+0.1?E.name.slice(0,n):'')+(Math.floor(t*3)%2?'<u></u>':'');
-  $('offer').style.opacity=C.offer===false?0:cl((t-C.endAt-0.3)/0.2); const g=cl((t-C.endAt-0.6)/0.25); $('listen').style.boxShadow=`0 0 0 ${10*g}px rgba(240,194,94,${0.9*g})`;
+  $('share').style.opacity=C.share===false?0:cl((t-C.endAt-0.15)/0.2); $('offer').style.opacity=C.offer===false?0:cl((t-C.endAt-0.3)/0.2); const g=cl((t-C.endAt-0.6)/0.25); $('listen').style.boxShadow=`0 0 0 ${10*g}px rgba(240,194,94,${0.9*g})`;
 }
 </script>
 </body>

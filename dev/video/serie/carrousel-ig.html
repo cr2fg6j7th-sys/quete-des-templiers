@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+/* Instagram carousels for parents (25 Oct 2026): useful content to save and send (a planning, mistakes to avoid,
+   a rainy-day plan, first names), the account's art direction (navy, gold, wax seal, aerial town), 1080 x 1350. */
+@font-face{font-family:"UnifrakturMaguntia";src:url(FONTS/UnifrakturMaguntia-Book.woff) format("woff")}
+@font-face{font-family:"Alegreya Sans";src:url(FONTS/AlegreyaSans-Regular.woff) format("woff");font-weight:400}
+@font-face{font-family:"Alegreya Sans";src:url(FONTS/AlegreyaSans-Bold.woff) format("woff");font-weight:700}
+@font-face{font-family:"Alegreya Sans SC";src:url(FONTS/AlegreyaSansSC-Bold.woff) format("woff");font-weight:700}
+:root{--navy:#11152a;--card:#1b2547;--ink:#fffaf0;--or:#f0c25e;--wax:#b8505c;--line:#323a5e;--paper:#f3ead6}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1350px;overflow:hidden;background:var(--navy);color:var(--ink);font-family:"Alegreya Sans",sans-serif}
+#bg{position:absolute;inset:0;width:1080px;height:1350px;object-fit:cover}
+#veil{position:absolute;inset:0}
+.wrap{position:absolute;inset:0;padding:90px 80px 120px;display:flex;flex-direction:column}
+.eb{align-self:flex-start;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:34px;letter-spacing:3px;padding:10px 24px;border-radius:999px;background:var(--wax);color:#fff}
+h1{font-weight:700;font-size:104px;line-height:1.02;margin-top:34px;text-shadow:0 6px 30px rgba(0,0,0,.6)}
+h1 b,h2 b,p b{color:var(--or)}
+.sub{align-self:flex-start;padding:12px 26px;border-radius:18px;background:rgba(17,21,42,.85);font-size:46px;line-height:1.2;margin-top:26px;color:rgba(255,250,240,.9);text-shadow:0 4px 20px rgba(0,0,0,.6)}
+.swipe{margin-top:auto;align-self:flex-end;font-weight:700;font-size:40px;padding:14px 30px;border-radius:999px;background:var(--paper);color:var(--navy)}
+.card{margin-top:auto;margin-bottom:auto;background:rgba(27,37,71,.94);border:3px solid var(--line);border-radius:36px;padding:56px 60px 60px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.seal{display:inline-flex;align-items:center;justify-content:center;min-width:150px;height:150px;padding:0 34px;border-radius:999px;background:var(--wax);border:8px solid var(--ink);font-weight:700;font-size:72px;color:#fff;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+.seal.round{width:150px;padding:0}
+h2{font-weight:700;font-size:76px;line-height:1.05;margin-top:36px}
+.card p{font-size:46px;line-height:1.28;margin-top:24px;color:rgba(255,250,240,.92)}
+.tip{margin-top:30px;font-size:38px;line-height:1.25;padding:20px 26px;border-radius:20px;background:rgba(240,194,94,.14);border-left:8px solid var(--or)}
+.names{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 20px;margin-top:40px}
+.names span{font-family:"UnifrakturMaguntia",serif;font-size:62px;text-align:center;padding:14px 0;border-radius:18px;background:rgba(255,250,240,.08);color:#ef93a0}
+.foot{position:absolute;left:80px;right:80px;bottom:46px;display:flex;justify-content:space-between;align-items:center;font-size:32px;color:rgba(255,250,240,.75)}
+.foot .brand{font-family:"UnifrakturMaguntia",serif;font-size:44px;color:var(--or)}
+.final{margin:auto 0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:30px}
+.final h2{margin-top:0;font-size:80px}
+.final p{font-size:44px;line-height:1.25;color:rgba(255,250,240,.92)}
+.phone{width:330px;height:600px;border-radius:52px;background:#0d0f17;padding:12px;box-shadow:0 30px 70px rgba(0,0,0,.5)}
+.phone div{width:100%;height:100%;border-radius:42px;overflow:hidden;background:#eef0f6}
+.phone img{width:100%}
+.row{display:flex;gap:40px;align-items:center;text-align:left}
+.link{font-weight:700;font-size:54px;padding:16px 36px;border-radius:24px;background:var(--paper);color:var(--navy);box-shadow:inset 0 0 0 5px #e0c98f}
+.offer{font-weight:700;font-size:38px;padding:12px 30px;border-radius:999px;background:var(--wax);color:#fff}
+.offer b{color:#ffe7a8}
+.asks{display:flex;gap:20px}
+.asks span{font-weight:700;font-size:36px;padding:12px 26px;border-radius:999px;border:4px solid var(--or);color:var(--ink)}
+</style>
+</head>
+<body>
+<img id="bg"><div id="veil"></div>
+<div id="content"></div>
+<script>
+function show(c){
+  document.getElementById('bg').src=c.bg;
+  document.getElementById('bg').style.filter=c.blur?'blur(10px) brightness(.55)':'none';
+  document.getElementById('veil').style.background=c.veil||'linear-gradient(rgba(17,21,42,.35),rgba(17,21,42,.15) 40%,rgba(17,21,42,.85))';
+  document.getElementById('content').innerHTML=c.html+`<div class="foot"><span class="brand">Ma Quête Légendaire</span><span>${c.n}</span></div>`;
+}
+</script>
+</body>
+</html>
