@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Future home page of maquetelegendaire.fr, for when there are several quests (Nathan, 27/10/2026).
+     NOT ONLINE: dev/build.py does not read this folder. To go live, follow dev/accueil/SEO.md. -->
+<title>Chasse au trésor d'anniversaire 5-12 ans | Ma Quête Légendaire</title>
+<meta name="description" content="Chasse au trésor d'anniversaire clé en main pour les 5-12 ans : un jeu de piste dans votre ville ou à la maison, au prénom de l'enfant, prêt en 2 minutes.">
+<link rel="canonical" href="{{SITE}}/">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="Ma Quête Légendaire">
+<meta property="og:title" content="Ma Quête Légendaire : des chasses au trésor d'anniversaire pour les 5-12 ans">
+<meta property="og:description" content="Un jeu de piste clé en main dans les rues de votre ville, ou à la maison s'il pleut, au prénom de votre enfant. Prêt en 2 minutes, rien à imprimer.">
+<meta property="og:url" content="{{SITE}}/">
+<meta property="og:image" content="{{SITE}}/og-accueil.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ma Quête Légendaire : chasses au trésor d'anniversaire pour les enfants de 5 à 12 ans">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1b2547">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="fonts/AlegreyaSans-Bold.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="fonts/AlegreyaSans-Regular.woff" as="font" type="font/woff" crossorigin>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"Organization","@id":"{{SITE}}/#entreprise","name":"Ma Quête Légendaire","url":"{{SITE}}/","logo":"{{SITE}}/apple-touch-icon.png",
+  "description":"Entreprise française, née en Alsace, qui crée des quêtes d'anniversaire clé en main pour les enfants de 5 à 12 ans : des chasses au trésor dans les rues de leur ville ou à la maison.",
+  "areaServed":{"@type":"Country","name":"France"},
+  "sameAs":["https://www.instagram.com/maquetelegendaire/","https://www.tiktok.com/@maquetelegendaire","https://www.pinterest.com/maquetelegendaire/"]},
+ {"@type":"WebSite","@id":"{{SITE}}/#site","name":"Ma Quête Légendaire","url":"{{SITE}}/","inLanguage":"fr-FR","publisher":{"@id":"{{SITE}}/#entreprise"}},
+ {"@type":"WebPage","@id":"{{SITE}}/#accueil","url":"{{SITE}}/","name":"Chasse au trésor d'anniversaire enfant 5-12 ans","isPartOf":{"@id":"{{SITE}}/#site"},"about":{"@id":"{{SITE}}/#entreprise"},"inLanguage":"fr-FR","mainEntity":{"@id":"{{SITE}}/#quetes"}},
+ {"@type":"ItemList","@id":"{{SITE}}/#quetes","name":"Nos quêtes d'anniversaire","itemListElement":[
+  {"@type":"ListItem","position":1,"item":{"@type":"Product","name":"La Quête du Chevalier","url":"{{SITE}}/quete-du-chevalier/","brand":{"@type":"Brand","name":"Ma Quête Légendaire"},
+   "description":"Chasse au trésor d'anniversaire pour les enfants de 7 à 10 ans : 4 à 6 étapes devant les lieux publics de votre ville, au prénom de l'enfant, avec la voix du Grand Maître. Environ une heure de jeu, pour 4 à 15 enfants.",
+   "audience":{"@type":"PeopleAudience","suggestedMinAge":7,"suggestedMaxAge":10},
+   "offers":{"@type":"Offer","price":"24.90","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"{{SITE}}/quete-du-chevalier/"}}}]},
+ {"@type":"FAQPage","@id":"{{SITE}}/#questions","mainEntity":[
+  {"@type":"Question","name":"Qu'est-ce qu'une quête Ma Quête Légendaire ?","acceptedAnswer":{"@type":"Answer","text":"C'est une chasse au trésor d'anniversaire clé en main, qui se joue avec un téléphone tenu par un adulte. Une voix appelle votre enfant par son prénom et guide la troupe de lieu en lieu, avec un défi et une énigme à chaque étape."}},
+  {"@type":"Question","name":"Pour quel âge ?","acceptedAnswer":{"@type":"Answer","text":"De 5 à 12 ans selon la quête. La Quête du Chevalier est pensée pour les 7 à 10 ans ; à 6 ans, elle marche si un grand aide à lire les réponses."}},
+  {"@type":"Question","name":"Combien ça coûte ?","acceptedAnswer":{"@type":"Answer","text":"L'aperçu est gratuit. La quête complète coûte 24,90 €, pour tout le groupe : de 4 à 15 enfants."}},
+  {"@type":"Question","name":"Faut-il imprimer ou cacher quelque chose ?","acceptedAnswer":{"@type":"Answer","text":"Non. Prévoyez seulement un petit trésor dans votre sac : bonbons, pièces en chocolat ou médailles."}},
+  {"@type":"Question","name":"Combien de temps dure une quête ?","acceptedAnswer":{"@type":"Answer","text":"Environ une heure de jeu : le cœur de la fête. Prévoyez le goûter et les cadeaux autour."}},
+  {"@type":"Question","name":"Est-ce que ça marche dans ma ville ?","acceptedAnswer":{"@type":"Answer","text":"Partout en France où il y a quelques lieux publics à pied : un bourg, un quartier, un centre-ville. L'aperçu gratuit vous le dit avant de payer."}},
+  {"@type":"Question","name":"Et s'il pleut ?","acceptedAnswer":{"@type":"Answer","text":"La quête passe en mode maison : vous cachez six cartes en cinq minutes, et les énigmes guident les enfants de cachette en cachette, avec des défis faits pour l'intérieur."}},
+  {"@type":"Question","name":"Faut-il installer une application ?","acceptedAnswer":{"@type":"Answer","text":"Non. La quête s'ouvre dans le navigateur du téléphone, et un lien permet de la rouvrir sur le téléphone d'un autre adulte."}},
+  {"@type":"Question","name":"Seulement pour les anniversaires ?","acceptedAnswer":{"@type":"Answer","text":"Non. Une quête se joue aussi un mercredi entre copains, pendant les vacances ou à une fête de famille."}},
+  {"@type":"Question","name":"Est-ce prudent avec un groupe d'enfants ?","acceptedAnswer":{"@type":"Answer","text":"Le parcours reste à pied autour du point de départ, dans des lieux publics, et on reste dehors. Le guide de l'adulte rappelle les consignes : un adulte pour cinq enfants environ, et le groupe qui reste ensemble."}}]}
+]}
+</script>
+<style>
+/* A home page for parents who will choose one quest among several: the house style of the knight quest
+   (stone, ink, wax rose, gold, the wax seal), on a wider page, readable on a phone first. */
+@font-face{font-family:"UnifrakturMaguntia";src:url(fonts/UnifrakturMaguntia-Book.woff) format("woff");font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(fonts/AlegreyaSans-Regular.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(fonts/AlegreyaSans-Medium.woff) format("woff");font-weight:500;font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(fonts/AlegreyaSans-Bold.woff) format("woff");font-weight:700;font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(fonts/AlegreyaSans-Italic.woff) format("woff");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Alegreya Sans SC";src:url(fonts/AlegreyaSansSC-Bold.woff) format("woff");font-weight:700;font-display:swap}
+:root{
+  --stone:#eef0f5;--card:#ffffff;--ink:#1b2547;--muted:#5b6482;--rose:#b8505c;--rose-soft:#f6e3e5;--or:#a87a1f;--or-soft:#f5ecd8;--line:#d9dce8;--on-rose:#fff;--night:#1b2547;--on-night:#fffaf0;
+  --display:"UnifrakturMaguntia","Old English Text MT",Georgia,serif;
+  --body:"Alegreya Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --label:"Alegreya Sans SC","Alegreya Sans",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--or-soft:#2e2a1e;--line:#2d3452;--on-rose:#11152a;--night:#0b0e1d;--on-night:#ebe9f4;color-scheme:dark}}
+:root[data-theme="dark"]{--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--or-soft:#2e2a1e;--line:#2d3452;--on-rose:#11152a;--night:#0b0e1d;--on-night:#ebe9f4;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--stone);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.55}
+a{color:var(--rose)}
+img,svg{max-width:100%}
+.w{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.skip{position:absolute;left:-999px}.skip:focus{left:16px;top:8px;background:var(--card);padding:8px 12px;border-radius:8px;z-index:9}
+:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+/* top bar */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:16px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--rose);font-family:var(--display);font-size:1.6rem;line-height:1}
+.logo svg{width:38px;height:38px;flex:none}
+.bar nav ul{list-style:none;display:flex;flex-wrap:wrap;gap:4px 18px;margin:0;padding:0;font-family:var(--label);font-size:.95rem;letter-spacing:.04em}
+.bar nav a{color:var(--ink);text-decoration:none}.bar nav a:hover{color:var(--rose)}
+@media (max-width:720px){.bar nav{display:none}}
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:40px;align-items:center;padding-block:28px 56px}
+.eyebrow{font-family:var(--label);font-size:.92rem;letter-spacing:.12em;color:var(--or);margin:0 0 10px}
+h1{font-weight:800;font-size:clamp(2rem,5.2vw,3.1rem);line-height:1.08;margin:0;text-wrap:balance}
+h1 em{font-style:normal;color:var(--rose)}
+.answer{font-size:1.2rem;line-height:1.5;margin:18px 0 0;max-width:36em}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:12px 22px;border-radius:14px;font-family:var(--label);font-weight:700;font-size:1.05rem;letter-spacing:.04em;text-decoration:none}
+.btn.main{background:var(--rose);color:var(--on-rose)}
+.btn.ghost{border:2px solid var(--rose);color:var(--rose);background:var(--card)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:22px 0 0}
+.chips li{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.95rem;font-weight:500}
+.chips li::before{content:"✦ ";color:var(--or)}
+.scroll{position:relative;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:48px 24px 24px;box-shadow:0 18px 40px rgba(27,37,71,.08)}
+.scroll .seal{position:absolute;top:-30px;left:50%;width:64px;height:64px;margin-left:-32px;filter:drop-shadow(0 2px 3px rgba(80,20,30,.25))}
+.scroll p{margin:0}
+.scroll .who{font-family:var(--label);font-size:.85rem;letter-spacing:.1em;color:var(--rose);text-align:center}
+.scroll blockquote{margin:10px 0 0;font-style:italic;font-size:1.1rem;line-height:1.5;text-align:center}
+.scroll blockquote b{font-style:normal;font-family:var(--display);font-weight:400;font-size:1.5rem;color:var(--rose)}
+.scroll .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:18px;text-align:center;font-size:.9rem;color:var(--muted)}
+.scroll .steps b{display:block;font-family:var(--display);font-weight:400;font-size:1.6rem;color:var(--or);line-height:1.1}
+@media (max-width:820px){.hero{grid-template-columns:1fr;gap:44px;padding-block:8px 40px}}
+/* sections */
+section{padding-block:44px}
+section.alt{background:var(--card);border-block:1px solid var(--line)}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(1.9rem,4.4vw,2.5rem);line-height:1.1;margin:0 0 8px;text-wrap:balance}
+h3{font-size:1.2rem;line-height:1.25;margin:0}
+.intro{color:var(--muted);max-width:40em;margin:0 0 24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
+/* quest cards */
+.quest{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:10px}
+section.alt .quest{background:var(--stone)}
+.quest .tag{align-self:flex-start;font-family:var(--label);font-size:.85rem;letter-spacing:.06em;border-radius:8px;padding:3px 10px;background:var(--rose-soft);color:var(--rose)}
+.quest h3{font-family:var(--display);font-weight:400;font-size:1.75rem;color:var(--ink)}
+.quest p{margin:0}
+.quest .facts{list-style:none;padding:0;margin:4px 0 0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.95rem;color:var(--muted)}
+.quest .facts li::before{content:"✦ ";color:var(--or)}
+.quest .btn{align-self:flex-start;margin-top:auto}
+.quest.soon{border-style:dashed;background:transparent}
+section.alt .quest.soon{background:transparent}
+.quest.soon .tag{background:var(--or-soft);color:var(--or)}
+/* how it works: three shields */
+ol.how{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:18px;counter-reset:s}
+ol.how li{counter-increment:s;display:grid;grid-template-columns:44px minmax(0,1fr);gap:4px 14px}
+ol.how li::before{content:counter(s);grid-row:span 2;width:44px;height:50px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--rose);border:2.5px solid var(--or);border-radius:6px 6px 22px 22px;background:var(--card)}
+ol.how h3{align-self:center}
+ol.how p{margin:0;color:var(--muted)}
+/* benefits */
+ul.why{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px 26px}
+ul.why li{padding-left:28px;position:relative}
+ul.why li::before{content:"⚔";position:absolute;left:0;top:0;color:var(--or)}
+ul.why b{display:block}
+/* comparison */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.98rem}
+caption{text-align:left;padding:12px 16px;color:var(--muted);font-size:.9rem}
+th,td{padding:12px 16px;text-align:left;vertical-align:top;border-top:1px solid var(--line)}
+thead th{font-family:var(--label);letter-spacing:.04em;background:var(--stone)}
+tbody th{font-weight:700;width:18%}
+td.us,th.us{background:var(--rose-soft)}
+/* ages */
+.age{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:8px}
+section.alt .age{background:var(--stone)}
+.age .years{font-family:var(--display);font-size:2.2rem;line-height:1;color:var(--rose)}
+.age p{margin:0}
+/* about */
+.about{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:32px;align-items:start}
+.about p{margin:0 0 12px;max-width:38em}
+.promise{background:var(--night);color:var(--on-night);border-radius:18px;padding:22px}
+.promise h3{font-family:var(--label);letter-spacing:.06em;color:var(--or);font-size:1rem;margin-bottom:8px}
+.promise ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+@media (max-width:820px){.about{grid-template-columns:1fr}}
+/* faq */
+.faq{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px 24px}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px}
+section.alt .faq details{background:var(--stone)}
+.faq summary{cursor:pointer;list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary h3{display:inline;font-size:1.08rem}
+.faq summary::after{content:" +";color:var(--rose);font-weight:700}
+.faq details[open] summary::after{content:" –"}
+.faq p{margin:8px 0 0;color:var(--muted)}
+/* closing call and footer */
+.final{text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.final p{max-width:34em;margin:0;color:var(--muted)}
+footer{background:var(--night);color:var(--on-night);padding-block:36px;font-size:.95rem}
+footer a{color:var(--on-night)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:24px}
+footer h2{font-family:var(--label);font-size:1rem;letter-spacing:.08em;color:var(--or);margin:0 0 8px}
+footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+footer .brand{font-family:var(--display);font-size:1.6rem;color:var(--on-night);margin:0 0 6px}
+footer .small{opacity:.75;font-size:.85rem;margin-top:24px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="sceau" viewBox="-30 -30 60 60"><path d="M25.0 -1.4Q26.0 0.0 26.8 1.6Q27.5 3.1 26.4 4.4Q25.4 5.8 24.1 6.9Q22.9 8.0 22.9 9.5Q23.0 11.1 22.9 12.7Q22.8 14.3 21.2 15.0Q19.6 15.7 18.1 16.1Q16.6 16.6 16.2 18.2Q15.7 19.7 15.1 21.3Q14.4 22.9 12.8 23.1Q11.2 23.2 9.6 23.1Q8.1 23.0 6.9 24.2Q5.8 25.4 4.5 26.5Q3.1 27.5 1.5 26.7Q0.0 25.9 -1.3 24.9Q-2.7 23.9 -4.2 24.3Q-5.6 24.7 -7.2 25.0Q-8.8 25.3 -9.9 23.9Q-10.9 22.6 -11.7 21.3Q-12.6 20.0 -14.2 19.9Q-15.9 19.9 -17.6 19.6Q-19.3 19.3 -19.8 17.7Q-20.3 16.2 -20.5 14.6Q-20.7 13.0 -22.1 12.2Q-23.5 11.3 -24.7 10.2Q-26.0 9.1 -25.5 7.4Q-25.0 5.7 -24.3 4.2Q-23.6 2.7 -24.4 1.3Q-25.2 0.0 -25.9 -1.5Q-26.5 -3.0 -25.5 -4.3Q-24.5 -5.6 -23.5 -6.7Q-22.4 -7.9 -22.8 -9.5Q-23.1 -11.1 -23.2 -12.9Q-23.3 -14.6 -21.8 -15.4Q-20.4 -16.3 -18.8 -16.8Q-17.3 -17.3 -16.7 -18.8Q-16.2 -20.3 -15.4 -21.7Q-14.5 -23.1 -12.8 -23.0Q-11.0 -22.9 -9.4 -22.6Q-7.8 -22.3 -6.7 -23.4Q-5.6 -24.5 -4.3 -25.5Q-3.0 -26.6 -1.5 -26.0Q-0.0 -25.3 1.3 -24.6Q2.7 -23.8 4.2 -24.5Q5.8 -25.2 7.4 -25.7Q9.1 -26.1 10.2 -24.8Q11.3 -23.5 12.2 -22.1Q13.0 -20.7 14.5 -20.4Q16.1 -20.1 17.6 -19.7Q19.2 -19.2 19.4 -17.5Q19.7 -15.7 19.8 -14.1Q19.9 -12.5 21.3 -11.7Q22.6 -10.9 24.0 -9.9Q25.4 -8.9 25.1 -7.3Q24.9 -5.7 24.5 -4.2Q24.1 -2.7 25.0 -1.4Z" fill="var(--rose)"/><circle r="17" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.2"/><path d="M-1.6-1.6-5-12H5L1.6-1.6 12-5V5L1.6 1.6 5 12H-5L-1.6 1.6-12 5V-5Z" fill="#fff" fill-opacity=".85"/></symbol>
+</defs></svg>
+<a class="skip" href="#contenu">Aller au contenu</a>
+
+<header class="w bar">
+  <a class="logo" href="./" aria-label="Ma Quête Légendaire, accueil"><svg aria-hidden="true"><use href="#sceau"/></svg>Ma Quête Légendaire</a>
+  <nav aria-label="Menu principal"><ul>
+    <li><a href="#quetes">Nos quêtes</a></li>
+    <li><a href="#comment">Comment ça marche</a></li>
+    <li><a href="#age">Par âge</a></li>
+    <li><a href="#qui">Qui sommes-nous</a></li>
+    <li><a href="#questions">Questions</a></li>
+  </ul></nav>
+</header>
+
+<main id="contenu">
+<div class="w hero">
+  <div>
+    <p class="eyebrow">Quêtes d'anniversaire · 5 à 12 ans</p>
+    <h1>La chasse au trésor d'anniversaire <em>qui appelle votre enfant par son prénom</em></h1>
+    <p class="answer">Ma Quête Légendaire crée des quêtes d'anniversaire clé en main pour les enfants de 5 à 12 ans : un jeu de piste dans les rues de votre ville, ou à la maison s'il pleut. Une voix guide la troupe d'énigme en énigme. Prête en 2 minutes, rien à imprimer.</p>
+    <div class="ctas">
+      <a class="btn main" href="quete-du-chevalier/">Découvrir la Quête du Chevalier</a>
+      <a class="btn ghost" href="#comment">Comment ça marche</a>
+    </div>
+    <ul class="chips" aria-label="En bref">
+      <li>Prête en 2 minutes</li><li>Rien à imprimer ni à cacher</li><li>4 à 15 enfants</li><li>Aperçu gratuit</li>
+    </ul>
+  </div>
+  <figure class="scroll" aria-label="Exemple : le début d'une quête">
+    <svg class="seal" aria-hidden="true"><use href="#sceau"/></svg>
+    <p class="who">Le Grand Maître de l'Ordre</p>
+    <blockquote><b>Léa,</b> approche… Aujourd'hui, c'est ton anniversaire, et j'ai besoin d'une chevalière courageuse.</blockquote>
+    <div class="steps" aria-hidden="true">
+      <p><b>4 à 6</b>étapes dans votre ville</p>
+      <p><b>1 h</b>de jeu en équipe</p>
+      <p><b>1</b>mot secret à trouver</p>
+    </div>
+  </figure>
+</div>
+
+<section id="quetes" class="alt" aria-labelledby="t-quetes">
+  <div class="w">
+    <h2 id="t-quetes">Nos quêtes d'anniversaire</h2>
+    <p class="intro">Chaque quête est un univers, avec son récit, ses énigmes et son âge conseillé. Choisissez celle qui fera briller les yeux du héros du jour.</p>
+    <div class="grid">
+      <article class="quest">
+        <span class="tag">7 à 10 ans · disponible</span>
+        <h3>La Quête du Chevalier</h3>
+        <p>Le Grand Maître de l'Ordre appelle votre enfant et sa troupe. Devant les lieux de votre ville (église, fontaine, vieille porte, parc), les enfants relèvent un défi, résolvent une énigme et gagnent les lettres d'un mot secret. À la fin, le héros du jour est adoubé chevalier ou chevalière.</p>
+        <ul class="facts"><li>4 à 6 étapes</li><li>Environ 1 heure</li><li>4 à 15 enfants</li><li>24,90 €</li></ul>
+        <a class="btn main" href="quete-du-chevalier/">Voir la Quête du Chevalier</a>
+      </article>
+      <article class="quest soon">
+        <span class="tag">Bientôt</span>
+        <h3>De nouvelles quêtes</h3>
+        <p>D'autres univers arrivent pour les 5 à 12 ans : pirates, fées… Chacun aura sa voix, son récit et ses énigmes, avec la même promesse : rien à préparer, et une fête dont les enfants se souviennent.</p>
+        <p>Pour être prévenu de leur sortie, suivez <b>@maquetelegendaire</b> sur Instagram ou TikTok.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="comment" aria-labelledby="t-comment">
+  <div class="w">
+    <h2 id="t-comment">Comment se passe une chasse au trésor d'anniversaire ?</h2>
+    <p class="intro">Pas d'indices à écrire la veille, pas d'enveloppes à cacher le matin. Le jeu de piste se prépare en deux minutes, et le jour de la fête, l'adulte n'a qu'à suivre.</p>
+    <ol class="how">
+      <li><h3>Vous choisissez la quête et tapez le prénom</h3><p>Le prénom du héros du jour et un point de départ : votre rue, la place du village, un parc. L'aperçu est gratuit, pour voir avant de payer.</p></li>
+      <li><h3>Le parcours se crée autour de vous</h3><p>La quête choisit des lieux publics à pied autour du point de départ, ou des cachettes dans la maison s'il pleut. Il suffit d'un petit trésor dans votre sac.</p></li>
+      <li><h3>Le jour J, les enfants mènent l'aventure</h3><p>L'adulte tient le téléphone. À chaque étape, la troupe écoute le récit, relève un défi, résout une énigme et gagne une lettre. À la fin : le mot secret, le trésor et un diplôme pour chaque enfant.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="alt" aria-labelledby="t-pourquoi">
+  <div class="w">
+    <h2 id="t-pourquoi">Une animation d'anniversaire sans rien préparer</h2>
+    <p class="intro">Ce que les parents nous disent chercher pour la fête de leur enfant, et ce qu'une quête leur apporte.</p>
+    <ul class="why">
+      <li><b>Zéro préparation</b>Pas d'énigmes à écrire, rien à imprimer ni à cacher dans la rue. Tout est prêt en deux minutes, même la veille.</li>
+      <li><b>Les enfants dehors, sans écran</b>Le téléphone reste dans la main de l'adulte. Les enfants, eux, courent, cherchent et réfléchissent ensemble.</li>
+      <li><b>Au prénom de votre enfant</b>La voix connaît plus de mille prénoms et appelle le héros du jour par le sien. Il s'affiche aussi sur son diplôme.</li>
+      <li><b>Tout le groupe joue</b>De 4 à 15 enfants, en équipe, avec un rôle pour chacun : chaque lettre gagnée est confiée à un gardien.</li>
+      <li><b>Dehors ou à la maison</b>Il pleut ? La quête passe en mode maison : six cartes à cacher, et les énigmes guident les enfants de cachette en cachette.</li>
+      <li><b>Un prix pour toute la troupe</b>24,90 € la quête, quel que soit le nombre d'enfants (jusqu'à 15). Aperçu gratuit avant de payer.</li>
+    </ul>
+  </div>
+</section>
+
+<section aria-labelledby="t-comparer">
+  <div class="w">
+    <h2 id="t-comparer">Kit à imprimer, animateur ou quête : que choisir ?</h2>
+    <p class="intro">Trois façons d'animer un anniversaire d'enfant, chacune avec ses atouts. Voici ce qui les distingue.</p>
+    <div class="tablewrap">
+      <table>
+        <caption>Comparatif des animations d'anniversaire pour enfants</caption>
+        <thead><tr><th scope="col"></th><th scope="col">Kit de chasse au trésor à imprimer</th><th scope="col">Animateur à domicile</th><th scope="col" class="us">Quête Ma Quête Légendaire</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Préparation</th><td>Imprimer, découper et cacher les indices avant la fête</td><td>Réserver une date à l'avance</td><td class="us">2 minutes, et un petit trésor dans votre sac</td></tr>
+          <tr><th scope="row">Où</th><td>À la maison ou au jardin</td><td>À la maison ou en salle</td><td class="us">Dans les rues de votre ville, ou à la maison s'il pleut</td></tr>
+          <tr><th scope="row">Au prénom de l'enfant</th><td>À écrire soi-même</td><td>Selon l'animateur</td><td class="us">Oui : une voix l'appelle par son prénom</td></tr>
+          <tr><th scope="row">Qui mène le jeu</th><td>Un adulte, qui doit connaître les réponses</td><td>L'animateur</td><td class="us">Le récit et les énigmes ; l'adulte suit le guide</td></tr>
+          <tr><th scope="row">Prix</th><td>Selon le kit</td><td>Selon la durée et le nombre d'enfants</td><td class="us">24,90 € pour 4 à 15 enfants</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="age" class="alt" aria-labelledby="t-age">
+  <div class="w">
+    <h2 id="t-age">Quelle chasse au trésor selon l'âge de l'enfant ?</h2>
+    <p class="intro">Un jeu de piste réussi colle à l'âge des enfants : ce qu'ils savent lire, combien de temps ils tiennent, et le défi qui les fait vibrer.</p>
+    <div class="grid">
+      <article class="age"><p class="years">5-6 ans</p><h3>Anniversaire 5 ou 6 ans : court, guidé, plein de mouvement</h3><p>À cet âge, les enfants lisent peu : un adulte ou un grand lit les énigmes, et l'on garde des étapes courtes, où l'on court et l'on cherche. La Quête du Chevalier convient si un grand aide à lire. Des quêtes pensées pour les plus petits sont en préparation.</p></article>
+      <article class="age"><p class="years">7-10 ans</p><h3>Anniversaire 7, 8, 9 ou 10 ans : l'âge des quêtes</h3><p>Ils lisent, adorent les défis en équipe et les histoires de héros. C'est l'âge de la Quête du Chevalier : 4 à 6 étapes, une énigme et un défi à chacune, environ une heure de jeu, et l'adoubement devant tous les amis.</p></article>
+      <article class="age"><p class="years">11-12 ans</p><h3>Anniversaire 11 ou 12 ans : plus de mystère, plus de défi</h3><p>Les grands veulent des énigmes qui résistent et un vrai rôle. Avec la Quête du Chevalier, certaines énigmes peuvent leur sembler faciles : confiez-leur la mission de guider les plus jeunes. Des quêtes plus corsées arriveront pour eux.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="qui" aria-labelledby="t-qui">
+  <div class="w about">
+    <div>
+      <h2 id="t-qui">Qui sommes-nous ?</h2>
+      <p><b>Ma Quête Légendaire</b> est une jeune entreprise française, née en Alsace en 2026. Nous créons des quêtes d'anniversaire qui font sortir les enfants dehors, ensemble, autour d'un vrai récit : des énigmes à résoudre, des défis à relever, des lieux de leur propre ville vus autrement, et un moment solennel à la fin.</p>
+      <p>Tout est parti d'une idée simple : un anniversaire réussi, ce n'est pas un parent qui court partout, c'est un enfant qui se sent le héros de sa propre histoire. Chaque quête est écrite comme un conte, testée par des familles avant sa sortie, et pensée pour que les parents n'aient presque rien à préparer.</p>
+      <p>Notre première quête, <a href="quete-du-chevalier/">La Quête du Chevalier</a>, a été jouée en avant-première par des familles testeuses à l'automne 2026. D'autres univers suivent.</p>
+    </div>
+    <aside class="promise" aria-labelledby="t-engagements">
+      <h3 id="t-engagements">Nos engagements</h3>
+      <ul>
+        <li>Des lieux publics, à pied, et des consignes de sécurité pour l'adulte.</li>
+        <li>On reste dehors : on n'entre ni dans les églises ni chez les commerçants.</li>
+        <li>Pas de compte à créer, pas d'application à installer.</li>
+        <li>Un aperçu gratuit, pour voir la quête avant de payer.</li>
+        <li>Une quête créée en France, et une vraie personne qui répond à vos messages.</li>
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<section id="questions" class="alt" aria-labelledby="t-questions">
+  <div class="w">
+    <h2 id="t-questions">Vos questions sur nos chasses au trésor</h2>
+    <div class="faq">
+      <details open><summary><h3>Qu'est-ce qu'une quête Ma Quête Légendaire ?</h3></summary><p>C'est une chasse au trésor d'anniversaire clé en main, qui se joue avec un téléphone tenu par un adulte. Une voix appelle votre enfant par son prénom et guide la troupe de lieu en lieu, avec un défi et une énigme à chaque étape.</p></details>
+      <details><summary><h3>Pour quel âge ?</h3></summary><p>De 5 à 12 ans selon la quête. La Quête du Chevalier est pensée pour les 7 à 10 ans ; à 6 ans, elle marche si un grand aide à lire les réponses.</p></details>
+      <details><summary><h3>Combien ça coûte ?</h3></summary><p>L'aperçu est gratuit. La quête complète coûte 24,90 €, pour tout le groupe : de 4 à 15 enfants.</p></details>
+      <details><summary><h3>Faut-il imprimer ou cacher quelque chose ?</h3></summary><p>Non. Prévoyez seulement un petit trésor dans votre sac : bonbons, pièces en chocolat ou médailles.</p></details>
+      <details><summary><h3>Combien de temps dure une quête ?</h3></summary><p>Environ une heure de jeu : le cœur de la fête. Prévoyez le goûter et les cadeaux autour.</p></details>
+      <details><summary><h3>Est-ce que ça marche dans ma ville ?</h3></summary><p>Partout en France où il y a quelques lieux publics à pied : un bourg, un quartier, un centre-ville. L'aperçu gratuit vous le dit avant de payer.</p></details>
+      <details><summary><h3>Et s'il pleut ?</h3></summary><p>La quête passe en mode maison : vous cachez six cartes en cinq minutes, et les énigmes guident les enfants de cachette en cachette, avec des défis faits pour l'intérieur.</p></details>
+      <details><summary><h3>Faut-il installer une application ?</h3></summary><p>Non. La quête s'ouvre dans le navigateur du téléphone, et un lien permet de la rouvrir sur le téléphone d'un autre adulte.</p></details>
+      <details><summary><h3>Seulement pour les anniversaires ?</h3></summary><p>Non. Une quête se joue aussi un mercredi entre copains, pendant les vacances ou à une fête de famille.</p></details>
+      <details><summary><h3>Est-ce prudent avec un groupe d'enfants ?</h3></summary><p>Le parcours reste à pied autour du point de départ, dans des lieux publics, et on reste dehors. Le guide de l'adulte rappelle les consignes : un adulte pour cinq enfants environ, et le groupe qui reste ensemble.</p></details>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="t-final">
+  <div class="w final">
+    <svg width="64" height="64" aria-hidden="true"><use href="#sceau"/></svg>
+    <h2 id="t-final">Le prochain héros, c'est votre enfant</h2>
+    <p>Tapez son prénom, écoutez la voix l'appeler, et découvrez la quête qui l'attend dans votre ville. L'aperçu est gratuit.</p>
+    <a class="btn main" href="quete-du-chevalier/">Créer l'aperçu gratuit</a>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="w">
+    <div class="cols">
+      <div>
+        <p class="brand">Ma Quête Légendaire</p>
+        <p>Chasses au trésor et jeux de piste d'anniversaire pour les enfants de 5 à 12 ans, dans votre ville ou à la maison.</p>
+      </div>
+      <nav aria-labelledby="f-quetes"><h2 id="f-quetes">Nos quêtes</h2><ul>
+        <li><a href="quete-du-chevalier/">La Quête du Chevalier (7-10 ans)</a></li>
+      </ul></nav>
+      <nav aria-labelledby="f-guides"><h2 id="f-guides">Nos guides</h2><ul>
+        <li><a href="anniversaire-chevalier.html">Organiser un anniversaire chevalier</a></li>
+        <li><a href="anniversaire-chevalier-a-la-maison.html">Anniversaire chevalier à la maison quand il pleut</a></li>
+        <li><a href="anniversaire-chevalier-villes.html">La quête près de chez vous, ville par ville</a></li>
+      </ul></nav>
+      <nav aria-labelledby="f-suivre"><h2 id="f-suivre">Nous suivre</h2><ul>
+        <li><a href="https://www.instagram.com/maquetelegendaire/" rel="me noopener">Instagram</a></li>
+        <li><a href="https://www.tiktok.com/@maquetelegendaire" rel="me noopener">TikTok</a></li>
+        <li><a href="https://www.pinterest.com/maquetelegendaire/" rel="me noopener">Pinterest</a></li>
+      </ul></nav>
+    </div>
+    <p class="small"><a href="legal/mentions-legales.html">Mentions légales</a> · <a href="legal/cgv.html">Conditions de vente</a> · <a href="legal/confidentialite.html">Confidentialité</a> · <a href="legal/credits.html">Crédits</a></p>
+  </div>
+</footer>
+</body>
+</html>
