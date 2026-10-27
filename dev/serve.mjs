@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 // Local test server for the paid app: node dev/serve.mjs [port]
 // Runs dist/worker.js like Cloudflare would, serves site/ and audio/, and fakes Stripe
 // (a pretend checkout page with "Payer" and "Annuler"). Build first: python3 dev/build.py
@@ -84,6 +85,9 @@ const STATS = {
 const env = {
   STATS,
   TESTEURS: process.env.TESTEURS || "",   // TESTEURS=1 node dev/serve.mjs: the tester mode (before the opening)
+  // private page /espace in the tests: login "test", code "TEST-CODE-0000-0000"
+  ESPACE_ID: "test", ESPACE_SALT: "sel",
+  ESPACE_HASH: crypto.createHash("sha256").update("sel:test:TEST-CODE-0000-0000").digest("hex"),
   QUEST_KEY: "cle-de-test", STRIPE_SECRET_KEY: "sk_test_local", STRIPE_API: `${base}/stripe`, PRICE_CENTS: "2490",
   ASSETS: { fetch: req => file(new URL(req.url).pathname) }
 };

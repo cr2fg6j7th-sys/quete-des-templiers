@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Mon espace</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+@font-face{font-family:"UnifrakturMaguntia";src:url(/fonts/UnifrakturMaguntia-Book.woff) format("woff");font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(/fonts/AlegreyaSans-Regular.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"Alegreya Sans";src:url(/fonts/AlegreyaSans-Bold.woff) format("woff");font-weight:700;font-display:swap}
+@font-face{font-family:"Alegreya Sans SC";src:url(/fonts/AlegreyaSansSC-Medium.woff) format("woff");font-weight:500;font-display:swap}
+:root{
+  --display:"UnifrakturMaguntia",Georgia,serif;--body:"Alegreya Sans",system-ui,-apple-system,sans-serif;--label:"Alegreya Sans SC","Alegreya Sans",system-ui,sans-serif;
+  --stone:#eef0f5;--card:#ffffff;--ink:#1b2547;--muted:#5b6482;--rose:#b8505c;--rose-soft:#f6e3e5;--or:#a87a1f;--line:#d9dce8;--ok:#2f7a4f;--on-rose:#fff;
+  color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;color-scheme:dark}}
+:root[data-theme="dark"]{--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+body{background:var(--stone);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;-webkit-text-size-adjust:100%}
+main{max-width:640px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px 48px;display:flex;flex-direction:column;gap:16px}
+.brand{font-family:var(--display);color:var(--rose);font-size:1.7rem;line-height:1}
+h1{font-family:var(--label);font-weight:500;letter-spacing:.05em;font-size:1.25rem}
+h2{font-family:var(--label);font-weight:500;letter-spacing:.05em;font-size:1.05rem;color:var(--rose)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+label{display:flex;flex-direction:column;gap:6px;font-family:var(--label);letter-spacing:.05em;font-size:.95rem}
+input[type=text],input[type=password]{font:inherit;font-family:var(--body);letter-spacing:0;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink);width:100%}
+.check{flex-direction:row;align-items:center;gap:10px;font-family:var(--body);letter-spacing:0}
+.check input{width:20px;height:20px;accent-color:var(--rose)}
+.btn{font:inherit;font-family:var(--label);letter-spacing:.06em;font-size:1rem;padding:12px 16px;border-radius:12px;border:0;background:var(--rose);color:var(--on-rose);cursor:pointer}
+.btn:disabled{opacity:.6}
+.ghost{background:none;border:1px solid var(--line);color:var(--ink);padding:8px 12px;font-size:.9rem}
+.note{font-size:.88rem;color:var(--muted)}
+.err{color:var(--rose);font-weight:700}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{font:inherit;font-size:.9rem;border:0;background:var(--card);color:var(--ink);padding:7px 14px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--rose);color:var(--on-rose)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:520px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.tile b{display:block;font-size:1.8rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{font-size:.85rem;color:var(--muted)}
+.refs{display:flex;flex-wrap:wrap;gap:6px}
+.refs span{background:var(--stone);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.85rem}
+.avis{border-left:4px solid var(--or)}
+.avis .who{font-weight:700;font-size:1.05rem}
+.avis a{color:var(--rose);word-break:break-all}
+.stars{color:var(--or);letter-spacing:2px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.95rem}
+.kv dt{color:var(--muted)}
+.quote{background:var(--stone);border-radius:10px;padding:8px 10px;font-size:.95rem;white-space:pre-line}
+.empty{text-align:center;color:var(--muted);padding:12px}
+#app{display:flex;flex-direction:column;gap:16px}
+.bar h2{margin-top:6px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <p class="brand">Ma Quête Légendaire</p>
+
+  <form id="login" class="card" autocomplete="on">
+    <h1>Mon espace</h1>
+    <label>Identifiant<input type="text" id="id" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+    <label>Code<input type="password" id="code" name="password" autocomplete="current-password" autocapitalize="characters" spellcheck="false" required></label>
+    <label class="check"><input type="checkbox" id="keep" checked> Rester connecté sur ce téléphone</label>
+    <button class="btn" type="submit" id="go">Entrer</button>
+    <p class="note" id="msg" role="status"></p>
+  </form>
+
+  <section id="app" hidden>
+    <div class="bar">
+      <h1>Mon espace</h1>
+      <div class="tools">
+        <button class="btn ghost" type="button" id="refresh">Actualiser</button>
+        <button class="btn ghost" type="button" id="logout">Se déconnecter</button>
+      </div>
+    </div>
+    <p class="note" id="mode"></p>
+
+    <div class="bar">
+      <h2>Le site</h2>
+      <div class="seg" role="group" aria-label="Période">
+        <button type="button" data-n="7" aria-pressed="true">7 jours</button>
+        <button type="button" data-n="28" aria-pressed="false">28 jours</button>
+      </div>
+    </div>
+    <div class="tiles" id="tiles"></div>
+    <div class="card"><h2>D'où viennent les visites</h2><div class="refs" id="refs"></div>
+      <p class="note">Sans vos appareils (lien ?moi=nathan), la démo ni les vérifications automatiques.</p></div>
+
+    <div class="bar"><h2 id="avis-title">Avis des familles testeuses</h2>
+      <button class="btn ghost" type="button" id="mails">Copier les e-mails</button></div>
+    <div id="avis" style="display:flex;flex-direction:column;gap:12px"></div>
+  </section>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const el=(tag,attrs,...kids)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs||{}))if(v!=null)k==="text"?e.textContent=v:e.setAttribute(k,v);e.append(...kids.filter(x=>x!=null));return e;};
+const KEY="espace-acces";
+const store={get(){try{return JSON.parse(localStorage.getItem(KEY)||sessionStorage.getItem(KEY)||"null");}catch(e){return null;}},
+  set(v,keep){try{(keep?localStorage:sessionStorage).setItem(KEY,JSON.stringify(v));}catch(e){}},
+  clear(){try{localStorage.removeItem(KEY);sessionStorage.removeItem(KEY);}catch(e){}}};
+let data=null,period=7,creds=null;
+
+async function load(c){
+  const r=await fetch("/api/espace",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id:c.id,code:c.code,days:28})});
+  const j=await r.json().catch(()=>({}));
+  if(r.status===403)throw new Error("login");
+  if(!j.ok)throw new Error("server");
+  return j;
+}
+
+$("#login").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const c={id:$("#id").value.trim(),code:$("#code").value.trim()};
+  $("#go").disabled=true;$("#msg").className="note";$("#msg").textContent="Vérification…";
+  try{data=await load(c);creds=c;store.set(c,$("#keep").checked);show();}
+  catch(err){$("#msg").className="note err";$("#msg").textContent=err.message==="login"?"Identifiant ou code incorrect.":"Le serveur ne répond pas. Réessayez dans un instant.";}
+  $("#go").disabled=false;
+});
+$("#logout").addEventListener("click",()=>{store.clear();creds=null;data=null;$("#app").hidden=true;$("#login").hidden=false;$("#code").value="";$("#msg").textContent="";});
+$("#refresh").addEventListener("click",async()=>{const b=$("#refresh");b.disabled=true;b.textContent="…";
+  try{data=await load(creds);show();}catch(e){alert("Impossible d'actualiser.");}b.disabled=false;b.textContent="Actualiser";});
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{period=+b.dataset.n;
+  document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));render();}));
+$("#mails").addEventListener("click",async()=>{
+  const list=[...new Set((data.avis||[]).map(a=>a.email).filter(Boolean))];
+  if(!list.length){alert("Aucune adresse e-mail pour l'instant.");return;}
+  try{await navigator.clipboard.writeText(list.join(", "));$("#mails").textContent="Copié ("+list.length+")";}
+  catch(e){prompt("Adresses e-mail :",list.join(", "));}
+  setTimeout(()=>$("#mails").textContent="Copier les e-mails",2500);
+});
+
+const SKIP=new Set(["smoke","demo","moi"]);
+function total(evt,n){
+  let t=0;const now=Date.now();
+  for(const[day,d]of Object.entries(data.days||{})){
+    if((now-Date.parse(day+"T00:00:00Z"))/864e5>=n)continue;
+    for(const[ref,c]of Object.entries(d[evt]||{}))if(!SKIP.has(ref))t+=c;
+  }
+  return t;
+}
+function refs(n){
+  const by={},now=Date.now();
+  for(const[day,d]of Object.entries(data.days||{})){
+    if((now-Date.parse(day+"T00:00:00Z"))/864e5>=n)continue;
+    for(const[ref,c]of Object.entries(d.home||{}))if(!SKIP.has(ref)){const k=ref==="-"?"direct":ref;by[k]=(by[k]||0)+c;}
+  }
+  return Object.entries(by).sort((a,b)=>b[1]-a[1]);
+}
+const L={adore:"adoré",bien:"bien aimé",bof:"bof",court:"trop courte",juste:"juste bien",long:"trop longue",oui:"oui","peut-etre":"peut-être",non:"non"};
+const when=iso=>{try{return new Date(iso).toLocaleString("fr-FR",{timeZone:"Europe/Paris",weekday:"short",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});}catch(e){return iso;}};
+
+function show(){$("#login").hidden=true;$("#app").hidden=false;render();}
+function render(){
+  $("#mode").textContent=data.testeurs?"Avant-première active : la quête est offerte aux familles testeuses, aucun paiement possible.":"Vente ouverte : paiements actifs.";
+  const tiles=[["home","Visites de l'accueil"],["preview","Aperçus créés"],["testeur","Quêtes offertes ouvertes"],["avis","Avis reçus"],["diploma","Quêtes finies (diplôme)"],["unlock","Quêtes payées"]];
+  $("#tiles").replaceChildren(...tiles.map(([k,t])=>el("div",{class:"tile"},el("b",{text:String(total(k,period))}),el("span",{text:t}))));
+  const r=refs(period);
+  $("#refs").replaceChildren(...(r.length?r.map(([k,c])=>el("span",{text:k+" · "+c})):[el("span",{text:"aucune visite"})]));
+  const av=data.avis||[];
+  $("#avis-title").textContent="Avis des familles testeuses ("+av.length+")";
+  $("#avis").replaceChildren(...(av.length?av.map(card):[el("p",{class:"card empty",text:"Aucun avis pour l'instant."})]));
+}
+function card(a){
+  const name=[a.prenom,a.nom].filter(Boolean).join(" ");
+  const kv=el("dl",{class:"kv"});
+  const row=(k,v)=>{if(v)kv.append(el("dt",{text:k}),el("dd",{text:v}));};
+  row("Les enfants",L[a.enfants]);row("Durée",L[a.duree]);row("À 24,90 €",L[a.prix]);
+  row("Lieu",(a.maison?"à la maison":(a.ville||"dehors"))+" · "+a.etapes+" étapes · "+a.enfantsN+" enfants");
+  row("Venu par",a.ref||"direct");row("Citer sur le site",a.citer?"oui, avec le prénom":"non");
+  return el("article",{class:"card avis"},
+    el("div",{class:"bar"},el("span",{class:"who",text:name||"Sans nom (avant le 27 octobre)"}),
+      a.note?el("span",{class:"stars","aria-label":a.note+" sur 5",text:"★".repeat(a.note)+"☆".repeat(5-a.note)}):null),
+    a.email?el("a",{href:"mailto:"+a.email,text:a.email}):null,
+    el("p",{class:"note",text:when(a.date)}),kv,
+    a.prefere?el("div",null,el("p",{class:"note",text:"Leur moment préféré"}),el("p",{class:"quote",text:a.prefere})):null,
+    a.coince?el("div",null,el("p",{class:"note",text:"Ce qui a coincé"}),el("p",{class:"quote",text:a.coince})):null);
+}
+
+(async()=>{const c=store.get();if(!c)return;
+  $("#id").value=c.id||"";$("#msg").textContent="Connexion…";
+  try{data=await load(c);creds=c;show();}catch(e){if(e.message==="login")store.clear();$("#msg").textContent="";}})();
+</script>
+</body>
+</html>

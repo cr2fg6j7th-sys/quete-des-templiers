@@ -27,6 +27,11 @@ SITE_HOST = "maquetelegendaire.fr"
 # Before the opening: the quest is offered to tester families, who answer a few questions at the end
 # (payment hidden). Delete this line on the day of the real payments: the button "Débloquer" comes back.
 TESTEURS = "1"
+# Nathan's private page maquetelegendaire.fr/espace (answers of the testers, counts). Login + random code
+# given to Nathan on 27/10/2026; only its salted SHA-256 is here. New code: python3 dev/espace_code.py
+ESPACE_ID = "nathan"
+ESPACE_SALT = "758df55ecee50e7c49222472017e4e99"
+ESPACE_HASH = "f8c98726a21cab7be73b12f2867cb15a5374896171c49a4bde37e0852617befb"
 
 [observability]
 enabled = true

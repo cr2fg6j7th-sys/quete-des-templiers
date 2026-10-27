@@ -141,6 +141,19 @@ footer a{color:var(--muted)}
 .avant b{display:block;font-family:var(--label,inherit);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
 .avant span{display:block;font-weight:700;font-size:1.02rem;line-height:1.3;margin-top:2px}
 .avant small{display:block;font-size:.85rem;opacity:.9;margin-top:4px}
+.brandrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-right:52px}
+.qmenu{position:relative;flex:none}
+.qmenu summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card);font-family:var(--label);letter-spacing:.05em;font-size:.85rem;color:var(--ink);white-space:nowrap}
+.qmenu summary::-webkit-details-marker{display:none}
+.qmenu summary:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.qmenu .chev{color:var(--rose);transition:transform .2s}
+.qmenu[open] .chev{transform:rotate(180deg)}
+.qlist{position:absolute;right:0;top:calc(100% + 8px);z-index:7;width:min(280px,calc(100vw - 32px));background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.16);padding:6px;display:flex;flex-direction:column;gap:2px}
+.qlist a{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--ink)}
+.qlist a.here{background:var(--rose-soft)}
+.qlist .qn{font-weight:700}
+.qlist .qs{font-size:.82rem;color:var(--muted)}
+.qlist .soon{padding:8px 12px 6px;font-size:.82rem;color:var(--muted);font-style:italic}
 .hero .brand{font-family:var(--display);font-size:1.9rem;line-height:1;color:var(--rose)}
 .hero h1{font-family:var(--body);font-weight:700;font-size:1.8rem;line-height:1.15;color:var(--ink)}
 .music{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:6;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--rose);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12);padding:0;cursor:pointer}
@@ -434,6 +447,21 @@ function shieldRow(){
       (got?`<text x="20" y="27" text-anchor="middle" font-family="UnifrakturMaguntia, Georgia, serif" font-size="20" fill="var(--on-rose)">${st.letter}</text>`:`<text x="20" y="27" text-anchor="middle" font-family="Alegreya Sans SC, sans-serif" font-size="13" fill="var(--muted)">${i+1}</text>`)+`</svg>`;
     row.append(w);});
   return row;
+}
+// The quests of the brand, in the menu at the top of the home page. Add the next themes here
+// (pirates, fairies…) with their address; "soon" shows a line without a link.
+const QUESTS=[{name:"La Quête du Chevalier",sub:"7 à 10 ans · chevaliers et châteaux",href:"./",here:true}];
+const QUESTS_SOON="D'autres quêtes arrivent bientôt";
+function questMenu(){
+  const menu=h("details",{class:"qmenu"});
+  const close=e=>{if(!menu.contains(e.target))menu.open=false;};
+  menu.addEventListener("toggle",()=>{if(menu.open)document.addEventListener("click",close);else document.removeEventListener("click",close);});
+  menu.append(h("summary",{"aria-label":"Nos quêtes"},"Nos quêtes",h("span",{class:"chev","aria-hidden":"true",text:"▾"})),
+    h("div",{class:"qlist"},
+      ...QUESTS.map(q=>h("a",{href:q.href,class:q.here?"here":"","aria-current":q.here?"page":null,onclick:e=>{if(q.here){e.preventDefault();menu.open=false;scrollTo({top:0,behavior:"smooth"});}}},
+        h("span",{class:"qn",text:"⚔️ "+q.name}),h("span",{class:"qs",text:q.sub}))),
+      h("p",{class:"soon",text:QUESTS_SOON+" ✦"})));
+  return menu;
 }
 function footer(){return h("footer",null,"Lieux : © contributeurs OpenStreetMap (licence ODbL). Communes et adresses : Base Adresse Nationale et API Géo (Licence Ouverte 2.0), Nominatim.",h("br"),
   h("a",{href:"anniversaire-chevalier.html"},"Guide : organiser un anniversaire chevalier"),h("br"),
@@ -880,7 +908,7 @@ function homeScreen(){
   return [
     avant,
     h("header",{class:"hero"},
-      h("p",{class:"brand",text:"Ma Quête Légendaire"}),
+      h("div",{class:"brandrow"},h("p",{class:"brand",text:"Ma Quête Légendaire"}),questMenu()),
       h("h1",{text:"La chasse au trésor de chevaliers, dans les rues de votre ville"}),
       h("p",{class:"promise",text:"Pour les anniversaires des 7 à 10 ans : le Grand Maître appelle votre enfant par son prénom et guide la troupe de lieu en lieu. Prête en deux minutes, rien à imprimer."}),
       S.ref==="fete"&&h("p",{class:"note",text:"Vos enfants ont joué à une quête de chevalier chez des amis ? Voici comment préparer la même pour votre enfant, dans votre ville."})),

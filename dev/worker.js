@@ -8,6 +8,7 @@
      POST /api/stats    the counts and the testers' answers, for the weekly report (key derived from the Stripe secret)
      POST /api/testeur  before the opening: sealed token -> full quest, free, for a family who tests it
      POST /api/avis     before the opening: a tester's answers to the questionnaire at the end of the quest
+     POST /api/espace   Nathan's private page (/espace): login + code -> counts and testers' answers
    The tester mode is on while the variable TESTEURS = "1" (wrangler.toml); removing it ends it everywhere.
    The token is encrypted (AES-GCM), so the places of a quest stay hidden until payment.
    Secrets: STRIPE_SECRET_KEY, QUEST_KEY. Variables: PRICE_CENTS, STRIPE_API (tests only).
@@ -299,7 +300,26 @@ async function stats(request, env) {
   const b = await readJSON(request);
   if (!b || b.key !== await statsKey(env)) return reply({ ok: false, reason: "key" }, 403);
   if (!env.STATS) return reply({ ok: false, reason: "off" }, 503);
-  const n = Math.max(1, Math.min(60, parseInt(b.days, 10) || 7)), days = {};
+  return reply(Object.assign({ ok: true }, await collect(env, b.days)));
+}
+
+// Nathan's private page (/espace): login + code, checked against a salted SHA-256 kept in wrangler.toml
+// (ESPACE_ID, ESPACE_SALT, ESPACE_HASH). The code is random (about 80 bits): the hash can stay public.
+async function espace(request, env) {
+  const b = await readJSON(request);
+  if (!env.ESPACE_HASH || !env.ESPACE_SALT || !env.ESPACE_ID) return reply({ ok: false, reason: "off" }, 503);
+  const id = String(b && b.id || "").trim().toLowerCase(), code = String(b && b.code || "").trim().toUpperCase().replace(/\s+/g, "");
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${env.ESPACE_SALT}:${id}:${code}`));
+  const h = [...new Uint8Array(d)].map(x => x.toString(16).padStart(2, "0")).join("");
+  let diff = h.length ^ env.ESPACE_HASH.length;
+  for (let i = 0; i < h.length; i++) diff |= h.charCodeAt(i) ^ (env.ESPACE_HASH.charCodeAt(i) || 0);
+  if (id !== env.ESPACE_ID || diff) { await new Promise(r => setTimeout(r, 400)); return reply({ ok: false, reason: "login" }, 403); }
+  if (!env.STATS) return reply({ ok: false, reason: "off" }, 503);
+  return reply(Object.assign({ ok: true, testeurs: testers(env) }, await collect(env, b.days || 28)));
+}
+
+async function collect(env, nDays) {
+  const n = Math.max(1, Math.min(60, parseInt(nDays, 10) || 7)), days = {};
   for (let i = 0; i < n; i++) {
     const day = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10), d = days[day] = {};
     let cursor;
@@ -321,7 +341,7 @@ async function stats(request, env) {
     cur = page.list_complete ? null : page.cursor;
   } while (cur && answers.length < 500);
   answers.sort((x, y) => y.date.localeCompare(x.date));
-  return reply({ ok: true, days, avis: answers });
+  return { days, avis: answers };
 }
 
 const SHORT = { "/tiktok": "tiktok", "/insta": "instagram", "/instagram": "instagram", "/pinterest": "pinterest", "/youtube": "youtube" };
@@ -346,6 +366,7 @@ export default {
         if (url.pathname === "/api/unlock") return await unlock(request, env, ctx);
         if (url.pathname === "/api/hit") return await hit(request, env, ctx);
         if (url.pathname === "/api/stats") return await stats(request, env);
+        if (url.pathname === "/api/espace") return await espace(request, env);
         if (url.pathname === "/api/testeur") return await testeur(request, env, ctx);
         if (url.pathname === "/api/avis") return await avis(request, env, ctx);
       } catch (e) {

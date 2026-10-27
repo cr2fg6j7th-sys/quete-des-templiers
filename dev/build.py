@@ -122,13 +122,17 @@ shutil.copytree(root / "fonts", site / "fonts")
 (site / "sw.js").write_text(sw, encoding="utf-8")
 for f in (d / "static").iterdir():
     shutil.copy(f, site / f.name)
+# Nathan's private page (login + code, checked by /api/espace): maquetelegendaire.fr/espace
+(site / "espace").mkdir(exist_ok=True)
+shutil.copy(d / "espace.html", site / "espace" / "index.html")
 (site / "robots.txt").write_text(f"User-agent: *\nDisallow: /api/\nDisallow: /places/\nDisallow: /audio/\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
 urls = [SITE + "/"] + [f"{SITE}/{n}" for n in guide_pages]
 (site / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + "".join(f"  <url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
 # Headers of the static files (Cloudflare): the demo may read the place tiles from another site.
 (site / "_headers").write_text("/places/*\n  Access-Control-Allow-Origin: *\n  Cache-Control: public, max-age=86400\n"
-    "/sw.js\n  Cache-Control: no-cache\n", encoding="utf-8")
+    "/sw.js\n  Cache-Control: no-cache\n"
+    "/espace/*\n  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-store\n  Referrer-Policy: no-referrer\n", encoding="utf-8")
 if "--audio" in sys.argv:
     shutil.copytree(root / "audio", site / "audio", ignore=shutil.ignore_patterns("manifest.json", "rapport-noms.json", "sources.json", "rapport.json", "accueil-?.mp3", "test"))
 
