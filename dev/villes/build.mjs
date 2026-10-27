@@ -222,7 +222,7 @@ function hub(done) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Anniversaire chevalier ${esc(z || "près de chez vous")} : la quête ville par ville | Ma Quête Légendaire</title>
+<title>Anniversaire chevalier ${esc(z || "près de chez vous")}, ville par ville</title>
 <meta name="description" content="Une chasse au trésor de chevaliers pour un anniversaire de 7 à 10 ans, dans les rues de votre village ou de votre ville : les lieux du Grand Maître à ${esc(list(sorted.slice(0, 5).map(o => o.c.nom)))}…">
 <link rel="canonical" href="${url}">
 <link rel="icon" href="icon.svg" type="image/svg+xml">

@@ -43,12 +43,19 @@ qr_js = json.dumps({"size": qr["size"], "d": qr["d"]})
 # The Grand Master's invented signature (dev/signature.json, made by dev/video/signature.py).
 sign_js = (d / "signature.json").read_text(encoding="utf-8").strip()
 
+# Ownership checks of Google Search Console and Bing Webmaster Tools (dev/verification.json): the code of the
+# "HTML tag" method, put on the home page of the paid site only. Empty: nothing is added.
+ver = json.loads((d / "verification.json").read_text(encoding="utf-8")) if (d / "verification.json").exists() else {}
+ver_tags = "".join(f'<meta name="{n}" content="{ver[k]}">\n' for k, n in (("google", "google-site-verification"), ("bing", "msvalidate.01"))
+                   if re.fullmatch(r"[A-Za-z0-9_\-]{10,100}", ver.get(k) or ""))
+
 def page(engine_part, paid):
     return (t.replace("/*GEO*/", geo).replace("/*ENGINE*/", engine_part).replace("/*VOICE*/", voice)
              .replace("const PAID=/*PAID*/false;", f"const PAID={'true' if paid else 'false'};")
              .replace("/*PLACES_SITE*/", "" if paid else PLACES_SITE)
              .replace("{{SITE}}", SITE).replace("/*VOICE_VERSION*/", VOICE_VERSION)
              .replace("<!--ROBOTS-->", "" if paid else '<meta name="robots" content="noindex">')
+             .replace("<!--VERIFICATION-->\n", ver_tags if paid else "")
              .replace("<!--FAQ-->", faq_ld).replace("/*HOME*/", home_static).replace("/*QR*/null", qr_js).replace("/*SIGN*/null", sign_js))
 sw = read("sw.js").replace("/*VOICE_VERSION*/", VOICE_VERSION)
 
