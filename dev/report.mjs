@@ -131,8 +131,8 @@ if (avisList.length) {
 
 ${avisList.length} questionnaire${avisList.length > 1 ? "s" : ""} depuis le début. Note moyenne : ${moy} sur 5. Les enfants ont : ${cnt("enfants")}. Durée : ${cnt("duree")}. Auraient acheté à 24,90 € : ${cnt("prix")}.
 
-${process.env.AVIS_DETAIL === "1" ? `| Date | Note | Enfants | Durée | Prix | Lieu | Moment préféré | Ce qui a coincé | Citable |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-${avisList.map(a => `| ${a.date.slice(0, 10)} | ${a.note || "—"} | ${L[a.enfants] || "—"} | ${L[a.duree] || "—"} | ${L[a.prix] || "—"} | ${a.maison ? "maison" : cell(a.ville) || "dehors"} (${a.etapes} étapes, ${a.enfantsN} enfants) | ${cell(a.prefere)} | ${cell(a.coince)} | ${a.citer ? "oui, " + cell(a.prenom || "sans prénom") : "non"} |`).join("\n")}` : "Le détail des réponses (textes libres, prénoms) n'est pas écrit ici tant que le dépôt est public : passer le dépôt en privé pour l'avoir dans ce rapport."}
+${process.env.AVIS_DETAIL === "1" ? `| Date | Qui | E-mail | Note | Enfants | Durée | Prix | Lieu | Moment préféré | Ce qui a coincé | Citable |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+${avisList.map(a => `| ${a.date.slice(0, 10)} | ${cell([a.prenom, a.nom].filter(Boolean).join(" ")) || "—"} | ${cell(a.email) || "—"} | ${a.note || "—"} | ${L[a.enfants] || "—"} | ${L[a.duree] || "—"} | ${L[a.prix] || "—"} | ${a.maison ? "maison" : cell(a.ville) || "dehors"} (${a.etapes} étapes, ${a.enfantsN} enfants) | ${cell(a.prefere)} | ${cell(a.coince)} | ${a.citer ? "oui" : "non"} |`).join("\n")}` : "Le détail des réponses (noms, e-mails, textes libres) n'est pas écrit ici tant que le dépôt est public : passer le dépôt en privé pour l'avoir dans ce rapport."}
 `);
 }

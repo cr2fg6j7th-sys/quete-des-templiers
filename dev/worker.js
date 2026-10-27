@@ -256,10 +256,12 @@ async function testeur(request, env, ctx) {
   return reply({ ok: true, quest });
 }
 
-// The questionnaire's answers, kept 400 days under "avis|<time>|<random>". No identifier: only what the
-// parent typed (a first name only if they agree to be quoted).
+// The questionnaire's answers, kept 400 days under "avis|<time>|<random>". No IP or cookie: only what the
+// parent typed, with their first name, last name and e-mail (to know who answered and write back; the
+// first name alone is shown on the site, and only if they agree to be quoted).
 const pick = (v, list) => list.includes(v) ? v : "";
 const txt = (v, n) => String(v || "").replace(/[\u0000-\u001f]+/g, " ").trim().slice(0, n);
+const mail = v => { const m = txt(v, 120).toLowerCase(); return /^[^\s@|]+@[^\s@|]+\.[^\s@|]{2,}$/.test(m) ? m : ""; };
 async function avis(request, env, ctx) {
   if (!testers(env)) return reply({ ok: false, reason: "closed" }, 403);
   const b = await readJSON(request);
@@ -270,11 +272,12 @@ async function avis(request, env, ctx) {
     duree: pick(b.duree, ["court", "juste", "long"]),
     prix: pick(b.prix, ["oui", "peut-etre", "non"]),
     prefere: txt(b.prefere, 400), coince: txt(b.coince, 600),
-    citer: b.citer === true, prenom: b.citer === true ? txt(b.prenom, 30) : "",
+    citer: b.citer === true, prenom: txt(b.prenom, 40), nom: txt(b.nom, 60), email: mail(b.email),
     maison: !!b.maison, etapes: Math.max(0, Math.min(6, parseInt(b.etapes, 10) || 0)),
     enfantsN: Math.max(0, Math.min(15, parseInt(b.enfantsN, 10) || 0)), ville: txt(b.ville, 60), ref: refOf(b)
   };
   if (!a.note && !a.enfants && !a.prefere && !a.coince) return reply({ ok: false, reason: "empty" }, 400);
+  if (!a.prenom || !a.nom || !a.email) return reply({ ok: false, reason: "contact" }, 400);
   count(env, ctx, "avis", a.ref);
   if (env.STATS) {
     const p = env.STATS.put(`avis|${new Date().toISOString()}|${crypto.randomUUID().slice(0, 8)}`, JSON.stringify(a), { expirationTtl: 400 * 86400 });

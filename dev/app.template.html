@@ -59,7 +59,7 @@ a{color:var(--rose)}
 .voice{background:var(--rose-soft);border:none}
 .voice p{font-style:italic}
 label{font-family:var(--label);letter-spacing:.05em;font-size:.95rem;display:flex;flex-direction:column;gap:6px}
-input[type=text],input[type=number],input[type=search],input[type=date],input[type=time],select{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink);width:100%}
+input[type=text],input[type=email],input[type=number],input[type=search],input[type=date],input[type=time],select{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink);width:100%}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 .row>*{flex:1 1 140px;min-width:0}
 .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
@@ -177,6 +177,7 @@ footer a{color:var(--muted)}
 .stars button.on{color:var(--or)}
 .avis .q{display:flex;flex-direction:column;gap:6px}
 .avis .qlab{font-family:var(--label);letter-spacing:.05em;font-size:.95rem}
+.avis input[type=text],.avis input[type=email]{font-family:var(--body);letter-spacing:0;text-transform:none;font-variant:normal}
 .avis textarea{font:inherit;font-family:var(--body);letter-spacing:0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink);width:100%;resize:vertical}
 .consent input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--rose)}
 .parchment{width:100%;height:auto;display:block;border-radius:8px;border:1px solid var(--line)}
@@ -1193,13 +1194,18 @@ function avisCard(){
   for(let i=1;i<=5;i++){const b=h("button",{type:"button","aria-label":i+" sur 5",text:"★",onclick:()=>{A.note=i;[...stars.children].forEach((x,j)=>x.classList.toggle("on",j<i));}});stars.append(b);}
   const pref=h("textarea",{rows:2,maxlength:400,placeholder:"Le moment où ils ont le plus ri, crié, couru…"});
   const coince=h("textarea",{rows:2,maxlength:600,placeholder:"Un indice pas clair, un lieu fermé, une étape trop longue…"});
-  const cite=h("input",{type:"checkbox",id:"citer"}),prenom=h("input",{type:"text",maxlength:30,placeholder:"Votre prénom (ex. : Julie, maman de Léo)"});
+  const cite=h("input",{type:"checkbox",id:"citer"});
+  const prenom=h("input",{type:"text",id:"avis-prenom",maxlength:40,autocomplete:"given-name",placeholder:"Julie"});
+  const nom=h("input",{type:"text",id:"avis-nom",maxlength:60,autocomplete:"family-name",placeholder:"Martin"});
+  const mail=h("input",{type:"email",id:"avis-email",maxlength:120,autocomplete:"email",inputmode:"email",placeholder:"julie.martin@exemple.fr"});
   const out=h("p",{class:"note",role:"status"});
   const send=async()=>{
     if(!A.note&&!A.enfants&&!pref.value.trim()&&!coince.value.trim()){out.textContent="Répondez au moins à une question.";return;}
+    if(!prenom.value.trim()||!nom.value.trim()){out.textContent="Indiquez votre prénom et votre nom.";(prenom.value.trim()?nom:prenom).focus();return;}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail.value.trim())){out.textContent="Votre adresse e-mail ne semble pas complète.";mail.focus();return;}
     btn.disabled=true;out.textContent="Envoi…";
     try{const r=await api("api/avis",{note:A.note,enfants:A.enfants,duree:A.duree,prix:A.prix,prefere:pref.value,coince:coince.value,
-        citer:cite.checked,prenom:prenom.value,maison:!!(S.indoor||S.quest.indoorOnly),etapes:S.quest.steps.length,enfantsN:S.kids,ville:S.town,ref:S.ref});
+        citer:cite.checked,prenom:prenom.value,nom:nom.value,email:mail.value,maison:!!(S.indoor||S.quest.indoorOnly),etapes:S.quest.steps.length,enfantsN:S.kids,ville:S.town,ref:S.ref});
       if(r.ok){S.avis=true;save();card.replaceWith(avisCard());return;}out.textContent="L'envoi n'a pas marché. Réessayez dans un instant.";}
     catch(e){out.textContent="Pas de réseau : réessayez quand le téléphone est connecté.";}
     btn.disabled=false;
@@ -1212,8 +1218,13 @@ function avisCard(){
     h("label",null,"Leur moment préféré",pref),
     h("label",null,"Ce qui a coincé",coince),
     h("div",{class:"q"},h("span",{class:"qlab",text:"À 24,90 €, vous l'auriez achetée ?"}),seg("prix",[["oui","oui"],["peut-etre","peut-être"],["non","non"]])),
+    h("div",{class:"q"},h("span",{class:"qlab",text:"Qui êtes-vous ?"}),
+      h("p",{class:"note",text:"Pour savoir qui nous a répondu et pouvoir vous recontacter au sujet de votre avis. Jamais de publicité, rien n'est affiché sur le site."})),
+    h("label",{for:"avis-prenom"},"Prénom",prenom),
+    h("label",{for:"avis-nom"},"Nom",nom),
+    h("label",{for:"avis-email"},"Adresse e-mail",mail),
     h("label",{class:"consent",for:"citer"},cite,h("span",null,"Vous acceptez qu'on cite votre avis sur le site, avec votre prénom seulement.")),
-    prenom,btn,out);
+    btn,out);
   return card;
 }
 // Unlock: free in the demo build; consent + Stripe payment in the paid build.
