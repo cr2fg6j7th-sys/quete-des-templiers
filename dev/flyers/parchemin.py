@@ -135,9 +135,9 @@ h1{font-size:27pt}h1 .ini{font-size:33pt}.sub{font-size:10.6pt;margin-top:1.4mm}
 {rule(7, w, h, bottom=5.5)}
 {HEAD.format(b=9.5, o=15.6, r=18.9, t=29, rib=M.ribbon_svg(M.RIBBON_TXT, 9.2, -4, WAX, "#5e1a16", "#f8ead0", hk=2.35))}
 {keep("keep")}{knight("knight k1")}{rider_svg()}{hill("hill")}
-<div class="card">{qr(M.SITE + "/?ref=f-comptoir")}<div>
+<div class="card">{qr(M.SITE + "/liens/?ref=f-comptoir")}<div>
   <div class="kick">Aperçu gratuit</div>
-  <div class="say">Scannez, tapez son prénom&#8239;: le Grand Maître l'appelle&#8239;!</div>
+  <div class="say">Scannez&#8239;: notre site et nos vidéos Instagram, TikTok, Pinterest&#8239;!</div>
   <div class="url">maquetelegendaire.fr</div></div></div>
 {seal("seal")}
 <div class="facts">4 à 15 enfants · environ 1 h · 24,90&#8239;€ pour tout le groupe</div>
@@ -171,9 +171,9 @@ h1{font-size:38pt}h1 .ini{font-size:46pt}.sub{font-size:14.6pt;margin-top:2mm}
 {HEAD.format(b=13.5, o=23.1, r=28.1, t=42.3, rib=M.ribbon_svg(M.RIBBON_TXT, 13, -5.6, WAX, "#5e1a16", "#f8ead0", hk=2.35))}
 {keep("keep")}{knight("knight k1")}{rider_svg()}{hill("hill")}
 <div class="points">Au prénom de l'enfant<b>✦</b>Prête en 2 minutes<b>✦</b>Il pleut&#8239;? À la maison</div>
-<div class="card">{qr(M.SITE + "/?ref=f-restaurant")}<div>
+<div class="card">{qr(M.SITE + "/liens/?ref=f-restaurant")}<div>
   <div class="kick">Aperçu gratuit</div>
-  <div class="say">Scannez, tapez le prénom de votre enfant&#8239;: le Grand Maître l'appelle&#8239;!</div>
+  <div class="say">Scannez&#8239;: notre site, l'aperçu au prénom de votre enfant et nos vidéos Instagram, TikTok, Pinterest&#8239;!</div>
   <div class="url">maquetelegendaire.fr</div></div></div>
 {seal("seal", '<span class="b1">Les enfants&#8239;:</span><span class="b2">jeux au dos</span><span class="b3">retourne-moi&#8239;!</span>')}
 <div class="facts">4 à 15 enfants · environ 1 h · 24,90&#8239;€ pour tout le groupe, sans animateur</div>

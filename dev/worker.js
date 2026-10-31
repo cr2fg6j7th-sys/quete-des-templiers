@@ -24,7 +24,8 @@ const log = (evt, data) => console.log(JSON.stringify(Object.assign({ evt }, dat
 // Anonymous counts of the visit, one KV key per event: "day|event|ref|random", kept 400 days.
 // No IP address, no identifier, no cookie: only how many times each step happened, and the ref.
 const EVENTS = new Set(["home", "setup", "preview", "few", "nodata", "neterr", "checkout", "unlock", "diploma",
-  "invite", "diplome", "imprime", "share", "apercu", "apercu-ouvert", "horsligne", "geo-refus", "geo-echec", "testeur", "avis"]);
+  "invite", "diplome", "imprime", "share", "apercu", "apercu-ouvert", "horsligne", "geo-refus", "geo-echec", "testeur", "avis",
+  "liens", "liens-site", "liens-instagram", "liens-tiktok", "liens-pinterest"]);
 function count(env, ctx, evt, ref) {
   if (!env.STATS || !EVENTS.has(evt)) return;
   const day = new Date().toISOString().slice(0, 10);
