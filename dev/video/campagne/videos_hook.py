@@ -118,4 +118,9 @@ VIDEOS = {
       "En grattant la terre avec de petits pinceaux, ils retrouvent parfois des pièces, des jouets d'enfants… et même des dés pour jouer !", cta=CTA_OPEN),
   "selle": fact("maison-oreiller", "En voyage, les chevaliers dormaient la tête… <b>sur quoi ?</b>",
       "En voyage, les chevaliers dormaient souvent par terre, enroulés dans leur manteau, la tête posée sur leur selle de cheval.", cta=CTA_OPEN),
+  # ---- 1 Nov 2026 (weekly review): first-name videos for the hand posts after 20 Nov, free preview
+  "mael": name("mael", "Maël", "m", CTA_OPEN),
+  "ambre": name("ambre", "Ambre", "f", CTA_OPEN),
+  "nolan": name("nolan", "Nolan", "m", CTA_OPEN),
+  "juliette": name("juliette", "Juliette", "f", CTA_OPEN),
 }
