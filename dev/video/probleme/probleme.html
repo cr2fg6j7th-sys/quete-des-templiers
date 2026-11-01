@@ -56,6 +56,28 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0b0e1d}
 .pill span{display:inline-block;background:#a33f4b;border-radius:999px;padding:18px 40px;font-weight:700;font-size:46px}
 .endkw{top:1560px;font-family:"Alegreya Sans SC",sans-serif;font-weight:700;font-size:38px;letter-spacing:3px;color:#e9c46a}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+/* Safe zones (1 Nov 2026, Nathan: « fais bien attention aux zones de sûreté d'Insta et TikTok »): everything that must be
+   read stays inside x 60-940, y 230-1500. Above: the app's top bar; below: the caption, account name and music line;
+   on the right: the like / comment / share buttons. Only the decorative keyword line of the end card sits lower. */
+.abs{left:60px;right:140px}
+.kw{top:236px}
+.head{top:290px;padding:0 30px}
+#note{left:90px;right:170px;top:540px;padding:38px 46px 32px}
+.it{font-size:48px;padding:11px 0}
+#note h3{font-size:50px}
+.sigh{top:1290px;padding:0 30px}
+#seal{left:500px;top:800px}
+.turn{top:1250px;padding:0 30px;font-size:80px}
+#phone{top:420px;left:500px}
+.step{left:70px;right:150px;font-size:52px;padding:22px 30px}
+.cap{top:1350px;padding:0 20px;font-size:52px}
+.cap span.bgc{background:rgba(11,14,29,.72);border-radius:14px;padding:4px 16px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.brand{top:430px}
+.endsub{top:820px;padding:0 30px}
+.url{top:1010px}
+.pill{top:1220px}
+.endkw{top:1560px}
+
 </style></head>
 <body><div id="stage">
   <div class="scene" id="s1">
@@ -72,17 +94,17 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0b0e1d}
   <div class="scene" id="s2">
     <div class="bg" style="background-image:url(IMG_CLOSE)"></div><div class="dim" style="background:linear-gradient(to bottom,rgba(11,14,29,.75) 0%,rgba(11,14,29,.3) 20%,rgba(11,14,29,.3) 75%,rgba(11,14,29,.8) 100%)"></div>
     <div class="abs kw">Grand jeu chevalier enfant</div>
-    <div class="abs head" id="head2" style="top:150px;font-size:76px">Vous tapez <em>son prénom</em>.</div>
+    <div class="abs head" id="head2" style="font-size:76px">Vous tapez <em>son prénom</em>.</div>
     <div id="phone"><div class="scr"><img src="IMG_HOME"><div id="typed"><span id="tt"></span><span id="caret"></span></div><div id="tap"></div></div></div>
   </div>
   <div class="scene" id="s3">
     <div class="bg" id="bg3" style="background-image:url(IMG_VILLE)"></div><div class="dim" style="background:linear-gradient(to bottom,rgba(11,14,29,.88) 0%,rgba(11,14,29,.35) 22%,rgba(11,14,29,.2) 55%,rgba(11,14,29,.85) 100%)"></div>
     <div class="abs kw" id="kw3">Chasse au trésor d'anniversaire</div>
     <div class="abs head" id="head3" style="font-size:78px">Il crée la quête <em>dans votre ville</em>.</div>
-    <div class="tag" id="g1" style="left:120px;top:1180px"><b>1</b> · Fontaine : une énigme</div>
-    <div class="tag" id="g2" style="left:380px;top:900px"><b>2</b> · Église : un défi</div>
-    <div class="tag" id="g3" style="left:330px;top:620px"><b>3</b> · Le mot secret</div>
-    <div class="step" id="st" style="top:1400px;text-align:center"><b>1 heure</b> de jeu, <b>rien à préparer</b>,<br>un diplôme pour chaque enfant</div>
+    <div class="tag" id="g1" style="left:110px;top:1060px"><b>1</b> · Fontaine : une énigme</div>
+    <div class="tag" id="g2" style="left:360px;top:820px"><b>2</b> · Église : un défi</div>
+    <div class="tag" id="g3" style="left:300px;top:580px"><b>3</b> · Le mot secret</div>
+    <div class="step" id="st" style="top:1150px;text-align:center"><b>1 heure</b> de jeu, <b>rien à préparer</b>,<br>un diplôme pour chaque enfant</div>
   </div>
   <div class="scene" id="end">
     <div class="abs brand">Ma Quête<br>Légendaire</div>
@@ -157,7 +179,7 @@ function frame(t){
   if (t >= T.end){ ["brand", "endsub", "url", "pill", "endkw"].forEach((k, i) => { const e = document.querySelector("#end ." + k); const p = clamp((t - T.end - .1 - i * .15) / .2); e.style.opacity = ease(p); e.style.transform = `translateY(${((1 - ease(p)) * 30).toFixed(1)}px)`; }); }
   // spoken lines, as captions
   const cap = $("cap"); const line = c.caps.find(([a, b]) => t >= a && t < b);
-  cap.innerHTML = line ? line[2] : ""; cap.style.opacity = line ? 1 : 0;
+  cap.innerHTML = line ? `<span class="bgc">${line[2]}</span>` : ""; cap.style.opacity = line ? 1 : 0;
   $("flash").style.opacity = flash.toFixed(3);
 }
 </script></body></html>
