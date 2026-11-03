@@ -2,10 +2,11 @@
 Codes repris de la tendance (TikTok, novembre 2026) :
 - décor : capture du vrai profil Instagram de la marque, fixe, en mode clair
 - personnage détouré (fond vert) qui danse avec une enceinte, posé en bas de l'écran, coupé par le bas,
-  qui change de place à chaque coupe sèche
+  en un seul plan continu (deux clips enchaînés, le second part de la dernière image du premier)
 - texte en haut, gras italique noir à contour blanc, présent toute la vidéo
 - ~12 s, son de la tendance ajouté dans l'application (Gonna Make You Sweat)
-Fichiers : profil.jpg (capture du profil), dragon-vert.mp4 (Wan 2.2 sur Hugging Face, fond vert)
+Fichiers : profil.jpg (capture du profil), dragon-vert.mp4 (Wan 2.2 sur Hugging Face, fond vert),
+           dragon-vert-2.mp4 (suite, Wan 3.0 sur fal.ai, quota Hugging Face épuisé)
 Usage : python3 sono_trend.py  ->  ../sortie/reel-sono-epaule.mp4"""
 import os, subprocess
 import numpy as np
@@ -19,10 +20,11 @@ if os.path.exists(os.path.join(HERE, 'DejaVuSerifCondensed-BoldItalic.ttf')):
     FONT = os.path.join(HERE, 'DejaVuSerifCondensed-BoldItalic.ttf')
 TXT = ['Quand le dragon se donne', 'du mal à faire connaître', 'la marque']
 
-# (début, fin, sens de lecture, vitesse, centre x, bas du personnage, hauteur du personnage) : coupes sèches
-SEGS = [(0.0, 5.0, 1, 1.0, 560, 2010, 1180),
-        (5.0, 8.6, -1, 1.35, 700, 2060, 1320),
-        (8.6, 12.0, 1, 1.45, 430, 1990, 1120)]
+# enchaînés sans retour en arrière ni répétition ; fal.ai a recadré l'image de départ en 9:16 (468 px de large au centre),
+# on remet donc le clip 2 à cette échelle et on complète de vert pour que le raccord tombe pile
+CLIPS = [('dragon-vert.mp4', 'fps=16,scale=480:832'),
+         ('dragon-vert-2.mp4', 'fps=16,scale=468:832,pad=480:832:6:0:color=0x00FF00')]
+CX, BOT, HH = 560, 2010, 1180                            # centre x, bas du personnage, hauteur du personnage
 
 def background():
     im = Image.open(os.path.join(HERE, 'profil.jpg')).convert('RGB')
@@ -30,11 +32,15 @@ def background():
     return im.crop((0, 0, W, H)).convert('RGBA')
 
 def load_frames():
-    raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', os.path.join(HERE, 'dragon-vert.mp4'), '-f', 'rawvideo',
-                          '-pix_fmt', 'rgb24', '-'], capture_output=True).stdout
-    w, h = 480, 832; n = len(raw) // (w * h * 3)
-    out = []
-    for i in range(n):
+    raws = []
+    for j, (c, vf) in enumerate(CLIPS):
+        raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', os.path.join(HERE, c), '-vf', vf,
+                              '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], capture_output=True).stdout
+        n = len(raw) // (480 * 832 * 3)
+        raws += [raw[i * 480 * 832 * 3:(i + 1) * 480 * 832 * 3] for i in range(1 if j else 0, n)]   # la 1re image du clip 2 = la dernière du clip 1
+    w, h = 480, 832; out = []
+    for chunk in raws:
+        i = 0; raw = chunk
         a = np.frombuffer(raw[i * w * h * 3:(i + 1) * w * h * 3], np.uint8).reshape(h, w, 3).astype(np.float32)
         r, g, b = a[..., 0], a[..., 1], a[..., 2]
         green = g - np.maximum(r, b)                                     # dominance du vert
@@ -59,20 +65,14 @@ def main():
     p = subprocess.Popen(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}',
                           '-r', str(FPS), '-i', '-', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '19',
                           '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out], stdin=subprocess.PIPE)
-    cache = {}
+    big = [f.resize((int(f.width * HH / f.height), HH), Image.LANCZOS) for f in frames]
+    speed = last / (END * cfps)                                      # tout le mouvement étalé sur 12 s, en un seul plan
     for k in range(int(END * FPS)):
         t = k / FPS
-        for (a, b, sens, v, cx, bot, hh) in SEGS:
-            if a <= t < b: break
-        x = (t - a) * v * cfps
-        x = min(last, x) if sens > 0 else max(0, last - x)
-        fr = frames[int(round(x))]
-        key = (id(fr), hh)
-        if key not in cache:
-            cache[key] = fr.resize((int(fr.width * hh / fr.height), hh), Image.LANCZOS)
-        d = cache[key]
+        x = min(last - .001, t * speed * cfps); i = int(x); a = x - i
+        d = Image.blend(big[i], big[i + 1], a) if a > .05 else big[i]   # images intermédiaires : mouvement fluide
         im = bg.copy()
-        im.alpha_composite(d, (int(cx - d.width / 2), int(bot - d.height)))
+        im.alpha_composite(d, (int(CX - d.width / 2), int(BOT - d.height)))
         im.alpha_composite(cap, (0, 360))
         p.stdin.write(im.convert('RGB').tobytes())
         if k == int(10.5 * FPS): im.convert('RGB').save(os.path.join(HERE, '..', 'sortie', 'reel-sono-epaule-apercu.jpg'), quality=90)
