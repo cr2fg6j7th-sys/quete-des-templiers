@@ -1,6 +1,6 @@
 """« Le dragon te parle » : vidéo de 19,8 s, voix Gemini TTS (Fenrir) et sous-titres mot à mot.
 Fichiers : ia/k1-k3.mp4 (le dragon parle), ia/f7.mp4 (course), ia/f8.mp4 (lettre dorée),
-img/phone.jpg, img/bourse.jpg, voix.wav (voix brute de fal.ai), son9.wav (python3 son9.py).
+ia/p1.mp4 (le dragon pleure), img/phone.jpg, img/bourse-pleure.jpg, voix.wav (voix brute de fal.ai), son9.wav (python3 son9.py).
 Usage : python3 parle.py [sortie.mp4] [--preview t1 t2 ...]"""
 import sys, math, subprocess, os, wave
 import numpy as np
@@ -73,8 +73,9 @@ SHOTS = [
 # clips : (fichier, décalage de départ en s, vitesse, aller-retour)
 CLIPS = {'k1': ('ia/k1.mp4', 0.0, 0.85, True), 'k2': ('ia/k2.mp4', 0.1, 1.0, False),
          'k3': ('ia/k3.mp4', 0.0, 1.0, False), 'f7': ('ia/f7.mp4', 0.3, 1.0, False),
-         'f8': ('ia/f8.mp4', 0.3, 1.0, False)}
-STILLS = {'phone': 'img/phone.jpg', 'bourse': 'img/bourse.jpg'}
+         'f8': ('ia/f8.mp4', 0.3, 1.0, False),
+         'bourse': ('ia/p1.mp4', 0.0, 1.0, False)}             # le dragon pleure sur sa bourse vide (Wan 3.0, fal.ai)
+STILLS = {'phone': 'img/phone.jpg', 'bourse': 'img/bourse-pleure.jpg'}
 SRC = {}
 _CF = {}
 def clip_src(name, lt):
