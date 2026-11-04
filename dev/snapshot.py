@@ -28,6 +28,8 @@ with sync_playwright() as p:
     html = page.eval_on_selector("#app", "e => e.innerHTML")
     # Buttons only work once the script runs: in the copy, they are plain text holders.
     html = re.sub(r'<p class="note" role="status"></p>|<p class="words"></p>', "", html)
+    # The tester offer ends on 7 Nov 2026: robots get the page without its banner.
+    html = re.sub(r'<button class="avant".*?</button>', "", html, flags=re.S)
     src = (d / "app.template.html").read_text(encoding="utf-8")
     tag = hashlib.sha256(re.search(r"\nconst FAQ=.*?\nfunction setupScreen", src, re.S).group(0).encode()).hexdigest()[:12]
     (d / "home.static.html").write_text(f"<!--home {tag}-->" + html.strip() + "\n", encoding="utf-8")
