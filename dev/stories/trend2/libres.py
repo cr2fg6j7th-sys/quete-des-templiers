@@ -122,22 +122,24 @@ def journee():
             ('14:00', Image.open(os.path.join(DRAGON, 'img', 'course.jpg'))), ('15:30', Image.open(os.path.join(DRAGON, 'img', 'lettre.jpg'))),
             ('16:30', Image.open(os.path.join(SERIE, 'gateau.jpg'))), ('17:00', Image.open(os.path.join(DRAGON, 'img', 'bourse-pleure.jpg'))),
             ('21:00', Image.open(os.path.join(STO, 'img', 'fete-epuise.png')))]
-    cw, ch, gap = 320, 426, 14
-    gx = (W - 3 * cw - 2 * gap) // 2; gy = 560
-    ft = ImageFont.truetype(BOLD, 40)
+    # zone visible sur Instagram et TikTok : sous les 250 px du haut, au-dessus des 450 px du bas
+    # (légende, nom du compte, son), et à gauche des boutons de droite (x < 930 dans la moitié basse)
+    cw, ch, gap = 249, 332, 14
+    gx, gy = 75, 445                            # grille de x 75 à 850, de y 445 à 1469
+    ft = ImageFont.truetype(BOLD, 34)
     cells = []
     for hh, im in pics:
         c = cover(im, cw, ch).convert('RGBA'); d = ImageDraw.Draw(c)
-        d.text((16, ch - 16), hh, font=ft, fill=(255, 255, 255), anchor='ld', stroke_width=3, stroke_fill=(0, 0, 0))
+        d.text((12, ch - 12), hh, font=ft, fill=(255, 255, 255), anchor='ld', stroke_width=3, stroke_fill=(0, 0, 0))
         cells.append(c)
     bg = cover(pics[2][1]).filter(ImageFilter.GaussianBlur(40)).convert('RGBA')
     bg.alpha_composite(Image.new('RGBA', (W, H), (10, 10, 20, 150)))
-    tf = ImageFont.truetype(BOLD, 66); title = Image.new('RGBA', (W, 200), (0, 0, 0, 0)); d = ImageDraw.Draw(title)
+    tf = ImageFont.truetype(BOLD, 62); title = Image.new('RGBA', (W, 200), (0, 0, 0, 0)); d = ImageDraw.Draw(title)
     for i, l in enumerate(['Une journée de travail', 'du dragon']):
-        d.text((W / 2, 60 + i * 80), l, font=tf, fill=(255, 255, 255), anchor='mm', stroke_width=2, stroke_fill=(0, 0, 0))
+        d.text((gx + (3 * cw + 2 * gap) / 2, 60 + i * 76), l, font=tf, fill=(255, 255, 255), anchor='mm', stroke_width=2, stroke_fill=(0, 0, 0))
     STEP, END = 0.52, 7.5                       # une photo par temps, puis la grille complète tient
     def fr(t):
-        im = bg.copy(); im.alpha_composite(title, (0, 300))
+        im = bg.copy(); im.alpha_composite(title, (0, 235))   # titre de y 265 à 425
         for i, c in enumerate(cells):
             t0 = .4 + i * STEP
             if t < t0: break
