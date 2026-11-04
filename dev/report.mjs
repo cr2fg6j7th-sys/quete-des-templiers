@@ -119,6 +119,22 @@ Démo gratuite (entourage), 28 jours : visites ${total(days, "home", 28, "demo")
 
 Appareils de Nathan (lien personnel, non comptés ci-dessus), 7 jours : visites ${total(days, "home", 7, "moi")} · aperçus ${total(days, "preview", 7, "moi")} · pages de paiement ${total(days, "checkout", 7, "moi")}.
 `);
+  // Day by day, the last 8 days (UTC days), for « did we have visits since Monday? »
+  const real = r => r !== "smoke" && r !== "demo" && r !== "moi";
+  const sum = (d, evt) => Object.entries(d[evt] || {}).reduce((t, [r, c]) => t + (real(r) ? c : 0), 0);
+  const refs = d => { const by = {}; for (const [r, c] of Object.entries(d.home || {})) if (real(r)) by[r === "-" ? "direct" : r] = (by[r === "-" ? "direct" : r] || 0) + c; return Object.entries(by).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(", ") || "—"; };
+  const jours = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+  const lines = [];
+  for (let i = 7; i >= 0; i--) {
+    const dt = new Date(Date.now() - i * 86400000), key = dt.toISOString().slice(0, 10), d = days[key] || {};
+    lines.push(`| ${jours[dt.getUTCDay()]} ${key.slice(8, 10)}/${key.slice(5, 7)} | ${sum(d, "home")} | ${sum(d, "preview")} | ${sum(d, "testeur")} | ${sum(d, "checkout")} | ${refs(d)} |`);
+  }
+  console.log(`### Jour par jour (8 derniers jours)
+
+| Jour | Visites | Aperçus | Quêtes testeurs | Paiement ouvert | Provenance des visites |
+| --- | --- | --- | --- | --- | --- |
+${lines.join("\n")}
+`);
 }
 
 // The testers' answers (questionnaire at the end of the quest, before the opening).
