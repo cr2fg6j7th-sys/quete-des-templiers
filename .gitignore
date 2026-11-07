@@ -29,3 +29,6 @@ dev/video/dragon/troupe/*.mp4
 
 # rendus en cours (renommés à la fin)
 *.tmp.mp4
+
+# clips 1080p générés sur fal.ai pour « L'entretien d'embauche du dragon »
+dev/video/dragon/entretien/*.mp4
