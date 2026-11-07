@@ -1,4 +1,4 @@
-"""Instagram et TikTok « L'entretien d'embauche du dragon » (34 s), 7 novembre 2026, 3e vidéo d'ouverture.
+"""Instagram et TikTok « L'entretien d'embauche du dragon » (39 s), 7 novembre 2026, 3e vidéo d'ouverture.
 Demande de Nathan (7/11, 11 h 40) : « une vidéo décalée au maximum… lâche-toi sur les blagues, que rien ne
 soit prévisible ». Format des réels qui font réagir : accroche datée, série numérotée (Question 1/4 à 4/4),
 retournement, dernier gag, question à un chiffre. La carte de fin reste 4,6 s.
@@ -6,7 +6,9 @@ retournement, dernier gag, question à un chiffre. La carte de fin reste 4,6 s.
 tard », le chat de la vidéo 2 en dernier candidat.
 12 h 19 (« soigne le montage pour que ce soit beau et facile à comprendre ») : bulles de BD qui pointent
 vers celui qui parle (le Grand Maître pose les questions, le dragon répond), étiquette « QUESTION n/4 »,
-narration en légende en haut, voile plus léger, rythme plus posé (chaque réponse reste 1,3 s à 2,4 s).
+narration en légende en haut, voile plus léger, rythme plus posé.
+12 h 29 (« qu'on arrive un peu mieux à lire… plus de temps après les bulles ») : chaque question reste seule
+1,5 s environ, chaque réponse 1,6 à 2,3 s avant la coupe ; accroche 3,4 s ; vidéo de 39 s.
 Images : Nano Banana 2.1 ; animation : Wan 3.0 Prime (fal.ai). Plan du chat : troupe/c8.mp4 ; carte de fin :
 annonce/c7.mp4.
 Zones d'Instagram et TikTok évitées : 220 px en haut, 470 px en bas, colonne des boutons à droite (x > 930).
@@ -30,32 +32,33 @@ END_CLIP = '../annonce/c7'
 
 # (début, fin, clip, départ dans le clip, vitesse)
 SHOTS = [
-    (0.0, 3.0, 'e1', 0.0, 1.0),     # le dragon en costume face au Grand Maître
-    (3.0, 6.4, 'e2', 0.0, 1.0),     # Q1 : « Mon sang-froid. » La chaise brûle derrière lui
-    (6.4, 9.8, 'e3', 0.0, 1.0),     # Q2 : « Le perfectionnisme. » La barbe flambe
-    (9.8, 14.0, 'e4', 0.0, 1.0),    # Q3 : « Une fois. 12 enfants de 8 ans. » « On n'en parle pas. »
-    (14.0, 16.2, 'e1', 2.8, 1.0),   # Q4 : « Où vous voyez-vous dans 5 ans ? » « À votre place. »
-    (16.2, 18.4, 'e5', 0.0, 1.0),   # 5 secondes plus tard : rôles inversés
-    (18.4, 22.0, 'e6', 0.0, 1.0),   # « Et vous, votre plus grande qualité ? » LA QUÊTE DU CHEVALIER
-    (22.0, 25.0, 'e7', 0.0, 1.0),   # les enfants dans les rues
-    (25.0, 26.8, 'e8', 0.0, 1.0),   # salle d'attente : le poste a été supprimé
-    (26.8, 29.4, CAT, 0.0, 1.0),    # candidat suivant : le chat couronné (vidéo 2)
-    (29.4, 34.0, END_CLIP, 0.0, 1.0),   # carte de fin
+    (0.0, 3.4, 'e1', 0.0, 1.0),     # le dragon en costume face au Grand Maître
+    (3.4, 7.4, 'e2', 0.0, 1.0),     # Q1 : « Mon sang-froid. » La chaise brûle derrière lui
+    (7.4, 11.4, 'e3', 0.0, 1.0),    # Q2 : « Le perfectionnisme. » La barbe flambe
+    (11.4, 16.4, 'e4', 0.0, 1.0),   # Q3 : « Une fois. 12 enfants de 8 ans. » « On n'en parle pas. »
+    (16.4, 19.6, 'e1', 1.0, 1.0),   # Q4 : « Où vous voyez-vous dans 5 ans ? » « À votre place. »
+    (19.6, 22.0, 'e5', 0.0, 1.0),   # 5 secondes plus tard : rôles inversés
+    (22.0, 26.0, 'e6', 0.0, 1.0),   # « Et vous, votre plus grande qualité ? » LA QUÊTE DU CHEVALIER
+    (26.0, 29.2, 'e7', 0.0, 1.0),   # les enfants dans les rues
+    (29.2, 31.4, 'e8', 0.0, 1.0),   # salle d'attente : le poste a été supprimé
+    (31.4, 34.4, CAT, 0.0, 1.0),    # candidat suivant : le chat couronné (vidéo 2)
+    (34.4, 39.0, END_CLIP, 0.0, 1.0),   # carte de fin
 ]
-FIN0 = 29.4
-END = 34.0
-R1_T = 4.3             # « Mon sang-froid. »
-R2_T = 7.7             # « Le perfectionnisme. »
-R3_T = 10.8            # « Une fois. 12 enfants de 8 ans. »
-R3B_T = 12.4           # « … On n'en parle pas. »
-VET_T = 12.9           # tampon VÉTÉRAN
-R4_T = 14.9            # « À votre place. »
-SWAP_T = 16.2          # coupe sèche : 5 secondes plus tard
-QUETE_T = 19.9         # LA QUÊTE DU CHEVALIER
-KIDS_T = 22.0
-WAIT_T = 25.0
-CHAT_T = 26.8          # candidat suivant
-DEJA_T = 27.6          # « Déjà réservé. »
+FIN0 = 34.4
+END = 39.0
+Q1_S, Q2_S, Q3_S, Q4_S, PROD_S = 3.4, 7.4, 11.4, 16.4, 22.0   # débuts des plans (pour la bande-son)
+R1_T = 5.1             # « Mon sang-froid. » (la question reste seule 1,6 s, la réponse 2,3 s)
+R2_T = 9.1             # « Le perfectionnisme. »
+R3_T = 13.0            # « Une fois. 12 enfants de 8 ans. » (1,8 s)
+R3B_T = 14.8           # « … On n'en parle pas. » (1,6 s)
+VET_T = 15.2           # tampon VÉTÉRAN
+R4_T = 17.9            # « À votre place. » (1,7 s)
+SWAP_T = 19.6          # coupe sèche : 5 secondes plus tard
+QUETE_T = 23.9         # LA QUÊTE DU CHEVALIER (la question du dragon reste 1,8 s)
+KIDS_T = 26.0
+WAIT_T = 29.2
+CHAT_T = 31.4          # candidat suivant
+DEJA_T = 32.3          # « Déjà réservé. » (2,1 s)
 IMPACTS = [VET_T, SWAP_T, QUETE_T, DEJA_T]
 BASEZ = {'e1': (1.15, .3, .85), 'e2': (1.15, .3, .85), 'e3': (1.15, .3, .85), 'e5': (1.15, .3, .85), 'e8': (1.2, .65, .9)}   # recadrage : personnages plus grands
 PUNCH = [(R1_T, 1.04), (R2_T, 1.05), (R3B_T, 1.05), (VET_T, 1.08), (SWAP_T, 1.06), (QUETE_T, 1.05), (DEJA_T, 1.08)]

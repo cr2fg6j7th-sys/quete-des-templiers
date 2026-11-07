@@ -1,4 +1,4 @@
-"""Bande-son de « L'entretien d'embauche du dragon » (34 s) : musique d'attente guindée (luth et
+"""Bande-son de « L'entretien d'embauche du dragon » (39 s) : musique d'attente guindée (luth et
 pizzicato) pendant l'entretien, bruitages de chute à chaque réponse (feu qui prend, barbe qui grésille,
 langue de belle-mère triste, accord dramatique), whoosh et gong de l'inversion des rôles, scintillement
 et fanfare de la quête, marche des enfants, musique d'attente solitaire et « ding » du ticket, fin.
@@ -10,6 +10,7 @@ src = open('entretien.py').read()
 def const(name): return float(re.search(rf'^{name} = ([0-9.]+)', src, re.M).group(1))
 (R1_T, R2_T, R3_T, R3B_T, VET_T, R4_T, SWAP_T, QUETE_T, CHAT_T, DEJA_T, END, FIN0) = [const(n) for n in
  ('R1_T', 'R2_T', 'R3_T', 'R3B_T', 'VET_T', 'R4_T', 'SWAP_T', 'QUETE_T', 'CHAT_T', 'DEJA_T', 'END', 'FIN0')]
+Q1_S, Q2_S, Q3_S, Q4_S, PROD_S = [float(x) for x in re.search(r'^Q1_S, Q2_S, Q3_S, Q4_S, PROD_S = (.*?)\s+#', src, re.M).group(1).split(',')]
 KIDS_T, WAIT_T = const('KIDS_T'), const('WAIT_T')
 
 DUR = END; N = int(SR * DUR); mix = np.zeros(N)
@@ -70,32 +71,33 @@ def slurp(t, g=.3):
 
 # ----- 0 -> 3 : accroche -----
 fan([(74, 0, .33), (78, .33, .33), (81, .67, .67)], 0.0, .45); put(GONG, 0, .2)
-lounge(0.6, 3.0, .16)
+lounge(0.6, Q1_S, .16)
 # ----- 3 -> 6,4 : Q1 « Je suis très chaud. » -----
-lounge(3.0, R1_T - .1, .16)
+lounge(Q1_S, R1_T - .1, .16)
 put(tick(), R1_T - .05, .4); fire(R1_T + .05, 2.0, .85); put(whoosh(.4), R1_T - .1, .4)
 fan([(67, 0, .3), (72, .33, .5)], R1_T + .2, .35)
 # ----- 6,4 -> 9,8 : Q2, même réponse -----
-put(whoosh(.25), 6.3, .3)
-lounge(6.4, R2_T - .1, .16)
+put(whoosh(.25), Q2_S - .1, .3)
+lounge(Q2_S, R2_T - .1, .16)
 put(tick(), R2_T - .05, .4); sizzle(R2_T + .1, 1.6, .35); fire(R2_T + .1, 1.2, .45)
 fan([(67, 0, .3), (72, .33, .5)], R2_T + .2, .35)
 # ----- 9,8 -> 13,4 : Q3, le vétéran -----
-put(whoosh(.25), 9.7, .3)
-lounge(9.8, R3_T - .1, .16)
-put(drone(38, 2.4), R3_T, .35)                                      # gravité de film de guerre
+put(whoosh(.25), Q3_S - .1, .3)
+lounge(Q3_S, R3_T - .1, .16)
+put(drone(38, 3.4), R3_T, .35)                                      # gravité de film de guerre
 tooter(R3B_T, .45)
 stamp(VET_T); put(GONG, VET_T, .3)
 # ----- 13,4 -> 17,2 : Q4, « À votre place. » puis inversion des rôles -----
-put(whoosh(.25), 13.3, .3)
-lounge(13.4, R4_T - .1, .16)
+put(whoosh(.25), Q4_S - .1, .3)
+lounge(Q4_S, R4_T - .1, .16)
 cut(R4_T - .05, R4_T)
 dun(R4_T, 38, .55)
 scratch(SWAP_T - .25, .55); put(whoosh(.35), SWAP_T - .2, .5)
 put(DAVUL, SWAP_T, 1.5); put(GONG, SWAP_T, .55)
 fan([(62, 0, .5), (65, .5, .5), (69, 1, .5), (74, 1.5, 1.2)], SWAP_T + .15, .55)   # thème du « nouveau patron »
 # ----- 17,2 -> 20,2 : la quête -----
-put(whoosh(.3), 17.1, .35)
+put(whoosh(.3), PROD_S - .1, .35)
+lounge(PROD_S + .1, QUETE_T - .1, .14)
 for i, f in enumerate([1568, 1976, 2349, 2637, 3136]): put(bell(f, .9), QUETE_T - .6 + i * .1, .12)
 put(DAVUL, QUETE_T, 1.5); put(DAVUL_HI, QUETE_T, .7); put(GONG, QUETE_T, .5)
 fan([(74, 0, .5), (79, .5, .5), (83, 1, .5), (86, 1.5, 1.4)], QUETE_T, .6)
