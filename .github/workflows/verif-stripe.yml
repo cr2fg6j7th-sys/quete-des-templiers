@@ -44,5 +44,15 @@ jobs:
             const st = n => !c || !c[n] ? "absent" : `${(c[n].display_preference || {}).value || "?"}${c[n].available ? "" : " (indisponible)"}`;
             if (c) out.push(`moyens de paiement : carte ${st("card")}, Apple Pay ${st("apple_pay")}, Google Pay ${st("google_pay")}, Link ${st("link")}`);
           } else out.push(`moyens de paiement : HTTP ${pm.status}`);
+          // What the site itself needs: open a payment page (then cancel it at once: nothing is charged),
+          // read payment pages and refunds (Sunday report). A restricted key (rk_) must allow these.
+          const post = async (p, body) => { const r = await fetch("https://api.stripe.com/v1/" + p, { method: "POST", headers: { authorization: "Bearer " + k, "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(body) }); return { status: r.status, j: await r.json() }; };
+          const cs = await post("checkout/sessions", { mode: "payment", locale: "fr", "line_items[0][quantity]": "1",
+            "line_items[0][price_data][currency]": "eur", "line_items[0][price_data][unit_amount]": "2490",
+            "line_items[0][price_data][product_data][name]": "Vérification (jamais payée)", success_url: "https://maquetelegendaire.fr/", cancel_url: "https://maquetelegendaire.fr/" });
+          if (cs.status === 200) { const ex = await post("checkout/sessions/" + cs.j.id + "/expire", {}); out.push(`page de paiement : création OK (${cs.j.livemode ? "réelle" : "test"}), annulée ${ex.status === 200 ? "OK" : "HTTP " + ex.status}`); }
+          else out.push(`page de paiement : REFUSÉE HTTP ${cs.status} ${cs.j.error ? (cs.j.error.type + " " + (cs.j.error.message || "")).slice(0, 160) : ""}`);
+          const rs = await get("checkout/sessions?limit=1"); out.push(`lecture des paiements : ${rs.status === 200 ? "OK" : "REFUSÉE HTTP " + rs.status}`);
+          const rf = await get("refunds?limit=1"); out.push(`lecture des remboursements : ${rf.status === 200 ? "OK" : "REFUSÉE HTTP " + rf.status}`);
           for (const l of out) console.log("::notice::" + l.replace(/\n/g, " "));
           EOF
