@@ -1,4 +1,4 @@
-"""Bande-son de « L'entretien d'embauche du dragon » (30,6 s) : musique d'attente guindée (luth et
+"""Bande-son de « L'entretien d'embauche du dragon » (34 s) : musique d'attente guindée (luth et
 pizzicato) pendant l'entretien, bruitages de chute à chaque réponse (feu qui prend, barbe qui grésille,
 langue de belle-mère triste, accord dramatique), whoosh et gong de l'inversion des rôles, scintillement
 et fanfare de la quête, marche des enfants, musique d'attente solitaire et « ding » du ticket, fin.
@@ -8,9 +8,9 @@ exec(open('son4.py').read().split('# =========== A.')[0])
 import re
 src = open('entretien.py').read()
 def const(name): return float(re.search(rf'^{name} = ([0-9.]+)', src, re.M).group(1))
-(R1_T, R2_T, R3_T, VET_T, R4_T, SWAP_T, QUETE_T, END, FIN0) = [const(n) for n in
- ('R1_T', 'R2_T', 'R3_T', 'VET_T', 'R4_T', 'SWAP_T', 'QUETE_T', 'END', 'FIN0')]
-KIDS_T, WAIT_T = 20.2, 23.2
+(R1_T, R2_T, R3_T, R3B_T, VET_T, R4_T, SWAP_T, QUETE_T, CHAT_T, DEJA_T, END, FIN0) = [const(n) for n in
+ ('R1_T', 'R2_T', 'R3_T', 'R3B_T', 'VET_T', 'R4_T', 'SWAP_T', 'QUETE_T', 'CHAT_T', 'DEJA_T', 'END', 'FIN0')]
+KIDS_T, WAIT_T = const('KIDS_T'), const('WAIT_T')
 
 DUR = END; N = int(SR * DUR); mix = np.zeros(N)
 TRIP = B / 3
@@ -84,7 +84,7 @@ fan([(67, 0, .3), (72, .33, .5)], R2_T + .2, .35)
 put(whoosh(.25), 9.7, .3)
 lounge(9.8, R3_T - .1, .16)
 put(drone(38, 2.4), R3_T, .35)                                      # gravité de film de guerre
-tooter(R3_T + .5, .45)
+tooter(R3B_T, .45)
 stamp(VET_T); put(GONG, VET_T, .3)
 # ----- 13,4 -> 17,2 : Q4, « À votre place. » puis inversion des rôles -----
 put(whoosh(.25), 13.3, .3)
@@ -106,10 +106,19 @@ fan([(74, 0, .5), (74, .5, .25), (74, .75, .25), (79, 1, 1), (81, 2, .5), (83, 2
 for k in range(int(3.0 / (B / 2))): put(lute([50, 57, 62, 57][k % 4], .3), KIDS_T + k * B / 2, .22)
 # ----- 23,2 -> 26 : salle d'attente -----
 cut(WAIT_T, WAIT_T + .05)
-lounge(WAIT_T + .1, FIN0 - .1, .12, 52)                              # même musique d'attente, plus triste
+lounge(WAIT_T + .1, CHAT_T - .1, .12, 52)                              # même musique d'attente, plus triste
 put(bell(1047, 1.0), WAIT_T + .5, .3)                               # « ding » du ticket
 slurp(WAIT_T + 1.2, .3)
-put(glide(300, 200, .5, .2, 6), WAIT_T + 2.0, 1)                   # soupir
+put(glide(300, 200, .5, .2, 6), WAIT_T + 1.3, 1)                   # soupir
+# ----- 26 -> 28,6 : candidat suivant, le chat -----
+cut(CHAT_T - .05, CHAT_T)
+put(bell(1319, .8), CHAT_T, .3); put(bell(1047, 1.0), CHAT_T + .18, .3)   # « candidat suivant »
+put(glide(620, 880, .18, .3, 6, .03), CHAT_T + .3, 1); put(glide(880, 520, .4, .3, 6, .04), CHAT_T + .48, 1)   # miaou
+put(tick(), DEJA_T - .25, .6); put(bell(1976, .7), DEJA_T - .1, .25)
+for i, (m, d) in enumerate([(38, .3), (38, .3), (37, 1.0)]):            # DUN DUN DUNNN
+    tt = DEJA_T + [0, .3, .6][i]
+    put(horn(m, d), tt, .55); put(horn(m + 12, d), tt, .35); put(DAVUL, tt, 1.2)
+put(GONG, DEJA_T + .6, .45)
 # ----- carte de fin -----
 put(DAVUL, FIN0, 1.3); put(GONG, FIN0, .35); put(whoosh(), FIN0 - .15, .3)
 fan([(78, 0, .33), (78, .33, .33), (78, .67, .33), (81, 1, .67), (83, 1.67, .33), (86, 2, .67)], FIN0, .5)
