@@ -23,3 +23,6 @@ dev/video/anime/out/
 
 # clips 1080p générés sur fal.ai pour « Le dragon annonce l'ouverture » (trop lourds pour le dépôt)
 dev/video/dragon/annonce/*.mp4
+
+# clips 1080p générés sur fal.ai pour « Le petit chevalier recrute sa troupe »
+dev/video/dragon/troupe/*.mp4
