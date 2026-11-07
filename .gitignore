@@ -20,3 +20,6 @@ dev/video/anime/out/
 
 # free demo, local tests only (GitHub Pages must not publish it)
 /demo.html
+
+# clips 1080p générés sur fal.ai pour « Le dragon annonce l'ouverture » (trop lourds pour le dépôt)
+dev/video/dragon/annonce/*.mp4
