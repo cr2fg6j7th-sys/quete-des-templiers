@@ -26,3 +26,6 @@ dev/video/dragon/annonce/*.mp4
 
 # clips 1080p générés sur fal.ai pour « Le petit chevalier recrute sa troupe »
 dev/video/dragon/troupe/*.mp4
+
+# rendus en cours (renommés à la fin)
+*.tmp.mp4
