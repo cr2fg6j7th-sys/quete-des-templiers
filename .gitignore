@@ -17,3 +17,6 @@ dev/video/probleme/_probleme.html
 dev/video/accroche/_accroche*.html
 dev/video/probleme/_*.html
 dev/video/anime/out/
+
+# free demo, local tests only (GitHub Pages must not publish it)
+/demo.html

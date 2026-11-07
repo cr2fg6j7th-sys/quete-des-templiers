@@ -1,5 +1,6 @@
 # Builds the app from dev/: python3 dev/build.py
-#   index.html          free demo for GitHub Pages: everything runs in the phone, unlock is free
+#   index.html          since the opening (7 Nov 2026): a page that sends GitHub Pages visitors to the paid site
+#   demo.html           the free demo (everything runs in the phone, unlock is free), local tests only (not committed)
 #   site/index.html     paid app for Cloudflare: places chosen by the server, unlock after payment
 #   legal/, site/legal/ sales terms, legal notice, privacy, filled from dev/legal/identite.json
 #   *.html guides       pages for Google and Pinterest, from dev/pages/, at the site root
@@ -59,7 +60,15 @@ def page(engine_part, paid):
              .replace("<!--FAQ-->", faq_ld).replace("/*HOME*/", home_static).replace("/*QR*/null", qr_js).replace("/*SIGN*/null", sign_js))
 sw = read("sw.js").replace("/*VOICE_VERSION*/", VOICE_VERSION)
 
-(root / "index.html").write_text(page(eng, False), encoding="utf-8")
+(root / "demo.html").write_text(page(eng, False), encoding="utf-8")
+# GitHub Pages published the free demo from this folder: since real payments opened, it only redirects.
+(root / "index.html").write_text(f"""<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ma Quête Légendaire</title><meta name="robots" content="noindex"><link rel="canonical" href="{SITE}/">
+<meta http-equiv="refresh" content="0; url={SITE}/?ref=demo"></head>
+<body style="font-family:system-ui,sans-serif;padding:24px"><p>La quête est ici : <a href="{SITE}/?ref=demo">{SITE.split('//')[1]}</a></p>
+<script>location.replace("{SITE}/?ref=demo")</script></body></html>
+""", encoding="utf-8")
 (root / "sw.js").write_text(sw, encoding="utf-8")
 for f in (d / "static").iterdir():
     shutil.copy(f, root / f.name)

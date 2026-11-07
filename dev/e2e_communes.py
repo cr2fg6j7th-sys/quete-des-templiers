@@ -15,7 +15,7 @@ async def page(b, geo=None, scheme="light", w=390):
     await ctx.add_init_script("try{if(!sessionStorage.getItem('t')){sessionStorage.setItem('t','1');" + STATE + "}}catch(e){}")
     pg = await ctx.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
-    await pg.goto("http://127.0.0.1:8766/index.html"); await pg.wait_for_selector("#commune")
+    await pg.goto("http://127.0.0.1:8766/demo.html"); await pg.wait_for_selector("#commune")
     return ctx, pg, errs
 
 async def chips(pg):
