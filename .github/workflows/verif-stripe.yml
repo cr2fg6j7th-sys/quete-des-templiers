@@ -54,5 +54,20 @@ jobs:
           else out.push(`page de paiement : REFUSÉE HTTP ${cs.status} ${cs.j.error ? (cs.j.error.type + " " + (cs.j.error.message || "")).slice(0, 160) : ""}`);
           const rs = await get("checkout/sessions?limit=1"); out.push(`lecture des paiements : ${rs.status === 200 ? "OK" : "REFUSÉE HTTP " + rs.status}`);
           const rf = await get("refunds?limit=1"); out.push(`lecture des remboursements : ${rf.status === 200 ? "OK" : "REFUSÉE HTTP " + rf.status}`);
+          // The live site itself: a preview, then its payment page (cancelled at once, never paid; counted as "smoke").
+          try {
+            const site = "https://maquetelegendaire.fr";
+            const sp = async (p, b) => { const r = await fetch(site + p, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }); let j = null; try { j = await r.json(); } catch (e) {} return { status: r.status, j }; };
+            const pv = await sp("/api/preview", { indoor: true, ref: "smoke" });
+            if (!pv.j || !pv.j.ok) out.unshift(`site : aperçu HTTP ${pv.status}`);
+            else {
+              const co = await sp("/api/checkout", { token: pv.j.token, consent: true, name: "Test", hero: "m", kids: 8, town: "Rosheim", ref: "smoke" });
+              const id = co.j && co.j.url ? (co.j.url.match(/cs_(live|test)_[A-Za-z0-9]+/) || [""])[0] : "";
+              if (co.j && co.j.ok && id) { const ex = await post("checkout/sessions/" + id + "/expire", {});
+                out.unshift(`site en ligne : aperçu ${pv.j.testeur ? "TESTEURS" : "payant"}, prix ${pv.j.price || "?"}, page de paiement ${id.startsWith("cs_live") ? "RÉELLE" : "test"} ouverte (${co.j.branding === "ok" ? "aux couleurs" : "sans les couleurs"}), annulée ${ex.status === 200 ? "OK" : "HTTP " + ex.status}`); }
+              else out.unshift(`site en ligne : paiement REFUSÉ HTTP ${co.status} ${JSON.stringify(co.j).slice(0, 200)}`);
+            }
+          } catch (e) { out.unshift("site en ligne : " + String(e).slice(0, 160)); }
+          out.splice(1, 0, ...out.filter(l => /^(page de paiement|lecture)/.test(l)));
           for (const l of out) console.log("::notice::" + l.replace(/\n/g, " "));
           EOF
