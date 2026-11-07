@@ -43,6 +43,7 @@ R4_T = 14.3            # « À votre place. »
 SWAP_T = 14.9          # coupe sèche, rôles inversés
 QUETE_T = 18.2         # LA QUÊTE DU CHEVALIER
 IMPACTS = [VET_T, SWAP_T, QUETE_T]
+BASEZ = {'e1': (1.15, .3, .85), 'e2': (1.15, .3, .85), 'e3': (1.15, .3, .85), 'e5': (1.15, .3, .85), 'e8': (1.2, .65, .9)}   # recadrage : personnages plus grands
 PUNCH = [(R1_T, 1.05), (R2_T, 1.07), (VET_T, 1.1), (SWAP_T, 1.08), (QUETE_T, 1.06)]
 
 _CF = {}
@@ -65,7 +66,7 @@ def T_(s, size=86, fill=None, font=None, maxw=860, stroke=12):
     return M.text_img(s, font or M.TITLE, size, fill=fill or M.WHITE, stroke=stroke, maxw=maxw)
 
 def question(n, q):
-    return T_(f'Question {n} :\n« {q} »', 68, [M.GOLD, M.WHITE])
+    return T_(f'Question {n} :\n« {q} »', 72, [M.GOLD, M.WHITE], maxw=880)
 def answer(a, size=84):
     return T_(f'« {a} »', size, M.GOLD, maxw=880, stroke=14)
 
@@ -105,9 +106,9 @@ def shade(im, y0, y1, a=120):
     layer = Image.new('RGBA', (W, y1 - y0), (10, 12, 30, 0)); layer.putalpha(g.resize((W, y1 - y0)))
     im.alpha_composite(layer, (0, y0))
 
-def zoom(im, z, cy=0.5):
+def zoom(im, z, cy=0.5, cx=0.5):
     if z <= 1.001: return im
-    w, h = int(W / z), int(H / z); x0 = (W - w) // 2; y0 = int((H - h) * cy)
+    w, h = int(W / z), int(H / z); x0 = int((W - w) * cx); y0 = int((H - h) * cy)
     return im.crop((x0, y0, x0 + w, y0 + h)).resize((W, H), Image.BICUBIC)
 
 def punch(t):
@@ -132,7 +133,8 @@ def frame(t):
         if a <= t < b: break
     lt = t - a
     im = clip_at(c, off + lt * sp)
-    im = zoom(im, punch(t))
+    bz, bcx, bcy = BASEZ.get(c, (1.0, .5, .5))
+    im = zoom(im, bz * punch(t), bcy, bcx)
     P = M.paste; pop = M.pop
     if a < FIN0: shade(im, 0, 900, 160)
     if a == 0.0:
@@ -147,12 +149,12 @@ def frame(t):
     elif c == 'e4':
         P(im, E['q3'], XT, 350, pop(t, a, .16))
         P(im, E['r3'], XT, 660, pop(t, R3_T, .14))
-        F.stamp_at(im, E['vet'], t, VET_T, XT, 1250, .9)
+        F.stamp_at(im, E['vet'], t, VET_T, XT, 880, .85)
     elif c == 'e1':
         P(im, E['q4'], XT, 350, pop(t, a, .16))
         P(im, E['r4'], XT, 640, pop(t, R4_T, .14))
     elif c == 'e5':
-        P(im, E['r4'], XT, 640, 1.0)
+        P(im, E['r4'], XT, 380, 1.0)
     elif c == 'e6':
         P(im, E['mieux'], XT, 330, pop(t, a, .16))
         if t >= QUETE_T: SPG.draw(im, t - QUETE_T, .8)
