@@ -76,7 +76,9 @@ async function commune(c) {
 }
 
 // ---- Where a town is, for parents of the area: « à 6 km d'Obernai » ----
-const de = n => /^[aeiouyéèêâîôûh]/i.test(n) ? `d'${n}` : `de ${n}`;
+// « d'Obernai », « de Haguenau » (the h of Alsatian names is heard), « du Hohwald », « des Andelys »; « au Hohwald ».
+const de = n => { const m = n.match(/^(les?)\s+(.+)$/i); return m ? (m[1].length === 3 ? "des " : "du ") + m[2] : /^[aeiouyéèêâîôû]/i.test(n) ? `d'${n}` : `de ${n}`; };
+const a = n => { const m = n.match(/^(les?)\s+(.+)$/i); return m ? (m[1].length === 3 ? "aux " : "au ") + m[2] : `à ${n}`; };
 let REPERES = [];
 function repere(c) {
   const r = REPERES.map(x => ({ nom: x.nom, km: Math.round(E.dist(c, x) / 1000) })).sort((a, b) => a.km - b.km)[0];
@@ -142,12 +144,12 @@ function page(c, s, siblings) {
   const n = s.places.length, q = s.quest;
   const top = s.named.slice(0, 8);
   const ex = top.slice(0, 2).map(p => p.name);
-  const title = `Anniversaire chevalier à ${c.nom} (7-10 ans) | Ma Quête Légendaire`;
-  const desc = `Une chasse au trésor de chevaliers à ${c.nom}, ${ex.length ? `de ${list(ex)}` : "dans les rues du centre"} : ${n} lieux à pied autour de ${s.startLabel}, au prénom de votre enfant. Prête en 2 minutes, aperçu gratuit.`;
+  const title = `Anniversaire chevalier ${a(c.nom)} (7-10 ans) | Ma Quête Légendaire`;
+  const desc = `Une chasse au trésor de chevaliers ${a(c.nom)}, ${ex.length ? `de ${list(ex)}` : "dans les rues du centre"} : ${n} lieux à pied autour de ${s.startLabel}, au prénom de votre enfant. Prête en 2 minutes, aperçu gratuit.`;
   const faq = [
-    [`Est-ce que la quête marche à ${c.nom} ?`, `Oui. Autour de ${s.startLabel} de ${c.nom}, ${n} lieux publics peuvent servir d'étapes, dont ${list(countsText(s.counts).slice(0, 3))}. Le Grand Maître en choisit 4 à 6 selon votre point de départ, et l'aperçu gratuit vous dit le nombre d'étapes, la distance et la durée avant de payer.`],
-    [`Peut-on partir d'ailleurs que du centre de ${c.nom} ?`, big ? `Oui, et c'est même conseillé : à ${c.nom}, chaque quartier a ses propres lieux. Indiquez votre rue, une place ou un parc près de chez vous : la quête se construit autour.` : `Oui : indiquez votre rue, une place ou un parc. La quête se construit avec les lieux à pied autour du point choisi.`],
-    [`Et s'il pleut à ${c.nom} le jour de la fête ?`, "Passez en mode maison : même histoire, mêmes énigmes, et des défis à faire à l'intérieur."],
+    [`Est-ce que la quête marche ${a(c.nom)} ?`, `Oui. Autour de ${s.startLabel} ${de(c.nom)}, ${n} lieux publics peuvent servir d'étapes, dont ${list(countsText(s.counts).slice(0, 3))}. Le Grand Maître en choisit 4 à 6 selon votre point de départ, et l'aperçu gratuit vous dit le nombre d'étapes, la distance et la durée avant de payer.`],
+    [`Peut-on partir d'ailleurs que du centre ${de(c.nom)} ?`, big ? `Oui, et c'est même conseillé : ${a(c.nom)}, chaque quartier a ses propres lieux. Indiquez votre rue, une place ou un parc près de chez vous : la quête se construit autour.` : `Oui : indiquez votre rue, une place ou un parc. La quête se construit avec les lieux à pied autour du point choisi.`],
+    [`Et s'il pleut ${a(c.nom)} le jour de la fête ?`, "Passez en mode maison : même histoire, mêmes énigmes, et des défis à faire à l'intérieur."],
     ["Les enfants entrent-ils dans les églises ?", "Non. Tout se passe dehors, devant les lieux."]
   ];
   const ld = [
@@ -168,7 +170,7 @@ function page(c, s, siblings) {
 <link rel="canonical" href="${url}">
 <meta property="og:type" content="article">
 <meta property="og:locale" content="fr_FR">
-<meta property="og:title" content="${esc(`Anniversaire chevalier à ${c.nom}`)}">
+<meta property="og:title" content="${esc(`Anniversaire chevalier ${a(c.nom)}`)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/og.png">
@@ -196,7 +198,7 @@ ${top.length ? `<p>Parmi eux :</p>\n<ul class="lieux">\n${top.map(p => `<li>${es
 <div class="cta">
 <p><b>Créez la quête de votre enfant à ${esc(c.nom)}</b> : tapez son prénom et votre point de départ, l'aperçu est gratuit.</p>
 <p>La quête coûte 24,90 €, à payer après l'aperçu.</p>
-<a class="btn" href="./?ref=${ref}">Créer l'aperçu gratuit</a>
+<a class="btn" href="./?ref=${ref}">Créer mon aperçu gratuit</a>
 </div>
 
 <h2>Questions fréquentes</h2>
@@ -204,7 +206,7 @@ ${faq.map(([qq, a]) => `<h3>${esc(qq)}</h3>\n<p>${esc(a)}</p>`).join("\n")}
 
 <h2>Pour le reste de la fête</h2>
 <p>Le déroulé sur 2 h 30, une invitation à copier, des costumes faits maison et l'adoubement final : <a href="anniversaire-chevalier.html">organiser un anniversaire chevalier</a>.</p>
-${siblings.length ? `<p>Aussi près de ${esc(c.nom)} : ${siblings.map(o => `<a href="anniversaire-chevalier-${slug(o.c.nom)}.html">${esc(o.c.nom)}</a>`).join(", ")}.</p>` : ""}
+${siblings.length ? `<p>Aussi près ${esc(de(c.nom))} : ${siblings.map(o => `<a href="anniversaire-chevalier-${slug(o.c.nom)}.html">${esc(o.c.nom)}</a>`).join(", ")}.</p>` : ""}
 <p class="src">Lieux : © contributeurs OpenStreetMap (licence ODbL). Communes : geo.api.gouv.fr. Point de départ : Base Adresse Nationale (IGN).</p>
 </main>
 </body>

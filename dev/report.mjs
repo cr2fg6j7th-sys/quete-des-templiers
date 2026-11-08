@@ -92,7 +92,8 @@ Comptes anonymes du site (sans les vérifications automatiques, la démo ni les 
 | | 7 derniers jours | 28 derniers jours |
 | --- | --- | --- |
 ${row("Visites de la page d'accueil", "home")}
-${row("Clics sur « Créer l'aperçu »", "setup")}
+${row("Démo vidéo lancée sur l'accueil", "demo")}
+${row("Clics sur « Créer mon aperçu gratuit » (formulaire ouvert)", "setup")}
 ${row("Aperçus créés", "preview")}
 ${row("Pas assez de lieux autour du départ", "few")}
 ${row("Cartes en panne (écran d'erreur)", "neterr")}
@@ -103,6 +104,7 @@ ${row("Aperçus reçus et ouverts", "apercu-ouvert")}
 ${row("Quêtes ouvertes par des familles testeuses (avant-première)", "testeur")}
 ${row("Questionnaires des testeurs envoyés", "avis")}
 ${row("Pages de paiement ouvertes", "checkout")}
+${row("Achats confirmés (retour du paiement)", "achat")}
 ${row("Quêtes ouvertes après paiement (avec les réouvertures)", "unlock")}
 ${row("Voix enregistrée pour jouer sans réseau", "horsligne")}
 ${row("Invitations en image envoyées", "invite")}

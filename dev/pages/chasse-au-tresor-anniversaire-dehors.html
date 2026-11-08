@@ -41,14 +41,14 @@ ol.plan{padding-left:1.3em}ol.plan li{margin:.5em 0}ol.plan b{color:var(--ink)}
 .gbar[hidden]{display:none}
 .gbar{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));max-width:620px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:8px 6px 8px 14px;border-radius:16px;background:#1b2547;color:#fffaf0;box-shadow:0 8px 24px rgba(27,37,71,.3)}
 .gbar p{flex:1;margin:0;font-weight:700;font-size:.95rem;line-height:1.25}
-.gbar a{flex:none;display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;background:#e9c46a;color:#1b2547;font-weight:800;text-decoration:none}
+.gbar a{flex:1;min-width:0;justify-content:center;display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;background:#e9c46a;color:#1b2547;font-weight:800;text-decoration:none}
 .gbar button{flex:none;width:44px;height:44px;border:0;background:none;color:#fffaf0;font-size:1.3rem;cursor:pointer}
 main{padding-bottom:110px}
 </style>
 </head>
 <body>
 <main>
-<header class="ghead"><a class="glogo" href="./">Ma Quête Légendaire</a><a class="gbtn" href="./?ref=guide">Créer ma quête</a></header>
+<header class="ghead"><a class="glogo" href="./">Ma Quête Légendaire</a><a class="gbtn" href="./?ref=guide">Aperçu gratuit</a></header>
 <nav class="crumbs" aria-label="Fil d'Ariane"><a href="./">Accueil</a> › <span aria-current="page">Chasse au trésor dehors</span></nav>
 <h1>Chasse au trésor d'anniversaire dehors, pour les 7-10 ans</h1>
 <p class="maj">6 min de lecture · Mis à jour le 1<sup>er</sup> novembre 2026</p>
@@ -131,7 +131,7 @@ main{padding-bottom:110px}
 <div class="cta">
 <p><b>Ma Quête Légendaire</b> prépare cette chasse au trésor pour vous, au prénom de votre enfant : vous indiquez votre ville ou une adresse de départ, et une quête de chevaliers de 4 à 6 étapes se crée avec les vrais lieux publics autour (église, fontaine, vieille porte, parc…). La voix du Grand Maître raconte, donne les défis et les énigmes ; l'adulte tient le téléphone et guide le groupe. Rien à imprimer, rien à cacher dans la rue, et une version à la maison s'il pleut.</p>
 <p>L'aperçu est gratuit. La quête coûte 24,90 €, à payer après l'aperçu.</p>
-<a class="btn" href="./?ref=guide">Créer l'aperçu gratuit</a>
+<a class="btn" href="./?ref=guide">Créer mon aperçu gratuit</a>
 </div>
 
 <p>Pour tout le reste de la fête (invitation, costumes, banquet, adoubement), voyez le guide <a href="anniversaire-chevalier.html">organiser un anniversaire chevalier</a>.</p>
@@ -140,10 +140,10 @@ main{padding-bottom:110px}
 <a class="gcard" href="anniversaire-chevalier.html"><small>Guide · 4 min de lecture</small><strong>Organiser un anniversaire chevalier</strong><span>Déroulé sur 2 h 30, invitation à copier, costumes maison, trois jeux.</span><b>Lire →</b></a>
 <a class="gcard" href="anniversaire-chevalier-a-la-maison.html"><small>Guide · 6 min de lecture</small><strong>Anniversaire chevalier à la maison quand il pleut</strong><span>Un déroulé de 2 h : cinq jeux d'intérieur, blason, chasse aux lettres.</span><b>Lire →</b></a>
 </div>
-<nav class="gchips" aria-label="Aller plus loin"><a href="./#prix-par-enfant">Prix par enfant</a><a href="./#telephone">La quête en vidéo</a><a href="anniversaire-chevalier-villes.html">Toutes les villes</a><a href="./?ref=guide">Aperçu gratuit</a></nav>
+<nav class="gchips" aria-label="Aller plus loin"><a href="./#prix-par-enfant">Prix par enfant</a><a href="./#demo">La quête en vidéo</a><a href="anniversaire-chevalier-villes.html">Toutes les villes</a><a href="./?ref=guide">Aperçu gratuit</a></nav>
 <p class="maj"><a href="./">Retour à Ma Quête Légendaire</a></p>
 </main>
-<div class="gbar" id="gbar"><p>La quête de votre enfant, prête en 2 minutes</p><a href="./?ref=guide">Aperçu gratuit</a><button type="button" aria-label="Fermer la barre" onclick="document.getElementById('gbar').hidden=true;try{sessionStorage.setItem('barre-fermee','1')}catch(e){}">✕</button></div>
+<div class="gbar" id="gbar"><a href="./?ref=guide">Créer mon aperçu gratuit</a><button type="button" aria-label="Fermer la barre" onclick="document.getElementById('gbar').hidden=true;try{sessionStorage.setItem('barre-fermee','1')}catch(e){}">✕</button></div>
 <script>try{if(sessionStorage.getItem("barre-fermee")==="1")document.getElementById("gbar").hidden=true}catch(e){}</script>
 </body>
 </html>

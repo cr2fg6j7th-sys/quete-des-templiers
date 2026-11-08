@@ -146,8 +146,8 @@ shutil.copy(d / "espace.html", site / "espace" / "index.html")
 shutil.copy(d / "liens.html", site / "liens" / "index.html")
 (site / "robots.txt").write_text(f"User-agent: *\nDisallow: /api/\nDisallow: /places/\nDisallow: /audio/\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
 urls = [SITE + "/"] + [f"{SITE}/{n}" for n in guide_pages]
-# The home page carries the four phone videos (8/11/2026): listed for Google's video search.
-VIDEOS = [("quete-apercu", "L'aperçu de la quête, 2 minutes après sa création", 14), ("quete-depart", "Le jour de la fête : le Grand Maître guide la troupe", 12),
+# The home page carries the demo film (9/11/2026) and the four phone videos (8/11/2026): listed for Google's video search.
+VIDEOS = [("demo-quete", "Démo : une chasse au trésor de chevaliers en 27 secondes", 27), ("quete-apercu", "L'aperçu de la quête, 2 minutes après sa création", 14), ("quete-depart", "Le jour de la fête : le Grand Maître guide la troupe", 12),
           ("quete-defis", "À chaque lieu : un défi, une énigme, une lettre", 16), ("quete-tresor", "Le dernier lieu : le mot secret ouvre le trésor", 13)]
 esc = lambda x: x.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;")
 home_videos = "".join(f"<video:video><video:thumbnail_loc>{SITE}/{f}.jpg</video:thumbnail_loc><video:title>{esc(t)}</video:title>"

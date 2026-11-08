@@ -25,7 +25,7 @@ globalThis.fetch = (input, init) => {
   return realFetch(input, init);
 };
 
-const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".png": "image/png", ".svg": "image/svg+xml", ".txt": "text/plain", ".xml": "application/xml", ".json": "application/json", ".mp3": "audio/mpeg", ".woff": "font/woff", ".css": "text/css" };
+const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".png": "image/png", ".svg": "image/svg+xml", ".txt": "text/plain", ".xml": "application/xml", ".json": "application/json", ".mp3": "audio/mpeg", ".woff": "font/woff", ".css": "text/css", ".mp4": "video/mp4", ".webm": "video/webm", ".jpg": "image/jpeg", ".webp": "image/webp" };
 function file(p) {
   const clean = decodeURIComponent(p).replace(/\.\.+/g, "");
   for (const dir of ["site", "."]) {

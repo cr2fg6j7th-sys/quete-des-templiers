@@ -23,7 +23,7 @@ const log = (evt, data) => console.log(JSON.stringify(Object.assign({ evt }, dat
 
 // Anonymous counts of the visit, one KV key per event: "day|event|ref|random", kept 400 days.
 // No IP address, no identifier, no cookie: only how many times each step happened, and the ref.
-const EVENTS = new Set(["home", "setup", "preview", "few", "nodata", "neterr", "checkout", "unlock", "diploma",
+const EVENTS = new Set(["home", "setup", "preview", "few", "nodata", "neterr", "checkout", "unlock", "achat", "demo", "diploma",
   "invite", "diplome", "imprime", "share", "apercu", "apercu-ouvert", "horsligne", "geo-refus", "geo-echec", "testeur", "avis",
   "liens", "liens-site", "liens-instagram", "liens-tiktok", "liens-pinterest"]);
 function count(env, ctx, evt, ref) {
@@ -244,6 +244,8 @@ async function unlock(request, env, ctx) {
   if (!quest) return reply({ ok: false, reason: "token" }, 500);
   log("unlock", { ok: true, ref: m.ref || "" });
   count(env, ctx, "unlock", refOf(m));
+  // back from the payment page (?paid=, not a reopening): the purchase confirmed, counted once
+  if (b.first === true) count(env, ctx, "achat", refOf(m));
   return reply({ ok: true, quest, name: m.n || "", hero: m.h === "f" ? "f" : "m", kids: parseInt(m.k, 10) || 8, town: m.v || "" });
 }
 
