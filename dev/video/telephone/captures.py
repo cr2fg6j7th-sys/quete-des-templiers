@@ -52,7 +52,6 @@ async def main():
             await pg.click("text=Place de l'Église 67999 Bourg-la-Forêt")
             await pg.wait_for_selector("text=Ce qui vous attend", timeout=8000)
             await shot(pg, "01-apercu")
-            print(await pg.inner_text("body"))
             await pg.evaluate("navigator.clipboard.writeText=t=>Promise.resolve();navigator.share=undefined")
             await pg.check("#consent")
             await pg.click("button:has-text('Débloquer la quête')")
