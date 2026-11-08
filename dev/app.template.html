@@ -26,6 +26,7 @@
 <meta name="theme-color" content="#1b2547">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"La Quête du Chevalier","image":["{{SITE}}/og.png","{{SITE}}/accueil-troupe.webp"],"url":"{{SITE}}/","audience":{"@type":"PeopleAudience","suggestedMinAge":7,"suggestedMaxAge":10},"brand":{"@type":"Brand","name":"Ma Quête Légendaire"},"description":"Quête d'anniversaire numérique pour enfants de 7 à 10 ans : 4 à 6 étapes dans les lieux publics autour d'un point de départ en France, au prénom de l'enfant, avec la voix enregistrée du Grand Maître.","offers":{"@type":"Offer","price":"24.90","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"{{SITE}}/"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"{{SITE}}/#org","name":"Ma Quête Légendaire","url":"{{SITE}}/","logo":"{{SITE}}/apple-touch-icon.png","sameAs":["https://www.instagram.com/maquetelegendaire/","https://www.tiktok.com/@maquetelegendaire","https://www.pinterest.com/maquetelegendaire/"]},{"@type":"WebSite","@id":"{{SITE}}/#site","name":"Ma Quête Légendaire","url":"{{SITE}}/","inLanguage":"fr-FR","publisher":{"@id":"{{SITE}}/#org"}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"VideoObject","name":"L'aperçu de la quête, 2 minutes après sa création","description":"La quête de Gabriel dans les rues d'un village : la carte dans le brouillard, les 6 étapes à deviner, la distance, la durée et le prix pour tout le groupe.","thumbnailUrl":"{{SITE}}/quete-apercu.jpg","contentUrl":"{{SITE}}/quete-apercu.mp4","uploadDate":"2026-11-08T22:30:00+01:00","duration":"PT14S","inLanguage":"fr-FR","publisher":{"@id":"{{SITE}}/#org"}},{"@type":"VideoObject","name":"Le jour de la fête : le Grand Maître guide la troupe","description":"Le début de la quête sur le téléphone : le message du Grand Maître au prénom de l'enfant, puis l'indice de la première étape et le lieu expliqué à l'adulte.","thumbnailUrl":"{{SITE}}/quete-depart.jpg","contentUrl":"{{SITE}}/quete-depart.mp4","uploadDate":"2026-11-08T22:30:00+01:00","duration":"PT12S","inLanguage":"fr-FR","publisher":{"@id":"{{SITE}}/#org"}},{"@type":"VideoObject","name":"À chaque lieu : un défi, une énigme, une lettre","description":"Le récit du lieu, le défi des chevaliers, l'énigme à choix et la lettre du mot secret gagnée par la troupe.","thumbnailUrl":"{{SITE}}/quete-defis.jpg","contentUrl":"{{SITE}}/quete-defis.mp4","uploadDate":"2026-11-08T22:30:00+01:00","duration":"PT16S","inLanguage":"fr-FR","publisher":{"@id":"{{SITE}}/#org"}},{"@type":"VideoObject","name":"Le dernier lieu : le mot secret ouvre le trésor","description":"Les enfants retrouvent le mot secret, le Sceau du Temple s'ouvre, le trésor sort du sac et le diplôme de chevalier s'affiche au prénom de l'enfant.","thumbnailUrl":"{{SITE}}/quete-tresor.jpg","contentUrl":"{{SITE}}/quete-tresor.mp4","uploadDate":"2026-11-08T22:30:00+01:00","duration":"PT13S","inLanguage":"fr-FR","publisher":{"@id":"{{SITE}}/#org"}}]}</script>
 <link rel="preload" href="fonts/AlegreyaSans-ExtraBold.woff" as="font" type="font/woff" crossorigin>
 <style>
 /* Fonts served by the site itself (SIL Open Font License, see fonts/), so no visitor data goes to a font service. */
@@ -40,14 +41,14 @@
 /* Layout: one narrow column held by the adult guide; six shields track the quest. */
 :root{
   --stone:#f5ecd6;--card:#fffaf0;--ink:#1b2547;--muted:#5b5045;--rose:#b8505c;--rose-soft:#f6e1de;--or:#a87a1f;--line:#dccba6;--ok:#2f7a4f;--on-rose:#fff;--garance:#b8202b;
-  --navy:#1b2547;--on-navy:#fffaf0;--gold:#e9c46a;--pink:#f0a3ac;--rose-text:#a33f4b;
+  --navy:#1b2547;--on-navy:#fffaf0;--gold:#e9c46a;--pink:#f0a3ac;--rose-text:#a33f4b;--cta:#1b2547;--on-cta:#fffaf0;
   --display:"UnifrakturMaguntia","Old English Text MT",Georgia,serif;
   --body:"Alegreya Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --label:"Alegreya Sans SC","Alegreya Sans",system-ui,sans-serif;
   color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;--garance:#f0707a;--navy:#1f2a55;--on-navy:#fffaf0;--gold:#e9c46a;--pink:#f0a3ac;--rose-text:#e58b95;color-scheme:dark}}
-:root[data-theme="dark"]{--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;--garance:#f0707a;--navy:#1f2a55;--on-navy:#fffaf0;--gold:#e9c46a;--pink:#f0a3ac;--rose-text:#e58b95;color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;--garance:#f0707a;--navy:#1f2a55;--on-navy:#fffaf0;--gold:#e9c46a;--pink:#f0a3ac;--rose-text:#e58b95;--cta:#e9c46a;--on-cta:#1b2547;color-scheme:dark}}
+:root[data-theme="dark"]{--stone:#11152a;--card:#1a2038;--ink:#ebe9f4;--muted:#a3a8c3;--rose:#e58b95;--rose-soft:#3a2230;--or:#e0b55a;--line:#2d3452;--ok:#6cc596;--on-rose:#11152a;--garance:#f0707a;--navy:#1f2a55;--on-navy:#fffaf0;--gold:#e9c46a;--pink:#f0a3ac;--rose-text:#e58b95;--cta:#e9c46a;--on-cta:#1b2547;color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -141,13 +142,11 @@ ul.rules{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
 footer{font-size:.78rem;color:var(--muted);text-align:center}
 footer a{color:var(--muted)}
 /* Home */
-.hero{display:flex;flex-direction:column;gap:12px;padding-top:8px}
 /* Avant-première banner (until the opening of 7 Nov 2026): the same promise as the videos. */
 .avant{display:block;width:100%;text-align:left;border:0;border-radius:14px;padding:12px 64px 12px 14px;background:var(--rose);color:var(--on-rose);font:inherit;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.12)}
 .avant b{display:block;font-family:var(--label,inherit);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
 .avant span{display:block;font-weight:700;font-size:1.02rem;line-height:1.3;margin-top:2px}
 .avant small{display:block;font-size:.85rem;opacity:.9;margin-top:4px}
-.brandrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-right:52px}
 .qmenu{position:relative;flex:none}
 .qmenu summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card);font-family:var(--label);letter-spacing:.05em;font-size:.85rem;color:var(--ink);white-space:nowrap}
 .qmenu summary::-webkit-details-marker{display:none}
@@ -160,12 +159,8 @@ footer a{color:var(--muted)}
 .qlist .qn{font-weight:700}
 .qlist .qs{font-size:.82rem;color:var(--muted)}
 .qlist .soon{padding:8px 12px 6px;font-size:.82rem;color:var(--muted);font-style:italic}
-.hero .brand{font-family:var(--display);font-size:1.9rem;line-height:1;color:var(--rose)}
-.hero h1{font-family:var(--body);font-weight:700;font-size:1.8rem;line-height:1.15;color:var(--ink)}
 .music{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:6;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--rose);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12);padding:0;cursor:pointer}
 .music[aria-pressed="false"]{color:var(--muted)}
-.sticky{position:fixed;left:0;right:0;bottom:0;padding:18px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--stone) 35%);display:flex;justify-content:center;z-index:5}
-.sticky .btn{width:100%;max-width:528px;box-shadow:0 4px 14px rgba(27,37,71,.25)}
 .missive .btn.listen{border-color:var(--rose);color:var(--rose);background:var(--card)}
 .promise{font-size:1.15rem;line-height:1.45}
 .missive{position:relative;margin-top:26px;padding-top:40px;background:var(--rose-soft);border:none}
@@ -176,11 +171,6 @@ footer a{color:var(--muted)}
 .btn.big{font-size:1.15rem;padding:15px 18px}
 .center{text-align:center}
 .block{display:flex;flex-direction:column;gap:12px;margin-top:10px}
-.route{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:20px}
-.route li{display:grid;grid-template-columns:38px 1fr;gap:14px;position:relative}
-.route li:not(:last-child)::before{content:"";position:absolute;left:18px;top:48px;bottom:-16px;border-left:2px dotted var(--or)}
-.route .mark svg{width:38px;height:44px;display:block}
-.route b{display:block;font-family:var(--label);font-size:1.05rem;color:var(--rose);letter-spacing:.04em}
 .kit{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:8px}
 .kit li::marker{color:var(--or)}
 .price{font-family:var(--display);font-size:2rem;line-height:1.1;color:var(--rose)}
@@ -214,57 +204,9 @@ html,body{overflow-x:clip}
   .route::before{animation:march 1.4s linear infinite}@keyframes march{to{background-position:0 26px}}
   .bubble.hello{animation:rise .7s ease-out .5s both}@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 }
-/* Hero: the navy band runs to the edges of the screen, the picture straddles its bottom edge */
 #app[data-screen=home]{font-size:1.06rem}
-.hero{position:relative;isolation:isolate;padding:6px 0 0;gap:14px;color:var(--on-navy)}
-.hero::before{content:"";position:absolute;z-index:-1;left:0;right:0;top:-20px;bottom:170px;background:var(--navy);box-shadow:0 0 0 100vmax var(--navy);clip-path:inset(0 -100vmax)}
-.hero .avant{margin-bottom:4px}
-.hero .brandrow{padding-right:52px;justify-content:flex-start}
-.hero .qmenu summary{background:transparent;color:var(--on-navy);border-color:rgba(255,250,240,.35)}
-.hero .qmenu .chev{color:var(--gold)}
-.hero .qlist{left:0;right:auto;width:min(300px,calc(100vw - 32px))}
-.hero .brand{font-family:var(--display);font-size:3.3rem;line-height:.92;color:var(--pink);text-align:center;margin-top:2px;text-shadow:0 2px 0 rgba(0,0,0,.25)}
-.hero .rule{display:flex;justify-content:center;color:var(--or)}
-.hero .kicker{color:var(--gold);font-size:.88rem}
-.hero h1{font-family:var(--body);font-weight:800;font-size:2.45rem;line-height:1.05;letter-spacing:-.02em;color:var(--on-navy)}
-.hero h1 .gold{color:var(--gold)}
-.hero .promise{font-size:1.18rem;line-height:1.5;color:#dfe2ee}
-.hero .note{color:#c9cde0}
-.herofig{position:relative;margin:6px 0 0}
-.herofig>img:first-child{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:18px;border:3px solid #fffaf0;box-shadow:0 10px 28px rgba(27,37,71,.35)}
-.herofig .dr{position:absolute;right:-10px;bottom:-44px;width:100px}
-.bubble.hello{align-self:flex-start;margin:8px 96px 0 0}
-.facts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;text-align:center}
-.facts li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;line-height:1.2}
-.facts b{font-size:1.2rem;color:var(--ink);font-variant-numeric:tabular-nums}
-.facts span{font-size:.85rem;color:var(--muted)}
-/* The secret word: sticks at the top while the visitor reads the path */
-.wordbar{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:10px;padding:9px 60px 9px 0;margin-top:6px;background:var(--navy);color:var(--on-navy);box-shadow:0 0 0 100vmax var(--navy);clip-path:inset(0 -100vmax)}
-.wordbar .wl{font-family:var(--label);font-weight:700;font-size:.85rem;letter-spacing:.06em;color:var(--gold)}
-.wordbar .wl b{color:var(--on-navy);font-family:var(--body);font-variant-numeric:tabular-nums}
-.tiles{display:flex;gap:5px}
 .tile{width:22px;height:26px;border-radius:5px;border:1.5px dashed rgba(233,196,106,.65);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;line-height:1;color:transparent}
 .tile.on{background:var(--gold);border:0;color:#1b2547}
-/* The path: five steps on a dotted line */
-.path{gap:10px}
-.path .lead{color:var(--muted)}
-.route{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:16px;position:relative}
-.route::before{content:"";position:absolute;left:20px;top:10px;bottom:30px;width:3px;background:repeating-linear-gradient(to bottom,var(--rose) 0 4px,transparent 4px 13px)}
-.route>li{display:flex;gap:12px;align-items:flex-start;position:relative}
-.route>li::before{content:none!important;display:none!important}
-.route .num{flex:none;position:relative;z-index:1;width:44px;height:44px;border-radius:50%;background:var(--navy);color:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.15rem;border:3px solid var(--stone)}
-.route li:last-child .num{background:var(--gold);color:#1b2547}
-.stepcard{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
-.stepcard.last{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
-.stepcard.last h3{color:var(--on-navy)}.stepcard.last .lab{color:var(--gold)}.stepcard.last p{color:#e6e2d8}
-.sc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.stepcard .lab{font-family:var(--label);font-weight:700;font-size:.8rem;letter-spacing:.07em;color:var(--rose-text)}
-.stepcard h3{font-family:var(--body);font-weight:800;font-size:1.25rem;line-height:1.2;letter-spacing:0;color:var(--ink)}
-.stepcard .tile{flex:none;width:34px;height:40px;border-radius:7px;border:2px dashed var(--line);color:var(--muted);font-size:1.25rem}
-.stepcard .tile:not(.on){color:var(--muted)}
-.stepcard.last .tile:not(.on){border-color:rgba(233,196,106,.7);color:var(--gold)}
-.stepcard .tile.on{border:0}
-.stepcard .pic{width:100%;height:auto;aspect-ratio:5/4;object-fit:cover;border-radius:12px;display:block}
 .phone{position:relative;border-radius:12px;overflow:hidden}
 .phone>img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block}
 .phone .screen{position:absolute;left:34%;right:34%;top:17%;bottom:15%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;color:#3a2614}
@@ -274,14 +216,6 @@ html,body{overflow-x:clip}
 .callplay:focus-visible{outline:3px solid var(--or);outline-offset:2px}
 .demo{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:12px}
 .demo .btn.listen{border-color:var(--rose);color:var(--rose-text);background:var(--card)}
-.route .aside{padding-left:40px;align-items:center;gap:8px}
-.route .aside .dr{width:70px;flex:none}
-.route .aside .bubble{flex:1;min-width:0;font-size:.98rem}
-.bigword{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:10px 0 4px}
-.bigword .tile{width:50px;height:58px;border-radius:9px;border:2px dashed var(--or);color:var(--or);font-size:1.8rem}
-.bigword .tile:not(.on){color:var(--or)}
-.bigword .tile.on{background:var(--rose);color:#fff;border:0;box-shadow:0 4px 0 #7d2a35}
-.verdict{color:var(--muted);max-width:320px}
 /* Where and for whom */
 .where{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .where li{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
@@ -301,19 +235,136 @@ html,body{overflow-x:clip}
 .incl svg{flex:none;margin-top:3px;color:var(--gold)}
 .pricecard .btn.gold{background:var(--gold);color:#1b2547;font-weight:700}
 .guarantee{font-size:.95rem;color:#d6d9e8;border-top:1px solid rgba(255,250,240,.15);padding-top:10px}
-/* Questions and links */
-#app[data-screen=home] .faq{display:flex;flex-direction:column;gap:8px}
-#app[data-screen=home] .faq details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-#app[data-screen=home] .faq details:last-child{border-bottom:1px solid var(--line)}
+.btn.big{font-weight:700;min-height:54px}
+/* ---------- Home (8/11/2026): light header, chips, two-part title, calculator, phone videos ---------- */
+#app[data-screen=home]{font-size:1.06rem}
+.mhead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 54px 12px 0;border-bottom:1px solid var(--line);margin-top:-6px}
+.mlogo{display:flex;flex-direction:column;min-width:0;text-decoration:none;color:var(--ink)}
+.mbrand{font-family:var(--display);font-size:1.45rem;line-height:1;color:var(--ink)}
+.mtag{font-size:.82rem;line-height:1.25;color:var(--muted);margin-top:4px}
+.btn.mini{flex:none;min-height:44px;padding:0 14px;border-radius:999px;background:var(--cta);color:var(--on-cta);font-family:var(--body);letter-spacing:0;font-weight:700;font-size:.95rem}
+.mchips{display:flex;gap:8px;overflow-x:auto;margin:-6px -16px 0;padding:2px 16px 6px;scrollbar-width:none}
+.mchips::-webkit-scrollbar{display:none}
+.mchip{flex:none;display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);font:inherit;font-weight:600;font-size:.95rem;text-decoration:none;white-space:nowrap;cursor:pointer}
+.mchip.on{background:#f6e7bf;border-color:var(--gold);color:#1b2547;font-weight:700}
+.mchip.dark{background:var(--navy);border-color:var(--navy);color:var(--on-navy);font-weight:700}
+.mchip:focus-visible,.gcard:focus-visible,.linkbtn:focus-visible,.hesite:focus-visible,.mlogo:focus-visible,.mbar-x:focus-visible,.kctl button:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.mhero{display:flex;flex-direction:column;gap:16px;padding-top:6px}
+.mhero h1{font-family:var(--body);font-weight:800;font-size:2.3rem;line-height:1.06;letter-spacing:-.015em;color:var(--ink)}
+.mhero h1 em{font-style:italic;font-weight:700;color:var(--rose-text)}
+.perks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.perks li{display:flex;align-items:center;gap:12px;font-size:1.1rem;font-weight:500;line-height:1.3}
+.ico{flex:none;width:36px;height:36px;border-radius:50%;background:#f6e7bf;color:#1b2547;display:inline-flex;align-items:center;justify-content:center}
+.ico.box{width:42px;height:42px;border-radius:12px;background:var(--navy);color:var(--gold)}
+.ctabox{display:flex;flex-direction:column;gap:6px}
+.ctabox .btn{width:100%}
+.btn.wide{width:100%;min-height:52px;border-radius:999px;font-family:var(--body);letter-spacing:0;font-weight:700;font-size:1.1rem}
+.btn.ghost.wide{border:2px solid var(--ink);color:var(--ink)}
+.btn.ghost.wide .ico{width:auto;height:auto;background:none;color:currentColor}
+#app[data-screen=home] .btn.big{border-radius:999px;font-family:var(--body);letter-spacing:0;font-weight:800;font-size:1.2rem;min-height:56px}
+#app[data-screen=home] .btn.big:not(.gold){background:var(--cta);color:var(--on-cta)}
+.micro{text-align:center;font-size:.93rem;color:var(--muted)}
+.hesite{text-align:center;color:var(--ink);text-underline-offset:3px}
+.herofig{position:relative;margin:4px 0 14px}
+.herofig>img:first-child{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:22px;box-shadow:0 10px 28px rgba(27,37,71,.22)}
+.herofig .dr{position:absolute;right:-6px;bottom:-22px;width:104px}
+.herofig figcaption{position:absolute;left:12px;bottom:14px;max-width:min(200px,55%);font-weight:600;font-size:.95rem}
+/* The calculator */
+.calc{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px;margin-top:20px}
+.calc-head{display:flex;align-items:center;gap:12px}
+#app .calc h2{font-size:1.45rem}
+.kstep{display:flex;flex-direction:column;gap:8px}
+.klab{font-weight:700}
+.kctl{display:flex;align-items:center;gap:10px}
+.kctl button{width:48px;height:48px;border-radius:50%;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:inherit;font-size:1.5rem;font-weight:700;line-height:1;cursor:pointer}
+.kn{min-width:64px;text-align:center;font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums;border:1px solid var(--line);border-radius:12px;padding:6px 0;background:var(--stone)}
+.krange{font-size:.9rem;color:var(--muted)}
+.kres{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.kres p{background:var(--stone);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:2px}
+.kres b{font-size:1.55rem;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.kres span{font-size:.9rem;color:var(--muted);line-height:1.3}
+.pills{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.pills li{font-size:.85rem;font-weight:600;padding:5px 10px;border-radius:999px;background:#f6e7bf;color:#1b2547}
+.btn.gold{background:var(--gold);color:#1b2547}
+/* The phone videos: the real pages of the quest, scrolling in a loop */
+.phones{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:8px 16px 18px;scrollbar-width:none}
+.phones::-webkit-scrollbar{display:none}
+.phonevid{flex:none;width:236px;margin:0;scroll-snap-align:center;display:flex;flex-direction:column;gap:12px}
+.pv-frame{background:#1c1c22;border-radius:36px;padding:8px;box-shadow:0 14px 30px rgba(27,37,71,.22)}
+.pv-screen{border-radius:29px;overflow:hidden;background:#f3ead6;display:flex;flex-direction:column}
+.pv-bar{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 6px}
+.pv-notch{width:62px;height:15px;border-radius:10px;background:#1c1c22}
+.pv-url{font-size:.72rem;color:#4a4339;font-family:system-ui,sans-serif}
+.phonevid video{display:block;width:220px;height:476px;object-fit:cover;background:#f3ead6}
+.phonevid figcaption{display:flex;flex-direction:column;gap:2px}
+.pv-k{font-family:var(--label);font-weight:700;font-size:.9rem;color:var(--rose-text)}
+.phonevid strong{font-size:1.1rem;line-height:1.2}
+/* The five steps */
+.msteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.msteps li{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.msteps .num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--navy);color:var(--gold);font-weight:800;display:flex;align-items:center;justify-content:center}
+.msteps li>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.msteps h3{font-family:var(--body);font-weight:800;font-size:1.12rem;letter-spacing:0;line-height:1.25;color:var(--ink)}
+.msteps p{font-size:1rem;line-height:1.45;color:var(--muted)}
+.msteps .tile{flex:none;width:30px;height:34px;border-radius:6px;font-size:1rem;background:#f6e7bf;border:1px solid var(--gold);color:#1b2547}
+/* The voice sample */
+.demo-card{margin-top:8px}
+#app .demo-card h2{font-size:1.45rem}
+/* Value, box, price per child, ages, guides, towns, questions */
+.mvalue{margin-top:20px}
+.mbox{background:#fdf0d2;color:#1b2547;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.mbox-t{display:flex;align-items:center;gap:10px;font-size:1.15rem}
+.mbox .ico{width:auto;height:auto;background:none}
+.mbox .micro{text-align:left;color:#5b5045}
+.linkbtn{align-self:flex-start;background:none;border:0;padding:6px 0;font:inherit;font-weight:800;color:#1b2547;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:44px}
+.ptable-wrap{overflow-x:auto;border-radius:16px;border:1px solid var(--line)}
+.ptable{width:100%;border-collapse:collapse;background:var(--card);font-variant-numeric:tabular-nums}
+.ptable th,.ptable td{text-align:left;padding:11px 14px;border-top:1px solid var(--line)}
+.ptable thead th{background:var(--navy);color:var(--on-navy);border-top:0;font-size:.95rem}
+.ptable tbody th{font-weight:800}
+.ptable tr.hl{background:rgba(233,196,106,.22)}
+.ages{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.ages li{display:flex;gap:12px;align-items:baseline;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.ages li.on{background:#f6e7bf;border-color:var(--gold);color:#1b2547}
+.ages li.on span{color:#1b2547}
+.ages b{flex:none;width:84px;font-size:1.1rem}
+.ages span{color:var(--muted);line-height:1.4}
+.gcard{display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.gcard .gk{display:flex;align-items:center;gap:8px;font-family:var(--label);font-weight:700;font-size:.88rem;color:var(--muted)}
+.gcard .gk .ico{width:auto;height:auto;background:none;color:currentColor}
+.gcard strong{font-size:1.18rem;line-height:1.25}
+.gcard .gp{color:var(--muted);line-height:1.4}
+.gcard .gl{font-weight:800}
+.vchips{display:flex;flex-wrap:wrap;gap:8px}
+#app[data-screen=home] .faq{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+#app[data-screen=home] .faq details{border-top:1px solid var(--line);padding:14px 16px}
+#app[data-screen=home] .faq details:first-child{border-top:0}
+#app[data-screen=home] .faq details:last-child{border-bottom:0}
 #app[data-screen=home] .faq summary{color:var(--ink)}
 #app[data-screen=home] .faq details p{color:var(--muted)}
-.links{display:flex;flex-direction:column;gap:6px;background:var(--navy);color:var(--on-navy);border-radius:16px;padding:16px;margin-top:8px}
-.links .kicker{color:var(--gold);margin-top:6px}
-.links .kicker:first-child{margin-top:0}
-.links a{color:var(--on-navy)}
-.links .towns{line-height:1.9}
-.btn.big{font-weight:700;min-height:54px}
-.sticky .btn{min-height:52px}
+/* The bar at the bottom of the screen, with its close button */
+.mbar{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:5;max-width:540px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 6px 10px 14px;border-radius:18px;background:var(--navy);color:var(--on-navy);box-shadow:0 8px 24px rgba(27,37,71,.3)}
+.mbar p{flex:1;min-width:0;font-weight:700;font-size:.95rem;line-height:1.25}
+.mbar .btn{flex:none;min-height:44px;border-radius:999px;font-family:var(--body);letter-spacing:0;font-weight:800;font-size:.95rem;padding:0 14px}
+.mbar-x{flex:none;width:44px;height:44px;border:0;background:transparent;color:var(--on-navy);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.mbar-x .ico{width:auto;height:auto;background:none;color:currentColor}
+/* Setup as an assistant (8/11/2026): three numbered cards and a bar that fills */
+.asst{display:flex;flex-direction:column;gap:8px}
+.asst-n{font-family:var(--label);font-weight:700;font-size:.9rem;letter-spacing:.05em;color:var(--rose-text)}
+.asst-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.asst-bar span{height:6px;border-radius:3px;background:var(--line)}
+.asst-bar span.on{background:var(--gold)}
+.asst-lab{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;font-size:.82rem;color:var(--muted)}
+.asst .micro{text-align:left}
+.asst-cards{display:flex;flex-direction:column;gap:18px}
+.card h3 .cn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;margin-right:10px;border-radius:50%;background:var(--navy);color:var(--gold);font-size:.95rem;vertical-align:2px}
+#app[data-screen=setup] .seg.opts button{min-height:84px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;text-align:left;padding:12px}
+#app[data-screen=setup] .seg.opts button span{font-weight:400;font-size:.85rem;line-height:1.3;opacity:.85}
+.kidsnote{font-size:.95rem;color:var(--muted)}
+.optcard{display:flex;flex-direction:column;gap:3px;text-align:left;width:100%;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:var(--stone);color:var(--ink);font:inherit;cursor:pointer}
+.optcard strong{font-size:1.02rem}
+.optcard span{font-size:.9rem;color:var(--muted);line-height:1.35}
+.optcard:focus-visible{outline:3px solid var(--or);outline-offset:2px}
 /* Setup and preview */
 .steps3{position:relative;display:flex;justify-content:space-between;padding:0 6px}
 .steps3::before{content:"";position:absolute;left:38px;right:38px;top:17px;height:3px;background:repeating-linear-gradient(to right,var(--rose) 0 4px,transparent 4px 12px)}
@@ -1042,10 +1093,11 @@ const FAQ=[
   ["Mon enfant a 6 ans, ou 11 ans ?","Les défis et les énigmes sont pensés pour les 7 à 10 ans. À 6 ans, ça marche si un grand ou un adulte aide à lire les réponses. Dès 11 ans, les énigmes peuvent sembler faciles."],
   ["Est-ce prudent avec un groupe d'enfants ?","Le parcours reste à pied autour du point de départ, dans des lieux publics. Le guide de l'adulte rappelle les consignes : un adulte pour cinq enfants environ, le groupe qui reste ensemble, les défis sur le trottoir, une place ou dans un parc."]
 ];
-// Home: the treasure map. The visitor walks the five steps of the party like the troop will;
-// each step read gives a letter of an example secret word (BRAVE), shown in the bar at the top.
-const HOME_WORD="BRAVE";
-let homeIO=null,stepIO=null;
+// Home (8/11/2026, on the model of mon-petit-dressing.fr validated by Nathan): a light header with a menu
+// of chips, a two-part title, five promises, the price calculator, four short phone videos of the real
+// quest pages, the steps, the Grand Master's voice as a live sample, the price per child, the guides,
+// the towns, the questions, and a bar at the bottom that can be closed.
+let homeIO=null,stepIO=null,vidIO=null;
 const IMG=(src,alt,w,ht,more)=>h("img",Object.assign({src,alt,width:String(w),height:String(ht),decoding:"async"},more||{}));
 const CHECK='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function checkLi(t){const l=h("li");l.innerHTML=CHECK;l.append(h("span",{text:t}));return l;}
@@ -1059,6 +1111,40 @@ function steps3(cur){
     if(st==="done")dot.innerHTML=CHECK;
     box.append(h("div",{class:st},dot,l));});
   return box;
+}
+// Stroke icons (24 px grid), drawn in the text colour.
+const ICO={clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',mic:'<path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+  pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',shield:'<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/>',
+  rain:'<path d="M3 12a9 9 0 0 1 18 0z"/><path d="M12 12v6a2 2 0 0 0 4 0"/>',sound:'<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+  sliders:'<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',play:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/>'};
+function ico(name,size,cls){const s=h("span",{class:cls||"ico","aria-hidden":"true"});
+  s.innerHTML=`<svg viewBox="0 0 24 24" width="${size||20}" height="${size||20}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICO[name]}</svg>`;return s;}
+// The price of the whole group, shared: what each child costs, and the adults to bring (one for five).
+const priceNum=()=>parseFloat(String(PRICE).replace(/[^\d,.]/g,"").replace(",","."))||24.9;
+const eur=v=>(Math.round(v*100)/100).toFixed(2).replace(".",",")+" €";
+const perChild=n=>eur(Math.round(priceNum()*100/n)/100);
+const adultsFor=n=>{const a=Math.ceil(n/5);return a+(a>1?" adultes":" adulte");};
+// The four phone videos: the real pages after the quest is created, scrolling slowly, in a loop.
+const PHONE_VIDS=[
+  ["quete-apercu","1 · Après 2 minutes","L'aperçu de votre ville","L'aperçu de la quête qui défile sur un téléphone : la carte, les étapes à deviner, la durée et le prix"],
+  ["quete-depart","2 · Le jour de la fête","Le Grand Maître guide la troupe","Le début de la quête et la première étape qui défilent : le message du Grand Maître, l'indice et le lieu pour l'adulte"],
+  ["quete-defis","3 · À chaque lieu","Un défi, une énigme, une lettre","Le récit du lieu, le défi des chevaliers, l'énigme et la lettre gagnée qui défilent"],
+  ["quete-tresor","4 · Le dernier lieu","Le mot secret ouvre le trésor","Le mot secret, le trésor et le diplôme de chevalier qui défilent"]];
+const GUIDES=[
+  ["anniversaire-chevalier.html","4 min de lecture","Organiser un anniversaire chevalier","Déroulé sur 2 h 30, invitation à copier, costumes maison, trois jeux."],
+  ["anniversaire-chevalier-a-la-maison.html","6 min de lecture","Anniversaire chevalier à la maison quand il pleut","Un déroulé de 2 h : cinq jeux d'intérieur, blason, chasse aux lettres."],
+  ["chasse-au-tresor-anniversaire-dehors.html","6 min de lecture","Chasse au trésor d'anniversaire dehors","Parcours, sécurité, six types d'indices, défis et trésor."]];
+const TOWNS=[["Obernai","obernai"],["Molsheim","molsheim"],["Mutzig","mutzig"],["Ottrott","ottrott"]];
+function phoneVideo([file,kicker,title,alt]){
+  const v=h("video",{poster:file+".jpg",muted:true,loop:true,playsinline:true,preload:"none",width:"540",height:"1168","aria-label":alt},
+    h("source",{src:file+".mp4",type:"video/mp4"}),h("source",{src:file+".webm",type:"video/webm"}));
+  v.muted=true;
+  return h("figure",{class:"phonevid"},
+    h("div",{class:"pv-frame"},h("div",{class:"pv-screen"},
+      h("div",{class:"pv-bar","aria-hidden":"true"},h("span",{class:"pv-notch"}),h("span",{class:"pv-url",text:"maquetelegendaire.fr"})),v)),
+    h("figcaption",null,h("span",{class:"pv-k",text:kicker}),h("strong",{text:title})));
 }
 function homeScreen(){
   const start=()=>{hit("setup");go({screen:"setup"});};
@@ -1088,116 +1174,141 @@ function homeScreen(){
     ...[["m","Chevalier"],["f","Chevalière"]].map(([v,l])=>h("button",{type:"button","aria-pressed":String(S.hero===v),onclick:e=>{
       S.hero=v;save();seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b===e.currentTarget)));checkName();label();}},l)));
   const fq=h("div",{class:"faq"},FAQ.map(([q,a])=>h("details",null,h("summary",{text:q}),h("p",{text:a}))));
-  // A call to action stays at the bottom of the screen while none of the page's buttons is visible.
-  const priceCta=h("button",{class:"btn big gold",type:"button",onclick:start},"Créer l'aperçu gratuit");
-  const lastCta=h("button",{class:"btn big",type:"button",onclick:start},"Créer l'aperçu gratuit");
-  const bar=h("div",{class:"sticky",hidden:true},h("button",{class:"btn big",type:"button",onclick:start},"Créer l'aperçu gratuit"));
-  if("IntersectionObserver" in window)setTimeout(()=>{const seen=new Map();
-    homeIO=new IntersectionObserver(es=>{for(const e of es)seen.set(e.target,e.isIntersecting);bar.hidden=[...seen.values()].some(Boolean)||window.scrollY<300;});
-    [cta,priceCta,lastCta].forEach(x=>homeIO.observe(x));},0);
   setTimeout(checkName,0);
-  // Until the opening (7 Nov 2026), every visitor sees the tester offer first: the videos promise it.
+  // Until the opening (7 Nov 2026), every visitor saw the tester offer first: kept for the record, now off.
   const avant=Date.now()<Date.parse("2026-11-07T00:00:00+01:00")&&h("button",{class:"avant",type:"button",onclick:()=>{nameIn.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>nameIn.focus(),400);}},
     h("b",{text:"Avant-première jusqu'au 6 novembre"}),
     h("span",{text:"La quête est offerte aux familles testeuses, en échange de votre avis."}),
     h("small",{text:"Tapez le prénom de votre enfant pour commencer ↓"}));
 
-  // The secret word: a bar that sticks at the top of the screen along the path, and the big word at its end.
-  const W=[...HOME_WORD],won=new Set();
-  const tileSet=()=>W.map(()=>h("span",{class:"tile",text:"?"}));
-  const barTiles=tileSet(),bigTiles=tileSet(),stepTiles=tileSet();
-  const count=h("b",{text:"0/"+W.length});
-  const wordbar=h("div",{class:"wordbar"},h("span",{class:"wl"},"Mot secret ",count),h("span",{class:"tiles","aria-hidden":"true"},...barTiles));
-  const verdict=h("p",{class:"verdict",role:"status",text:"Chaque étape lue vous donne une lettre."});
-  const win=i=>{if(won.has(i))return;won.add(i);
-    for(const t of [barTiles[i],bigTiles[i],stepTiles[i]]){t.textContent=W[i];t.classList.add("on");}
-    count.textContent=won.size+"/"+W.length;
-    const left=W.length-won.size;
-    verdict.textContent=left?`Encore ${left} lettre${left>1?"s":""} à gagner sur le chemin.`:"BRAVE ! Le Sceau est ouvert. Reste à créer la vraie quête, dans votre ville.";};
-  const STEPS=[
-    {lab:"Chez vous · 2 minutes",t:"Le prénom et la ville",p:"Vous indiquez le prénom de votre enfant et sa ville. Le Grand Maître choisit 4 à 6 lieux publics à pied, autour de la mairie."},
-    {lab:"Devant l'église",t:"Le Grand Maître appelle votre enfant",p:"Il appelle votre enfant par son prénom (il en connaît plus de mille) et raconte l'histoire du lieu. Essayez :",call:true},
-    {lab:"À la fontaine",t:"Un défi pour toute la troupe",p:"Courir, chercher, s'entraider : de 4 à 15 enfants, personne ne reste sur le côté.",
-      img:["accueil-defi.webp","Une troupe d'enfants chevaliers court dans une rue pavée pendant un défi du jeu de piste",640,512]},
-    {lab:"À la vieille porte",t:"Une énigme, une lettre du mot secret",p:"La bonne réponse rapporte une lettre, confiée à un gardien. Chaque enfant a son rôle."},
-    {lab:"Le dernier lieu",t:"L'adoubement du chevalier",p:"Les gardiens s'alignent, le Sceau s'ouvre, vous sortez le trésor de votre sac. Votre enfant est nommé chevalier ou chevalière, diplôme à l'appui.",last:true}];
-  const items=STEPS.map((s,i)=>{
-    const card=h("div",{class:"stepcard"+(s.last?" last":"")},
-      h("div",{class:"sc-head"},h("div",null,h("p",{class:"lab",text:s.lab}),h("h3",{text:s.t})),stepTiles[i]),
-      s.call&&h("div",{class:"phone"},IMG("accueil-appel.webp","Le Grand Maître appelle l'enfant par son prénom sur le téléphone, au début de la quête",640,640,{loading:"lazy"}),
-        h("div",{class:"screen"},callName,h("span",{class:"approche",text:"approche…"}),play)),
-      s.img&&IMG(s.img[0],s.img[1],s.img[2],s.img[3],{loading:"lazy",class:"pic"}),
-      h("p",{text:s.p}),
-      s.call&&h("div",{class:"demo"},h("label",{for:"demo-name"},"Prénom de l'enfant",nameIn),seg,known,listen,words));
-    const li=h("li",{"data-i":String(i)},h("span",{class:"num","aria-hidden":"true",text:s.last?"":String(i+1)}),card);
-    if(s.last)li.querySelector(".num").innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 21V9h3V6h3v3h4V6h3v3h3v12z M10 21v-5h4v5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>';
-    return li;});
-  const dragonLi=h("li",{class:"aside"},IMG("dragon-clin.webp","",160,234,{loading:"lazy",class:"dr"}),
-    h("p",{class:"bubble",text:"Moi, je garde la carte. Le trésor, c'est vous qui le cachez dans votre sac."}));
-  items.splice(3,0,dragonLi);
-  if("IntersectionObserver" in window)setTimeout(()=>{
-    stepIO=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting)win(+e.target.dataset.i);},{threshold:.55});
-    items.forEach(li=>{if(li.dataset.i!=null)stepIO.observe(li);});},0);
-  else W.forEach((_,i)=>win(i));
+  // The calculator: the price per child and the adults to bring, then the form (kids kept).
+  let kids=Math.max(4,Math.min(15,S.kids||8));
+  const kOut=h("output",{class:"kn",for:"calc-minus calc-plus","aria-live":"polite",text:String(kids)});
+  const perOut=h("b"),adOut=h("b");
+  const showCalc=()=>{kOut.textContent=String(kids);perOut.textContent=perChild(kids);adOut.textContent=adultsFor(kids);};showCalc();
+  const bump=d=>{kids=Math.max(4,Math.min(15,kids+d));S.kids=kids;save();showCalc();};
+  const calcGo=h("button",{class:"btn gold wide",type:"button",onclick:()=>{S.kids=kids;save();hit("calcul");go({screen:"setup"});}},"Continuer : le prénom et la ville");
 
-  const li2=checkLi;
-  const icon=d=>{const s=h("span",{class:"ic"});s.innerHTML=`<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;return s;};
+  // The Grand Master's voice, as a live sample (the hero's second button scrolls here).
+  const demoCard=h("section",{class:"card demo-card",id:"ecouter"},
+    h("h2",{text:"Le Grand Maître appelle votre enfant"}),
+    h("p",{class:"lead",text:"Par son prénom : il en connaît plus de mille. Essayez :"}),
+    h("div",{class:"phone"},IMG("accueil-appel.webp","Le Grand Maître appelle l'enfant par son prénom sur le téléphone, au début de la quête",640,640,{loading:"lazy"}),
+      h("div",{class:"screen"},callName,h("span",{class:"approche",text:"approche…"}),play)),
+    h("div",{class:"demo"},h("label",{for:"demo-name"},"Prénom de l'enfant",nameIn),seg,known,listen,words));
+
+  // The five steps of the party day; each gives a letter of an example secret word.
+  const STEPS=[["Le prénom et la ville","Chez vous, en 2 minutes. Le Grand Maître choisit 4 à 6 lieux publics à pied, autour de la mairie."],
+    ["Le Grand Maître appelle votre enfant","Par son prénom (il en connaît plus de mille), et il raconte l'histoire du lieu."],
+    ["Un défi pour toute la troupe","Courir, chercher, s'entraider : de 4 à 15 enfants, personne ne reste sur le côté."],
+    ["Une énigme, une lettre du mot secret","La bonne réponse rapporte une lettre, confiée à un gardien. Chaque enfant a son rôle."],
+    ["L'adoubement du chevalier","Le Sceau s'ouvre, vous sortez le trésor de votre sac. Votre enfant est nommé chevalier ou chevalière, diplôme à l'appui."]];
+  const steps=h("ol",{class:"msteps"},...STEPS.map(([t,p],i)=>h("li",null,h("span",{class:"num","aria-hidden":"true",text:String(i+1)}),
+    h("div",null,h("h3",{text:t}),h("p",{text:p})),h("span",{class:"tile on","aria-hidden":"true",text:"BRAVE"[i]}))));
+  const phones=h("div",{class:"phones"},...PHONE_VIDS.map(phoneVideo));
+
+  // The bar at the bottom: shown while no button of the page is on screen; it can be closed.
+  let closed=false;try{closed=sessionStorage.getItem("barre-fermee")==="1";}catch(e){}
+  const priceCta=h("button",{class:"btn big gold",type:"button",onclick:start},"Créer l'aperçu gratuit");
+  const lastCta=h("button",{class:"btn big",type:"button",onclick:start},"Créer l'aperçu gratuit");
+  const bar=h("div",{class:"mbar",hidden:true},h("p",{text:"La quête de votre enfant, prête en 2 minutes"}),
+    h("button",{class:"btn gold",type:"button",onclick:start},"Aperçu gratuit"),
+    h("button",{class:"mbar-x",type:"button","aria-label":"Fermer la barre",onclick:()=>{closed=true;bar.hidden=true;try{sessionStorage.setItem("barre-fermee","1");}catch(e){}}},ico("x",18)));
+  if("IntersectionObserver" in window)setTimeout(()=>{const seen=new Map();
+    homeIO=new IntersectionObserver(es=>{for(const e of es)seen.set(e.target,e.isIntersecting);bar.hidden=closed||[...seen.values()].some(Boolean)||window.scrollY<300;});
+    [cta,calcGo,priceCta,lastCta].forEach(x=>homeIO.observe(x));
+    // the videos play only on screen (and not at all for visitors who ask for less motion)
+    const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const vids=[...phones.querySelectorAll("video")];
+    if(still)vids.forEach(v=>v.setAttribute("controls",""));
+    else{vidIO=new IntersectionObserver(es=>{for(const e of es){const v=e.target;
+        if(e.isIntersecting){v.muted=true;const p=v.play();if(p&&p.catch)p.catch(()=>{});}else v.pause();}},{threshold:.35});
+      vids.forEach(v=>vidIO.observe(v));}},0);
+
   return [
-    h("header",{class:"hero"},
+    h("header",{class:"mhead"},
+      h("a",{class:"mlogo",href:"./",onclick:e=>{e.preventDefault();scrollTo({top:0,behavior:"smooth"});}},
+        h("span",{class:"mbrand",text:"Ma Quête Légendaire"}),h("span",{class:"mtag",text:"La chasse au trésor d'anniversaire, simplifiée"})),
+      h("button",{class:"btn mini",type:"button",onclick:start},"Créer ma quête")),
+    h("nav",{class:"mchips","aria-label":"Sur cette page"},
+      h("button",{class:"mchip on",type:"button",onclick:start},"Aperçu gratuit"),
+      h("a",{class:"mchip",href:"#telephone"},"Vidéos"),h("a",{class:"mchip",href:"#prix-par-enfant"},"Prix"),
+      h("a",{class:"mchip",href:"#guides"},"Guides"),h("a",{class:"mchip",href:"#villes"},"Villes"),h("a",{class:"mchip",href:"#faq"},"Questions")),
+    h("section",{class:"mhero"},
       avant,
-      h("div",{class:"brandrow"},questMenu()),
-      h("p",{class:"brand"},"Ma Quête",h("br"),"Légendaire"),
-      (()=>{const s=h("span",{class:"rule","aria-hidden":"true"});s.innerHTML='<svg viewBox="0 0 190 14" width="190" height="14"><path d="M2 7h80M108 7h80" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M95 1l6 6-6 6-6-6z" fill="var(--gold)"/></svg>';return s;})(),
       h("p",{class:"kicker",text:"Anniversaire des 7 à 10 ans"}),
-      h("h1",null,h("span",{class:"gold",text:"Chasse au trésor d'anniversaire"})," : votre enfant devient chevalier, dans votre ville"),
-      h("p",{class:"promise",text:"Un jeu de piste au prénom de votre enfant, guidé par la voix du Grand Maître. Prêt en 2 minutes, rien à imprimer."}),
+      h("h1",null,"Chasse au trésor d'anniversaire. ",h("em",{text:"Votre enfant devient chevalier."})),
       S.ref==="fete"&&h("p",{class:"note",text:"Vos enfants ont joué à une quête de chevalier chez des amis ? Voici comment préparer la même pour votre enfant, dans votre ville."}),
+      h("ul",{class:"perks"},...[["clock","Sa quête prête en 2 minutes"],["mic","Le Grand Maître l'appelle par son prénom"],["pin","4 à 6 lieux de votre ville, à pied"],
+        ["shield","Un rôle pour chaque enfant, de 4 à 15"],["rain","Il pleut ? Elle se joue à la maison"]].map(([i,t])=>h("li",null,ico(i,19),h("span",{text:t})))),
+      h("div",{class:"ctabox"},cta,h("p",{class:"micro",text:avant?`Avant-première : offerte aux familles testeuses jusqu'au 6 novembre, puis ${PRICE}.`:"Gratuit · sans compte · 2 minutes"})),
+      h("div",{class:"ctabox"},h("button",{class:"btn ghost wide",type:"button",onclick:()=>{demoCard.scrollIntoView({behavior:"smooth",block:"start"});setTimeout(()=>{try{nameIn.focus({preventScroll:true});}catch(e){}},600);}},ico("sound",19)," Écouter le Grand Maître"),
+        h("p",{class:"micro",text:"Tapez un prénom : il le prononce"})),
+      h("a",{class:"hesite",href:"#telephone"},"Vous hésitez encore ? Voyez la quête sur le téléphone"),
       h("figure",{class:"herofig"},IMG("accueil-troupe.webp","Enfants déguisés en chevaliers, une carte au trésor à la main, pendant une chasse au trésor d'anniversaire dans une rue de village",720,720,{fetchpriority:"high"}),
-        IMG("dragon-montre.webp","",220,325,{class:"dr"}))),
-    h("p",{class:"bubble hello",text:"Suivez-moi, j'ai la carte ! Enfin… presque."}),
-    cta,
-    h("p",{class:"note center",text:avant?`Avant-première : la quête complète est offerte aux familles testeuses jusqu'au 6 novembre, puis ${PRICE}.`:`Gratuit. Vous voyez la quête de votre ville avant de payer, puis ${PRICE} pour la débloquer.`}),
-    h("ul",{class:"facts"},h("li",null,h("b",{text:"4 à 15"}),h("span",{text:"enfants"})),h("li",null,h("b",{text:"≈ 1 h"}),h("span",{text:"de jeu"})),h("li",null,h("b",{text:PRICE}),h("span",{text:"tout le groupe"}))),
-    wordbar,
-    h("section",{class:"block path"},
+        IMG("dragon-montre.webp","",220,325,{class:"dr"}),h("figcaption",{class:"bubble",text:"Suivez-moi, j'ai la carte ! Enfin… presque."}))),
+    h("section",{class:"calc",id:"calcul","aria-labelledby":"calc-t"},
+      h("div",{class:"calc-head"},ico("sliders",22,"ico box"),h("h2",{id:"calc-t",text:"Votre quête en 3 questions"})),
+      h("p",{class:"lead",text:"Le prix par enfant, les adultes à prévoir, puis le parcours dans votre ville. Gratuit, sans inscription."}),
+      h("div",{class:"kstep",role:"group","aria-label":"Nombre d'enfants à la fête"},h("span",{class:"klab",text:"Combien d'enfants à la fête ?"}),
+        h("div",{class:"kctl"},h("button",{type:"button",id:"calc-minus","aria-label":"Un enfant de moins",onclick:()=>bump(-1)},"−"),kOut,
+          h("button",{type:"button",id:"calc-plus","aria-label":"Un enfant de plus",onclick:()=>bump(1)},"+"),h("span",{class:"krange",text:"de 4 à 15"}))),
+      h("div",{class:"kres"},h("p",null,perOut,h("span",{text:`par enfant (${PRICE} le groupe)`})),h("p",null,adOut,h("span",{text:"conseillés, un pour 5 enfants"}))),
+      h("ul",{class:"pills","aria-label":"Les 3 questions"},h("li",{text:"1 · L'enfant · 10 s"}),h("li",{text:"2 · La fête · 20 s"}),h("li",{text:"3 · La ville · 10 s"})),
+      calcGo),
+    h("section",{class:"block",id:"telephone"},
       h("p",{class:"kicker",text:"Le jour de la fête, en 5 étapes"}),
       h("h2",{text:"Comment se passe la chasse au trésor ?"}),
-      h("p",{class:"lead",text:"Suivez le chemin comme la troupe le fera. Chaque étape vous donne une lettre du mot secret."}),
-      h("ol",{class:"route"},...items),
-      h("div",{class:"bigword"},h("div",{class:"tiles","aria-label":"Le mot secret"},...bigTiles),verdict)),
+      h("p",{class:"lead",text:"Voici ce que vous verrez sur votre téléphone, une fois la quête créée."}),
+      phones,
+      h("p",{class:"lead",text:"Chaque étape rapporte une lettre du mot secret. Le dernier lieu ouvre le Sceau."}),
+      steps),
+    demoCard,
+    h("section",{class:"block mvalue"},
+      h("h2",{text:"Rangez les fiches à imprimer."}),
+      h("p",{class:"lead",text:"Pas d'animateur à payer, rien à cacher dans la rue, rien à imprimer la veille au soir. Le Grand Maître anime la quête depuis votre téléphone. Vous, vous gardez le trésor dans votre sac."})),
+    h("aside",{class:"mbox"},h("p",{class:"mbox-t"},ico("cal",22),h("b",{text:"La fête est ce week-end ?"})),
+      h("p",{text:"La quête est prête en 2 minutes, même la veille au soir."}),
+      h("button",{class:"linkbtn",type:"button",onclick:start},"Créer l'aperçu gratuit →"),
+      h("p",{class:"micro",text:`Gratuit pour voir · ${PRICE} pour tout le groupe`})),
+    h("section",{class:"block",id:"prix-par-enfant"},
+      h("h2",{text:"Combien coûte la quête par enfant ?"}),
+      h("p",{class:"lead",text:`${PRICE} pour tout le groupe, de 4 à 15 enfants. Plus la troupe est grande, moins chaque enfant coûte.`}),
+      h("div",{class:"ptable-wrap"},h("table",{class:"ptable"},
+        h("thead",null,h("tr",null,h("th",{scope:"col",text:"Enfants"}),h("th",{scope:"col",text:"Prix par enfant"}),h("th",{scope:"col",text:"Adultes conseillés"}))),
+        h("tbody",null,...[4,6,8,10,12,15].map(n=>h("tr",n===8?{class:"hl"}:null,h("th",{scope:"row",text:String(n)}),h("td",{text:perChild(n)}),h("td",{text:String(Math.ceil(n/5))})))))),
+      h("p",{class:"note",text:"Un adulte pour cinq enfants environ, comme dans le guide de l'adulte fourni avec la quête."})),
     h("section",{class:"block"},
       h("h2",{text:"Un anniversaire chevalier pour les 7 à 10 ans"}),
-      h("p",{class:"lead",text:"Les défis et les énigmes sont pensés pour cet âge. À 6 ans, ça marche si un grand aide à lire les réponses ; dès 11 ans, les énigmes peuvent sembler faciles."}),
-      h("ul",{class:"where"},
-        h("li",null,icon('<path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/>'),h("div",null,h("h3",{text:"Dans les rues de votre ville"}),h("p",{text:"4 à 6 lieux publics à pied, moins de 2 km, autour de la mairie. Partout en France."}))),
-        h("li",null,icon('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-5h6v5"/>'),h("div",null,h("h3",{text:"Ou à la maison s'il pleut"}),h("p",{text:"Une chasse aux lettres cachées dans la maison, avec des énigmes et des défis d'intérieur."}))),
-        h("li",null,icon('<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M14 15.5c.9-.9 2-1.5 3-1.5 2.8 0 5 2.2 5 5"/>'),h("div",null,h("h3",{text:"De 4 à 15 enfants"}),h("p",{text:"Avec un adulte pour cinq enfants environ. Chaque enfant a un rôle de gardien."}))))),
+      h("p",{class:"lead",text:"Dans les rues de votre ville (4 à 6 lieux publics à pied, moins de 2 km, autour de la mairie, partout en France), ou à la maison s'il pleut, avec des énigmes et des défis d'intérieur."}),
+      h("ul",{class:"ages"},
+        h("li",null,h("b",{text:"6 ans"}),h("span",{text:"Ça marche si un grand aide à lire les réponses."})),
+        h("li",{class:"on"},h("b",{text:"7 à 10 ans"}),h("span",{text:"Les défis et les énigmes sont pensés pour eux."})),
+        h("li",null,h("b",{text:"11 ans"}),h("span",{text:"Les énigmes peuvent sembler faciles."})))),
     h("section",{class:"pricecard"},
       IMG("dragon-bourse.webp","Le petit dragon de Ma Quête Légendaire tient une bourse vide",210,290,{loading:"lazy",class:"dr"}),
       h("h2",{text:"Combien coûte la chasse au trésor ?"}),
       h("p",{class:"price"},h("b",{text:PRICE})," ",h("span",{text:"pour tout le groupe"})),
       h("p",{class:"sub",text:"Environ 3 € par enfant pour une fête de huit. Le Grand Maître anime la quête : pas d'animateur à payer, rien à préparer."}),
-      avant&&h("p",{class:"sub",text:"Avant-première : offerte aux familles testeuses jusqu'au 6 novembre."}),
       h("ul",{class:"incl"},
-        li2("La voix du Grand Maître, au prénom de votre enfant"),
-        li2("4 à 6 étapes : récits, défis et énigmes pour les 7 à 10 ans"),
-        li2("Un rôle pour chaque enfant : chaque lettre est confiée à un gardien"),
-        li2("Le guide de l'adulte : itinéraire, sécurité, trésor à prévoir"),
-        li2("Un mode maison s'il pleut"),
-        li2("Le diplôme de chevalier ou de chevalière")),
+        checkLi("La voix du Grand Maître, au prénom de votre enfant"),
+        checkLi("4 à 6 étapes : récits, défis et énigmes pour les 7 à 10 ans"),
+        checkLi("Un rôle pour chaque enfant : chaque lettre est confiée à un gardien"),
+        checkLi("Le guide de l'adulte : itinéraire, sécurité, trésor à prévoir"),
+        checkLi("Un mode maison s'il pleut"),
+        checkLi("Le diplôme de chevalier ou de chevalière")),
       priceCta,
       h("p",{class:"sub center",text:"L'aperçu est gratuit : vous voyez le nombre d'étapes, la distance et la durée avant de payer."}),
       h("p",{class:"guarantee",text:"Un lieu fermé ? Vous passez l'étape. Un souci technique ? Écrivez-nous : nous vous aidons à jouer, et si la quête ne peut vraiment pas fonctionner, nous vous remboursons."})),
-    h("section",{class:"block"},h("h2",{text:"Questions fréquentes sur l'anniversaire chevalier"}),fq),
+    h("section",{class:"block",id:"guides"},
+      h("h2",{text:"Conseils de parents"}),
+      ...GUIDES.map(([href,time,t,p])=>h("a",{class:"gcard",href},h("span",{class:"gk"},ico("book",16),"Guide · "+time),h("strong",{text:t}),h("span",{class:"gp",text:p}),h("span",{class:"gl",text:"Lire →"})))),
+    h("section",{class:"block",id:"villes"},
+      h("h2",{text:"Anniversaire chevalier près de chez vous"}),
+      h("div",{class:"vchips"},...TOWNS.map(([n,s])=>h("a",{class:"mchip",href:`anniversaire-chevalier-${s}.html`},n)),
+        h("a",{class:"mchip dark",href:"anniversaire-chevalier-villes.html"},"Toutes les villes →"))),
+    h("section",{class:"block",id:"faq"},h("h2",{text:"Questions fréquentes sur l'anniversaire chevalier"}),fq),
     lastCta,
-    h("nav",{class:"links","aria-label":"Préparer la fête"},
-      h("p",{class:"kicker",text:"Préparer un anniversaire chevalier"}),
-      h("a",{href:"anniversaire-chevalier.html"},"Organiser un anniversaire chevalier : déroulé, jeux, costumes"),
-      h("a",{href:"anniversaire-chevalier-a-la-maison.html"},"Anniversaire chevalier à la maison quand il pleut"),
-      h("a",{href:"chasse-au-tresor-anniversaire-dehors.html"},"Chasse au trésor d'anniversaire dehors : nos conseils"),
-      h("p",{class:"kicker",text:"Anniversaire chevalier près de chez vous"}),
-      h("p",{class:"towns"},...[["Obernai","obernai"],["Molsheim","molsheim"],["Mutzig","mutzig"],["Ottrott","ottrott"]].flatMap(([n,s])=>[h("a",{href:`anniversaire-chevalier-${s}.html`},n)," · "]),
-        h("a",{href:"anniversaire-chevalier-villes.html"},"toutes les villes"))),
     footer(),
     bar
   ];
@@ -1212,6 +1323,7 @@ function communeField(searchInto){
   const input=h("input",{type:"text",id:"commune",name:"ville",placeholder:"Ex. : Bernardswiller",autocomplete:"off",autocapitalize:"words",spellcheck:"false",enterkeyhint:"go",
     role:"combobox","aria-autocomplete":"list","aria-expanded":"false","aria-controls":LID});
   input.value=communeLabel(S.commune);
+  if(!S.commune&&S.villeQ){input.value=S.villeQ;S.villeQ="";save();}
   const list=h("ul",{id:LID,class:"listbox",role:"listbox","aria-label":"Communes proposées",hidden:true});
   const hid={nom:h("input",{type:"hidden",name:"commune_nom"}),cp:h("input",{type:"hidden",name:"commune_code_postal"}),
     lat:h("input",{type:"hidden",name:"commune_lat"}),lon:h("input",{type:"hidden",name:"commune_lon"})};
@@ -1299,12 +1411,18 @@ function setupScreen(){
   nameIn.addEventListener("input",()=>{S.name=nameIn.value.trim();save();});
   const kidsIn=h("input",{type:"number",id:"kids",min:"2",max:"15",value:String(S.kids),inputmode:"numeric"});
   kidsIn.addEventListener("input",()=>{S.kids=Math.max(2,Math.min(15,parseInt(kidsIn.value||"8",10)));save();});
-  const bump=d=>{S.kids=Math.max(2,Math.min(15,(S.kids||8)+d));kidsIn.value=String(S.kids);save();};
+  // what each child costs and the adults to bring, live under the number of children
+  const per=h("p",{class:"kidsnote","aria-live":"polite"});
+  const showPer=()=>{const n=S.kids||8;per.textContent=`Soit ${perChild(n)} par enfant · ${adultsFor(n)} ${n>5?"conseillés":"conseillé"}`;};showPer();
+  kidsIn.addEventListener("input",showPer);
+  const bump=d=>{S.kids=Math.max(2,Math.min(15,(S.kids||8)+d));kidsIn.value=String(S.kids);save();showPer();};
   const minus=h("button",{type:"button","aria-label":"Un enfant de moins",onclick:()=>bump(-1)},"−");
   const plus=h("button",{type:"button","aria-label":"Un enfant de plus",onclick:()=>bump(1)},"+");
-  const seg=h("div",{class:"seg",role:"group","aria-label":"Héros ou héroïne"},
-    h("button",{type:"button","aria-pressed":String(S.hero==="m"),onclick:()=>{S.hero="m";save();seg.querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-pressed",String(i===0)));}},"Chevalier"),
-    h("button",{type:"button","aria-pressed":String(S.hero==="f"),onclick:()=>{S.hero="f";save();seg.querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-pressed",String(i===1)));}},"Chevalière"));
+  const seg=h("div",{class:"seg opts",role:"group","aria-label":"Héros ou héroïne"},
+    h("button",{type:"button","aria-pressed":String(S.hero==="m"),onclick:()=>{S.hero="m";save();seg.querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-pressed",String(i===0)));}},
+      h("strong",{text:"Chevalier"}),h("span",{text:"« Jeune chevalier, approche… »"})),
+    h("button",{type:"button","aria-pressed":String(S.hero==="f"),onclick:()=>{S.hero="f";save();seg.querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-pressed",String(i===1)));}},
+      h("strong",{text:"Chevalière"}),h("span",{text:"« Jeune chevalière, approche… »"})));
   const q=h("input",{type:"search",id:"start-q",placeholder:"Ex. : place de l'église",autocomplete:"off"});
   const results=h("div",{class:"choices"});
   // Address search: one search per tap (Nominatim's usage policy), around the chosen commune if any.
@@ -1328,18 +1446,24 @@ function setupScreen(){
         :"La position n'a pas été trouvée. Réessayez près d'une fenêtre ou dehors, ou cherchez une adresse ci-dessous.";
     });
   };
-  return [
-    h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"home"})},"Retour à la présentation"),
-    steps3(1),
-    h("div",{class:"setuphead"},
-      h("div",null,h("h2",{text:"Créer l'aperçu gratuit"}),
-        h("p",{class:"lead",text:"Deux minutes suffisent. Vous verrez le nombre d'étapes, la distance et la durée avant de payer."})),
-      h("div",{class:"drbox","aria-hidden":"true"},h("p",{class:"bubble say",text:"2 minutes. Je compte."}),IMG("dragon-chut.webp","",150,242,{class:"dr"}))),
-    h("div",{class:"card"},h("h3",{text:"Pour qui est la quête ?"}),
+  // The assistant (8/11/2026): three numbered cards, a bar that fills as they are answered.
+  const segs=[0,1,2].map(()=>h("span"));
+  const stepLab=h("span",{class:"asst-n"});
+  const prog=()=>{const done=[S.name.length>1,S.name.length>1&&(S.kids||0)>=2,!!S.commune];
+    segs.forEach((x,i)=>x.classList.toggle("on",done[i]));
+    const n=done.indexOf(false);stepLab.textContent=n<0?"Prêt : créez l'aperçu":`Étape ${n+1} sur 3`;};
+  nameIn.addEventListener("input",prog);
+  const rainy=()=>{if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}startIndoor();};
+  const box=h("div",{class:"asst-cards"},
+    h("div",{class:"card"},h("h3",null,h("span",{class:"cn",text:"1"}),"Votre enfant"),
+      h("p",{class:"note",text:"Pour que le Grand Maître l'appelle par son prénom."}),
       h("label",{for:"hero-name"},"Prénom de l'enfant",nameIn),
-      h("div",{class:"field"},h("span",{class:"flab",text:"Le héros de la fête"}),seg),
-      h("div",{class:"stepper"},h("label",{for:"kids"},"Nombre d'enfants"),h("div",{class:"ctl"},minus,kidsIn,plus))),
-    h("div",{class:"card"},h("h3",{text:"Où commence la quête ?"}),
+      h("div",{class:"field"},h("span",{class:"flab",text:"Le héros de la fête"}),seg)),
+    h("div",{class:"card"},h("h3",null,h("span",{class:"cn",text:"2"}),"La fête"),
+      h("div",{class:"stepper"},h("label",{for:"kids"},"Nombre d'enfants"),h("div",{class:"ctl"},minus,kidsIn,plus)),per,
+      h("button",{class:"optcard",type:"button",onclick:rainy},h("strong",{text:"Il pleut ? Créer une quête à jouer à la maison"}),
+        h("span",{text:"Six cartes à cacher en 5 minutes, des énigmes et des défis d'intérieur."}))),
+    h("div",{class:"card"},h("h3",null,h("span",{class:"cn",text:"3"}),"Où commence la quête ?"),
       h("p",{class:"note",text:"Choisissez la ville ou le village de la fête : la quête part de la mairie et se construit dans un rayon d'environ 700 mètres."}),
       town.nodes,
       h("details",{class:"more"},h("summary",null,"Préciser le point de départ (facultatif)"),
@@ -1348,9 +1472,20 @@ function setupScreen(){
           h("label",{for:"start-q"},"Chercher une adresse",q),
           h("button",{class:"btn ghost",type:"button",onclick:doSearch},"Chercher"),
           results,
-          h("button",{class:"btn ghost",type:"button",onclick:here},"Ou partir d'ici (ma position exacte)")))),
+          h("button",{class:"btn ghost",type:"button",onclick:here},"Ou partir d'ici (ma position exacte)")))));
+  ["input","click","change"].forEach(t=>box.addEventListener(t,()=>setTimeout(prog,0)));
+  prog();
+  return [
+    h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"home"})},"Retour à la présentation"),
+    h("div",{class:"asst"},
+      h("div",{class:"setuphead"},
+        h("div",null,h("h2",{text:"Créer votre quête"}),stepLab),
+        h("div",{class:"drbox","aria-hidden":"true"},h("p",{class:"bubble say",text:"2 minutes. Je compte."}),IMG("dragon-chut.webp","",150,242,{class:"dr"}))),
+      h("div",{class:"asst-bar","aria-hidden":"true"},...segs),
+      h("div",{class:"asst-lab","aria-hidden":"true"},h("span",{text:"L'enfant · 10 s"}),h("span",{text:"La fête · 20 s"}),h("span",{text:"La ville · 10 s"})),
+      h("p",{class:"micro",text:"Gratuit · sans compte · vous voyez la quête avant de payer"})),
+    box,
     note,
-    h("button",{class:"linkish",type:"button",onclick:()=>{if(!S.name){note.textContent="Indiquez d'abord le prénom de l'enfant.";document.getElementById("hero-name")?.focus();return;}startIndoor();}},"Il pleut ? Créer une quête à jouer à la maison"),
     footer()
   ];
 }
@@ -1753,7 +1888,7 @@ function topbar(){
 }
 const OPEN=["home","setup","loading","few","neterr","unlocking","unlockerr"];
 function render(){
-  note.textContent="";stopVoice();app.replaceChildren();if(homeIO){homeIO.disconnect();homeIO=null;}if(stepIO){stepIO.disconnect();stepIO=null;}
+  note.textContent="";stopVoice();app.replaceChildren();if(homeIO){homeIO.disconnect();homeIO=null;}if(stepIO){stepIO.disconnect();stepIO=null;}if(vidIO){vidIO.disconnect();vidIO=null;}
   let screen=S.screen;
   if(!S.preview&&!OPEN.includes(screen))screen="home";
   else if(!(S.unlocked&&S.quest)&&!OPEN.includes(screen)&&screen!=="preview")screen="preview";
@@ -1802,6 +1937,10 @@ if(qs.has("moi")){const t=h("div",{class:"toast",role:"status",text:ME?"Appareil
   const u=new URL(location.href);u.searchParams.delete("moi");history.replaceState(null,"",u.pathname+u.search+u.hash);}
 if(qs.get("ref")){S.ref=qs.get("ref").replace(/[^a-z0-9-]/gi,"").slice(0,20);save();if(!qs.get("paid")&&!qs.get("quete")&&!qs.get("apercu"))history.replaceState(null,"",location.pathname);}
 const sid=qs.get("paid")||qs.get("quete");
+// From a guide's "La fête a lieu à" box (?ville=…): open the form with the town already typed.
+if(qs.get("ville")&&!sid&&!qs.get("apercu")){const v=qs.get("ville").replace(/[<>]/g,"").trim().slice(0,60);
+  if(v&&!(S.unlocked&&S.quest)){S.villeQ=v;S.commune=null;S.screen="setup";save();}
+  if(!qs.get("ref"))history.replaceState(null,"",location.pathname);}
 if(PAID&&sid){history.replaceState(null,"",location.pathname);unlockWith(sid);}
 else if(PAID&&qs.get("apercu")){history.replaceState(null,"",location.pathname);openShared(qs.get("apercu"),qs);}
 else if(qs.has("annule")){history.replaceState(null,"",location.pathname);if(S.preview)S.screen="preview";render();note.textContent="Paiement annulé : rien n'a été débité.";}

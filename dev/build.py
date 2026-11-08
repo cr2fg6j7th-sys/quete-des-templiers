@@ -146,8 +146,16 @@ shutil.copy(d / "espace.html", site / "espace" / "index.html")
 shutil.copy(d / "liens.html", site / "liens" / "index.html")
 (site / "robots.txt").write_text(f"User-agent: *\nDisallow: /api/\nDisallow: /places/\nDisallow: /audio/\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
 urls = [SITE + "/"] + [f"{SITE}/{n}" for n in guide_pages]
-(site / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    + "".join(f"  <url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
+# The home page carries the four phone videos (8/11/2026): listed for Google's video search.
+VIDEOS = [("quete-apercu", "L'aperçu de la quête, 2 minutes après sa création", 14), ("quete-depart", "Le jour de la fête : le Grand Maître guide la troupe", 12),
+          ("quete-defis", "À chaque lieu : un défi, une énigme, une lettre", 16), ("quete-tresor", "Le dernier lieu : le mot secret ouvre le trésor", 13)]
+esc = lambda x: x.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;")
+home_videos = "".join(f"<video:video><video:thumbnail_loc>{SITE}/{f}.jpg</video:thumbnail_loc><video:title>{esc(t)}</video:title>"
+                      f"<video:description>{esc(t)} : les vraies pages de la quête qui défilent sur un téléphone.</video:description>"
+                      f"<video:content_loc>{SITE}/{f}.mp4</video:content_loc><video:duration>{s}</video:duration><video:family_friendly>yes</video:family_friendly></video:video>"
+                      for f, t, s in VIDEOS)
+(site / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">\n'
+    + "".join(f"  <url><loc>{u}</loc>{home_videos if u == SITE + '/' else ''}</url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
 # Headers of the static files (Cloudflare): the demo may read the place tiles from another site.
 (site / "_headers").write_text("/places/*\n  Access-Control-Allow-Origin: *\n  Cache-Control: public, max-age=86400\n"
     "/sw.js\n  Cache-Control: no-cache\n"

@@ -34,3 +34,7 @@ dev/video/dragon/troupe/*.mp4
 dev/video/dragon/entretien/*.mp4
 dev/video/dragon/lendemain/*.mp4
 dev/video/telephone/ecrans/
+# copies of the phone videos made by build.py at the root (the root only redirects to the paid site)
+/quete-*.mp4
+/quete-*.webm
+/quete-*.jpg
