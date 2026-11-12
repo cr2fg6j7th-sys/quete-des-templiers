@@ -229,14 +229,15 @@ html,body{overflow-x:clip}
 .pricecard .price b{font-size:2.6rem;font-weight:800}
 .pricecard .price span{font-size:1.05rem;color:#d6d9e8}
 .pricecard .sub{font-size:.98rem;color:#d6d9e8}
-.incl{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.incl{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
 .incl li{display:flex;gap:10px;align-items:flex-start;line-height:1.4}
 .incl svg{flex:none;margin-top:3px;color:var(--gold)}
 .pricecard .btn.gold{background:var(--gold);color:#1b2547;font-weight:700}
 .guarantee{font-size:.95rem;color:#d6d9e8;border-top:1px solid rgba(255,250,240,.15);padding-top:10px}
 .btn.big{font-weight:700;min-height:54px}
 /* ---------- Home (12/11/2026): an adventure page for parents arriving from Instagram or TikTok ---------- */
-#app[data-screen=home]{font-size:1.06rem;padding-bottom:120px}
+#app[data-screen=home]{font-size:1.06rem;padding-bottom:120px;gap:14px}
+#app[data-screen=home]>.block{margin-top:4px}
 #app[data-screen=home] :is(section,article)[id]{scroll-margin-top:16px}
 /* Header: the logo, three links (a menu on a phone), the music switch */
 .mhead{display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--line);margin-top:-6px}
@@ -274,9 +275,15 @@ html,body{overflow-x:clip}
 #app[data-screen=home] .btn.big{border-radius:999px;font-family:var(--body);letter-spacing:0;font-weight:800;font-size:1.2rem;min-height:56px}
 #app[data-screen=home] .btn.big:not(.gold){background:var(--cta);color:var(--on-cta);box-shadow:0 6px 16px rgba(25,35,66,.25)}
 .micro{text-align:center;font-size:.95rem;color:var(--muted)}
+/* The guarantees under the first button and the price button: one short line each, a small stroke icon */
+.trust{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:3px;font-size:.93rem;line-height:1.3;color:var(--ink)}
+.trust li{display:flex;align-items:center;gap:8px}
+.tr-i{flex:none;display:inline-flex;color:var(--or-text)}
+.trust.on-navy{margin:0;color:var(--on-navy)}
+.trust.on-navy .tr-i{color:var(--gold)}
 .hero-link{align-self:center;display:inline-flex;align-items:center;min-height:44px;font-weight:700;color:var(--ink);text-decoration:underline;text-decoration-color:var(--or);text-decoration-thickness:2px;text-underline-offset:5px}
 .hero-art{position:relative;margin:0 0 18px}
-.ha-img{position:relative;z-index:1;display:block;width:100%;height:200px;object-fit:cover;object-position:50% 40%;border-radius:20px;box-shadow:0 10px 26px rgba(25,35,66,.22)}
+.ha-img{position:relative;z-index:1;display:block;width:100%;height:170px;object-fit:cover;object-position:50% 40%;border-radius:20px;box-shadow:0 10px 26px rgba(25,35,66,.22)}
 .ha-phone{position:absolute;z-index:2;right:14px;bottom:-16px;width:92px;padding:4px;border-radius:16px;background:#1c1c22;box-shadow:0 8px 20px rgba(25,35,66,.35)}
 .ha-phone img{display:block;width:100%;height:auto;aspect-ratio:9/13;object-fit:cover;object-position:top;border-radius:12px}
 .hero-art{margin-top:30px}
@@ -289,11 +296,11 @@ html,body{overflow-x:clip}
   background:var(--card) repeating-linear-gradient(transparent 0 33px,rgba(168,122,31,.10) 33px 34px);box-shadow:0 8px 22px rgba(25,35,66,.12)}
 .carnet::before{content:"";position:absolute;left:16px;top:0;bottom:0;border-left:2px solid rgba(160,50,68,.35)}
 .carnet:focus{outline:none}.carnet:focus-visible{outline:3px solid var(--or);outline-offset:3px}
-.ex-tag{align-self:flex-start;font-family:var(--label);font-weight:700;font-size:.82rem;letter-spacing:.06em;padding:3px 10px;border-radius:999px;background:var(--rose-soft);color:var(--rose-text)}
+.ex-tag{align-self:flex-start;font-family:var(--label);font-weight:700;font-size:.78rem;letter-spacing:.03em;padding:3px 10px;border-radius:999px;background:var(--rose-soft);color:var(--rose-text)}
 #app .ex-h{font-family:var(--display);font-weight:400;font-size:1.9rem;letter-spacing:0;color:var(--ink);line-height:1.05}
 .c-part{display:flex;flex-direction:column;gap:10px}
 .ex-photo{margin:0;display:flex;flex-direction:column;gap:6px}
-.ex-photo img{display:block;width:100%;height:auto;aspect-ratio:4/5;max-height:460px;object-fit:cover;object-position:50% 40%;border-radius:12px;box-shadow:0 6px 16px rgba(25,35,66,.18)}
+.ex-photo img{display:block;width:100%;height:auto;aspect-ratio:2/1;max-height:400px;object-fit:cover;object-position:50% 45%;border-radius:12px;box-shadow:0 6px 16px rgba(25,35,66,.18)}
 .ex-photo figcaption{font-size:.9rem;color:var(--muted);font-style:italic}
 .c-part h4{margin:0;font-family:var(--label);font-weight:700;font-size:.9rem;letter-spacing:.07em;color:var(--or-text)}
 .ex-say{margin:0;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:var(--rose-soft);font-style:italic;line-height:1.5}
@@ -333,13 +340,10 @@ html,body{overflow-x:clip}
 .exfigs dt{font-size:.85rem;color:var(--muted)}
 .exfigs dd{margin:0;font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums}
 .essai-side .note{font-size:.92rem}
-.film-open{display:flex;align-items:center;gap:14px;width:100%;padding:8px;border-radius:16px;border:2px solid var(--ink);background:var(--stone);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
-.film-poster{flex:none;width:92px;height:auto;aspect-ratio:9/16;object-fit:cover;border-radius:10px}
-.film-txt{display:flex;flex-direction:column;gap:4px;min-width:0}
-.film-txt b{font-size:1.08rem;line-height:1.2}
-.film-txt small{font-size:.9rem;line-height:1.35;color:var(--muted)}
-.film-txt .fp-i{align-self:flex-start;width:auto;height:auto;background:none;color:var(--rose-text)}
-.film{margin:0 auto;width:min(100%,330px);border-radius:18px;overflow:hidden;background:#efe6d3;aspect-ratio:9/16}
+.film-open{position:relative;display:block;width:100%;padding:8px;border:0;border-radius:36px;background:#1c1c22;box-shadow:0 14px 30px rgba(25,35,66,.22);cursor:pointer}
+.film-poster{display:block;width:100%;height:auto;aspect-ratio:220/526;object-fit:cover;border-radius:29px}
+.film-open .fp-i{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;background:var(--rose);color:#fff;box-shadow:0 4px 14px rgba(80,20,30,.35)}
+.film{margin:0 auto;width:100%;border-radius:18px;overflow:hidden;background:#efe6d3;aspect-ratio:9/16}
 .film video{display:block;width:100%;height:100%;object-fit:cover;background:#efe6d3}
 /* How it goes, the two places, the day */
 .ico{flex:none;width:36px;height:36px;border-radius:50%;background:#f6e7bf;color:var(--ink);display:inline-flex;align-items:center;justify-content:center}
@@ -350,7 +354,6 @@ html,body{overflow-x:clip}
 .how3 li>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 #app .how3 h3,#app .modecard h3{font-family:var(--body);font-weight:800;font-size:1.15rem;letter-spacing:0;line-height:1.25;color:var(--ink)}
 .how3 p{line-height:1.5;color:var(--muted)}
-#app .sub-h{font-family:var(--body);font-weight:800;font-size:1.05rem;letter-spacing:0;color:var(--ink);margin-top:6px}
 .phones{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:8px 16px 18px;scrollbar-width:none}
 .phones::-webkit-scrollbar{display:none}
 .phonevid{flex:none;width:236px;margin:0;scroll-snap-align:center;display:flex;flex-direction:column;gap:12px}
@@ -364,27 +367,32 @@ html,body{overflow-x:clip}
 .pv-k{font-family:var(--label);font-weight:700;font-size:.9rem;color:var(--rose-text)}
 .phonevid strong{font-size:1.1rem;line-height:1.2}
 .modegrid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
-.modecard{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line)}
+.modecard{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:18px;background:var(--card);border:1px solid var(--line)}
 .modecard h3{display:flex;align-items:center;gap:10px}
-.modecard dl{margin:0;display:flex;flex-direction:column;gap:10px}
-.modecard dt{font-family:var(--label);font-weight:700;font-size:.85rem;letter-spacing:.06em;color:var(--or-text)}
-.modecard dd{margin:2px 0 0;line-height:1.5}
+.modecard dl{margin:0;display:flex;flex-direction:column;gap:8px}
+.modecard dl>div{line-height:1.45}
+/* the label runs into its text, to keep the two cards short */
+.modecard dt{display:inline;font-family:var(--label);font-weight:700;font-size:.85rem;letter-spacing:.06em;color:var(--or-text)}
+.modecard dt::after{content:" : "}
+.modecard dd{display:inline;margin:0}
+.mc-more summary{cursor:pointer;font-weight:700;display:list-item;padding:10px 0;color:var(--ink)}
+.mc-more summary::marker{color:var(--rose)}
+.mc-more summary:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.mc-more dl{margin-top:4px}
 .linkbtn{align-self:flex-start;background:none;border:0;padding:6px 0;font:inherit;font-weight:800;color:var(--ink);text-decoration:underline;text-decoration-color:var(--or);text-decoration-thickness:2px;text-underline-offset:4px;cursor:pointer;min-height:44px}
-.note.big{font-size:.98rem;line-height:1.45}
 .times{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .times li{display:flex;flex-direction:column;gap:2px;padding:12px 10px;border-radius:14px;background:var(--navy);color:var(--on-navy)}
 .times b{font-size:1.25rem;font-weight:800;line-height:1.1;color:var(--gold)}
 .times span{font-size:.9rem;line-height:1.3;color:#e6e2d8}
-.qa{margin:0;display:flex;flex-direction:column}
-.qa>div{padding:12px 0;border-top:1px solid var(--line)}
-.qa>div:last-child{border-bottom:1px solid var(--line)}
-.qa dt{font-weight:800;font-size:1.06rem;line-height:1.3}
-.qa dd{margin:4px 0 0;line-height:1.5;color:var(--muted)}
+#app[data-screen=home] .qa details{padding:9px 16px}
+.qa details p{line-height:1.5}
 .btn.wide{width:100%;min-height:52px;border-radius:999px;font-family:var(--body);letter-spacing:0;font-weight:700;font-size:1.1rem}
 .btn.ghost.wide{border:2px solid var(--ink);color:var(--ink)}
 .btn.ghost.wide .ico{width:auto;height:auto;background:none;color:currentColor}
 /* The voice with the child's name, the price, the rest */
 .demo-card{margin-top:8px}
+#app[data-screen=home] .pricecard{margin-top:10px}
+@media (max-width:959px){.demo-card .phone{width:100%;max-width:190px;margin-inline:auto}}
 .demo-card .kicker{margin-bottom:-6px}
 #app .demo-card h2{font-size:1.45rem}
 .kstep{display:flex;flex-direction:column;gap:6px}
@@ -405,23 +413,23 @@ html,body{overflow-x:clip}
 .ptable th,.ptable td{text-align:left;padding:11px 14px;border-top:1px solid var(--line)}
 .ptable thead th{background:var(--navy);color:var(--on-navy);border-top:0;font-size:.95rem}
 .ptable tbody th{font-weight:800}
-.ages{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-.ages li{display:flex;gap:12px;align-items:baseline;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.ages{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ages li{display:flex;flex-direction:column;gap:4px;padding:10px 10px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
 .ages li.on{background:#f6e7bf;border-color:var(--gold);color:var(--ink)}
 .ages li.on span{color:var(--ink)}
-.ages b{flex:none;width:84px;font-size:1.1rem}
-.ages span{color:var(--muted);line-height:1.4}
-.gcard{display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.ages b{font-size:1.05rem;line-height:1.2}
+.ages span{color:var(--muted);line-height:1.3;font-size:.9rem}
+.gcard{position:relative;display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-radius:18px;background:var(--card);border:1px solid var(--line);text-decoration:none;color:var(--ink)}
 .gcard .gk{display:flex;align-items:center;gap:8px;font-family:var(--label);font-weight:700;font-size:.88rem;color:var(--muted)}
 .gcard .gk .ico{width:auto;height:auto;background:none;color:currentColor}
 .gcard strong{font-size:1.18rem;line-height:1.25}
 .gcard .gp{color:var(--muted);line-height:1.4}
-.gcard .gl{font-weight:800}
+.gcard .gl{position:absolute;right:14px;top:10px;font-weight:800;font-size:.95rem}
 .vchips{display:flex;flex-wrap:wrap;gap:8px}
 .mchip{flex:none;display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);font:inherit;font-weight:600;font-size:.95rem;text-decoration:none;white-space:nowrap}
 .mchip.dark{background:var(--navy);border-color:var(--navy);color:var(--on-navy);font-weight:700}
 #app[data-screen=home] .faq{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-#app[data-screen=home] .faq details{border-top:1px solid var(--line);padding:14px 16px}
+#app[data-screen=home] .faq details{border-top:1px solid var(--line);padding:9px 16px}
 #app[data-screen=home] .faq details:first-child{border-top:0}
 #app[data-screen=home] .faq details:last-child{border-bottom:0}
 #app[data-screen=home] .faq summary{color:var(--ink);min-height:28px}
@@ -441,6 +449,7 @@ html:has(#app[data-screen=home]){scroll-padding-bottom:96px}
 /* Narrow phones; tablets; computers: the first screen and the step side by side, reading width elsewhere */
 .mm-t{display:none}
 @media (max-width:520px){.keyinfo li:last-child{flex-basis:100%}.keyinfo li:last-child::before{content:none}}
+@media (max-width:599px){.phonevid{width:152px;gap:8px}.pv-frame,.film-open{border-radius:28px;padding:6px}.pv-screen,.film-poster{border-radius:23px}.phonevid video{width:140px;height:303px}.film-poster{aspect-ratio:140/353}.phonevid strong{font-size:1rem}}
 @media (max-width:360px){.mbrand{font-size:1.1rem}.music.inhead .mu-t{display:none}.music.inhead{padding:0}.mhero h1{font-size:1.9rem}.times b{font-size:1.08rem}}
 @media (min-width:600px){.mtag{display:block}.mm-t{display:inline}.mbrand{font-size:1.45rem}.mhero h1{font-size:2.6rem}.ha-img{height:280px}.ha-phone{width:120px}.modegrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:960px){
@@ -467,8 +476,6 @@ html:has(#app[data-screen=home]){scroll-padding-bottom:96px}
   .carnet{grid-column:1;grid-row:2}
   .essai-cta{grid-column:1;grid-row:3;max-width:440px}
   .essai-side{grid-column:2;grid-row:2/span 2;position:sticky;top:20px}
-  .essai-side .film-open{flex-direction:column;align-items:stretch;text-align:left}
-  .essai-side .film-poster{width:100%;max-height:420px}
   .demo-card{display:grid;grid-template-columns:300px minmax(0,1fr);column-gap:28px;row-gap:12px;align-items:start}
   .demo-card>:is(.kicker,h2,.lead){grid-column:1/-1}
   .demo-card .demo{border-top:0;padding-top:0}
@@ -1229,7 +1236,7 @@ const SEAL=`<svg class="seal" viewBox="-30 -30 60 60" aria-hidden="true">
   <path d="M-1.6-1.6-5-12H5L1.6-1.6 12-5V5L1.6 1.6 5 12H-5L-1.6 1.6-12 5V-5Z" fill="#fff" fill-opacity=".85"/></svg>`;
 const FAQ=[
   ["Faut-il préparer quelque chose ?","Un peu. Dehors : un téléphone chargé tenu par un adulte, un adulte pour cinq enfants environ, et un petit trésor dans votre sac (bonbons, pièces en chocolat, médailles). Rien à cacher dans la rue. À la maison : en plus, six cartes à cacher avant la fête, imprimées depuis le guide ou écrites à la main (5 minutes). L'aperçu se crée en 2 minutes, la partie dure environ une heure."],
-  ["Et s'il pleut, ou en hiver ?","Passez en mode maison : le Grand Maître transforme la quête en chasse aux lettres. Vous cachez six cartes dans la maison (5 minutes, à imprimer ou à écrire à la main), les enfants les retrouvent grâce à ses énigmes et relèvent des défis faits pour l'intérieur. Vous pouvez aussi créer directement une quête à la maison."],
+  ["Et s'il pleut, ou en hiver ?","Passez en mode maison, même avec une quête créée en ville : le choix se fait dans le guide de l'adulte, après le paiement. Le Grand Maître transforme la quête en chasse aux lettres. Vous cachez six cartes dans la maison (5 minutes, à imprimer ou à écrire à la main), les enfants les retrouvent grâce à ses énigmes et relèvent des défis faits pour l'intérieur. Vous pouvez aussi créer directement une quête à la maison."],
   ["Un lieu est fermé ou en travaux ?","Un bouton permet de passer l'étape, et la lettre est gagnée quand même."],
   ["Les enfants entrent-ils dans les églises ?","Non. Tout se passe dehors, devant les lieux."],
   ["Est-ce que ça marche dans ma ville ?","Partout en France où il y a quelques lieux publics à pied : un bourg, un quartier, un centre-ville. L'aperçu gratuit vous le dit avant de payer."],
@@ -1257,9 +1264,19 @@ const ICO={clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',mic:'<
   flag:'<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>',quest:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.6"/><path d="M12 16.8v.2"/>',
   home:'<path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/>',phone:'<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
   users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.2c2.6.2 4.5 2.6 4.5 5.8"/>',
-  gift:'<rect x="4" y="9" width="16" height="12" rx="1.5"/><path d="M3 9h18v-3H3zM12 6v15"/><path d="M12 6c-1.5-3-5-3.5-5-1.2C7 6 9 6 12 6c3 0 5 0 5-1.2C17 2.5 13.5 3 12 6z"/>'};
+  gift:'<rect x="4" y="9" width="16" height="12" rx="1.5"/><path d="M3 9h18v-3H3zM12 6v15"/><path d="M12 6c-1.5-3-5-3.5-5-1.2C7 6 9 6 12 6c3 0 5 0 5-1.2C17 2.5 13.5 3 12 6z"/>',
+  eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+  lock:'<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+  refund:'<path d="M4 9h11a5 5 0 0 1 0 10H8"/><path d="M8 5L4 9l4 4"/>'};
 function ico(name,size,cls){const s=h("span",{class:cls||"ico","aria-hidden":"true"});
   s.innerHTML=`<svg viewBox="0 0 24 24" width="${size||20}" height="${size||20}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICO[name]}</svg>`;return s;}
+// The guarantees, under the first button and the price button (13/11/2026). Only what the site really
+// promises: free preview without an account (home), Stripe payment (CGV, article on ordering), a refund if
+// the quest cannot work (CGV, legal guarantee of conformity; price block), no app (FAQ).
+const TRUST=[["eye","Aperçu gratuit, sans compte"],["lock","Paiement sécurisé par Stripe"],
+  ["refund","Remboursé si la quête ne peut pas fonctionner"],["phone","Aucune application à installer"]];
+const trustList=(items,cls)=>h("ul",{class:cls||"trust","aria-label":"Nos garanties"},
+  ...items.map(([i,t])=>h("li",null,ico(i,18,"tr-i"),h("span",{text:t}))));
 // The price of the whole group, shared: what each child costs, and the adults to bring (one for five).
 const priceNum=()=>parseFloat(String(PRICE).replace(/[^\d,.]/g,"").replace(",","."))||24.9;
 const eur=v=>(Math.round(v*100)/100).toFixed(2).replace(".",",")+" €";
@@ -1312,11 +1329,11 @@ function homeMenu(){
       link(["#guides","Conseils de parents"],"minor"),link(["#villes","Villes"],"minor")));
   return menu;
 }
-// The 27-second film (Nathan's montage, sound taken off): a small poster until a tap, then the player.
+// The 27-second film (Nathan's montage, sound taken off): a poster until a tap, then the player. Since
+// 13/11/2026 it is the first phone of the row "Ce que vous verrez sur votre téléphone".
 function filmCard(){
-  const open=h("button",{class:"film-open",type:"button"},
-    IMG("demo-quete.jpg","",720,1280,{loading:"lazy",class:"film-poster"}),
-    h("span",{class:"film-txt"},ico("play",26,"ico fp-i"),h("b",{text:"Voir le parcours complet"}),h("small",{text:"Vidéo de 27 secondes, sans son : l'aperçu, l'indice, le défi, l'énigme et les lettres."})));
+  const open=h("button",{class:"film-open",type:"button","aria-label":"Voir le parcours complet : vidéo de 27 secondes, sans son (l'aperçu, l'indice, le défi, l'énigme et les lettres)"},
+    IMG("demo-quete.jpg","",720,1280,{loading:"lazy",class:"film-poster"}),ico("play",30,"ico fp-i"));
   const box=h("div",{class:"film-card"},open);
   open.addEventListener("click",()=>{
     const v=h("video",{poster:"demo-quete.jpg",preload:"auto",playsinline:true,muted:true,controls:true,width:"720",height:"1280",
@@ -1326,7 +1343,8 @@ function filmCard(){
     const p=v.play();if(p&&p.catch)p.catch(()=>{});
     if(!filmCard.seen){filmCard.seen=true;hit("demo");}
   });
-  return box;
+  return h("figure",{class:"phonevid film-tile"},box,
+    h("figcaption",null,h("span",{class:"pv-k",text:"Vidéo · 27 s, sans son"}),h("strong",{text:"Voir le parcours complet"})));
 }
 // One step of the real game, to try without the form: the fountain (engine T.fountain[0], with its
 // recorded voice: "indice-fountain-0", the name clip, "recit-fountain-0"), a riddle that answers, the
@@ -1377,14 +1395,15 @@ function essaiStep(){
       IMG("fontaine-obernai-600.jpg","La fontaine de la place du Marché d'Obernai : une colonne surmontée d'une statue, des géraniums rouges et un grand bassin, entourés de maisons à colombages",600,747,
         {loading:"lazy",srcset:"fontaine-obernai-600.jpg 600w, fontaine-obernai.jpg 912w",sizes:"(min-width: 960px) 600px, calc(100vw - 80px)"}),
       h("figcaption",{text:"La fontaine de la place du Marché, à Obernai."})),
+    // Shorter since 13/11/2026: the clue and the voice button stay in view; the whole transcript, what to
+    // look for and the challenge are one tap away (still in the page for search engines).
     part("Ce que les enfants entendent",
-      h("blockquote",{class:"ex-say"},h("p",{text:"« "+ESSAI.clue+" »"}),h("p",{text:"« Gabriel, te voici près de cette fontaine. Avant l'eau du robinet, les fontaines servaient à tout le village… »"})),
+      h("blockquote",{class:"ex-say"},h("p",{text:"« "+ESSAI.clue+" »"})),
       lis,status,
-      h("details",{class:"transcript"},h("summary",null,"Lire toute la transcription"),
-        h("p",{text:"Le Grand Maître : « "+ESSAI.clue+" »"}),h("p",{text:"Puis, sur place : « "+ESSAI.story+" »"}))),
-    part("Ce qu'ils doivent chercher",
-      h("p",null,"Un endroit où l'eau coule ou jaillit : ici, ",h("b",{text:"une fontaine"}),"."),
-      h("p",null,h("b",{text:"Sur place, le défi des porteurs d'eau : "}),ESSAI.defi)),
+      h("details",{class:"transcript"},h("summary",null,"Transcription, lieu à trouver et défi"),
+        h("p",{text:"Le Grand Maître : « "+ESSAI.clue+" »"}),h("p",{text:"Puis, sur place : « "+ESSAI.story+" »"}),
+        h("p",null,h("b",{text:"Ce qu'ils doivent chercher : "}),"un endroit où l'eau coule ou jaillit, ici ",h("b",{text:"une fontaine"}),"."),
+        h("p",null,h("b",{text:"Sur place, le défi des porteurs d'eau : "}),ESSAI.defi))),
     part("L'énigme",h("p",{id:"essai-q",class:"ex-q",text:ESSAI.q}),box,fb,won));
 }
 
@@ -1426,7 +1445,7 @@ function homeScreen(){
       h("p",{class:"hero-text",text:"Le Grand Maître appelle votre enfant par son prénom. Depuis votre téléphone, il guide toute la troupe entre défis et énigmes, dans votre ville ou à la maison."}),
       h("ul",{class:"keyinfo","aria-label":"En bref"},h("li",{text:"7 à 10 ans"}),h("li",{text:"4 à 15 enfants"}),h("li",null,h("b",{text:PRICE})," pour tout le groupe")),
       S.ref==="fete"&&h("p",{class:"note",text:"Vos enfants ont joué à une quête de chevalier chez des amis ? Voici comment préparer la même pour votre enfant, dans votre ville."}),
-      h("div",{class:"ctabox"},cta,h("p",{class:"micro",text:"Découvrez votre quête avant de payer. Sans compte."})),
+      h("div",{class:"ctabox"},cta,trustList(TRUST)),
       h("a",{class:"hero-link",href:"#etape",onclick:toStep},"Essayer une énigme à Obernai",h("span",{"aria-hidden":"true",text:" →"}))),
     h("figure",{class:"hero-art"},
       IMG("accueil-defi.webp","Une troupe d'enfants déguisés en chevaliers court dans une rue alsacienne, à la recherche du prochain lieu",1136,912,
@@ -1435,37 +1454,42 @@ function homeScreen(){
       IMG("dragon-montre.webp","",220,325,{class:"dr ha-dr",loading:"lazy"}),
       h("figcaption",{class:"ha-cap",text:"Sur le téléphone de l'adulte : l'étape de la fontaine, au prénom de Gabriel."})));
 
-  // The step to try, right after the first screen; the film of the whole route comes after the riddle.
+  // The step to try, after the three steps; the film of the whole route is in the row of phones below.
   const exBtn=h("button",{class:"btn big",type:"button",onclick:()=>openForm("ville")},CTA);
   const essai=h("section",{class:"essai",id:"essai","aria-labelledby":"essai-t"},
     h("div",{class:"essai-head"},
       h("p",{class:"kicker",text:"Démonstration"}),
-      h("h2",{id:"essai-t",text:"Essayez une étape à Obernai"}),
-      h("p",{class:"lead",text:"Voici ce que les enfants entendent, ce qu'ils doivent chercher et ce que vous voyez sur votre téléphone."})),
+      h("h2",{id:"essai-t",text:"Essayez une étape à Obernai"})),
     essaiStep(),
-    h("div",{class:"essai-cta"},exBtn,h("p",{class:"micro",text:"Découvrez votre quête avant de payer. Sans compte."})),
+    h("div",{class:"essai-cta"},exBtn),
     h("aside",{class:"essai-side","aria-labelledby":"ex-route-t"},
       h("h3",{id:"ex-route-t",text:"Le parcours exemple à Obernai"}),
       h("dl",{class:"exfigs"},h("div",null,h("dt",{text:"Étapes"}),h("dd",{text:"6"})),h("div",null,h("dt",{text:"À pied"}),h("dd",{text:"≈ 0,4 km"})),h("div",null,h("dt",{text:"De jeu"}),h("dd",{text:"≈ 64 min"}))),
-      h("p",{class:"note",text:"Chiffres de l'aperçu créé lors d'un test à Obernai : la distance et la durée sont des estimations. Votre parcours aura ses propres chiffres, selon la ville et le point de départ."}),
-      filmCard()));
+      h("p",{class:"note",text:"Aperçu créé lors d'un test à Obernai ; distance et durée estimées. Votre parcours aura ses propres chiffres."})));
 
-  // How it goes, in three steps, with the real pages of the quest on the phone.
-  const phones=h("div",{class:"phones"},...PHONE_VIDS.map(phoneVideo));
+  // How it goes, in three steps, right under the first screen (13/11/2026: before the step to try).
   const howLi=(n,t,p)=>h("li",null,h("span",{class:"num","aria-hidden":"true",text:n}),h("div",null,h("h3",{text:t}),h("p",{text:p})));
   const comment=h("section",{class:"block comment",id:"comment","aria-labelledby":"cm-t"},
     h("h2",{id:"cm-t",text:"Comment se passe la quête ?"}),
     h("ol",{class:"how3"},
       howLi("1","Créez l'aperçu","Choisissez la ville ou la maison, puis renseignez le prénom de l'enfant. En 2 minutes, vous voyez le parcours, gratuitement."),
       howLi("2","Préparez la fête","Un téléphone chargé, des adultes pour accompagner et un petit trésor dans votre sac. À la maison, en plus : six cartes à cacher."),
-      howLi("3","Lancez l'aventure","Le Grand Maître guide la troupe. Les enfants relèvent les défis et résolvent les énigmes ensemble, pendant environ une heure.")),
-    h("h3",{class:"sub-h",text:"Ce que vous verrez sur votre téléphone"}),
+      howLi("3","Lancez l'aventure","Le Grand Maître guide la troupe. Les enfants relèvent les défis et résolvent les énigmes ensemble, pendant environ une heure.")));
+  // The real pages of the quest on the phone, after the step to try, the film of the whole route first
+  // (#demo: the "La quête en vidéo" link of the guides lands here).
+  const film=filmCard();
+  const phones=h("div",{class:"phones"},film,...PHONE_VIDS.map(phoneVideo));
+  const tel=h("section",{class:"block tel",id:"demo","aria-labelledby":"tel-t"},
+    h("h2",{id:"tel-t",text:"Ce que vous verrez sur votre téléphone"}),
     phones);
 
   // The two places to play, side by side (stacked on a phone): checked in the engine and the adult guide.
+  // Since 13/11/2026, only where you play is in view; the rest, said higher up and in the FAQ, is folded.
   const modeCard=(icon,title,rows,lab,mode)=>h("article",{class:"modecard"},
     h("h3",null,ico(icon,22,"ico box"),h("span",{text:title})),
-    h("dl",null,...rows.map(([k,v])=>h("div",null,h("dt",{text:k}),h("dd",{text:v})))),
+    h("dl",null,...rows.slice(0,1).map(([k,v])=>h("div",null,h("dt",{text:k}),h("dd",{text:v})))),
+    h("details",{class:"mc-more"},h("summary",null,"Préparation et déroulé"),
+      h("dl",null,...rows.slice(1).map(([k,v])=>h("div",null,h("dt",{text:k}),h("dd",{text:v}))))),
     h("button",{class:"linkbtn",type:"button",onclick:()=>openForm(mode)},lab));
   const modes=h("section",{class:"block",id:"modes","aria-labelledby":"modes-t"},
     h("h2",{id:"modes-t",text:"Dans votre ville ou à la maison"}),
@@ -1479,11 +1503,11 @@ function homeScreen(){
         ["Où on joue","Chez vous, sans sortir, pièce après pièce."],
         ["Ce que vous préparez","Six cartes, imprimées ou écrites à la main, cachées dans l'ordre avant la fête (5 minutes), et le trésor."],
         ["Ce que font les enfants","Chaque énigme les mène à une cachette. Ils rapportent la lettre au Grand Maître et relèvent des défis d'intérieur."]],
-        "Créer mon aperçu à la maison →","maison")),
-    h("p",{class:"note big",text:"Il pleut le jour J ? Une quête créée en ville peut aussi se jouer à la maison : le choix se fait dans le guide de l'adulte, après le paiement."}));
+        "Créer mon aperçu à la maison →","maison")));
 
-  // The day, as the parent's questions (answers taken from the adult guide).
-  const qa=(q,a)=>h("div",null,h("dt",{text:q}),h("dd",{text:a}));
+  // The day, as the parent's questions (answers taken from the adult guide): the three figures in view,
+  // the questions folded like the FAQ (13/11/2026), as they repeat the steps above in more detail.
+  const qa=(q,a)=>h("details",null,h("summary",{text:q}),h("p",{text:a}));
   const preparer=h("section",{class:"block preparer",id:"preparer","aria-labelledby":"prep-t"},
     h("p",{class:"kicker",text:"Préparer la fête"}),
     h("h2",{id:"prep-t",text:"Ce que vous prévoyez le jour J"}),
@@ -1491,8 +1515,7 @@ function homeScreen(){
       h("li",null,h("b",{text:"2 min"}),h("span",{text:"pour créer l'aperçu, chez vous"})),
       h("li",null,h("b",{text:"5 à 10 min"}),h("span",{text:"pour préparer la fête"})),
       h("li",null,h("b",{text:"≈ 1 h"}),h("span",{text:"de jeu avec la troupe"}))),
-    h("dl",{class:"qa"},
-      qa("Quel matériel préparer ?","Un téléphone chargé et un petit trésor. À la maison, en plus : les six cartes à cacher."),
+    h("div",{class:"faq qa"},
       qa("Qui tient le téléphone ?","Un adulte. Il lit les indices, fait parler le Grand Maître et voit le lieu exact de chaque étape. Les enfants n'ont pas besoin de regarder l'écran."),
       qa("Combien d'adultes prévoir ?","Un adulte pour cinq enfants environ : deux adultes pour huit enfants. Dehors, le groupe reste ensemble et les défis se font sur un trottoir, une place ou dans un parc."),
       qa("Qui fournit le trésor ?","Vous : un petit coffre ou un sachet (bonbons, pièces en chocolat, médailles), gardé dans votre sac et remis quand les enfants trouvent le mot secret."),
@@ -1535,7 +1558,7 @@ function homeScreen(){
     homeIO=new IntersectionObserver(es=>{for(const e of es){
         if(e.target===cta)past=!e.isIntersecting&&e.boundingClientRect.top<0;else seen.set(e.target,e.isIntersecting);}
       showBar();});
-    [cta,essai,demoCard,priceCta,lastCta].forEach(x=>homeIO.observe(x));
+    [cta,essai,film,demoCard,priceCta,lastCta].forEach(x=>homeIO.observe(x));
     // the phone videos play only on screen (and not at all for visitors who ask for less motion)
     const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
     const vids=[...phones.querySelectorAll("video")];
@@ -1551,12 +1574,14 @@ function homeScreen(){
       h("nav",{class:"mnav-wide","aria-label":"Sur cette page"},...NAV.map(([href,t])=>h("a",{href},t))),
       h("span",{id:"music-slot",class:"music-slot"}),
       menu),
+    // Order (13/11/2026, the home was 10 600 px high on a phone): how it goes, the step to try, the phone
+    // pages, the two places, what to prepare, then the price (the decision) before the name to try.
     hero,
-    essai,
     comment,
+    essai,
+    tel,
     modes,
     preparer,
-    demoCard,
     h("section",{class:"pricecard",id:"prix-par-enfant","aria-labelledby":"prix-t"},
       h("h2",{id:"prix-t",text:"Combien coûte la chasse au trésor ?"}),
       h("p",{class:"price"},h("b",{text:PRICE})," ",h("span",{text:"pour tout le groupe, de 4 à 15 enfants"})),
@@ -1572,12 +1597,13 @@ function homeScreen(){
         checkLi("Un mode maison s'il pleut, avec les six cartes à imprimer"),
         checkLi("Le diplôme de chevalier ou de chevalière")),
       priceCta,
-      h("p",{class:"sub center",text:"L'aperçu est gratuit : vous voyez le nombre d'étapes, la distance et la durée avant de payer."}),
+      trustList([["eye","Aperçu gratuit : étapes, distance et durée avant de payer"],...TRUST.slice(1)],"trust on-navy"),
       h("details",{class:"pmore"},h("summary",null,"Le prix par enfant, de 4 à 15 enfants"),
         h("div",{class:"ptable-wrap"},h("table",{class:"ptable"},
           h("thead",null,h("tr",null,h("th",{scope:"col",text:"Enfants"}),h("th",{scope:"col",text:"Prix par enfant"}),h("th",{scope:"col",text:"Adultes conseillés"}))),
           h("tbody",null,...[4,6,8,10,12,15].map(n=>h("tr",null,h("th",{scope:"row",text:String(n)}),h("td",{text:perChild(n)}),h("td",{text:String(Math.ceil(n/5))}))))))),
       h("p",{class:"guarantee",text:"Un lieu fermé ? Vous passez l'étape. Un souci technique ? Écrivez-nous : nous vous aidons à jouer, et si la quête ne peut vraiment pas fonctionner, nous vous remboursons."})),
+    demoCard,
     h("section",{class:"block"},
       h("h2",{text:"Un anniversaire chevalier pour les 7 à 10 ans"}),
       h("ul",{class:"ages"},
