@@ -104,4 +104,16 @@ for (const s of home.steps) assert(!hpv.includes(s.hide) && !hpv.includes(s.home
 // The ranking of places: every category once, from the most to the least interesting.
 assert.deepStrictEqual(E.RANK.map(r => r[0]).sort(), Object.keys(E.T).sort(), "RANK lists every category once");
 assert(E.RANK.every((r, i) => i === 0 || r[1] <= E.RANK[i - 1][1]) && E.RANK[0][0] === "church" && E.RANK[E.RANK.length - 1][0] === "postbox", "RANK goes down, church first, post box last");
+// The step to try on the home page copies the game's fountain (texts and recorded voice): keep them equal.
+{
+  const app = require("fs").readFileSync(__dirname + "/app.template.html", "utf8");
+  const f = E.T.fountain[0], V = require("./voice.js");
+  const essai = app.slice(app.indexOf("const ESSAI={"), app.indexOf("function essaiStep()"));
+  const spoken = V.LINES["recit-fountain-0"].replace(/^Te voici/, "te voici");
+  assert(essai.includes(`clue:"Écoute bien. ${f.clue}"`) && essai.includes(`story:"Gabriel, ${spoken}"`) && essai.includes(f.defi.replace(/^Les porteurs d'eau : /, ""))
+    && essai.includes(f.q) && f.choices.every(c => essai.includes(c)) && f.answer === 0 && essai.includes(f.hints[0]) && essai.includes(f.hints[1]),
+    "home step to try = the game's fountain");
+  assert(V.LINES["indice-fountain-0"] === "Écoute bien. " + f.clue, "the clue clip says the clue");
+  assert(require("fs").existsSync(__dirname + "/../audio/noms/gabriel.mp3"), "the demo name is recorded");
+}
 console.log("\nTous les tests passent.");
