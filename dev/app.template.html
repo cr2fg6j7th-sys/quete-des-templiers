@@ -433,6 +433,11 @@ html,body{overflow-x:clip}
 .mbar .btn{flex:1;min-width:0;min-height:48px;border-radius:999px;font-family:var(--body);letter-spacing:0;font-weight:800;font-size:1.02rem;padding:0 14px;background:var(--gold);color:var(--ink)}
 .mbar-x{flex:none;width:44px;height:44px;border:0;background:transparent;color:var(--on-navy);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 .mbar-x .ico{width:auto;height:auto;background:none;color:currentColor}
+.mbar .btn:focus-visible,.mbar-x:focus-visible{outline-color:var(--gold)}
+/* While the bar shows: the "device recognised" message sits above it, and a field reached with Tab stays clear of it */
+body:has(.mbar:not([hidden])) .toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+html:has(#app[data-screen=home]){scroll-padding-bottom:96px}
+@media (prefers-reduced-motion:no-preference){.mbar:not([hidden]){animation:barin .25s ease-out both}@keyframes barin{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}}
 /* Narrow phones; tablets; computers: the first screen and the step side by side, reading width elsewhere */
 .mm-t{display:none}
 @media (max-width:520px){.keyinfo li:last-child{flex-basis:100%}.keyinfo li:last-child::before{content:none}}
@@ -442,6 +447,7 @@ html,body{overflow-x:clip}
   #app[data-screen=home]{max-width:1180px;padding-inline:32px}
   #app[data-screen=home]>*{width:100%;max-width:720px;margin-inline:auto}
   #app[data-screen=home]>:is(.mhead,.mhero,.essai){max-width:none}
+  #app[data-screen=home]>.mbar{max-width:420px}
   .mnav-wide{display:flex;gap:4px;margin-right:6px}
   .mnav-wide a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:999px;color:var(--ink);font-weight:700;text-decoration:none}
   .mnav-wide a:hover{background:var(--card)}
@@ -1514,15 +1520,21 @@ function homeScreen(){
   const lastCta=h("button",{class:"btn big",type:"button",onclick:()=>openForm("ville")},CTA);
 
   // The bar at the bottom: only once the first button has gone up out of the screen; never over the step
-  // to try (voice, transcript, riddle, film), the name field or another button; it can be closed.
+  // to try (voice, transcript, riddle, film), the name field or another button; never while the menu is
+  // open or the name field is being typed in; it can be closed.
   let closed=false;try{closed=sessionStorage.getItem("barre-fermee")==="1";}catch(e){}
+  const menu=homeMenu();
+  const seen=new Map();let past=false,typing=false;
   const bar=h("div",{class:"mbar",hidden:true},
     h("button",{class:"btn gold",type:"button",onclick:()=>openForm("ville")},CTA),
     h("button",{class:"mbar-x",type:"button","aria-label":"Fermer la barre",onclick:()=>{closed=true;bar.hidden=true;try{sessionStorage.setItem("barre-fermee","1");}catch(e){}}},ico("x",18)));
-  if("IntersectionObserver" in window)setTimeout(()=>{const seen=new Map();let past=false;
+  const showBar=()=>{bar.hidden=closed||!past||menu.open||typing||[...seen.values()].some(Boolean);};
+  menu.addEventListener("toggle",showBar);
+  nameIn.addEventListener("focus",()=>{typing=true;showBar();});nameIn.addEventListener("blur",()=>{typing=false;showBar();});
+  if("IntersectionObserver" in window)setTimeout(()=>{
     homeIO=new IntersectionObserver(es=>{for(const e of es){
         if(e.target===cta)past=!e.isIntersecting&&e.boundingClientRect.top<0;else seen.set(e.target,e.isIntersecting);}
-      bar.hidden=closed||!past||[...seen.values()].some(Boolean);});
+      showBar();});
     [cta,essai,demoCard,priceCta,lastCta].forEach(x=>homeIO.observe(x));
     // the phone videos play only on screen (and not at all for visitors who ask for less motion)
     const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1538,7 +1550,7 @@ function homeScreen(){
         h("span",{class:"mbrand",text:"Ma Quête Légendaire"}),h("span",{class:"mtag",text:"La chasse au trésor d'anniversaire, simplifiée"})),
       h("nav",{class:"mnav-wide","aria-label":"Sur cette page"},...NAV.map(([href,t])=>h("a",{href},t))),
       h("span",{id:"music-slot",class:"music-slot"}),
-      homeMenu()),
+      menu),
     hero,
     essai,
     comment,
