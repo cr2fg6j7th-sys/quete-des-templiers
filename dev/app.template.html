@@ -703,16 +703,16 @@ function playKeys(keys,fallbackText,onEnd){
 function stopVoice(){try{speechSynthesis.cancel();speakRun++;}catch(e){}playRun++;try{if(curAudio){curAudio.pause();curAudio=null;}}catch(e){}talk(false);}
 
 /* ---------- Background music: a quiet knightly loop on the first screens ----------
-   Only on request (12/11/2026, brief « aucun démarrage sonore automatique »; before, it started at the first
-   touch): the « Musique » switch, in the home page's header and at the top right of the other first screens,
-   starts it for this visit, then it loops (Web Audio, without a gap). It is separate from the Grand Master's
-   voice: it goes very quiet while he speaks, and stops once the quest itself begins. */
+   It starts by itself (Nathan, 12/11/2026, again after a day of « only with the switch »): browsers only let
+   sound start after a touch, so it is tried at the first touch, tap, click, key, wheel or scroll, then loops
+   (Web Audio, without a gap). The « Musique » switch (in the home page's header, at the top right of the other
+   first screens) turns it off; that choice is kept. It goes very quiet while the Grand Master speaks, and
+   stops once the quest itself begins. */
 // Low on purpose (15/10/2026, Nathan): it also plays when the phone is on silent, which no website can detect.
 const MUSIC_URL="audio/musique/accueil.mp3",MUSIC_VOL=.1,MUSIC_UNDER=.02;
 const MUSIC_SCREENS=["home","setup","loading","preview","few","neterr"];
 let mCtx=null,mGain=null,mSrc=null,mBuf=null,mLoading=false,talking=false;
-let musicChosen=false;   // turned on with the switch, for this visit only
-const musicWanted=()=>musicChosen;
+const musicWanted=()=>{try{return localStorage.getItem("musique")!=="non";}catch(e){return true;}};
 const musicHere=()=>MUSIC_SCREENS.includes(render.cur||S.screen)&&!document.hidden;
 function talk(on){talking=on;musicLevel();}
 function musicLevel(){
@@ -762,12 +762,11 @@ function musicSwitch(){
   let b=document.getElementById("music");
   if(!MUSIC_SCREENS.includes(render.cur||S.screen)){if(b)b.remove();return;}
   if(!b){b=h("button",{class:"music",id:"music",type:"button",onclick:()=>{
-      const on=!(musicPlaying()||mLoading);musicChosen=on;
+      const on=!(musicPlaying()||mLoading);try{localStorage.setItem("musique",on?"oui":"non");}catch(x){}
       if(on)musicOn();else musicOff();musicSwitch();}});}
   // in the home page's header when it has a place for it, else at the top right of the screen
   const slot=document.getElementById("music-slot");
   if(slot){if(b.parentNode!==slot)slot.append(b);b.classList.add("inhead");}
-  else if(!musicChosen&&!musicPlaying()){b.remove();return;}
   else{if(b.parentNode!==document.body)document.body.append(b);b.classList.remove("inhead");}
   const on=musicPlaying()||mLoading;
   b.setAttribute("aria-pressed",String(on));b.setAttribute("aria-label",on?"Couper la musique d'ambiance":"Mettre la musique d'ambiance");b.title=b.getAttribute("aria-label");
@@ -775,6 +774,12 @@ function musicSwitch(){
     :'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z" opacity=".55"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>')
     +'<span class="mu-t" aria-hidden="true">Musique</span>';
 }
+// Try at once when the page opens (a computer that already knows the site may allow it)…
+window.addEventListener("load",()=>setTimeout(()=>musicOn(true),300));
+// …else at the first gesture: phones allow sound at the end of a touch or a tap; a scroll or a wheel
+// also tries (some browsers accept it, the others wait for the next touch).
+for(const ev of ["touchstart","touchend","pointerdown","pointerup","click","keydown","wheel","scroll"])
+  document.addEventListener(ev,e=>{if(!(e.target&&e.target.closest&&e.target.closest("#music")))musicOn();},{passive:true,capture:true});
 document.addEventListener("visibilitychange",()=>{if(!mCtx)return;if(document.hidden){try{mCtx.suspend();}catch(e){}}else if(musicHere()&&musicWanted()){try{mCtx.resume();}catch(e){}musicLevel();}});
 
 /* ---------- DOM helpers ---------- */

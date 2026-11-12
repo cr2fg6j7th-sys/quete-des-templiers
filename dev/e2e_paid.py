@@ -318,10 +318,10 @@ async def main():
             top = await pgA.evaluate("['h1','.keyinfo','.mhero button.big','.ha-img','#essai'].map(s=>Math.round(document.querySelector(s).getBoundingClientRect().top))")
             check(top[0] < top[1] < top[2] < 860 and top[2] < top[3] < top[4], f"mobile : titre, infos clés et bouton avant l'image, puis la démo {top}")
             await pgA.wait_for_timeout(1500)
-            check(not await pgA.evaluate("!!document.querySelector('.essai video')") and not any(u.endswith(".mp3") or "demo-quete.mp4" in u or "demo-quete.webm" in u for u in asked),
-                  "ouverture : ni vidéo de démo ni son chargés")
+            check(not await pgA.evaluate("!!document.querySelector('.essai video')") and not any((u.endswith(".mp3") and "/audio/musique/" not in u) or "demo-quete.mp4" in u or "demo-quete.webm" in u for u in asked),
+                  "ouverture : ni voix ni vidéo de démo chargées (seule la musique d'ambiance peut démarrer)")
             music = await pgA.evaluate("(()=>{const b=document.getElementById('music');return b&&{inhead:b.classList.contains('inhead'),on:b.getAttribute('aria-pressed'),t:b.textContent}})()")
-            check(music and music["inhead"] and music["on"] == "false" and "Musique" in music["t"], f"musique : interrupteur « Musique » dans l'en-tête, coupé au départ ({music})")
+            check(music and music["inhead"] and "Musique" in music["t"], f"musique : interrupteur « Musique » dans l'en-tête ({music})")
             await pgA.click("text=Essayer une énigme à Obernai")
             await pgA.wait_for_timeout(700)
             check(await pgA.evaluate("document.activeElement && document.activeElement.id === 'etape'") and await pgA.locator("text=Étape de démonstration").count() == 1,
