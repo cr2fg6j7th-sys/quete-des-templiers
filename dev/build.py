@@ -12,6 +12,7 @@
 #   home.static.html    the home screen copied into the page for robots without JavaScript (dev/snapshot.py)
 # The audio folder is copied into site/ by the deploy workflow (or with --audio).
 import hashlib, json, re, shutil, subprocess, sys
+from datetime import date
 from pathlib import Path
 d = Path(__file__).parent
 root = d.parent
@@ -33,8 +34,10 @@ home_src = hashlib.sha256((re.search(r"\nconst FAQ=.*?\nfunction setupScreen", t
 if f"<!--home {home_src}-->" not in home_static:
     print("::warning::ATTENTION : l'accueil a changé, relancez python3 dev/snapshot.py pour mettre à jour sa copie (dev/home.static.html)")
 faq = json.loads(re.search(r"const FAQ=(\[.*?\n\]);", t, re.S).group(1))
-faq_ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
-    {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]}, ensure_ascii=False) + "</script>"
+# The questions of « Préparer la fête » are on the page too (folded like the FAQ): both lists, in the page's order.
+prep_qa = json.loads(re.search(r"const PREP_QA=(\[.*?\n\]);", t, re.S).group(1))
+faq_ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "FAQPage", "@id": SITE + "/#faq", "mainEntity": [
+    {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in prep_qa + faq]}, ensure_ascii=False) + "</script>"
 
 # QR code of the diplomas (dev/qr-diplome.json, made by dev/video/qr.py): it must point to this site.
 qr = json.loads((d / "qr-diplome.json").read_text(encoding="utf-8"))
@@ -55,7 +58,7 @@ def page(engine_part, paid):
              .replace("const PAID=/*PAID*/false;", f"const PAID={'true' if paid else 'false'};")
              .replace("/*PLACES_SITE*/", "" if paid else PLACES_SITE)
              .replace("{{SITE}}", SITE).replace("/*VOICE_VERSION*/", VOICE_VERSION)
-             .replace("<!--ROBOTS-->", "" if paid else '<meta name="robots" content="noindex">')
+             .replace("<!--ROBOTS-->", '<meta name="robots" content="max-image-preview:large">' if paid else '<meta name="robots" content="noindex">')
              .replace("<!--VERIFICATION-->\n", ver_tags if paid else "")
              .replace("<!--FAQ-->", faq_ld).replace("/*HOME*/", home_static).replace("/*QR*/null", qr_js).replace("/*SIGN*/null", sign_js))
 sw = read("sw.js").replace("/*VOICE_VERSION*/", VOICE_VERSION)
@@ -118,7 +121,8 @@ for f in sorted((d / "legal").glob("*.html")):
     html = f.read_text(encoding="utf-8")
     for k, v in fields.items():
         html = html.replace(k, v)
-    legal_pages[f.name] = html
+    # one address for search engines, whichever copy (paid site or GitHub Pages) is read
+    legal_pages[f.name] = html.replace("</head>", f'<link rel="canonical" href="{SITE}/legal/{f.name}">\n</head>', 1)
 (root / "legal").mkdir(exist_ok=True)
 for name, html in legal_pages.items():
     (root / "legal" / name).write_text(html, encoding="utf-8")
@@ -133,7 +137,7 @@ if site.exists():
 for name, html in legal_pages.items():
     (site / "legal" / name).write_text(html, encoding="utf-8")
 for name, html in guide_pages.items():
-    (site / name).write_text(html, encoding="utf-8")
+    (site / name).write_text(html.replace("</head>", '<meta name="robots" content="max-image-preview:large">\n</head>', 1), encoding="utf-8")
 shutil.copytree(root / "fonts", site / "fonts")
 (site / "sw.js").write_text(sw, encoding="utf-8")
 for f in (d / "static").iterdir():
@@ -145,7 +149,22 @@ shutil.copy(d / "espace.html", site / "espace" / "index.html")
 (site / "liens").mkdir(exist_ok=True)
 shutil.copy(d / "liens.html", site / "liens" / "index.html")
 (site / "robots.txt").write_text(f"User-agent: *\nDisallow: /api/\nDisallow: /places/\nDisallow: /audio/\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
-urls = [SITE + "/"] + [f"{SITE}/{n}" for n in guide_pages]
+urls = [SITE + "/"] + [f"{SITE}/{n}" for n in guide_pages] + [f"{SITE}/legal/{n}" for n in legal_pages]
+# Date of the last change of each page, for the sitemap (dev/lastmod.json): kept with a hash of the built
+# page, and set to today when the page changes. Commit the file with the change, so the deploy keeps the date.
+lastmod_file = d / "lastmod.json"
+lastmod = json.loads(lastmod_file.read_text(encoding="utf-8")) if lastmod_file.exists() else {}
+def page_file(u):
+    rel = u[len(SITE) + 1:] or "index.html"
+    return site / rel
+changed = False
+for u in urls:
+    hsh = hashlib.sha256(page_file(u).read_bytes()).hexdigest()[:16]
+    if lastmod.get(u, {}).get("hash") != hsh:
+        lastmod[u] = {"hash": hsh, "date": date.today().isoformat()}
+        changed = True
+if changed:
+    lastmod_file.write_text(json.dumps({u: lastmod[u] for u in urls}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 # The home page carries the demo film (9/11/2026) and the four phone videos (8/11/2026): listed for Google's video search.
 VIDEOS = [("demo-quete", "Démo : une chasse au trésor de chevaliers en 27 secondes", 27), ("quete-apercu", "L'aperçu de la quête, 2 minutes après sa création", 14), ("quete-depart", "Le jour de la fête : le Grand Maître guide la troupe", 12),
           ("quete-defis", "À chaque lieu : un défi, une énigme, une lettre", 16), ("quete-tresor", "Le dernier lieu : le mot secret ouvre le trésor", 13)]
@@ -155,7 +174,31 @@ home_videos = "".join(f"<video:video><video:thumbnail_loc>{SITE}/{f}.jpg</video:
                       f"<video:content_loc>{SITE}/{f}.mp4</video:content_loc><video:duration>{s}</video:duration><video:family_friendly>yes</video:family_friendly></video:video>"
                       for f, t, s in VIDEOS)
 (site / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">\n'
-    + "".join(f"  <url><loc>{u}</loc>{home_videos if u == SITE + '/' else ''}</url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
+    + "".join(f"  <url><loc>{u}</loc><lastmod>{lastmod[u]['date']}</lastmod>{home_videos if u == SITE + '/' else ''}</url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
+# A short, plain description of the service for AI assistants (llmstxt.org); dev/villes/build.mjs adds the town list.
+price = re.search(r'let PRICE="([^"]+)";', t).group(1)
+(site / "llms.txt").write_text(f"""# Ma Quête Légendaire
+
+> Ma Quête Légendaire crée « La Quête du Chevalier », une chasse au trésor d'anniversaire pour les enfants de 7 à 10 ans, au prénom de l'enfant. Un adulte la guide depuis son téléphone avec la voix enregistrée du Grand Maître. Elle se joue dans les rues de sa ville ou de son village, partout en France (4 à 6 lieux publics à pied), ou à la maison avec six cartes à cacher.
+
+- Prix : {price} pour tout le groupe, de 4 à 15 enfants.
+- Aperçu gratuit et sans compte (étapes, distance, durée) avant de payer ; paiement sécurisé par Stripe.
+- Environ une heure de jeu ; l'aperçu se crée en 2 minutes ; aucune application à installer, la quête s'ouvre dans le navigateur.
+- Un adulte pour cinq enfants environ. Tout se passe dehors, devant les lieux : on n'entre pas dans les églises.
+- Contact : {ident.get("email") or "voir les mentions légales"}
+
+## Pages
+
+- [La Quête du Chevalier]({SITE}/) : démonstration, déroulé, prix et questions fréquentes
+- [Organiser un anniversaire chevalier]({SITE}/anniversaire-chevalier.html) : déroulé sur 2 h 30, invitation, costumes, jeux
+- [Anniversaire chevalier à la maison quand il pleut]({SITE}/anniversaire-chevalier-a-la-maison.html) : déroulé de 2 h, jeux d'intérieur
+- [Chasse au trésor d'anniversaire dehors]({SITE}/chasse-au-tresor-anniversaire-dehors.html) : parcours, sécurité, indices, trésor
+
+## Informations
+
+- [Conditions de vente]({SITE}/legal/cgv.html)
+- [Mentions légales]({SITE}/legal/mentions-legales.html)
+""", encoding="utf-8")
 # Headers of the static files (Cloudflare): the demo may read the place tiles from another site.
 (site / "_headers").write_text("/places/*\n  Access-Control-Allow-Origin: *\n  Cache-Control: public, max-age=86400\n"
     "/sw.js\n  Cache-Control: no-cache\n"

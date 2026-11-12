@@ -104,6 +104,7 @@ function study(c) {
   const hall = near.filter(p => p.cat === "townhall").sort((a, b) => E.dist(c, a) - E.dist(c, b))[0];
   const start = hall ? { lat: hall.lat, lon: hall.lon } : { lat: c.lat, lon: c.lon };
   const startLabel = hall ? "la mairie" : "le centre-ville";
+  const startDe = hall ? "de la mairie" : "du centre-ville";   // « autour du centre-ville », never « de le »
   const places = E.dedupe(placesAround(start.lat, start.lon, R)).filter(p => p.cat !== "townhall");
   const sel = E.selectPlaces(places, start);
   const quest = sel.ok ? E.assemble(start, sel.stops) : null;
@@ -116,7 +117,7 @@ function study(c) {
     if (seen.has(k)) continue;
     seen.add(k); named.push(p);
   }
-  return { start, startLabel, places, counts, named, quest };
+  return { start, startLabel, startDe, places, counts, named, quest };
 }
 
 function countsText(counts) {
@@ -145,9 +146,9 @@ function page(c, s, siblings) {
   const top = s.named.slice(0, 8);
   const ex = top.slice(0, 2).map(p => p.name);
   const title = `Anniversaire chevalier ${a(c.nom)} (7-10 ans) | Ma Quête Légendaire`;
-  const desc = `Une chasse au trésor de chevaliers ${a(c.nom)}, ${ex.length ? `de ${list(ex)}` : "dans les rues du centre"} : ${n} lieux à pied autour de ${s.startLabel}, au prénom de votre enfant. Prête en 2 minutes, aperçu gratuit.`;
+  const desc = `Une chasse au trésor de chevaliers ${a(c.nom)}, ${ex.length ? `de ${list(ex)}` : "dans les rues du centre"} : ${n} lieux à pied autour ${s.startDe}, au prénom de votre enfant. Prête en 2 minutes, aperçu gratuit.`;
   const faq = [
-    [`Est-ce que la quête marche ${a(c.nom)} ?`, `Oui. Autour de ${s.startLabel} ${de(c.nom)}, ${n} lieux publics peuvent servir d'étapes, dont ${list(countsText(s.counts).slice(0, 3))}. Le Grand Maître en choisit 4 à 6 selon votre point de départ, et l'aperçu gratuit vous dit le nombre d'étapes, la distance et la durée avant de payer.`],
+    [`Est-ce que la quête marche ${a(c.nom)} ?`, `Oui. Autour ${s.startDe} ${de(c.nom)}, ${n} lieux publics peuvent servir d'étapes, dont ${list(countsText(s.counts).slice(0, 3))}. Le Grand Maître en choisit 4 à 6 selon votre point de départ, et l'aperçu gratuit vous dit le nombre d'étapes, la distance et la durée avant de payer.`],
     [`Peut-on partir d'ailleurs que du centre ${de(c.nom)} ?`, big ? `Oui, et c'est même conseillé : ${a(c.nom)}, chaque quartier a ses propres lieux. Indiquez votre rue, une place ou un parc près de chez vous : la quête se construit autour.` : `Oui : indiquez votre rue, une place ou un parc. La quête se construit avec les lieux à pied autour du point choisi.`],
     [`Et s'il pleut ${a(c.nom)} le jour de la fête ?`, "Passez en mode maison : même histoire, mêmes énigmes, et des défis à faire à l'intérieur."],
     ["Les enfants entrent-ils dans les églises ?", "Non. Tout se passe dehors, devant les lieux."]
@@ -174,6 +175,11 @@ function page(c, s, siblings) {
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Ma Quête Légendaire">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="max-image-preview:large">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 ${style}
 ${EXTRA_CSS}
@@ -183,15 +189,15 @@ ${ld.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`
 <main>
 <p class="back"><a href="./">Ma Quête Légendaire</a> › <a href="anniversaire-chevalier-villes.html">Par ville</a> › ${esc(c.nom)}</p>
 <h1>Anniversaire chevalier à ${esc(c.nom)}</h1>
-<p>À ${esc(c.nom)} (${esc(c.dep)}${repere(c) ? `, à ${repere(c).km} km ${esc(de(repere(c).nom))}` : ""}), Ma Quête Légendaire prépare en deux minutes une chasse au trésor d'une heure pour un anniversaire de 7 à 10 ans : ${n} lieux publics à moins de ${R} m de ${s.startLabel} peuvent servir d'étapes${ex.length ? `, comme ${esc(list(ex))}` : ""}. Le Grand Maître appelle votre enfant par son prénom et guide la troupe de lieu en lieu.</p>
+<p>À ${esc(c.nom)} (${esc(c.dep)}${repere(c) ? `, à ${repere(c).km} km ${esc(de(repere(c).nom))}` : ""}), Ma Quête Légendaire prépare en deux minutes une chasse au trésor d'une heure pour un anniversaire de 7 à 10 ans : ${n} lieux publics à moins de ${R} m ${s.startDe} peuvent servir d'étapes${ex.length ? `, comme ${esc(list(ex))}` : ""}. Le Grand Maître appelle votre enfant par son prénom et guide la troupe de lieu en lieu.</p>
 
-<h2>Une quête au départ de ${s.startLabel}</h2>
+<h2>Une quête au départ ${s.startDe}</h2>
 <div class="facts"><div><b>${q.steps.length}</b><span>étapes</span></div><div><b>${km(q.walkM)}</b><span>à pied</span></div><div><b>${q.minutes} min</b><span>de jeu environ</span></div></div>
 <p>À chaque étape, les enfants écoutent le Grand Maître, relèvent un défi, résolvent une énigme et gagnent une lettre du mot secret. Le parcours exact reste une surprise jusqu'au jour de la fête : l'aperçu gratuit le calcule pour votre point de départ.</p>
 ${big ? `<p>À ${esc(c.nom)}, inutile d'aller dans le centre : partez de votre rue, d'une place ou d'un parc de votre quartier, la quête se construit avec les lieux autour.</p>` : ""}
 
 <h2>Les lieux du Grand Maître à ${esc(c.nom)}</h2>
-<p>Autour de ${s.startLabel}, à pied : ${esc(list(countsText(s.counts)))}.</p>
+<p>Autour ${s.startDe}, à pied : ${esc(list(countsText(s.counts)))}.</p>
 ${top.length ? `<p>Parmi eux :</p>\n<ul class="lieux">\n${top.map(p => `<li>${esc(p.name)} <span class="src">(${CAT[p.cat][0]})</span></li>`).join("\n")}\n</ul>` : ""}
 <p class="src">Lieux tirés d'OpenStreetMap${built ? ` (mis à jour en ${moisFr(built)})` : ""}. On reste toujours dehors, devant les lieux.</p>
 
@@ -227,6 +233,13 @@ function hub(done) {
 <title>Anniversaire chevalier ${esc(z || "près de chez vous")}, ville par ville</title>
 <meta name="description" content="Une chasse au trésor de chevaliers pour un anniversaire de 7 à 10 ans, dans les rues de votre village ou de votre ville : les lieux du Grand Maître à ${esc(list(sorted.slice(0, 5).map(o => o.c.nom)))}…">
 <link rel="canonical" href="${url}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="Anniversaire chevalier ${esc(z || "près de chez vous")}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE}/og.png">
+<meta property="og:site_name" content="Ma Quête Légendaire">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 ${style}
 </head>
@@ -274,7 +287,12 @@ if (done.length) {
   fs.writeFileSync(path.join(siteDir, "anniversaire-chevalier-villes.html"), hub(done));
   out.unshift(`${SITE}/anniversaire-chevalier-villes.html`);
   const sm = path.join(siteDir, "sitemap.xml");
-  const xml = fs.readFileSync(sm, "utf-8").replace("</urlset>", out.map(u => `  <url><loc>${u}</loc></url>\n`).join("") + "</urlset>");
+  // the pages change with the places of France: their date is the date of the places (the month's extraction)
+  const lm = built ? `<lastmod>${built}</lastmod>` : "";
+  const xml = fs.readFileSync(sm, "utf-8").replace("</urlset>", out.map(u => `  <url><loc>${u}</loc>${lm}</url>\n`).join("") + "</urlset>");
   fs.writeFileSync(sm, xml);
+  const llms = path.join(siteDir, "llms.txt");
+  if (fs.existsSync(llms)) fs.writeFileSync(llms, fs.readFileSync(llms, "utf-8").replace("\n## Informations",
+    `- [Anniversaire chevalier, ville par ville](${out[0]}) : les lieux de la quête dans ${done.length} commune${done.length > 1 ? "s" : ""} ${zone ? zone.nom : ""}\n\n## Informations`));
 }
 console.log(`${done.length} pages de ville sur ${conf.length} : ${done.map(o => `${o.c.nom} (${o.s.places.length} lieux)`).join(", ")}`);
