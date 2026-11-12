@@ -292,6 +292,9 @@ html,body{overflow-x:clip}
 .ex-tag{align-self:flex-start;font-family:var(--label);font-weight:700;font-size:.82rem;letter-spacing:.06em;padding:3px 10px;border-radius:999px;background:var(--rose-soft);color:var(--rose-text)}
 #app .ex-h{font-family:var(--display);font-weight:400;font-size:1.9rem;letter-spacing:0;color:var(--ink);line-height:1.05}
 .c-part{display:flex;flex-direction:column;gap:10px}
+.ex-photo{margin:0;display:flex;flex-direction:column;gap:6px}
+.ex-photo img{display:block;width:100%;height:auto;aspect-ratio:4/5;max-height:460px;object-fit:cover;object-position:50% 40%;border-radius:12px;box-shadow:0 6px 16px rgba(25,35,66,.18)}
+.ex-photo figcaption{font-size:.9rem;color:var(--muted);font-style:italic}
 .c-part h4{margin:0;font-family:var(--label);font-weight:700;font-size:.9rem;letter-spacing:.07em;color:var(--or-text)}
 .ex-say{margin:0;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:var(--rose-soft);font-style:italic;line-height:1.5}
 .btn.gm-listen{align-self:flex-start;min-height:48px;border-radius:999px;background:var(--navy);color:var(--on-navy);padding:0 18px;font-family:var(--body);letter-spacing:0;font-weight:800}
@@ -1359,6 +1362,10 @@ function essaiStep(){
   return h("article",{class:"carnet",id:"etape","aria-labelledby":"etape-t",tabindex:"-1"},
     h("p",{class:"ex-tag",text:"Étape de démonstration · textes et voix du jeu"}),
     h("h3",{id:"etape-t",class:"ex-h",text:"La fontaine"}),
+    h("figure",{class:"ex-photo"},
+      IMG("fontaine-obernai-600.jpg","La fontaine de la place du Marché d'Obernai : une colonne surmontée d'une statue, des géraniums rouges et un grand bassin, entourés de maisons à colombages",600,747,
+        {loading:"lazy",srcset:"fontaine-obernai-600.jpg 600w, fontaine-obernai.jpg 912w",sizes:"(min-width: 960px) 600px, calc(100vw - 80px)"}),
+      h("figcaption",{text:"La fontaine de la place du Marché, à Obernai."})),
     part("Ce que les enfants entendent",
       h("blockquote",{class:"ex-say"},h("p",{text:"« "+ESSAI.clue+" »"}),h("p",{text:"« Gabriel, te voici près de cette fontaine. Avant l'eau du robinet, les fontaines servaient à tout le village… »"})),
       lis,status,
@@ -1411,7 +1418,8 @@ function homeScreen(){
       h("div",{class:"ctabox"},cta,h("p",{class:"micro",text:"Découvrez votre quête avant de payer. Sans compte."})),
       h("a",{class:"hero-link",href:"#etape",onclick:toStep},"Essayer une énigme à Obernai",h("span",{"aria-hidden":"true",text:" →"}))),
     h("figure",{class:"hero-art"},
-      IMG("accueil-defi.webp","Une troupe d'enfants déguisés en chevaliers court dans une rue alsacienne, à la recherche du prochain lieu",640,512,{class:"ha-img",fetchpriority:"high"}),
+      IMG("accueil-defi.webp","Une troupe d'enfants déguisés en chevaliers court dans une rue alsacienne, à la recherche du prochain lieu",1136,912,
+        {class:"ha-img",fetchpriority:"high",srcset:"accueil-defi-640.webp 640w, accueil-defi.webp 1136w",sizes:"(min-width: 960px) 540px, calc(100vw - 32px)"}),
       h("div",{class:"ha-phone","aria-hidden":"true"},IMG("quete-defis.jpg","",540,1168,{loading:"lazy"})),
       IMG("dragon-montre.webp","",220,325,{class:"dr ha-dr",loading:"lazy"}),
       h("figcaption",{class:"ha-cap",text:"Sur le téléphone de l'adulte : l'étape de la fontaine, au prénom de Gabriel."})));
