@@ -158,8 +158,11 @@ def page_file(u):
     rel = u[len(SITE) + 1:] or "index.html"
     return site / rel
 changed = False
+# The voice cache name (VOICE_VERSION) changes with every voice added by .github/workflows/audio.yml, which
+# does not commit this file: it is left out of the hash, so that does not move the date of the home page.
+voice_cache = f"quete-voix-{VOICE_VERSION}".encode()
 for u in urls:
-    hsh = hashlib.sha256(page_file(u).read_bytes()).hexdigest()[:16]
+    hsh = hashlib.sha256(page_file(u).read_bytes().replace(voice_cache, b"quete-voix-")).hexdigest()[:16]
     if lastmod.get(u, {}).get("hash") != hsh:
         lastmod[u] = {"hash": hsh, "date": date.today().isoformat()}
         changed = True
@@ -184,7 +187,7 @@ price = re.search(r'let PRICE="([^"]+)";', t).group(1)
 - Prix : {price} pour tout le groupe, de 4 à 15 enfants.
 - Aperçu gratuit et sans compte (étapes, distance, durée) avant de payer ; paiement sécurisé par Stripe.
 - Environ une heure de jeu ; l'aperçu se crée en 2 minutes ; aucune application à installer, la quête s'ouvre dans le navigateur.
-- Un adulte pour cinq enfants environ. Tout se passe dehors, devant les lieux : on n'entre pas dans les églises.
+- Un adulte pour cinq enfants environ. En ville, tout se passe dehors, devant des lieux publics (on n'entre pas dans les églises) ; ou à la maison, avec les cartes cachées.
 - Contact : {ident.get("email") or "voir les mentions légales"}
 
 ## Pages
