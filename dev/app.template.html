@@ -2029,6 +2029,7 @@ function unlockBlock(){
       ". Je demande l'accès à la quête dès le paiement et je renonce ainsi à mon droit de rétractation.")),
     note,btn,
     h("p",{class:"note center",text:"Paiement sécurisé par Stripe : carte, Apple Pay ou Google Pay."}),
+    h("p",{class:"note center",text:"Un code promo ? Vous le saisirez sur la page de paiement, avant de payer."}),
     h("p",{class:"guarantee",text:"Un souci le jour J ? Nous vous aidons. Si la quête ne peut vraiment pas fonctionner, nous vous remboursons."}));
   const bar=h("div",{class:"paybar",hidden:true},h("div",null,h("p",null,h("b",{text:price}),h("span",{text:"tout le groupe"})),
     h("a",{class:"btn",href:"#payer",onclick:e=>{e.preventDefault();card.scrollIntoView({behavior:"smooth",block:"center"});}},"Débloquer la quête")));

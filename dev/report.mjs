@@ -105,6 +105,7 @@ ${row("Quêtes ouvertes par des familles testeuses (avant-première)", "testeur"
 ${row("Questionnaires des testeurs envoyés", "avis")}
 ${row("Pages de paiement ouvertes", "checkout")}
 ${row("Achats confirmés (retour du paiement)", "achat")}
+${row("… dont avec un code promo (NOEL10…)", "promo")}
 ${row("Quêtes ouvertes après paiement (avec les réouvertures)", "unlock")}
 ${row("Voix enregistrée pour jouer sans réseau", "horsligne")}
 ${row("Invitations en image envoyées", "invite")}

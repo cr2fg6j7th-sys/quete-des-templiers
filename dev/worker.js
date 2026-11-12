@@ -23,7 +23,7 @@ const log = (evt, data) => console.log(JSON.stringify(Object.assign({ evt }, dat
 
 // Anonymous counts of the visit, one KV key per event: "day|event|ref|random", kept 400 days.
 // No IP address, no identifier, no cookie: only how many times each step happened, and the ref.
-const EVENTS = new Set(["home", "setup", "preview", "few", "nodata", "neterr", "checkout", "unlock", "achat", "demo", "diploma",
+const EVENTS = new Set(["home", "setup", "preview", "few", "nodata", "neterr", "checkout", "unlock", "achat", "promo", "demo", "diploma",
   "invite", "diplome", "imprime", "share", "apercu", "apercu-ouvert", "horsligne", "geo-refus", "geo-echec", "testeur", "avis",
   "liens", "liens-site", "liens-instagram", "liens-tiktok", "liens-pinterest"]);
 function count(env, ctx, evt, ref) {
@@ -199,6 +199,8 @@ async function checkout(request, env, ctx) {
       `Quête d'anniversaire de ${name || "votre enfant"} : ${quest.steps.length} étapes${quest.indoorOnly ? " à la maison" : town ? " à " + town : ""}. Accès immédiat.`,
     success_url: origin + "/?paid={CHECKOUT_SESSION_ID}",
     cancel_url: origin + "/?annule=1",
+    // promotion codes (NOEL10…) are created by Nathan in the Stripe Dashboard and typed on the payment page
+    allow_promotion_codes: "true",
     "custom_text[submit][message]": "Vous avez demandé l'accès immédiat à la quête et renoncé au droit de rétractation (article L221-28 du Code de la consommation).",
     "metadata[n]": name, "metadata[h]": hero, "metadata[k]": String(kids), "metadata[v]": town,
     "metadata[consent]": new Date().toISOString(), "metadata[ref]": refOf(b)
@@ -246,6 +248,8 @@ async function unlock(request, env, ctx) {
   count(env, ctx, "unlock", refOf(m));
   // back from the payment page (?paid=, not a reopening): the purchase confirmed, counted once
   if (b.first === true) count(env, ctx, "achat", refOf(m));
+  // paid with a promotion code from the Stripe Dashboard (which code: see Stripe)
+  if (b.first === true && s.total_details && s.total_details.amount_discount > 0) count(env, ctx, "promo", refOf(m));
   return reply({ ok: true, quest, name: m.n || "", hero: m.h === "f" ? "f" : "m", kids: parseInt(m.k, 10) || 8, town: m.v || "" });
 }
 

@@ -387,6 +387,7 @@ async def main():
             await pgA.check("#consent")
             await pgA.click("button:has-text('Débloquer la quête')")
             await pgA.wait_for_url("**/fake-checkout**", timeout=5000)
+            check("Ajouter un code promotionnel" in await pgA.inner_text("body"), "paiement : la page Stripe propose le champ code promo (NOEL10)")
             check("Arthur" in await pgA.inner_text("body"), "quête à la maison : page de paiement (Stripe factice) atteinte, sans payer")
             await ctxA.close()
             # anonymous counts of the visit, and the report's access to them

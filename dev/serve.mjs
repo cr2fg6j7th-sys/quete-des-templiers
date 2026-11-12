@@ -69,7 +69,7 @@ function fakeCheckout(url) {
     return Response.redirect(s.params.success_url.replace("{CHECKOUT_SESSION_ID}", s.id), 303);
   }
   return new Response(`<!doctype html><meta charset="utf-8"><title>Fake Stripe</title><h1>Paiement factice</h1>
-<p>${s.params["line_items[0][price_data][product_data][description]"]}</p><p>${s.params["line_items[0][price_data][unit_amount]"]} centimes</p>
+<p>${s.params["line_items[0][price_data][product_data][description]"]}</p><p>${s.params["line_items[0][price_data][unit_amount]"]} centimes</p>${s.params.allow_promotion_codes === "true" ? "<p>Champ « Ajouter un code promotionnel » proposé</p>" : ""}
 <p id="msg">${s.params["custom_text[submit][message]"]}</p>
 <a id="pay" href="/fake-checkout?id=${s.id}&pay=1">Payer</a> <a id="cancel" href="${s.params.cancel_url}">Annuler</a>`,
     { headers: { "content-type": "text/html; charset=utf-8" } });
