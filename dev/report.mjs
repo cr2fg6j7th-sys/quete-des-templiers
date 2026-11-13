@@ -94,7 +94,16 @@ Comptes anonymes du site (sans les vérifications automatiques, la démo ni les 
 ${row("Visites de la page d'accueil", "home")}
 ${row("Démo vidéo lancée sur l'accueil", "demo")}
 ${row("Clics sur « Créer mon aperçu gratuit » (formulaire ouvert)", "setup")}
+${row("Commune choisie dans la liste proposée", "commune-liste")}
+${row("Commune tapée en entier (sans la liste)", "commune-tapee")}
+${row("Commune la plus proche proposée", "commune-proche")}
+${row("Commune trouvée par « Me localiser »", "localiser-ok")}
+${row("« Me localiser » sans résultat", "localiser-echec")}
 ${row("Aperçus créés", "preview")}
+${row("Voix du Grand Maître écoutée sur l'aperçu", "prologue")}
+${row("Aperçus retrouvés sur le même téléphone (retour ou rechargement)", "apercu-retour")}
+${row("Aperçus envoyés à soi-même par e-mail (« M'envoyer l'aperçu »)", "apercu-garde")}
+${row("Clics sur la barre de prix en bas de l'aperçu", "paybar")}
 ${row("Pas assez de lieux autour du départ", "few")}
 ${row("Cartes en panne (écran d'erreur)", "neterr")}
 ${row("Position refusée par le téléphone (« Partir d'ici »)", "geo-refus")}
@@ -104,6 +113,7 @@ ${row("Aperçus reçus et ouverts", "apercu-ouvert")}
 ${row("Quêtes ouvertes par des familles testeuses (avant-première)", "testeur")}
 ${row("Questionnaires des testeurs envoyés", "avis")}
 ${row("Pages de paiement ouvertes", "checkout")}
+${row("Retours de la page de paiement sans payer (annulé)", "annule")}
 ${row("Achats confirmés (retour du paiement)", "achat")}
 ${row("… dont avec un code promo (NOEL10…)", "promo")}
 ${row("Quêtes ouvertes après paiement (avec les réouvertures)", "unlock")}

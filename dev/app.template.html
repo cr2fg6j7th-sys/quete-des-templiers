@@ -675,7 +675,34 @@ label.mode:has(input:focus-visible){outline:3px solid var(--or);outline-offset:2
 .paycard .price span{color:var(--muted);font-size:1.02rem}
 .paycard .incl svg{color:var(--ok)}
 .paycard .consent{background:var(--stone);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
-.paycard .btn.wait{background:#8f7f86;color:#fff}
+.paycard{scroll-margin-top:84px}
+.paycard .consent{transition:border-color .2s,background-color .2s}
+.paycard .consent.need{border:2px solid var(--rose-text);background:var(--rose-soft)}
+@media (prefers-reduced-motion:no-preference){.paycard .consent.need{animation:nudge .45s ease-in-out}@keyframes nudge{0%,100%{transform:none}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}}
+.paycard .ferr{margin-top:-6px}
+.cancelled{position:relative;z-index:1;display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:12px;background:var(--stone);border:2px solid var(--ok);line-height:1.4}
+.cancelled b{color:var(--ok)}
+.cancelled a:not(.btn){overflow-wrap:anywhere}
+/* The preview's proof: the Grand Master's voice, under the title */
+.listen{display:flex;flex-direction:column;gap:5px}
+#app[data-screen=preview] .treasure{gap:10px}
+.btn.listen-main{align-self:stretch;min-height:54px;font-size:1.08rem;padding:0 16px;box-shadow:0 4px 12px rgba(25,35,66,.22)}
+.listen-sub{font-size:.92rem;color:var(--muted);line-height:1.35}
+.listen .more{border-top-color:rgba(168,122,31,.35);padding-top:6px;margin-top:2px}
+.listen .more summary{min-height:32px;display:flex;align-items:center}
+.prolog{font-style:italic;margin-top:6px;line-height:1.5}
+.keep{gap:10px;padding:14px 16px}
+.paycard{gap:10px}
+.paycard .incl{gap:3px;font-size:.96rem}
+.paycard .consent{font-size:.9rem;line-height:1.35;padding:10px 12px}
+#app[data-screen=preview] .keep h3{font-size:1.1rem}
+.keep .btn{min-height:46px}
+.keep .note:empty{display:none}
+@media (max-width:375px){.paycard>h3{padding-right:72px}.btn.listen-main{font-size:1rem;padding:0 12px}}
+.fold{padding:0}
+.fold summary{cursor:pointer;font-weight:800;padding:14px 16px;min-height:48px;display:flex;align-items:center}
+.fold summary:focus-visible{outline:3px solid var(--or);outline-offset:2px;border-radius:14px}
+.fold .twobox{padding:0 12px 14px}
 .paycard .guarantee{color:var(--muted);border-top-color:var(--line)}
 .paybar{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--stone);border-top:1px solid var(--line);display:flex;justify-content:center}
 .paybar>div{width:100%;max-width:528px;display:flex;align-items:center;gap:12px}
@@ -687,7 +714,7 @@ label.mode:has(input:focus-visible){outline:3px solid var(--or);outline-offset:2
 .prevhead{display:flex;flex-direction:column;gap:2px}
 .tmap{margin:0;border:2px solid var(--ink);border-radius:16px;overflow:hidden;background:var(--card)}
 .tmap svg{width:100%;height:auto;display:block}
-.tmap figcaption{padding:8px 12px;font-size:.95rem;color:var(--muted);border-top:1px solid var(--line)}
+.tmap figcaption{padding:7px 12px;font-size:.95rem;color:var(--muted);border-top:1px solid var(--line)}
 @media (prefers-reduced-motion:no-preference){.tmap .trail{animation:dash 1.2s linear infinite}@keyframes dash{to{stroke-dashoffset:-20}}.tmap .fog{animation:fog 3s ease-in-out infinite}@keyframes fog{0%,100%{opacity:.4}50%{opacity:.7}}}
 #app[data-screen=preview]{padding-bottom:110px}
 #app:is([data-screen=home],[data-screen=setup],[data-screen=preview]) .btn,.sticky .btn,.paybar .btn{font-family:var(--body);letter-spacing:0;font-weight:800}
@@ -755,6 +782,8 @@ const E=(typeof QuestEngine!=="undefined")?QuestEngine:null;
 const G=QuestGeo;
 const STORE="quete-templiers-v3";
 let PRICE="24,90 €";
+// The contact address of the sales terms (dev/legal/identite.json, filled in by dev/build.py); empty: not shown.
+const CONTACT=(s=>/^[^\s@"<>]+@[^\s@"<>]+$/.test(s)?s:"")("/*EMAIL*/");
 
 const NOMINATIM="https://nominatim.openstreetmap.org";
 // National address base (IGN Géoplateforme): exact street numbers everywhere in France, 50 requests/s.
@@ -816,7 +845,7 @@ function speak(text){
 /* Recorded voice (Gemini TTS, voice Algenib), served from the audio/ folder; phone voice only as a fallback. */
 const V=QuestVoice;
 let nameSet=null;
-try{fetch("audio/noms.json").then(r=>r.ok?r.json():[]).then(a=>{nameSet=new Set(a);}).catch(()=>{nameSet=new Set();});}catch(e){nameSet=new Set();}
+const namesReady=(()=>{try{return fetch("audio/noms.json").then(r=>r.ok?r.json():[]).then(a=>{nameSet=new Set(a);}).catch(()=>{nameSet=new Set();});}catch(e){nameSet=new Set();return Promise.resolve();}})();
 // "@name" = the child's name, or "Jeune chevalier," when unknown; "@name?" = the name only when it is recorded.
 function clipUrl(k){
   if(k.startsWith("nom:"))return `audio/noms/${k.slice(4)}.mp3`;
@@ -2024,20 +2053,20 @@ function netErrScreen(){const out=!!S.start;
 function mapTeaser(){
   // A treasure map still in the fog: the start is shown, the steps are question marks, the places stay hidden.
   const n=Math.max(1,Math.min(6,(S.preview&&S.preview.count)||5));
-  const P=[[128,118],[190,74],[256,100],[262,160],[200,184],[140,190]].slice(0,n),S0=[64,150];
+  const P=[[128,96],[190,60],[256,82],[262,124],[200,140],[140,146]].slice(0,n),S0=[64,116];
   const d="M"+[S0,...P].map(p=>p.join(" ")).join(" L");
   const box=h("figure",{class:"tmap"});
-  box.innerHTML=`<svg viewBox="0 0 320 214" role="img" aria-label="Carte de la quête : le départ est visible, les ${n} étapes restent dans le brouillard">
-   <rect width="320" height="214" fill="var(--card)"/>
-   <g fill="none" stroke="var(--line)" stroke-linecap="round"><path d="M-10 170 C70 140 120 190 200 160 S300 110 330 130" stroke-width="10"/><path d="M60 -10 C80 60 50 120 90 230" stroke-width="10"/><path d="M240 -10 C220 70 270 140 240 230" stroke-width="10"/><path d="M-10 64 C80 84 150 34 230 64 S310 54 330 34" stroke-width="5"/></g>
+  box.innerHTML=`<svg viewBox="0 0 320 168" role="img" aria-label="Carte de la quête : le départ est visible, les ${n} étapes restent dans le brouillard">
+   <rect width="320" height="168" fill="var(--card)"/>
+   <g fill="none" stroke="var(--line)" stroke-linecap="round"><path d="M-10 134 C70 110 120 150 200 126 S300 88 330 104" stroke-width="10"/><path d="M60 -10 C80 50 50 96 90 180" stroke-width="10"/><path d="M240 -10 C220 56 270 112 240 180" stroke-width="10"/><path d="M-10 52 C80 68 150 28 230 52 S310 44 330 28" stroke-width="5"/></g>
    <path d="${d}" fill="none" stroke="var(--rose)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 8" class="trail"/>
-   <ellipse class="fog" cx="190" cy="122" rx="120" ry="68" fill="var(--stone)" opacity=".5"/>
+   <ellipse class="fog" cx="190" cy="100" rx="120" ry="56" fill="var(--stone)" opacity=".5"/>
    ${P.map(([x,y])=>`<g transform="translate(${x} ${y})"><circle r="12" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text y="5" text-anchor="middle" font-family="Alegreya Sans, sans-serif" font-weight="800" font-size="14" fill="var(--or)">?</text></g>`).join("")}
    <g transform="translate(${S0[0]} ${S0[1]})"><circle r="15" fill="var(--rose)" stroke="var(--card)" stroke-width="3"/><path d="M-6 5V-3l6-5 6 5v8z" fill="var(--card)"/></g>
-   <text x="${S0[0]}" y="${S0[1]+32}" text-anchor="middle" font-family="Alegreya Sans, sans-serif" font-weight="800" font-size="12" fill="var(--ink)">Départ</text>
-   <g transform="translate(290 30)"><circle r="16" fill="var(--card)" stroke="var(--or)" stroke-width="1.5"/><path d="M0-12 L4 0 L0 12 L-4 0z" fill="var(--or)"/></g></svg>`;
+   <text x="${S0[0]}" y="${S0[1]+31}" text-anchor="middle" font-family="Alegreya Sans, sans-serif" font-weight="800" font-size="12" fill="var(--ink)">Départ</text>
+   <g transform="translate(292 26)"><circle r="15" fill="var(--card)" stroke="var(--or)" stroke-width="1.5"/><path d="M0-12 L4 0 L0 12 L-4 0z" fill="var(--or)"/></g></svg>`;
   const t=box.querySelector("svg");const tx=document.createElementNS("http://www.w3.org/2000/svg","text");
-  tx.setAttribute("x","14");tx.setAttribute("y","30");tx.setAttribute("font-family","UnifrakturMaguntia, Georgia, serif");tx.setAttribute("font-size","19");tx.setAttribute("fill","var(--ink)");
+  tx.setAttribute("x","14");tx.setAttribute("y","28");tx.setAttribute("font-family","UnifrakturMaguntia, Georgia, serif");tx.setAttribute("font-size","19");tx.setAttribute("fill","var(--ink)");
   tx.textContent=S.preview.indoorOnly?"À la maison":(S.town||"Votre quartier");t.append(tx);
   box.append(h("figcaption",{text:"Carte schématique : le départ est placé, les lieux restent dans le brouillard."}));
   return box;
@@ -2047,16 +2076,16 @@ function houseTeaser(){
   const n=Math.max(1,Math.min(6,(S.preview&&S.preview.count)||6));
   const P=[[86,70],[176,62],[262,78],[250,160],[160,168],[78,156]].slice(0,n);
   const box=h("figure",{class:"tmap"});
-  box.innerHTML=`<svg viewBox="0 0 320 214" role="img" aria-label="Plan de la maison : les ${n} cachettes restent à trouver">
+  box.innerHTML=`<svg viewBox="0 10 320 198" role="img" aria-label="Plan de la maison : les ${n} cachettes restent à trouver">
    <rect width="320" height="214" fill="var(--card)"/>
    <g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round" opacity=".75"><path d="M30 38h260v150H30z"/><path d="M128 38v58M128 124v64M212 38v40M212 106v82M30 112h70M150 112h62M240 112h50"/></g>
    <g fill="none" stroke="var(--line)" stroke-width="2"><rect x="44" y="130" width="40" height="22" rx="4"/><rect x="230" y="128" width="44" height="30" rx="4"/><circle cx="168" cy="72" r="12"/></g>
    ${P.map(([x,y])=>`<g transform="translate(${x} ${y})"><circle r="12" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text y="5" text-anchor="middle" font-family="Alegreya Sans, sans-serif" font-weight="800" font-size="14" fill="var(--or)">?</text></g>`).join("")}
    <g transform="translate(160 200)"><circle r="11" fill="var(--rose)" stroke="var(--card)" stroke-width="3"/></g></svg>`;
   const t=box.querySelector("svg");const tx=document.createElementNS("http://www.w3.org/2000/svg","text");
-  tx.setAttribute("x","30");tx.setAttribute("y","26");tx.setAttribute("font-family","UnifrakturMaguntia, Georgia, serif");tx.setAttribute("font-size","19");tx.setAttribute("fill","var(--ink)");
+  tx.setAttribute("x","30");tx.setAttribute("y","30");tx.setAttribute("font-family","UnifrakturMaguntia, Georgia, serif");tx.setAttribute("font-size","19");tx.setAttribute("fill","var(--ink)");
   tx.textContent="À la maison";t.append(tx);
-  box.append(h("figcaption",{text:`Plan schématique : ${n} cachettes à trouver, dévoilées dans le guide de l'adulte après le paiement.`}));
+  box.append(h("figcaption",{text:`Plan schématique : ${n} cachettes, dévoilées dans le guide de l'adulte après le paiement.`}));
   return box;
 }
 function prologueText(){
@@ -2067,51 +2096,102 @@ function prologueText(){
 // « La quête d'Arthur »; before an h (« Hugo »), the sentence is turned: « Hugo, votre quête est prête ! ».
 function questTitle(){const n=S.name,d=n&&deMot(n);
   return !n?`La quête de votre ${g("chevalier","chevalière")}`:d?`La quête ${d}`:`${n}, votre quête est prête !`;}
+// The preview (13/11/2026, after the funnel audit): the proof first (the Grand Master calls the child by name),
+// then the map and the figures, a way to keep the preview, and the payment within two screens (iPhone 13); the steps
+// to guess come right after it, and what is free and what the full quest opens is folded below.
 function previewScreen(){
   const q=S.preview,home=!!q.indoorOnly,d=S.name&&deMot(S.name),dt=S.town&&deLieu(S.town);
   const edit=()=>go({screen:"setup",mode:home?"maison":"ville"});
   const where=home?"À jouer à la maison, sans sortir.":!S.town?"Dans les rues de votre quartier.":dt?`Dans les rues ${dt}.`:`${aLieu(S.town).replace(/^./,c=>c.toUpperCase())}, à pied dans les rues.`;
+  const keep=PAID&&S.token&&!S.unlocked;
+  const pay=unlockBlock();
   return [
     h("button",{class:"linkish",type:"button",onclick:edit},home?"Modifier le prénom ou le lieu de jeu":"Modifier le prénom, la ville ou le départ"),
-    // the child's map: the title, the place or the mode, then the map (or the house) and the figures of this quest
+    // the child's map: the title, the place or the mode, the Grand Master's voice, then the map (or the house) and the figures
     h("section",{class:"treasure","aria-labelledby":"prev-t"},
       (()=>{const r=h("p",{class:"ready"});r.innerHTML=CHECK;r.append(home?"Quête à la maison":S.name&&!d?"Aperçu gratuit":"Votre quête est prête");
         return h("div",{class:"prevhead"},r,h("h2",{id:"prev-t",text:questTitle()}),h("p",{class:"lead",text:where}));})(),
+      prologueListen(home),
       home?houseTeaser():mapTeaser(),
       h("div",{class:"stats"},
         h("div",null,h("b",{text:String(q.count)}),h("span",{text:home?"cachettes":"étapes"})),
         h("div",null,h("b",{text:home?"0 km":`≈ ${(q.walkM/1000).toFixed(1).replace(".",",")} km`}),h("span",{text:"à pied"})),
         h("div",null,h("b",{text:`≈ ${q.minutes} min`}),h("span",{text:"de jeu"}))),
       h("p",{class:"note",text:home?"Durée estimée pour cette quête.":"Distance et durée estimées pour ce parcours."})),
-    // what can be seen now, and what the full quest opens, and when (checked in stepScreen and guideScreen:
-    // no list of the places before the game; each one shows at the start of its step, with a walking route)
-    h("div",{class:"twobox"},
-      h("section",{class:"freebox","aria-labelledby":"free-t"},h("h3",{id:"free-t",text:"Disponible dans votre aperçu"}),
-        h("ul",null,...(home
-          ?["Le plan schématique et le nombre de cachettes","La durée estimée","Un avant-goût de chaque étape, ci-dessous","Le prologue du Grand Maître, à écouter"]
-          :["La carte schématique du départ","Le nombre d'étapes, la distance et la durée estimées","Un avant-goût de chaque étape, ci-dessous","Le prologue du Grand Maître, à écouter"]).map(x=>h("li",{text:x})))),
-      h("section",{class:"fullbox","aria-labelledby":"full-t"},h("h3",{id:"full-t",text:"Dans la quête complète"}),
-        home?h("p",{text:"Dès le paiement, le guide de l'adulte s'ouvre : les six cachettes de la maison et les cartes à imprimer ou à écrire à la main, à cacher avant la fête (5 minutes). Le jour J, la voix du Grand Maître, les énigmes, les défis et le diplôme."})
-          :h("p",{text:"Dès le paiement, le guide de l'adulte s'ouvre : sécurité, trésor, invitation et diplôme. Le jour J, les lieux exacts se révèlent un par un pendant la partie : au début de chaque étape, votre écran montre le lieu et un lien « Itinéraire à pied ». Il n'y a pas de liste des lieux à consulter avant la fête."}))),
+    keep&&keepPreview(),
+    ...pay,
     h("div",{class:"card"},h("h3",{text:"Ce qui vous attend"}),
       h("ul",{class:"teasers"},q.teasers.map((t,i)=>h("li",null,h("span",{class:"n",text:String(i+1)}),h("span",{text:t}))))),
-    voiceCard(prologueText(),"Prologue gratuit",null,V.message("prologue",{g:S.hero,indoor:home}),"Écouter le prologue"),
-    ...unlockBlock(),
-    PAID&&S.token&&!S.unlocked&&sharePreview(),
+    // what can be seen now, and what the full quest opens, and when (checked in stepScreen and guideScreen:
+    // no list of the places before the game; each one shows at the start of its step, with a walking route)
+    h("details",{class:"card fold"},h("summary",null,"Aperçu gratuit ou quête complète : ce qui change"),
+      h("div",{class:"twobox"},
+        h("section",{class:"freebox","aria-labelledby":"free-t"},h("h3",{id:"free-t",text:"Disponible dans votre aperçu"}),
+          h("ul",null,...(home
+            ?["Le plan schématique et le nombre de cachettes","La durée estimée","Un avant-goût de chaque étape","Le prologue du Grand Maître, à écouter"]
+            :["La carte schématique du départ","Le nombre d'étapes, la distance et la durée estimées","Un avant-goût de chaque étape","Le prologue du Grand Maître, à écouter"]).map(x=>h("li",{text:x})))),
+        h("section",{class:"fullbox","aria-labelledby":"full-t"},h("h3",{id:"full-t",text:"Dans la quête complète"}),
+          home?h("p",{text:"Dès le paiement, le guide de l'adulte s'ouvre : les six cachettes de la maison et les cartes à imprimer ou à écrire à la main, à cacher avant la fête (5 minutes). Le jour J, la voix du Grand Maître, les énigmes, les défis et le diplôme."})
+            :h("p",{text:"Dès le paiement, le guide de l'adulte s'ouvre : sécurité, trésor, invitation et diplôme. Le jour J, les lieux exacts se révèlent un par un pendant la partie : au début de chaque étape, votre écran montre le lieu et un lien « Itinéraire à pied ». Il n'y a pas de liste des lieux à consulter avant la fête."})))),
     h("button",{class:"linkish",type:"button",onclick:()=>go({screen:"setup",mode:"ville"})},home?"Créer plutôt une quête dans ma ville":"Changer de point de départ"),
     footer()
   ];
 }
-// To decide together: the preview opens on the other parent's phone, places still hidden.
-function sharePreview(){
-  const q=S.preview,out=h("p",{class:"note",role:"status"});
-  const url=`${location.origin}${location.pathname}?apercu=${S.token}&n=${encodeURIComponent(S.name)}&h=${S.hero}&k=${S.kids}&v=${encodeURIComponent(S.town||"")}`;
+// The proof of the preview: the recorded prologue, with the child's name when the Grand Master knows it
+// (the clips last 36 to 45 seconds, plus the name). The text stays folded below, without a second player.
+function prologueListen(home){
+  const status=h("p",{class:"gm-status",role:"status"});
+  const sub=h("p",{class:"listen-sub"});
+  const lis=h("button",{class:"btn gm-listen listen-main",type:"button","aria-pressed":"false"});
+  const known=()=>!!(S.name&&nameSet&&V.nameClip(S.name,nameSet));
+  const idle=()=>{lis.setAttribute("aria-pressed","false");status.textContent="";
+    lis.replaceChildren(playIcon()," "+(known()?`Écouter le Grand Maître appeler ${S.name}`:"Écouter le prologue du Grand Maître"));
+    const of=S.name&&(deMot(S.name)||"de "+S.name);
+    sub.textContent=known()?`Le prologue de la quête, avec le prénom ${of} : moins d'une minute, avec le son.`
+      :S.name?`Le Grand Maître dit « ${g("jeune chevalier","jeune chevalière")} » ; le prénom ${of} s'affiche à l'écran et sur le diplôme.`
+      :"Le prologue de la quête : moins d'une minute, avec le son.";};
+  idle();if(!nameSet)namesReady.then(()=>{if(lis.getAttribute("aria-pressed")!=="true")idle();});
+  const t=fill(prologueText());
+  lis.addEventListener("click",()=>{
+    if(lis.getAttribute("aria-pressed")==="true"){stopVoice();idle();return;}
+    lis.setAttribute("aria-pressed","true");lis.replaceChildren(h("span",{class:"stop","aria-hidden":"true"})," Arrêter");
+    status.textContent="Le Grand Maître parle…";
+    if(!prologueListen.counted){prologueListen.counted=true;hit("prologue");}
+    playKeys(V.message("prologue",{g:S.hero,indoor:home}),t,idle);
+  });
+  return h("div",{class:"listen"},lis,sub,status,
+    h("details",{class:"more"},h("summary",null,"Lire le prologue"),h("p",{class:"prolog",text:t})));
+}
+// The preview's address (?apercu=…): the same quest, places still hidden, on any phone or browser.
+function previewLink(){
+  return `${location.origin}${location.pathname}?apercu=${S.token}&n=${encodeURIComponent(S.name)}&h=${S.hero}&k=${S.kids}&v=${encodeURIComponent(S.town||"")}`;
+}
+function previewSummary(){
+  const q=S.preview;
+  return `${q.count} étapes${q.indoorOnly?" à la maison":`, ${(q.walkM/1000).toFixed(1).replace(".",",")} km à pied`}, environ ${q.minutes} minutes de jeu`;
+}
+// « M'envoyer l'aperçu »: an e-mail written by the parent's own mail app, to no one yet (nothing is collected).
+function previewMail(){
+  const who=S.name?deMot(S.name)||"pour "+S.name:"de notre enfant";
+  return "mailto:?subject="+encodeURIComponent(`L'aperçu de la quête ${who}`)
+    +"&body="+encodeURIComponent(`L'aperçu de la quête d'anniversaire ${who} (${previewSummary()}).\nPour le retrouver et débloquer la quête, ouvrez ce lien :\n${previewLink()}\n`);
+}
+function mailPreviewBtn(){
+  return h("a",{class:"btn ghost",href:previewMail(),onclick:()=>hit("apercu-garde")},"M'envoyer l'aperçu");
+}
+// To keep the preview for later, or to decide together: the preview opens on the other parent's phone, places still hidden.
+// In-app browsers (Instagram, TikTok…) keep their own storage: the link is the way back from Safari or Chrome.
+function keepPreview(){
+  const out=h("p",{class:"note",role:"status"});
   const send=async()=>{
-    const text=`Regarde l'aperçu de la quête d'anniversaire ${S.name?deMot(S.name)||"préparée pour "+S.name:"de notre enfant"} : ${q.count} étapes${q.indoorOnly?" à la maison":`, ${(q.walkM/1000).toFixed(1).replace(".",",")} km à pied`}, environ ${q.minutes} minutes de jeu.`;
+    const text=`Regarde l'aperçu de la quête d'anniversaire ${S.name?deMot(S.name)||"préparée pour "+S.name:"de notre enfant"} : ${previewSummary()}.`;
+    const url=previewLink();
     try{if(navigator.share){await navigator.share({title:"Ma Quête Légendaire",text,url});hit("apercu");return;}}catch(e){if(e&&e.name==="AbortError")return;}
-    try{await navigator.clipboard.writeText(text+" "+url);out.textContent="Lien de l'aperçu copié.";hit("apercu");}catch(e){out.textContent=url;}
+    try{await navigator.clipboard.writeText(text+" "+url);out.textContent="✓ Lien de l'aperçu copié : collez-le dans un message.";hit("apercu");}catch(e){out.textContent=url;}
   };
-  return h("div",null,h("button",{class:"linkish",type:"button",onclick:send},"Décider à deux ? Envoyer l'aperçu"),out);
+  return h("section",{class:"card keep","aria-labelledby":"keep-t"},h("h3",{id:"keep-t",text:"Pas encore la date ? Gardez cet aperçu."}),
+    INAPP&&h("p",{class:"note",text:"Vous êtes dans le navigateur d'une application (Instagram, TikTok…) : ce lien vous permet de retrouver l'aperçu dans Safari ou Chrome."}),
+    h("div",{class:"row"},mailPreviewBtn(),h("button",{class:"btn ghost",type:"button",onclick:send},"Envoyer à l'autre parent")),out);
 }
 // Before the opening (server variable TESTEURS): the quest is offered to tester families, who answer
 // a few questions at the end. Payment stays hidden until the variable is removed.
@@ -2174,6 +2254,10 @@ function avisCard(){
   return card;
 }
 // Unlock: free in the demo build; consent + Stripe payment in the paid build.
+// The promises listed above the button are those of the sales terms and the guide (checked 13/11/2026):
+// the same quest playable at home (guideScreen « Où jouer ? », FAQ « Et s'il pleut »), the reopen link valid
+// at least twelve months (CGV art. 5), the voice kept on the phone (keepOffline), the invitation and diplomas.
+let cancelled=false;   // back from Stripe without paying (?annule): say it at the top of the payment card
 function unlockBlock(){
   if(S.unlocked&&S.quest)return [note,h("button",{class:"btn",type:"button",onclick:()=>go({screen:"guide"})},"Reprendre la quête")];
   if(!PAID)return [note,
@@ -2181,35 +2265,56 @@ function unlockBlock(){
     h("p",{class:"note",text:"Version de test : aucun paiement, le bouton débloque la quête directement."})];
   if(S.preview&&S.preview.testeur)return testerBlock();
   const box=h("input",{type:"checkbox",id:"consent"});
+  const consent=h("label",{class:"consent",for:"consent"},box,h("span",null,"J'accepte les ",h("a",{href:"legal/cgv",target:"_blank",rel:"noopener"},"conditions de vente"),
+    ". Je demande l'accès à la quête dès le paiement et je renonce ainsi à mon droit de rétractation."));
+  // the button keeps its colour: without the box ticked, it leads to the box and says why
+  const err=h("p",{class:"ferr",id:"consent-err",role:"alert",hidden:true});
+  const need=on=>{err.hidden=!on;err.textContent=on?"Cochez d'abord la case ci-dessus pour accéder à la quête dès le paiement.":"";
+    consent.classList.toggle("need",on);
+    if(on){box.setAttribute("aria-invalid","true");box.setAttribute("aria-describedby","consent-err");}
+    else{box.removeAttribute("aria-invalid");box.removeAttribute("aria-describedby");}};
+  box.addEventListener("change",()=>{if(box.checked)need(false);});
   const pay=async()=>{
-    if(!box.checked){note.textContent="Cochez d'abord la case ci-dessus pour accéder à la quête dès le paiement.";return;}
+    if(!box.checked){consent.classList.remove("need");void consent.offsetWidth;need(true);consent.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
+      box.focus({preventScroll:true});return;}
     btn.disabled=true;note.textContent="Ouverture du paiement sécurisé…";
-    try{const r=await api("api/checkout",{token:S.token,consent:true,name:S.name,hero:S.hero,kids:S.kids,town:S.town,ref:S.ref});
+    try{const r=await api("api/checkout",{token:S.token,consent:true,name:S.name,hero:S.hero,kids:S.kids,town:S.town,ref:ME?"moi":S.ref});
       if(r.ok&&r.url){location.href=r.url;return;}
       note.textContent=r.reason==="token"?"Cette quête a expiré : créez-la à nouveau depuis le point de départ.":"Le paiement n'a pas pu s'ouvrir. Réessayez dans un instant.";}
     catch(e){note.textContent="Le serveur ne répond pas. Vérifiez la connexion et réessayez.";}
     btn.disabled=false;
   };
   const btn=h("button",{class:"btn big",type:"button",onclick:pay},`Débloquer la quête complète · ${S.preview.price||PRICE}`);
-  const sync=()=>btn.classList.toggle("wait",!box.checked);box.addEventListener("change",sync);sync();
-  const price=S.preview.price||PRICE,n=S.preview.count;
+  const price=S.preview.price||PRICE,n=S.preview.count,home=!!S.preview.indoorOnly;
+  const named=S.name&&nameSet&&V.nameClip(S.name,nameSet);
+  const back=cancelled&&h("div",{class:"cancelled",role:"status"},
+    h("p",null,h("b",{text:"Paiement annulé : rien n'a été débité. Votre aperçu est gardé."})),
+    CONTACT&&h("p",null,"Une question avant de vous décider ? Écrivez-nous à ",h("a",{href:"mailto:"+CONTACT},CONTACT),"."),
+    S.token&&h("div",{class:"row"},mailPreviewBtn()));
+  cancelled=false;
   const card=h("section",{class:"card paycard",id:"payer"},
     IMG("dragon-bourse.webp","",210,290,{class:"dr",loading:"lazy"}),
-    h("p",{class:"bubble say","aria-hidden":"true",text:"Et moi ? Toujours pas payé."}),
+    h("p",{class:"bubble say","aria-hidden":"true",text:S.name?`Le Grand Maître attend ${S.name} !`:`Le Grand Maître attend son ${g("chevalier","chevalière")} !`}),
+    back,
     h("h3",{text:!S.name?`Débloquer la quête de votre ${g("chevalier","chevalière")}`:`Débloquer la quête ${deMot(S.name)||"pour "+S.name}`}),
     h("p",{class:"price"},h("b",{text:price})," ",h("span",{text:"pour tout le groupe"})),
-    h("ul",{class:"incl"},checkLi(`Les ${n} étapes, la voix du Grand Maître, les défis et les énigmes`),checkLi("Le guide de l'adulte et le diplôme"),checkLi("Un lien pour rouvrir la quête le jour de la fête")),
-    h("label",{class:"consent",for:"consent"},box,h("span",null,"J'accepte les ",h("a",{href:"legal/cgv",target:"_blank",rel:"noopener"},"conditions de vente"),
-      ". Je demande l'accès à la quête dès le paiement et je renonce ainsi à mon droit de rétractation.")),
-    note,btn,
+    h("ul",{class:"incl"},
+      checkLi(home?`Les ${n} cachettes et leurs cartes à imprimer, la voix du Grand Maître${named?" au prénom "+(deMot(S.name)||"de "+S.name):""}, les défis et les énigmes`
+        :`Les ${n} étapes, la voix du Grand Maître${named?" au prénom "+(deMot(S.name)||"de "+S.name):""}, les défis et les énigmes`),
+      !home&&checkLi("S'il pleut : la même quête à la maison, sans rien racheter"),
+      checkLi("Le guide de l'adulte, l'invitation et les diplômes"),
+      checkLi("Le lien de la quête, valable au moins douze mois"),
+      checkLi("Jouable sans réseau, une fois la voix enregistrée")),
+    consent,err,note,btn,
     h("p",{class:"note center",text:"Paiement sécurisé par Stripe : carte, Apple Pay ou Google Pay."}),
     h("p",{class:"note center",text:"Un code promo ? Vous le saisirez sur la page de paiement, avant de payer."}),
     h("p",{class:"guarantee",text:"Un souci le jour J ? Nous vous aidons. Si la quête ne peut vraiment pas fonctionner, nous vous remboursons."}));
+  // the price bar: from the first screen, hidden while the payment card is on screen (or above it)
   const bar=h("div",{class:"paybar",hidden:true},h("div",null,h("p",null,h("b",{text:price}),h("span",{text:"tout le groupe"})),
-    h("a",{class:"btn",href:"#payer",onclick:e=>{e.preventDefault();card.scrollIntoView({behavior:"smooth",block:"center"});}},"Débloquer la quête")));
-  const upd=()=>{if(!bar.isConnected){removeEventListener("scroll",upd);return;}
-    const r=card.getBoundingClientRect();bar.hidden=scrollY<200||(r.top<innerHeight&&r.bottom>0)||r.bottom<0;};
-  addEventListener("scroll",upd,{passive:true});setTimeout(upd,0);
+    h("a",{class:"btn",href:"#payer",onclick:e=>{e.preventDefault();hit("paybar");card.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});}},"Débloquer la quête")));
+  const upd=()=>{if(!bar.isConnected){removeEventListener("scroll",upd);removeEventListener("resize",upd);return;}
+    const r=card.getBoundingClientRect();bar.hidden=(r.top<innerHeight&&r.bottom>0)||r.bottom<0;};
+  addEventListener("scroll",upd,{passive:true});addEventListener("resize",upd,{passive:true});setTimeout(upd,0);
   return [card,bar];
 }
 function guideScreen(){
@@ -2459,8 +2564,16 @@ if(qs.get("ville")&&!sid&&!qs.get("apercu")){const v=qs.get("ville").replace(/[<
   if(!qs.get("ref"))history.replaceState(null,"",location.pathname);}
 if(PAID&&sid){history.replaceState(null,"",location.pathname);unlockWith(sid,!!qs.get("paid"));}
 else if(PAID&&qs.get("apercu")){history.replaceState(null,"",location.pathname);openShared(qs.get("apercu"),qs);}
-else if(qs.has("annule")){history.replaceState(null,"",location.pathname);if(S.preview)S.screen="preview";render();note.textContent="Paiement annulé : rien n'a été débité.";}
-else{render();refreshQuest();}
+else if(qs.has("annule")){history.replaceState(null,"",location.pathname);
+  // back from Stripe without paying: the payment card, with what happened and how to keep the preview (the box stays unticked)
+  if(S.preview&&!(S.unlocked&&S.quest)){S.screen="preview";cancelled=true;hit("annule");}
+  render();
+  const card=document.getElementById("payer");
+  if(card&&render.cur==="preview")card.scrollIntoView({block:"start"});else note.textContent="Paiement annulé : rien n'a été débité.";}
+else{
+  // a preview found again on this phone (the parent came back, or reloaded the page)
+  if(PAID&&S.preview&&S.token&&!S.unlocked&&S.screen==="preview")hit("apercu-retour");
+  render();refreshQuest();}
 
 // A quest kept on this phone before 15/10/2026 has no hiding places nor home stories: rebuild it
 // (same places, same letters, progress kept).

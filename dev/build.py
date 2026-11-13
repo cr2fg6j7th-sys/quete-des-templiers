@@ -53,8 +53,11 @@ ver = json.loads((d / "verification.json").read_text(encoding="utf-8")) if (d / 
 ver_tags = "".join(f'<meta name="{n}" content="{ver[k]}">\n' for k, n in (("google", "google-site-verification"), ("bing", "msvalidate.01"))
                    if re.fullmatch(r"[A-Za-z0-9_\-]{10,100}", ver.get(k) or ""))
 
+# The contact address of the sales terms, also offered on the preview after a cancelled payment.
+CONTACT = json.loads((d / "legal" / "identite.json").read_text(encoding="utf-8")).get("email") or ""
+
 def page(engine_part, paid):
-    return (t.replace("/*GEO*/", geo).replace("/*ENGINE*/", engine_part).replace("/*VOICE*/", voice)
+    return (t.replace("/*EMAIL*/", CONTACT).replace("/*GEO*/", geo).replace("/*ENGINE*/", engine_part).replace("/*VOICE*/", voice)
              .replace("const PAID=/*PAID*/false;", f"const PAID={'true' if paid else 'false'};")
              .replace("/*PLACES_SITE*/", "" if paid else PLACES_SITE)
              .replace("{{SITE}}", SITE).replace("/*VOICE_VERSION*/", VOICE_VERSION)

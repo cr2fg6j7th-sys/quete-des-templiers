@@ -25,7 +25,9 @@ const log = (evt, data) => console.log(JSON.stringify(Object.assign({ evt }, dat
 // No IP address, no identifier, no cookie: only how many times each step happened, and the ref.
 const EVENTS = new Set(["home", "setup", "preview", "few", "nodata", "neterr", "checkout", "unlock", "achat", "promo", "demo", "diploma",
   "invite", "diplome", "imprime", "share", "apercu", "apercu-ouvert", "horsligne", "geo-refus", "geo-echec", "testeur", "avis",
-  "liens", "liens-site", "liens-instagram", "liens-tiktok", "liens-pinterest"]);
+  "liens", "liens-site", "liens-instagram", "liens-tiktok", "liens-pinterest",
+  "prologue", "annule", "apercu-retour", "apercu-garde", "paybar",
+  "commune-liste", "commune-tapee", "commune-proche", "localiser-ok", "localiser-echec"]);
 function count(env, ctx, evt, ref) {
   if (!env.STATS || !EVENTS.has(evt)) return;
   const day = new Date().toISOString().slice(0, 10);

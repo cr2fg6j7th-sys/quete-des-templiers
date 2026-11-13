@@ -79,9 +79,30 @@ async def main():
             check("function choose" not in dom, "le moteur de choix des lieux n'est pas dans la page")
             check(not OSM_CALLS, "aperçu fait depuis notre copie des lieux, sans appeler OpenStreetMap")
             await pg.screenshot(path=str(ROOT / "dist" / "p1-apercu.png"), full_page=True)
+            # the proof at the top: the Grand Master calls the child by name (Michael: the recorded name that sounds the same)
+            listen = await pg.inner_text(".listen")
+            heard = []
+            pg.on("request", lambda r: heard.append(r.url) if "/audio/voix/prologue-" in r.url else None)
+            await pg.click(".listen-main")
+            await pg.wait_for_timeout(500)
+            check("Écouter le Grand Maître appeler Michael" in listen and "moins d'une minute" in listen and await pg.get_attribute(".listen-main", "aria-pressed") == "true"
+                  and any("prologue-dehors-m" in u for u in heard), "aperçu : la voix du Grand Maître en haut, au prénom, lue au clic " + repr(heard[:2]))
+            await pg.click(".listen-main")
+            # the price bar shows from the first screen, and leads to the payment card
+            check(await pg.is_visible(".paybar"), "aperçu : barre de prix visible dès le premier écran")
+            await pg.click(".paybar a")
+            await pg.wait_for_timeout(900)
+            check(not await pg.is_visible(".paybar") and await pg.evaluate("(()=>{const r=document.getElementById('payer').getBoundingClientRect();return r.top<innerHeight&&r.bottom>0})()"),
+                  "barre de prix : mène au paiement et se cache devant lui")
+            # keep the preview: an e-mail to oneself (no address asked), or a link to the other parent
+            mail = await pg.get_attribute(".keep a:has-text(\"M'envoyer l'aperçu\")", "href")
+            check(mail.startswith("mailto:?subject=") and "%3Fapercu%3D" in mail and "%26n%3DMichael" in mail, "aperçu : « M'envoyer l'aperçu » écrit un e-mail sans destinataire, avec le lien")
+            await pg.evaluate("document.querySelector('.keep a').addEventListener('click',e=>e.preventDefault())")
+            await pg.click(".keep a")
             # send the preview to the other parent: it opens on another phone, places still hidden
             await pg.evaluate("navigator.clipboard.writeText=t=>{window.__copied=t;return Promise.resolve()};navigator.share=undefined")
-            await pg.click("text=Décider à deux")
+            await pg.click("text=Envoyer à l'autre parent")
+            check("Lien de l'aperçu copié" in await pg.inner_text(".keep"), "aperçu : copie du lien confirmée à l'écran")
             shared = (await pg.evaluate("window.__copied")).split(" ")[-1]
             check("?apercu=" in shared and "&n=Michael" in shared, "aperçu : lien à envoyer à l'autre parent")
             ctxS, pgS = await new_page(b, errs)
@@ -91,8 +112,20 @@ async def main():
             check("La quête de Michael" in bodyS and "Débloquer la quête" in bodyS and not any(x in domS for x in PLACES) and "?apercu" not in pgS.url,
                   "aperçu reçu : même quête, prête à payer, lieux cachés, adresse nettoyée")
             await ctxS.close()
-            await pg.click("button:has-text('Débloquer la quête')")
-            check("Cochez d'abord" in await pg.inner_text("body"), "paiement refusé sans la case cochée")
+            n0 = len(json.loads(urllib.request.urlopen(BASE + "/__sessions").read()))
+            await pg.evaluate("scrollTo(0,0)")
+            bg = await pg.eval_on_selector("#payer button.big", "b=>getComputedStyle(b).backgroundColor")
+            await pg.click("#payer button.big")
+            await pg.wait_for_timeout(700)
+            n1 = len(json.loads(urllib.request.urlopen(BASE + "/__sessions").read()))
+            check(n1 == n0 and "fake-checkout" not in pg.url and await pg.is_visible("#consent-err") and "Cochez d'abord" in await pg.inner_text("#consent-err"),
+                  "paiement refusé sans la case cochée : pas de paiement, message visible")
+            check(bg == "rgb(160, 50, 68)" and await pg.evaluate("document.activeElement.id") == "consent"
+                  and await pg.get_attribute("#consent", "aria-describedby") == "consent-err" and await pg.evaluate("document.querySelector('.consent').classList.contains('need')"),
+                  f"bouton de paiement jamais gris ({bg}) ; la case est mise en évidence et reçoit le focus")
+            await pg.check("#consent")
+            check(not await pg.is_visible("#consent-err"), "case cochée : le message disparaît")
+            await pg.uncheck("#consent")
             await pg.check("#consent")
             await pg.click("button:has-text('Débloquer la quête')")
             await pg.wait_for_url("**/fake-checkout**", timeout=5000)
@@ -107,6 +140,10 @@ async def main():
             await pg.click("#cancel")
             await pg.wait_for_selector("text=Paiement annulé", timeout=5000)
             check("?annule" not in pg.url, "retour après annulation : aperçu et message")
+            banner = await pg.inner_text(".cancelled")
+            seen = await pg.evaluate("(()=>{const r=document.querySelector('.cancelled').getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight})()")
+            check(seen and "rien n'a été débité. Votre aperçu est gardé." in banner and "maquetelegendaire@gmail.com" in banner and "M'envoyer l'aperçu" in banner
+                  and not await pg.is_checked("#consent"), "retour après annulation : bandeau visible en haut du paiement, aide, case non cochée")
             await pg.check("#consent")
             await pg.click("button:has-text('Débloquer la quête')")
             await pg.wait_for_url("**/fake-checkout**", timeout=5000)
@@ -366,8 +403,12 @@ async def main():
             bodyP = await pgA.inner_text("body")
             check("La quête d'Arthur" in bodyP and "Dans les rues d'Obernai." in bodyP and "Débloquer la quête d'Arthur" in bodyP and " de Arthur" not in bodyP and " de Obernai" not in bodyP,
                   "aperçu : « La quête d'Arthur », « Dans les rues d'Obernai », bloc d'achat")
-            check("Disponible dans votre aperçu" in bodyP and "Dans la quête complète" in bodyP and "se révèlent un par un pendant la partie" in bodyP and "Carte schématique" in bodyP
-                  and "Écouter le prologue" in bodyP and "Débloquer la quête complète · 24,90" in bodyP, "aperçu : deux blocs gratuit / complet, carte schématique, prologue, prix sur le bouton")
+            folded = await pgA.text_content("details.fold")
+            check("Disponible dans votre aperçu" in folded and "Dans la quête complète" in folded and "se révèlent un par un pendant la partie" in folded and "Carte schématique" in bodyP
+                  and "Écouter le Grand Maître appeler Arthur" in bodyP and "Débloquer la quête complète · 24,90" in bodyP and "S'il pleut : la même quête à la maison" in bodyP,
+                  "aperçu : voix au prénom, carte schématique, gratuit / complet repliés, prix sur le bouton")
+            top = await pgA.evaluate("Math.round(document.querySelector('#payer button.big').getBoundingClientRect().top+scrollY)")
+            check(top <= 2 * 664, f"aperçu : bouton de paiement à deux écrans d'iPhone au plus ({top} px)")
             await pgA.screenshot(path=str(ROOT / "dist" / "p0-arthur-obernai.png"), full_page=True)
             await pgA.click("text=Modifier le prénom, la ville ou le départ")
             kept = (await pgA.input_value("#hero-name"), await pgA.input_value("#kids"), await pgA.input_value("#commune"))
@@ -382,7 +423,8 @@ async def main():
             await pgA.click("#create-home")
             await pgA.wait_for_selector("text=Ce qui vous attend", timeout=6000)
             bodyM = await pgA.inner_text("body")
-            check("La quête d'Arthur" in bodyM and "À jouer à la maison" in bodyM and "six cachettes" in bodyM and "Plan schématique" in bodyM
+            check("La quête d'Arthur" in bodyM and "À jouer à la maison" in bodyM and "six cachettes" in await pgA.text_content("details.fold") and "Plan schématique" in bodyM
+                  and "S'il pleut" not in bodyM
                   and "Modifier le prénom ou le lieu de jeu" in bodyM, "quête à la maison : plan de la maison, cachettes expliquées, lien de modification adapté")
             await pgA.check("#consent")
             await pgA.click("button:has-text('Débloquer la quête')")
@@ -393,7 +435,7 @@ async def main():
             # anonymous counts of the visit, and the report's access to them
             counts = json.loads(urllib.request.urlopen(BASE + "/__counts").read())
             events = {k.split("|")[1] for k in counts}
-            want = {"home", "setup", "preview", "checkout", "unlock", "achat", "demo", "diploma", "apercu", "apercu-ouvert", "horsligne", "share", "geo-refus", "geo-echec"}
+            want = {"home", "setup", "preview", "checkout", "unlock", "achat", "demo", "diploma", "apercu", "apercu-ouvert", "horsligne", "share", "geo-refus", "geo-echec", "prologue", "annule", "apercu-garde", "apercu-retour", "paybar", "commune-liste"}
             check(want <= events and all(len(k.split("|")) == 4 for k in counts), "compteurs anonymes : " + ", ".join(sorted(events)))
             key = hashlib.sha256(b"stats:sk_test_local").hexdigest()
             req = lambda body: urllib.request.Request(BASE + "/api/stats", data=json.dumps(body).encode(), headers={"content-type": "application/json"}, method="POST")
