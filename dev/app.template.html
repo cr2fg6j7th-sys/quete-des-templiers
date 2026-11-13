@@ -967,10 +967,10 @@ function questMenu(){
   return menu;
 }
 function footer(){return h("footer",null,"Lieux : © contributeurs OpenStreetMap (licence ODbL). Communes et adresses : Base Adresse Nationale et API Géo (Licence Ouverte 2.0), Nominatim.",h("br"),
-  h("a",{href:"anniversaire-chevalier.html"},"Guide : organiser un anniversaire chevalier"),h("br"),
-  h("a",{href:"anniversaire-chevalier-a-la-maison.html"},"Guide : anniversaire chevalier à la maison quand il pleut"),h("br"),
-  h("a",{href:"chasse-au-tresor-anniversaire-dehors.html"},"Guide : chasse au trésor d'anniversaire dehors"),h("br"),
-  h("a",{href:"legal/cgv.html"},"Conditions de vente")," · ",h("a",{href:"legal/mentions-legales.html"},"Mentions légales")," · ",h("a",{href:"legal/confidentialite.html"},"Confidentialité")," · ",h("a",{href:"legal/credits.html"},"Crédits"),
+  h("a",{href:"anniversaire-chevalier"},"Guide : organiser un anniversaire chevalier"),h("br"),
+  h("a",{href:"anniversaire-chevalier-a-la-maison"},"Guide : anniversaire chevalier à la maison quand il pleut"),h("br"),
+  h("a",{href:"chasse-au-tresor-anniversaire-dehors"},"Guide : chasse au trésor d'anniversaire dehors"),h("br"),
+  h("a",{href:"legal/cgv"},"Conditions de vente")," · ",h("a",{href:"legal/mentions-legales"},"Mentions légales")," · ",h("a",{href:"legal/confidentialite"},"Confidentialité")," · ",h("a",{href:"legal/credits"},"Crédits"),
   ME&&h("br"),ME&&h("span",{class:"me",text:"Appareil de Nathan : visites non comptées."}));}
 
 /* ---------- Network ---------- */
@@ -1434,9 +1434,9 @@ const PHONE_VIDS=[
   ["quete-defis","3 · À chaque lieu","Un défi, une énigme, une lettre","Le récit du lieu, le défi des chevaliers, l'énigme et la lettre gagnée qui défilent"],
   ["quete-tresor","4 · Le dernier lieu","Le mot secret ouvre le trésor","Le mot secret, le trésor et le diplôme de chevalier qui défilent"]];
 const GUIDES=[
-  ["anniversaire-chevalier.html","4 min de lecture","Organiser un anniversaire chevalier","Déroulé sur 2 h 30, invitation à copier, costumes maison, trois jeux."],
-  ["anniversaire-chevalier-a-la-maison.html","6 min de lecture","Anniversaire chevalier à la maison quand il pleut","Un déroulé de 2 h : cinq jeux d'intérieur, blason, chasse aux lettres."],
-  ["chasse-au-tresor-anniversaire-dehors.html","6 min de lecture","Chasse au trésor d'anniversaire dehors","Parcours, sécurité, six types d'indices, défis et trésor."]];
+  ["anniversaire-chevalier","4 min de lecture","Organiser un anniversaire chevalier","Déroulé sur 2 h 30, invitation à copier, costumes maison, trois jeux."],
+  ["anniversaire-chevalier-a-la-maison","6 min de lecture","Anniversaire chevalier à la maison quand il pleut","Un déroulé de 2 h : cinq jeux d'intérieur, blason, chasse aux lettres."],
+  ["chasse-au-tresor-anniversaire-dehors","6 min de lecture","Chasse au trésor d'anniversaire dehors","Parcours, sécurité, six types d'indices, défis et trésor."]];
 const TOWNS=[["Obernai","obernai"],["Molsheim","molsheim"],["Mutzig","mutzig"],["Ottrott","ottrott"]];
 function phoneVideo([file,kicker,title,alt]){
   const v=h("video",{poster:file+".jpg",muted:true,loop:true,playsinline:true,preload:"none",width:"540",height:"1168","aria-label":alt},
@@ -1744,8 +1744,8 @@ function homeScreen(){
       ...GUIDES.map(([href,time,t,p])=>h("a",{class:"gcard",href},h("span",{class:"gk"},ico("book",16),"Guide · "+time),h("strong",{text:t}),h("span",{class:"gp",text:p}),h("span",{class:"gl",text:"Lire →"})))),
     h("section",{class:"block",id:"villes"},
       h("h2",{text:"Anniversaire chevalier près de chez vous"}),
-      h("div",{class:"vchips"},...TOWNS.map(([n,s])=>h("a",{class:"mchip",href:`anniversaire-chevalier-${s}.html`},n)),
-        h("a",{class:"mchip dark",href:"anniversaire-chevalier-villes.html"},"Toutes les villes →"))),
+      h("div",{class:"vchips"},...TOWNS.map(([n,s])=>h("a",{class:"mchip",href:`anniversaire-chevalier-${s}`},n)),
+        h("a",{class:"mchip dark",href:"anniversaire-chevalier-villes"},"Toutes les villes →"))),
     h("section",{class:"finale"},
       h("div",{class:"dsay"},IMG("dragon-bourse.webp","",210,290,{loading:"lazy",class:"dr"}),h("p",{class:"bubble",text:"Je garde le trésor. Enfin, ce qu'il en reste."})),
       lastCta,h("p",{class:"micro",text:"Découvrez votre quête avant de payer. Sans compte."})),
@@ -2199,7 +2199,7 @@ function unlockBlock(){
     h("h3",{text:!S.name?`Débloquer la quête de votre ${g("chevalier","chevalière")}`:`Débloquer la quête ${deMot(S.name)||"pour "+S.name}`}),
     h("p",{class:"price"},h("b",{text:price})," ",h("span",{text:"pour tout le groupe"})),
     h("ul",{class:"incl"},checkLi(`Les ${n} étapes, la voix du Grand Maître, les défis et les énigmes`),checkLi("Le guide de l'adulte et le diplôme"),checkLi("Un lien pour rouvrir la quête le jour de la fête")),
-    h("label",{class:"consent",for:"consent"},box,h("span",null,"J'accepte les ",h("a",{href:"legal/cgv.html",target:"_blank",rel:"noopener"},"conditions de vente"),
+    h("label",{class:"consent",for:"consent"},box,h("span",null,"J'accepte les ",h("a",{href:"legal/cgv",target:"_blank",rel:"noopener"},"conditions de vente"),
       ". Je demande l'accès à la quête dès le paiement et je renonce ainsi à mon droit de rétractation.")),
     note,btn,
     h("p",{class:"note center",text:"Paiement sécurisé par Stripe : carte, Apple Pay ou Google Pay."}),

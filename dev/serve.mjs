@@ -26,12 +26,23 @@ globalThis.fetch = (input, init) => {
 };
 
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".png": "image/png", ".svg": "image/svg+xml", ".txt": "text/plain", ".xml": "application/xml", ".json": "application/json", ".mp3": "audio/mpeg", ".woff": "font/woff", ".css": "text/css", ".mp4": "video/mp4", ".webm": "video/webm", ".jpg": "image/jpeg", ".webp": "image/webp" };
-function file(p) {
+// Same HTML handling as Cloudflare's static assets ("auto-trailing-slash", the default):
+// /page serves page.html and /page.html redirects to /page (307); /dir/ serves dir/index.html,
+// /dir and /dir/index.html redirect to /dir/.
+const isFile = f => fs.existsSync(f) && fs.statSync(f).isFile();
+function file(p, search = "") {
   const clean = decodeURIComponent(p).replace(/\.\.+/g, "");
+  const site = path.join(root, "site");
+  const moved = to => new Response(null, { status: 307, headers: { location: to + search } });
+  if (clean.endsWith("/index.html") && isFile(path.join(site, clean))) return moved(clean.slice(0, -"index.html".length));
+  if (clean.endsWith(".html") && isFile(path.join(site, clean))) return moved(clean.slice(0, -".html".length));
+  if (!clean.endsWith("/") && !path.extname(clean) && isFile(path.join(site, clean, "index.html"))) return moved(clean + "/");
+  if (clean.length > 1 && clean.endsWith("/") && isFile(path.join(site, clean.slice(0, -1) + ".html"))) return moved(clean.slice(0, -1));
   for (const dir of ["site", "."]) {
     let f = path.join(root, dir, clean);
     if (fs.existsSync(f) && fs.statSync(f).isDirectory()) f = path.join(f, "index.html");
-    if (fs.existsSync(f) && fs.statSync(f).isFile() && (dir === "site" || clean.startsWith("/audio/")))
+    else if (dir === "site" && !isFile(f) && isFile(f + ".html")) f += ".html";
+    if (isFile(f) && (dir === "site" || clean.startsWith("/audio/")))
       return new Response(fs.readFileSync(f), { headers: { "content-type": TYPES[path.extname(f)] || "application/octet-stream" } });
   }
   return new Response("Not found", { status: 404 });
@@ -89,7 +100,7 @@ const env = {
   ESPACE_ID: "test", ESPACE_SALT: "sel",
   ESPACE_HASH: crypto.createHash("sha256").update("sel:test:TEST-CODE-0000-0000").digest("hex"),
   QUEST_KEY: "cle-de-test", STRIPE_SECRET_KEY: "sk_test_local", STRIPE_API: `${base}/stripe`, PRICE_CENTS: "2490",
-  ASSETS: { fetch: req => file(new URL(req.url).pathname) }
+  ASSETS: { fetch: req => { const u = new URL(req.url); return file(u.pathname, u.search); } }
 };
 
 http.createServer(async (nreq, nres) => {

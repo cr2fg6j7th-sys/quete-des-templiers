@@ -30,6 +30,21 @@ try {
   }
   missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, musique, prénoms, polices, pages, image des liens, hors ligne)`);
 
+  // The pages are published without .html (canonical tags, sitemap, links): Cloudflare must serve them
+  // there directly, without a redirect. Otherwise only a warning: the old .html links keep working.
+  {
+    const pages = ["/anniversaire-chevalier", "/anniversaire-chevalier-a-la-maison", "/chasse-au-tresor-anniversaire-dehors", "/legal/cgv"];
+    const odd = [];
+    for (const p of pages) {
+      try {
+        const r = await fetch(site + p, { redirect: "manual" });
+        if (r.status !== 200) odd.push(`${p} (HTTP ${r.status}${r.headers.get("location") ? " vers " + r.headers.get("location") : ""})`);
+      } catch (e) { odd.push(`${p} (${e.message})`); }
+    }
+    odd.length ? console.log(`::warning::Adresses sans .html non servies directement (les balises canonical et le sitemap les utilisent) : ${odd.join(", ")}`)
+      : ok(`${pages.length} pages servies sans .html ni redirection`);
+  }
+
   // short address for the videos: /tiktok -> /?ref=tiktok
   try {
     const r = await fetch(site + "/tiktok", { redirect: "manual" });

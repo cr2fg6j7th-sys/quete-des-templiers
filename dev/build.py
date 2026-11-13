@@ -110,22 +110,27 @@ def fill(html):
     for k, v in fields.items():
         html = html.replace(k, v)
     return html
+# Public address of a page: Cloudflare serves page.html at /page and redirects /page.html there (307),
+# so canonical tags, the sitemap and links name the address without .html. Files keep their .html name.
+url_of = lambda name: name[:-len(".html")] if name.endswith(".html") else name
+# The GitHub Pages copy at the root keeps .html in its links between pages (it works on any static host).
+with_html = lambda html: re.sub(r'href="((?:legal/)?[a-z0-9][a-z0-9-]*)"', r'href="\1.html"', html)
 # Guides for Google and Pinterest (dev/pages/), served at the site root. Google is told the paid
 # site holds the original (canonical); the demo copies are not to be indexed.
-guide_pages = {f.name: fill(f.read_text(encoding="utf-8")).replace("</head>", f'<link rel="canonical" href="{SITE}/{f.name}">\n</head>', 1)
+guide_pages = {f.name: fill(f.read_text(encoding="utf-8")).replace("</head>", f'<link rel="canonical" href="{SITE}/{url_of(f.name)}">\n</head>', 1)
                for f in sorted((d / "pages").glob("*.html"))}
 for name, html in guide_pages.items():
-    (root / name).write_text(html.replace("</head>", '<meta name="robots" content="noindex">\n</head>', 1), encoding="utf-8")
+    (root / name).write_text(with_html(html).replace("</head>", '<meta name="robots" content="noindex">\n</head>', 1), encoding="utf-8")
 legal_pages = {}
 for f in sorted((d / "legal").glob("*.html")):
     html = f.read_text(encoding="utf-8")
     for k, v in fields.items():
         html = html.replace(k, v)
     # one address for search engines, whichever copy (paid site or GitHub Pages) is read
-    legal_pages[f.name] = html.replace("</head>", f'<link rel="canonical" href="{SITE}/legal/{f.name}">\n</head>', 1)
+    legal_pages[f.name] = html.replace("</head>", f'<link rel="canonical" href="{SITE}/legal/{url_of(f.name)}">\n</head>', 1)
 (root / "legal").mkdir(exist_ok=True)
 for name, html in legal_pages.items():
-    (root / "legal" / name).write_text(html, encoding="utf-8")
+    (root / "legal" / name).write_text(with_html(html), encoding="utf-8")
 
 # The paid page does not ship the engine: only the list of recorded voice clips.
 keys = json.loads(subprocess.check_output(["node", "-e", "console.log(JSON.stringify(Object.keys(require('./voice.js').LINES)))"], cwd=d))
@@ -149,14 +154,14 @@ shutil.copy(d / "espace.html", site / "espace" / "index.html")
 (site / "liens").mkdir(exist_ok=True)
 shutil.copy(d / "liens.html", site / "liens" / "index.html")
 (site / "robots.txt").write_text(f"User-agent: *\nDisallow: /api/\nDisallow: /places/\nDisallow: /audio/\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
-urls = [SITE + "/"] + [f"{SITE}/{n}" for n in guide_pages] + [f"{SITE}/legal/{n}" for n in legal_pages]
+urls = [SITE + "/"] + [f"{SITE}/{url_of(n)}" for n in guide_pages] + [f"{SITE}/legal/{url_of(n)}" for n in legal_pages]
 # Date of the last change of each page, for the sitemap (dev/lastmod.json): kept with a hash of the built
 # page, and set to today when the page changes. Commit the file with the change, so the deploy keeps the date.
 lastmod_file = d / "lastmod.json"
 lastmod = json.loads(lastmod_file.read_text(encoding="utf-8")) if lastmod_file.exists() else {}
 def page_file(u):
-    rel = u[len(SITE) + 1:] or "index.html"
-    return site / rel
+    rel = u[len(SITE) + 1:]
+    return site / (rel + ".html" if rel else "index.html")
 changed = False
 # The voice cache name (VOICE_VERSION) changes with every voice added by .github/workflows/audio.yml, which
 # does not commit this file: it is left out of the hash, so that does not move the date of the home page.
@@ -193,14 +198,14 @@ price = re.search(r'let PRICE="([^"]+)";', t).group(1)
 ## Pages
 
 - [La Quête du Chevalier]({SITE}/) : démonstration, déroulé, prix et questions fréquentes
-- [Organiser un anniversaire chevalier]({SITE}/anniversaire-chevalier.html) : déroulé sur 2 h 30, invitation, costumes, jeux
-- [Anniversaire chevalier à la maison quand il pleut]({SITE}/anniversaire-chevalier-a-la-maison.html) : déroulé de 2 h, jeux d'intérieur
-- [Chasse au trésor d'anniversaire dehors]({SITE}/chasse-au-tresor-anniversaire-dehors.html) : parcours, sécurité, indices, trésor
+- [Organiser un anniversaire chevalier]({SITE}/anniversaire-chevalier) : déroulé sur 2 h 30, invitation, costumes, jeux
+- [Anniversaire chevalier à la maison quand il pleut]({SITE}/anniversaire-chevalier-a-la-maison) : déroulé de 2 h, jeux d'intérieur
+- [Chasse au trésor d'anniversaire dehors]({SITE}/chasse-au-tresor-anniversaire-dehors) : parcours, sécurité, indices, trésor
 
 ## Informations
 
-- [Conditions de vente]({SITE}/legal/cgv.html)
-- [Mentions légales]({SITE}/legal/mentions-legales.html)
+- [Conditions de vente]({SITE}/legal/cgv)
+- [Mentions légales]({SITE}/legal/mentions-legales)
 """, encoding="utf-8")
 # Headers of the static files (Cloudflare): the demo may read the place tiles from another site.
 (site / "_headers").write_text("/places/*\n  Access-Control-Allow-Origin: *\n  Cache-Control: public, max-age=86400\n"

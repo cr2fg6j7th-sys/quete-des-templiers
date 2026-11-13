@@ -140,7 +140,8 @@ h3{font-size:1rem;margin:1.1em 0 .2em}
 
 function page(c, s, siblings) {
   const file = `anniversaire-chevalier-${slug(c.nom)}.html`;
-  const url = `${SITE}/${file}`;
+  // public address without .html: Cloudflare serves the file there and redirects /page.html to it
+  const url = `${SITE}/${file.replace(/\.html$/, "")}`;
   const big = c.population >= 100000;
   const n = s.places.length, q = s.quest;
   const top = s.named.slice(0, 8);
@@ -156,7 +157,7 @@ function page(c, s, siblings) {
   const ld = [
     { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
       { "@type": "ListItem", position: 1, name: "Ma Quête Légendaire", item: `${SITE}/` },
-      { "@type": "ListItem", position: 2, name: "Par ville", item: `${SITE}/anniversaire-chevalier-villes.html` },
+      { "@type": "ListItem", position: 2, name: "Par ville", item: `${SITE}/anniversaire-chevalier-villes` },
       { "@type": "ListItem", position: 3, name: c.nom, item: url }] },
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }
   ];
@@ -187,7 +188,7 @@ ${ld.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`
 </head>
 <body>
 <main>
-<p class="back"><a href="./">Ma Quête Légendaire</a> › <a href="anniversaire-chevalier-villes.html">Par ville</a> › ${esc(c.nom)}</p>
+<p class="back"><a href="./">Ma Quête Légendaire</a> › <a href="anniversaire-chevalier-villes">Par ville</a> › ${esc(c.nom)}</p>
 <h1>Anniversaire chevalier à ${esc(c.nom)}</h1>
 <p>À ${esc(c.nom)} (${esc(c.dep)}${repere(c) ? `, à ${repere(c).km} km ${esc(de(repere(c).nom))}` : ""}), Ma Quête Légendaire prépare en deux minutes une chasse au trésor d'une heure pour un anniversaire de 7 à 10 ans : ${n} lieux publics à moins de ${R} m ${s.startDe} peuvent servir d'étapes${ex.length ? `, comme ${esc(list(ex))}` : ""}. Le Grand Maître appelle votre enfant par son prénom et guide la troupe de lieu en lieu.</p>
 
@@ -211,8 +212,8 @@ ${top.length ? `<p>Parmi eux :</p>\n<ul class="lieux">\n${top.map(p => `<li>${es
 ${faq.map(([qq, a]) => `<h3>${esc(qq)}</h3>\n<p>${esc(a)}</p>`).join("\n")}
 
 <h2>Pour le reste de la fête</h2>
-<p>Le déroulé sur 2 h 30, une invitation à copier, des costumes faits maison et l'adoubement final : <a href="anniversaire-chevalier.html">organiser un anniversaire chevalier</a>.</p>
-${siblings.length ? `<p>Aussi près ${esc(de(c.nom))} : ${siblings.map(o => `<a href="anniversaire-chevalier-${slug(o.c.nom)}.html">${esc(o.c.nom)}</a>`).join(", ")}.</p>` : ""}
+<p>Le déroulé sur 2 h 30, une invitation à copier, des costumes faits maison et l'adoubement final : <a href="anniversaire-chevalier">organiser un anniversaire chevalier</a>.</p>
+${siblings.length ? `<p>Aussi près ${esc(de(c.nom))} : ${siblings.map(o => `<a href="anniversaire-chevalier-${slug(o.c.nom)}">${esc(o.c.nom)}</a>`).join(", ")}.</p>` : ""}
 <p class="src">Lieux : © contributeurs OpenStreetMap (licence ODbL). Communes : geo.api.gouv.fr. Point de départ : Base Adresse Nationale (IGN).</p>
 </main>
 </body>
@@ -222,7 +223,7 @@ ${siblings.length ? `<p>Aussi près ${esc(de(c.nom))} : ${siblings.map(o => `<a 
 }
 
 function hub(done) {
-  const url = `${SITE}/anniversaire-chevalier-villes.html`;
+  const url = `${SITE}/anniversaire-chevalier-villes`;
   const z = zone ? zone.nom : "";
   const sorted = done.slice().sort((a, b) => a.c.nom.localeCompare(b.c.nom, "fr"));
   return `<!doctype html>
@@ -249,7 +250,7 @@ ${style}
 <h1>Anniversaire chevalier ${esc(z || "près de chez vous")}</h1>
 <p>La quête se construit dans chaque village ou ville où il y a quelques lieux publics à pied : église, fontaine, vieille porte, place, parc. Voici, commune par commune, combien de lieux le Grand Maître peut choisir autour de la mairie.</p>
 <ul>
-${sorted.map(o => { const r = repere(o.c); return `<li><a href="${o.file}">Anniversaire chevalier à ${esc(o.c.nom)}</a> : ${o.s.places.length} lieux à pied${r ? `, à ${r.km} km ${esc(de(r.nom))}` : ""}</li>`; }).join("\n")}
+${sorted.map(o => { const r = repere(o.c); return `<li><a href="${o.file.replace(/\.html$/, "")}">Anniversaire chevalier à ${esc(o.c.nom)}</a> : ${o.s.places.length} lieux à pied${r ? `, à ${r.km} km ${esc(de(r.nom))}` : ""}</li>`; }).join("\n")}
 </ul>
 <p>Votre commune n'est pas dans la liste ? La quête marche partout en France : <a href="./?ref=v-hub">créez l'aperçu gratuit</a> avec votre adresse.</p>
 <p class="src">Lieux : © contributeurs OpenStreetMap (licence ODbL).</p>
@@ -285,7 +286,7 @@ for (const o of done) {
 }
 if (done.length) {
   fs.writeFileSync(path.join(siteDir, "anniversaire-chevalier-villes.html"), hub(done));
-  out.unshift(`${SITE}/anniversaire-chevalier-villes.html`);
+  out.unshift(`${SITE}/anniversaire-chevalier-villes`);
   const sm = path.join(siteDir, "sitemap.xml");
   // the pages change with the places of France: their date is the date of the places (the month's extraction)
   const lm = built ? `<lastmod>${built}</lastmod>` : "";
