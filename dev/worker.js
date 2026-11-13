@@ -375,7 +375,7 @@ async function collect(env, nDays) {
    <t> and <e> are HMACs of the token and of the address (key derived from QUEST_KEY, which itself never changes),
    cut to 16 hex characters: no address in a key name, and no key can be guessed from an address. */
 const DAY = 86400000, REMIND_AFTER = 7 * DAY, KEEP_DAYS = 10;
-const PER_ADDRESS = 3, MAX_SENDS_PER_RUN = 30, MAX_SEEN_PER_RUN = 400;
+const PER_ADDRESS = 3, MAX_SENDS_PER_RUN = 30, MAX_SEEN_PER_RUN = 400, STRIPE_PAGES = 3;
 const mailOn = env => !!(env.BREVO_API_KEY && env.MAIL_FROM && env.STATS && env.QUEST_KEY);
 const dayCap = env => parseInt(env.MAIL_DAY_MAX || "200", 10) || 200;
 // Put here by dev/build.py: the first names the e-mails may print, and the seller's identity (dev/legal/identite.json).
@@ -566,13 +566,13 @@ async function askReminder(request, env, ctx) {
 // To never send twice, a record is marked before the send ("p": 1): a sure success deletes it; a sure refusal
 // (Brevo answered 4xx) clears the mark for one more try the next day; no answer leaves the mark, and a marked
 // record is deleted at the next run without a second send. Missing a reminder is better than sending two.
-// At most 30 sends a run (Workers allow 50 outgoing requests a run on the free plan) and 400 records read: the rest
-// go the next day.
+// At most 30 sends and 3 pages of Stripe a run (Workers allow 50 outgoing requests a run on the free plan) and 400
+// records read: the rest go the next day.
 async function sendDueReminders(env, ctx, now) {
   if (!mailOn(env)) return { off: true };
   // the list first, then the sends: deleting keys while paging through them could make the list skip some
   const keys = [];
-  let sent = 0, later = 0, cursor;
+  let sent = 0, later = 0, cursor, paid;
   do {
     const page = await env.STATS.list({ prefix: "rappel:", cursor });
     keys.push(...page.keys);
@@ -594,6 +594,11 @@ async function sendDueReminders(env, ctx, now) {
       if (now - created < REMIND_AFTER) continue;
       const exp = Number(m.x) || Math.floor(created / 1000) + KEEP_DAYS * 86400;
       if (exp * 1000 - now < 120000) { await env.STATS.delete(k.name); continue; }   // about to expire anyway
+      // paid, but the page never came back from Stripe (no /api/unlock, so no "rappel-paye" mark): no reminder.
+      // Stripe is read once per run, only when a reminder is about to go; if it does not answer, none goes today.
+      if (paid === undefined) paid = await paidTokens(env, now);
+      if (paid === null) { later++; break; }
+      if (paid.has(tokenOf(rec.link))) { await env.STATS.delete(k.name); continue; }
       const meta = { c: created, x: exp, n: (Number(m.n) || 0) + 1 };
       await env.STATS.put(k.name, raw, { expiration: exp, metadata: Object.assign({ p: 1 }, meta) });
       const res = await sendMail(env, rec.email, mailOf(env, rec, 2, await stopLink(env, new URL(rec.link).origin, k.name.slice("rappel:".length))));
@@ -607,6 +612,35 @@ async function sendDueReminders(env, ctx, now) {
   }
   log("reminders", { sent, later });
   return { sent, later };
+}
+
+// The tokens of the Checkout sessions completed in the last 11 days (a request lives 10 days), read from Stripe
+// (read only, newest first, at most STRIPE_PAGES pages of 100). null when Stripe does not answer.
+async function paidTokens(env, now) {
+  if (!env.STRIPE_SECRET_KEY) return new Set();   // no key, no payment possible
+  const tokens = new Set(), since = Math.floor(now / 1000) - (KEEP_DAYS + 1) * 86400;
+  let after = "";
+  try {
+    for (let page = 0; page < STRIPE_PAGES; page++) {
+      const r = await fetch((env.STRIPE_API || "https://api.stripe.com") + "/v1/checkout/sessions?status=complete&limit=100" +
+        (after ? "&starting_after=" + encodeURIComponent(after) : ""), { signal: AbortSignal.timeout(10000), headers: { authorization: "Bearer " + env.STRIPE_SECRET_KEY } });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const j = await r.json(), list = Array.isArray(j.data) ? j.data : [];
+      let old = false;
+      for (const s of list) {
+        if (Number(s.created) && Number(s.created) < since) { old = true; break; }
+        if (s.status !== "complete" && s.payment_status !== "paid") continue;
+        const m = s.metadata || {};
+        let t = "";
+        for (let i = 0; m["t" + i]; i++) t += m["t" + i];
+        if (t) tokens.add(t);
+      }
+      if (old || !j.has_more || !list.length) return tokens;
+      after = String(list[list.length - 1].id || "");
+    }
+    console.log("reminders: more paid sessions than read");
+    return tokens;
+  } catch (e) { console.log("reminders: stripe " + String(e && e.message || e)); return null; }
 }
 
 // After a payment (from /api/unlock, in waitUntil): no reminder for this quest, and its requests are deleted now.

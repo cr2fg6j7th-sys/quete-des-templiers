@@ -148,6 +148,49 @@ console.log("Adresses du site : tous les tests passent.");
   assert.strictEqual(sent.length, 30, "30 reminders in the first run");
   days = 8.2; await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
   assert.ok(sent.length === 32 && records().length === 0, "the 2 others the next day");
+
+  // paid, but the page never came back from Stripe (no /api/unlock): Stripe is read (read only) before the reminder
+  {
+    const senv = Object.assign({}, menv, { STRIPE_SECRET_KEY: "sk_test_unit", STRIPE_API: "https://stripe.test" });
+    const chunks = t => { const m = {}; for (let i = 0; i * 490 < t.length; i++) m["t" + i] = t.slice(i * 490, (i + 1) * 490); return m; };
+    let stripeState = "up", stripeCalls = [];
+    const sessions = () => [
+      { id: "cs_test_open", status: "open", payment_status: "unpaid", created: Math.floor(Date.now() / 1000) - 3600, metadata: chunks(home.token) },
+      { id: "cs_test_paid", status: "complete", payment_status: "paid", created: Math.floor(Date.now() / 1000) - 6 * 86400, metadata: chunks(outdoor.token) }];
+    globalThis.fetch = async (u, init) => {
+      u = String(u);
+      if (u.startsWith("https://stripe.test/")) {
+        stripeCalls.push({ u, method: (init && init.method) || "GET", auth: new Headers(init && init.headers).get("authorization") });
+        if (stripeState === "down") return Response.json({ error: { message: "down" } }, { status: 500 });
+        return Response.json({ data: sessions(), has_more: false });
+      }
+      if (u.startsWith("https://api.brevo.com/")) { sent.push({ body: JSON.parse(init.body) }); return new Response("{}", { status: 201 }); }
+      if (u.startsWith("https://geo.api.gouv.fr/")) return Response.json([{ nom: "Obernai" }]);
+      throw new Error("unexpected fetch " + u);
+    };
+    days = 0; sent.length = 0;
+    await call("/api/rappel", { email: "paye@exemple.fr", apercu: outdoor.token }, senv);   // will pay, never come back
+    await call("/api/rappel", { email: "paspaye@exemple.fr", apercu: home.token }, senv);   // checkout opened, not paid
+    sent.length = 0;
+    days = 7.1; stripeState = "down";
+    await worker.scheduled({ scheduledTime: Date.now() }, senv, { waitUntil() {} });
+    assert.ok(sent.length === 0 && records().length === 2, "Stripe does not answer: no reminder this run, requests kept");
+    assert.strictEqual(stripeCalls.length, 1, "one Stripe call, then the run stops");
+    assert.ok(records().every(k => !kv.get(k).meta.p), "Stripe down: nothing marked as being sent");
+    days = 8.1; stripeState = "up"; stripeCalls = [];
+    await worker.scheduled({ scheduledTime: Date.now() }, senv, { waitUntil() {} });
+    assert.strictEqual(sent.length, 1, "only the unpaid quest gets its reminder");
+    assert.deepStrictEqual(sent[0].body.to, [{ email: "paspaye@exemple.fr" }]);
+    assert.strictEqual(records().length, 0, "the paid quest's request is deleted without a reminder");
+    assert.ok(stripeCalls.length === 1 && stripeCalls.every(c => c.method === "GET" && c.auth === "Bearer sk_test_unit" && /\/v1\/checkout\/sessions\?status=complete&limit=100$/.test(c.u)),
+      "Stripe read once, read only: " + JSON.stringify(stripeCalls));
+    // nothing due: Stripe is not called at all
+    stripeCalls = [];
+    await call("/api/rappel", { email: "tot@exemple.fr", apercu: home.token }, senv);
+    await worker.scheduled({ scheduledTime: Date.now() }, senv, { waitUntil() {} });
+    assert.strictEqual(stripeCalls.length, 0, "no reminder due: no call to Stripe");
+    kv.clear(); sent.length = 0;
+  }
   globalThis.fetch = realFetch; Date.now = realNow; console.log = realLog;
 }
 console.log("Aperçu par e-mail : tous les tests passent.");

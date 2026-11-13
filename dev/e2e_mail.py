@@ -227,12 +227,15 @@ async def main():
             # 6. the reminder: not before 7 days, once at 7 days; none after payment or unsubscribe
             call("/__mails?clear=1")
             tokens = {}
-            for who in ["r1", "r2", "r3", "r4", "r5", "paye", "stop"]:
+            for who in ["r1", "r2", "r3", "r4", "r5", "paye", "stop", "parti"]:
                 _, pv = call("/api/preview", {"indoor": True})
                 tokens[who] = pv["token"]
                 check(call("/api/rappel", {"email": who + "@exemple.fr", "apercu": pv["token"], "n": "Léo", "ref": "test"})[0] == 200, "demande " + who)
             ms = {x["to"][0].split("@")[0]: x for x in mails()}
             code, unl = pay(tokens["paye"])
+            # paid, but the tab was closed during Stripe's redirect: no /api/unlock, the request stays until the cron
+            _, c = call("/api/checkout", {"token": tokens["parti"], "consent": True, "name": "Léo", "hero": "m", "kids": 8, "town": "", "ref": "test"})
+            urllib.request.urlopen(urllib.request.Request(c["url"].replace("/fake-checkout?", "/fake-checkout?pay=1&"), method="HEAD"))
             time.sleep(0.4)
             kvs = call("/__kv?prefix=rappel")[1]
             check(unl.get("ok") is True and set(unl) == {"ok", "quest", "name", "hero", "kids", "town"}, "paiement : la quête s'ouvre, réponse inchangée")
@@ -251,7 +254,8 @@ async def main():
             await ctx.close()
             check(call(stop_of(ms["r5"])[len(BASE):], {"List-Unsubscribe": "One-Click"})[0] == 200, "désinscription en un clic (POST) : acceptée")
             left = {json.loads(v["v"])["email"].split("@")[0] for k, v in call("/__kv?prefix=rappel:")[1].items()}
-            check({"r1", "r2", "r3", "r4"} <= left and not {"paye", "stop", "r5"} & left, "restent à relancer : " + ", ".join(sorted(left)))
+            check({"r1", "r2", "r3", "r4", "parti"} <= left and not {"paye", "stop", "r5"} & left, "restent à relancer : " + ", ".join(sorted(left)))
+            left.discard("parti")   # paid without coming back: Stripe says so at the cron
             call("/__mails?clear=1")
             call("/__clock?days=6.9")
             check(call("/__cron")[1]["sent"] == 0, "rappel : rien avant 7 jours")
@@ -261,6 +265,7 @@ async def main():
             got = sorted(x["to"][0].split("@")[0] for x in ms2)
             check(res["sent"] == len(left) and sorted(got) == sorted(left), f"rappel à 7 jours : un par demande restante ({res['sent']}) {got}")
             check("paye" not in got and "stop" not in got and "r5" not in got, "rappel : aucun après paiement ni désinscription")
+            check("parti" not in got, "rappel : aucun après un paiement sans retour sur le site (vérifié auprès de Stripe)")
             rm = next(x for x in ms2 if x["to"] == ["r1@exemple.fr"])
             check(rm["subject"] == "La quête de Léo vous attend" and "C'est le seul rappel que vous recevrez" in rm["text"] and "nous vous remboursons" in rm["text"]
                   and "Le lien de la quête, valable au moins douze mois" in rm["text"] and tokens["r1"] in rm["text"] and not re.search(r"promo|NOEL", rm["html"], re.I),
