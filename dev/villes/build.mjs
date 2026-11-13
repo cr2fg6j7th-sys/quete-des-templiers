@@ -5,6 +5,21 @@
 // this town has: how many quest places stand within walking distance of its town hall, their names,
 // and the length of a quest from there. It never shows a route nor a riddle: that is what is sold.
 // A town without enough named places gets no page (no thin pages). The pages are added to the sitemap.
+//
+// A passing outage of the API Géo or of the address base must never take pages off the site:
+// - each request has a short timeout and a few retries; after two calls that got no answer, the
+//   service is taken as down for the rest of the run (no ten-minute wait);
+// - every answer is kept in a cache file (dist/villes-cache.json, kept between deploys by the
+//   workflow); when a service does not answer, its last answer is used (communes hardly change);
+// - if a commune still cannot be built because a service did not answer, the script fails (exit 1,
+//   « ::error:: » annotation): better no deploy than a site without its town pages;
+// - whatever the network, if fewer pages are built than at the last deploy minus 20 %, the script
+//   fails too. When the zone is reduced on purpose, run it once with VILLES_BAISSE_OK=1.
+// A commune that the API says does not exist (any more), or whose name changed, gets no page and
+// no failure, as a commune without enough places.
+// Environment (tests): VILLES_CACHE (cache file), VILLES_GEO_API and VILLES_BAN_API (base addresses),
+// VILLES_TIMEOUT_MS (per request, default 8000), VILLES_RETRY_MS (first wait between tries, default 1000).
+// With --communes (test data, no network), the cache is neither read nor written.
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
@@ -43,21 +58,67 @@ function placesAround(lat, lon, r) {
 }
 
 // ---- Communes: name, département, population and the point of the chef-lieu ----
-async function getJSON(url) {
-  for (let i = 0; i < 3; i++) {
-    try { const r = await fetch(url, { headers: { "User-Agent": "MaQueteLegendaire/1.0 (pages villes)" } }); if (r.ok) return await r.json(); }
-    catch (e) {}
-    await new Promise(res => setTimeout(res, 1500 * (i + 1)));
-  }
-  return null;
+const GEO = { name: "API Géo", base: (process.env.VILLES_GEO_API || "https://geo.api.gouv.fr").replace(/\/$/, "") };
+const BAN = { name: "Base Adresse Nationale", base: (process.env.VILLES_BAN_API || "https://data.geopf.fr/geocodage").replace(/\/$/, "") };
+const TIMEOUT = +process.env.VILLES_TIMEOUT_MS || 8000, TRIES = 3, WAIT = +process.env.VILLES_RETRY_MS || 1000;
+const DROP = 0.2;   // more than 20 % of the pages lost since the last deploy: stop
+const today = new Date().toISOString().slice(0, 10);
+const cacheFile = communesFile ? null : process.env.VILLES_CACHE || path.join(here, "..", "..", "dist", "villes-cache.json");
+const cache = (() => {
+  if (!cacheFile) return null;
+  try { const c = JSON.parse(fs.readFileSync(cacheFile, "utf-8")); if (c && c.responses) return c; } catch (e) {}
+  return { _: "API Géo and address base answers for dev/villes/build.mjs, and the pages of the last build", responses: {}, pages: null };
+})();
+function saveCache() {
+  if (!cache) return;
+  fs.mkdirSync(path.dirname(cacheFile), { recursive: true });
+  fs.writeFileSync(cacheFile + ".tmp", JSON.stringify(cache));
+  fs.renameSync(cacheFile + ".tmp", cacheFile);
 }
+const silent = new Map();   // service -> calls in a row that got no answer
+const fromCache = new Map();   // service -> answers taken from the cache
+// { ok, data } (fresh or cached), { missing, http } (the service answered: no such thing), or { down, why }.
+async function getJSON(api, p) {
+  const key = `${api.name}:${p}`;
+  let why = "";
+  if ((silent.get(api) || 0) < 2) {
+    for (let i = 0; i < TRIES; i++) {
+      if (i) await new Promise(res => setTimeout(res, WAIT * 2 ** (i - 1)));
+      try {
+        const r = await fetch(api.base + p, { headers: { "User-Agent": "MaQueteLegendaire/1.0 (pages villes)" }, signal: AbortSignal.timeout(TIMEOUT) });
+        if (r.ok) {
+          const data = await r.json();
+          silent.set(api, 0);
+          if (cache) cache.responses[key] = { at: today, data };
+          return { ok: true, data };
+        }
+        // 404 and other client errors are answers: retrying or using an old answer would hide a real change
+        if (r.status < 500 && r.status !== 429) { silent.set(api, 0); return { missing: true, http: r.status }; }
+        why = `HTTP ${r.status}`;
+      } catch (e) {
+        why = e.name === "TimeoutError" ? `pas de réponse en ${TIMEOUT / 1000} s` : `${(e.cause && e.cause.code) || e.message}`;
+      }
+    }
+    silent.set(api, (silent.get(api) || 0) + 1);
+  } else why = "ne répond plus depuis le début de la construction";
+  const hit = cache && cache.responses[key];
+  if (hit) { fromCache.set(api, (fromCache.get(api) || 0) + 1); return { ok: true, data: hit.data, at: hit.at }; }
+  return { down: true, why };
+}
+// Communes not built because a service did not answer (unlike a commune without enough places).
+const unreachable = [];
 // All communes of the zone: within rayonKm of its centre, in its départements, above populationMin.
 async function zoneCommunes(z) {
   const out = [];
   for (const dep of z.departements) {
-    const list = await getJSON(`https://geo.api.gouv.fr/departements/${dep}/communes?fields=nom,code,centre,population`);
-    if (!list) { console.warn(`département ${dep} : liste des communes indisponible`); continue; }
-    for (const g of list) {
+    const r = await getJSON(GEO, `/departements/${dep}/communes?fields=nom,code,centre,population`);
+    if (!r.ok) {
+      const why = r.down ? `l'API Géo n'a pas répondu (${r.why})` : `HTTP ${r.http}`;
+      console.warn(`département ${dep} : liste des communes indisponible (${why})`);
+      unreachable.push(`toutes les communes du département ${dep} (${why})`);
+      continue;
+    }
+    for (const g of r.data) {
       if (!g.centre || (g.population || 0) < z.populationMin) continue;
       const [lon, lat] = g.centre.coordinates;
       if (E.dist({ lat: z.centre[0], lon: z.centre[1] }, { lat, lon }) <= z.rayonKm * 1000) out.push({ insee: g.code, nom: g.nom });
@@ -66,13 +127,21 @@ async function zoneCommunes(z) {
   return out;
 }
 async function commune(c) {
-  const g = await getJSON(`https://geo.api.gouv.fr/communes/${c.insee}?fields=nom,population,departement,region,centre`);
-  if (!g || g.nom !== c.nom) { console.warn(`${c.nom} : commune introuvable ou nom différent (${g && g.nom})`); return null; }
+  const r = await getJSON(GEO, `/communes/${c.insee}?fields=nom,population,departement,region,centre`);
+  if (r.down) {
+    console.warn(`${c.nom} : l'API Géo n'a pas répondu (${r.why}) et aucune réponse n'est en cache`);
+    unreachable.push(`${c.nom} (API Géo : ${r.why})`);
+    return null;
+  }
+  if (r.missing) { console.warn(`${c.nom} (${c.insee}) : commune inconnue de l'API Géo (HTTP ${r.http}), fusionnée ou code INSEE changé ? Pas de page.`); return null; }
+  const g = r.data;
+  if (g.nom !== c.nom) { console.warn(`${c.nom} (${c.insee}) : l'API Géo donne maintenant le nom « ${g.nom} » (commune renommée ?). Pas de page.`); return null; }
   // The address base gives the point of the chef-lieu (the town centre), better than the middle of the area.
-  const b = await getJSON(`https://data.geopf.fr/geocodage/search?q=${encodeURIComponent(c.nom)}&type=municipality&citycode=${c.insee}&limit=1`);
-  const f = b && b.features && b.features[0];
+  const b = await getJSON(BAN, `/search?q=${encodeURIComponent(c.nom)}&type=municipality&citycode=${c.insee}&limit=1`);
+  if (b.down) console.warn(`${c.nom} : la Base Adresse Nationale n'a pas répondu (${b.why}) et aucune réponse n'est en cache : départ depuis le centre donné par l'API Géo`);
+  const f = b.ok && b.data && b.data.features && b.data.features[0];
   const [lon, lat] = f ? f.geometry.coordinates : g.centre.coordinates;
-  return { nom: g.nom, dep: g.departement.nom, depCode: g.departement.code, region: g.region.nom, population: g.population, lat, lon };
+  return { nom: g.nom, dep: g.departement.nom, depCode: g.departement.code, region: g.region.nom, population: g.population, lat, lon, approx: !!b.down };
 }
 
 // ---- Where a town is, for parents of the area: « à 6 km d'Obernai » ----
@@ -268,13 +337,35 @@ const conf = [...(villes.communes || [])];
 REPERES = zone && zone.reperes || [];
 for (const x of zone ? (given ? Object.entries(given).map(([insee, c]) => ({ insee, nom: c.nom })) : await zoneCommunes(zone)) : [])
   if (!conf.some(y => y.insee === x.insee)) conf.push(x);
+const prev = cache && cache.pages;   // the pages of the last build that went through
 const done = [];
 for (const x of conf) {
   const c = given ? given[x.insee] : await commune(x);
   if (!c) continue;
   const s = study(c);
-  if (!s.quest || s.named.length < 4) { console.warn(`${c.nom} : pas assez de lieux nommés (${s.named.length}), pas de page`); continue; }
+  if (!s.quest || s.named.length < 4) {
+    // From the API Géo centre instead of the chef-lieu, the town may have lost places it has: an outage
+    // unless the last build (when known) had no page for it either.
+    if (c.approx && !(prev && (prev.communes || []).length && !prev.communes.includes(c.nom))) unreachable.push(`${c.nom} (Base Adresse Nationale, sans réponse en cache)`);
+    console.warn(`${c.nom} : pas assez de lieux nommés (${s.named.length}), pas de page`);
+    continue;
+  }
   done.push({ c, s });
+}
+for (const [api, n] of fromCache)
+  console.log(`::warning::Pages de ville : ${api.name} sans réponse, ${n} réponse${n > 1 ? "s" : ""} reprise${n > 1 ? "s" : ""} du déploiement précédent (dist/villes-cache.json)`);
+saveCache();   // the fresh answers are kept even if the build stops below
+const stop = msg => { console.log(`::error::${msg}`); process.exit(1); };
+if (unreachable.length)
+  stop(`Pages de ville : ${unreachable.length} commune${unreachable.length > 1 ? "s" : ""} non construite${unreachable.length > 1 ? "s" : ""} parce qu'un service ne répondait pas, ` +
+    `sans réponse en cache : ${unreachable.join(", ")}. Mise en ligne arrêtée pour ne pas retirer ces pages du site : relancez-la plus tard.`);
+if (prev && prev.count && done.length < prev.count * (1 - DROP)) {
+  const lost = (prev.communes || []).filter(n => !done.some(o => o.c.nom === n));
+  const msg = `Pages de ville : ${done.length} construites contre ${prev.count} au déploiement du ${prev.at} (plus de ${DROP * 100} % en moins)` +
+    (lost.length ? `. Pages qui disparaîtraient : ${lost.join(", ")}` : "");
+  if (process.env.VILLES_BAISSE_OK === "1") console.log(`::warning::${msg}. Baisse acceptée (VILLES_BAISSE_OK=1) : retirez la variable après ce déploiement.`);
+  else stop(`${msg}. Mise en ligne arrêtée. Si la baisse est voulue (zone réduite dans dev/villes/villes.json), relancez une fois avec la variable VILLES_BAISSE_OK=1 ` +
+    `(GitHub : Settings > Secrets and variables > Actions > Variables), puis supprimez-la.`);
 }
 const out = [];
 for (const o of done) {
@@ -296,4 +387,5 @@ if (done.length) {
   if (fs.existsSync(llms)) fs.writeFileSync(llms, fs.readFileSync(llms, "utf-8").replace("\n## Informations",
     `- [Anniversaire chevalier, ville par ville](${out[0]}) : les lieux de la quête dans ${done.length} commune${done.length > 1 ? "s" : ""} ${zone ? zone.nom : ""}\n\n## Informations`));
 }
+if (cache) { cache.pages = { count: done.length, at: today, communes: done.map(o => o.c.nom) }; saveCache(); }
 console.log(`${done.length} pages de ville sur ${conf.length} : ${done.map(o => `${o.c.nom} (${o.s.places.length} lieux)`).join(", ")}`);

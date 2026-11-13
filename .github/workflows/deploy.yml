@@ -93,20 +93,45 @@ jobs:
           path: places-data
           key: places-v3-${{ steps.month.outputs.m }}
 
+      # Last answers of the API Géo and of the address base for the town pages, kept between deploys:
+      # when those services are down, the pages are built from them. A cache key never changes once
+      # saved, so each run saves under its own key and the next run restores the latest one.
+      - name: Communes des pages de ville (dernières réponses)
+        if: steps.ready.outputs.ok == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: dist/villes-cache.json
+          key: villes-geo-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            villes-geo-v1-
+
       - name: Construire le site et le serveur
         if: steps.ready.outputs.ok == 'true'
         env:
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          # Repository variable, set to 1 for one deploy only when the town zone is reduced on purpose.
+          VILLES_BAISSE_OK: ${{ vars.VILLES_BAISSE_OK }}
         run: |
           # The preview by e-mail is offered only once the optional secret BREVO_API_KEY exists.
           if [ -n "$BREVO_API_KEY" ]; then python3 dev/build.py --audio --mail; else python3 dev/build.py --audio; fi
           node dev/test.js
           node dev/test-worker.mjs
           if [ -f places-data/index.json ]; then cp -r places-data site/places; echo "::notice::Lieux en ligne : $(cat places-data/index.json)"; fi
-          # Town pages for Google, from the same places (a failure never blocks the deploy).
+          # Town pages for Google, from the same places. If a commune cannot be built because the API Géo
+          # or the address base is down (and its last answer is not in the cache), or if many pages
+          # would vanish, the deploy stops here: yesterday's site stays online with all its pages.
           if [ -f places-data/index.json ]; then
-            if node dev/villes/build.mjs places-data site "$(cat dist/site-url.txt)" > /tmp/villes.log; then echo "::notice::$(tail -1 /tmp/villes.log)"; else echo "::warning::Pages de ville non construites : $(tail -3 /tmp/villes.log | tr '\n' ' ')"; fi
+            set -o pipefail
+            if node dev/villes/build.mjs places-data site "$(cat dist/site-url.txt)" | tee /tmp/villes.log; then echo "::notice::$(tail -1 /tmp/villes.log)"
+            else echo "::error::Mise en ligne arrêtée : pages de ville non construites (raison ci-dessus). Le site en ligne n'a pas changé."; exit 1; fi
           fi
+
+      - name: Garder les réponses des communes
+        if: ${{ !cancelled() && steps.ready.outputs.ok == 'true' && hashFiles('dist/villes-cache.json') != '' }}
+        uses: actions/cache/save@v4
+        with:
+          path: dist/villes-cache.json
+          key: villes-geo-v1-${{ github.run_id }}-${{ github.run_attempt }}
 
       # Anonymous visit counts (Workers KV, free plan). The namespace is created once; if the
       # Cloudflare token cannot do it, the site goes online without counts and a warning says so.

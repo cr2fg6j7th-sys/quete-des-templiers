@@ -45,6 +45,27 @@ try {
       : ok(`${pages.length} pages servies sans .html ni redirection`);
   }
 
+  // Town pages (dev/villes/build.mjs, rebuilt at each deploy): the « ville par ville » list and every
+  // town the home page links to, read from the served page (its static copy and its TOWNS list).
+  {
+    const links = new Set(["anniversaire-chevalier-villes"]);
+    for (const m of html.matchAll(/href="(anniversaire-chevalier-[a-z0-9-]+)"/g)) links.add(m[1]);
+    const towns = html.match(/const TOWNS=(\[[^;]*\]);/);
+    try { for (const [, s] of towns ? JSON.parse(towns[1]) : []) links.add("anniversaire-chevalier-" + s); } catch (e) {}
+    links.delete("anniversaire-chevalier-a-la-maison");   // a guide, checked above
+    const bad = [];
+    for (const p of links) {
+      let r;
+      for (let i = 0; i < 3; i++) {
+        try { r = await fetch(site + "/" + p); } catch (e) { r = { ok: false, status: e.message }; }
+        if (r.ok || i === 2) break;
+        await new Promise(res => setTimeout(res, 10000));   // a page added by this deploy can take a few seconds to spread
+      }
+      if (r.status !== 200) bad.push(`/${p} (HTTP ${r.status})`);
+    }
+    bad.length ? ko(`pages de ville liées depuis l'accueil : ${bad.join(", ")}`) : ok(`${links.size} pages de ville liées depuis l'accueil (dont la liste ville par ville)`);
+  }
+
   // short address for the videos: /tiktok -> /?ref=tiktok
   try {
     const r = await fetch(site + "/tiktok", { redirect: "manual" });
