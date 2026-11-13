@@ -98,6 +98,22 @@ console.log("Adresses du site : tous les tests passent.");
   // 3 requests per address per 24 hours
   for (let i = 0; i < 2; i++) assert.strictEqual((await call("/api/rappel", { email: "c@exemple.fr", apercu: outdoor.token }))[0], 200);
   assert.deepStrictEqual(await call("/api/rappel", { email: "c@exemple.fr", apercu: outdoor.token }), [429, { ok: false, reason: "limit" }], "4th request in 24 h");
+  // the same mailbox under other spellings (+tag, Gmail's dots, googlemail) counts as one address
+  for (const a of ["victime+1@gmail.com", "vic.time+2@gmail.com", "V.I.C.T.I.M.E@googlemail.com"])
+    assert.strictEqual((await call("/api/rappel", { email: a, apercu: home.token }))[0], 200, a);
+  assert.strictEqual((await call("/api/rappel", { email: "victime+4@gmail.com", apercu: home.token }))[0], 429, "aliases of one mailbox share its limit");
+  assert.strictEqual((await call("/api/rappel", { email: "x+1@exemple.fr", apercu: home.token }))[0], 200);
+  assert.strictEqual(sent.pop().body.to[0].email, "x+1@exemple.fr", "the e-mail goes to the address as typed");
+  for (const k of [...kv.keys()]) if (k.startsWith("rappel:") && /gmail\.com|googlemail|x\+1@/.test(kv.get(k).v)) kv.delete(k);   // keep the counts below simple
+  // Brevo's error message never puts an address in the logs
+  {
+    const logs = [], keep = globalThis.fetch;
+    console.log = s => logs.push(String(s));
+    globalThis.fetch = async (u, init) => String(u).includes("brevo") ? Response.json({ code: "invalid_parameter", message: "Invalid email address journal@exemple.fr" }, { status: 400 }) : keep(u, init);
+    assert.strictEqual((await call("/api/rappel", { email: "journal@exemple.fr", apercu: home.token }))[0], 502);
+    globalThis.fetch = keep; console.log = () => {};
+    assert.ok(logs.some(l => l.startsWith("brevo 400") && l.includes("<adresse>")) && !logs.some(l => l.includes("journal@")), "no address in the logs: " + logs.join(" | "));
+  }
   sent.length = 0;
 
   // the reminder: not before 7 days, once at 7 days, then the request is gone

@@ -392,6 +392,15 @@ function cleanEmail(v) {
   if (/^\.|\.\.|\.@/.test(m)) return "";
   return m.toLowerCase();
 }
+// The mailbox behind an address, for the limits: a+1@…, a+2@… and Gmail's dots reach the same person, so they count
+// as one address (otherwise one mailbox could be sent the whole day's e-mails). The e-mail still goes to the address given.
+function mailbox(email) {
+  let [local, domain] = email.split("@");
+  local = local.split("+")[0];
+  if (domain === "googlemail.com") domain = "gmail.com";
+  if (domain === "gmail.com") local = local.replace(/\./g, "");
+  return local + "@" + domain;
+}
 // The preview's token, given as is or inside the preview's link.
 function tokenOf(v) {
   let s = String(v || "").trim();
@@ -515,7 +524,8 @@ async function sendMail(env, to, m) {
     });
   } catch (e) { console.log("brevo: no answer " + String(e && e.name || e)); return "unknown"; }
   if (r.ok) return "ok";
-  console.log("brevo " + r.status + " " + (await r.text().catch(() => "")).slice(0, 300));
+  // Brevo's answer, without any address it may quote (the logs are kept by Cloudflare)
+  console.log("brevo " + r.status + " " + (await r.text().catch(() => "")).replace(/[^\s"'<>@:,]+@[^\s"'<>@:,]+/g, "<adresse>").slice(0, 300));
   return r.status >= 500 ? "unknown" : "refused";
 }
 
@@ -534,7 +544,7 @@ async function askReminder(request, env, ctx) {
   const dayKey = "rappel-jour:" + new Date(now).toISOString().slice(0, 10);
   const today = parseInt(await env.STATS.get(dayKey), 10) || 0;
   if (today >= dayCap(env)) { log("rappel", { ok: false, reason: "full" }); return reply({ ok: false, reason: "full" }, 503); }
-  const he = await mac(env, "e:" + email, 16), ht = await mac(env, "t:" + token, 16), id = ht + "." + he;
+  const he = await mac(env, "e:" + mailbox(email), 16), ht = await mac(env, "t:" + token, 16), id = ht + "." + he;
   let times = [];
   try { times = JSON.parse(await env.STATS.get("rappel-n:" + he) || "[]").filter(x => typeof x === "number" && now - x < DAY); } catch (e) { times = []; }
   if (times.length >= PER_ADDRESS) { log("rappel", { ok: false, reason: "limit" }); return reply({ ok: false, reason: "limit" }, 429); }
