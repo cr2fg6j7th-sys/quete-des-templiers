@@ -649,7 +649,7 @@ label.mode:has(input:focus-visible){outline:3px solid var(--or);outline-offset:2
 #app:is([data-screen=setup],[data-screen=home]) .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;border:0;overflow:visible}
 #app:is([data-screen=setup],[data-screen=home]) .seg button{min-height:48px;border-radius:12px;border:2px solid var(--line);background:var(--card);font-family:var(--body);font-weight:700;font-size:1.05rem}
 #app:is([data-screen=setup],[data-screen=home]) .seg button[aria-pressed="true"]{background:var(--rose);border-color:var(--rose);color:#fff}
-#app[data-screen=setup] input[type=text],#app[data-screen=setup] input[type=search],#app[data-screen=home] input[type=text]{font-size:1.1rem;min-height:50px;border:2px solid var(--line);background:var(--card);font-family:var(--body);letter-spacing:0}
+#app[data-screen=setup] input[type=text],#app[data-screen=setup] input[type=search],#app[data-screen=setup] input[type=email],#app[data-screen=home] input[type=text]{font-size:1.1rem;min-height:50px;border:2px solid var(--line);background:var(--card);font-family:var(--body);letter-spacing:0}
 #app[data-screen=setup] label{font-family:var(--body);font-weight:700;letter-spacing:0;font-size:1rem}
 #app[data-screen=home] .demo label{font-family:var(--body);font-weight:700;letter-spacing:0;font-size:1rem}
 .stepper{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -698,6 +698,15 @@ label.mode:has(input:focus-visible){outline:3px solid var(--or);outline-offset:2
 #app[data-screen=preview] .keep h3{font-size:1.1rem}
 .keep .btn{min-height:46px}
 .keep .note:empty{display:none}
+.mailbox{display:flex;flex-direction:column;gap:8px}
+.mailbox .fhelp a,.mailform .fhelp a{color:var(--rose-text)}
+.mailarea[hidden]{display:none}
+.mailform{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.mailform label{font-family:var(--body);font-weight:700;letter-spacing:0;font-size:1rem}
+.mailform input[type=email]{font-family:var(--body);letter-spacing:0;background:var(--card);min-height:46px}
+.mailsent{font-weight:700;color:var(--ok);line-height:1.4}
+.mailsent span{display:block;font-weight:400;color:var(--muted);font-size:.92rem}
+.mailfail{font-weight:700;color:var(--rose-text);line-height:1.4}
 @media (max-width:375px){.paycard>h3{padding-right:72px}.btn.listen-main{font-size:1rem;padding:0 12px}}
 .fold{padding:0}
 .fold summary{cursor:pointer;font-weight:800;padding:14px 16px;min-height:48px;display:flex;align-items:center}
@@ -776,6 +785,8 @@ label.mode:has(input:focus-visible){outline:3px solid var(--or);outline-offset:2
 // Paid build: the server chooses the places and unlocks the quest after payment.
 // Demo build (GitHub Pages): everything runs in the phone, the unlock button is free.
 const PAID=/*PAID*/false;
+// Paid build with --mail (dev/build.py, when the e-mail service's key exists): the preview can be sent by e-mail.
+const MAIL=/*MAIL*/false;
 // Demo build: reads the copy of the places of France kept by the paid site (public map data).
 const PLACES_SITE="/*PLACES_SITE*/";
 const E=(typeof QuestEngine!=="undefined")?QuestEngine:null;
@@ -1378,7 +1389,7 @@ async function startIndoor(){
   try{const p=await makePreview({indoor:true});
     if(!p.ok)throw new Error(p.reason);
     if(!PAID)hit("preview");
-    go(Object.assign({},fresh,{preview:p.preview,quest:p.quest,token:p.token,screen:"preview",indoor:true}));}
+    go(Object.assign({},fresh,{preview:p.preview,quest:p.quest,token:p.token,screen:"preview",indoor:true}));mailAfterPreview();}
   catch(e){hit("neterr");go({screen:"neterr"});}
 }
 
@@ -1934,7 +1945,7 @@ function setupScreen(){
   q.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doSearch();}});
   const town=communeField(searchInto);
   const here=()=>{
-    if(needName())return;
+    if(needName()||!mailOk())return;
     if(!("geolocation" in navigator)){note.textContent="Ce téléphone ne donne pas sa position : cherchez plutôt une adresse ci-dessous.";return;}
     note.textContent="Recherche de votre position… (jusqu'à 20 secondes)";
     locate().then(p=>startFrom(p.lat,p.lon,null)).catch(err=>{
@@ -1946,7 +1957,7 @@ function setupScreen(){
   };
   // The form on one screen (9/11/2026): where the quest is played first, two choices of the same weight;
   // then three cards, Votre enfant, La fête, Le départ. Changing the place keeps everything typed.
-  const createHome=()=>{if(goHome.disabled||needName())return;goHome.disabled=true;goHome.textContent="Préparation de l'aperçu…";startIndoor();};
+  const createHome=()=>{if(goHome.disabled||needName()||!mailOk())return;goHome.disabled=true;goHome.textContent="Préparation de l'aperçu…";startIndoor();};
   const villePart=h("div",{class:"part"},
     h("p",{class:"note",text:"Choisissez la ville ou le village de la fête : la quête part de la mairie et se construit dans un rayon d'environ 700 mètres."}),
     town.nodes,
@@ -1962,7 +1973,13 @@ function setupScreen(){
     h("p",{class:"note",text:"Pas d'adresse à donner : la quête se joue chez vous. Après le paiement, le guide de l'adulte vous dit où cacher les six cartes, à imprimer ou à écrire à la main (5 minutes avant la fête)."}),
     goHome);
   const depart=h("div",{class:"card"},h("h3",{text:"Le départ"}),villePart);
+  // Optional e-mail (paid build with --mail): last before the button of the chosen place, checked before the preview is made.
+  const mailBox=MAIL&&mailField("mail-to","Recevoir mon aperçu par e-mail (facultatif)");
+  const townBtn=town.nodes.querySelector("button[type=submit]");
+  // the town form's own submit handler is left as it is: a wrong address stops the click before it
+  if(MAIL)villePart.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("button[type=submit]")===townBtn&&S.name&&!mailOk()){e.preventDefault();e.stopPropagation();}},true);
   const setMode=v=>{S.mode=v;save();depart.hidden=v!=="ville";maisonPart.hidden=v!=="maison";note.textContent="";
+    if(mailBox)(v==="ville"?townBtn:goHome).before(mailBox.box);
     modes.querySelectorAll("label.mode").forEach(l=>l.classList.toggle("on",l.htmlFor==="mode-"+v));};
   const modes=h("fieldset",{class:"modes"},h("legend",{text:"Où se joue la quête ?"}),
     ...[["ville","pin","Dans ma ville","Un parcours à pied de 4 à 6 lieux publics, autour de la mairie"],
@@ -2002,7 +2019,7 @@ function locate(){
 }
 // town: known (address search) or null (position: looked up while the quest is prepared, 5 s at most).
 async function startFrom(lat,lon,town){
-  if(needName())return;
+  if(needName()||!mailOk())return;
   const townP=town!=null?Promise.resolve(town):Promise.race([reverseTown(lat,lon),new Promise(r=>setTimeout(()=>r(""),5000))]);
   go({screen:"loading",start:{lat,lon},town:town||""});
   try{
@@ -2018,6 +2035,7 @@ async function startFrom(lat,lon,town){
     const t=await townP;
     if(!p.ok){if(p.reason==="few"){go({screen:"few",found:p.found,town:t});return;}throw new Error(p.reason);}
     go(Object.assign({},fresh,{preview:p.preview,quest:p.quest,token:p.token,screen:"preview",indoor:false,town:t}));
+    mailAfterPreview();
   }catch(e){hit("neterr");go({screen:"neterr"});}
 }
 
@@ -2191,7 +2209,62 @@ function keepPreview(){
   };
   return h("section",{class:"card keep","aria-labelledby":"keep-t"},h("h3",{id:"keep-t",text:"Pas encore la date ? Gardez cet aperçu."}),
     INAPP&&h("p",{class:"note",text:"Vous êtes dans le navigateur d'une application (Instagram, TikTok…) : ce lien vous permet de retrouver l'aperçu dans Safari ou Chrome."}),
-    h("div",{class:"row"},mailPreviewBtn(),h("button",{class:"btn ghost",type:"button",onclick:send},"Envoyer à l'autre parent")),out);
+    h("div",{class:"row"},MAIL?mailToggle():mailPreviewBtn(),h("button",{class:"btn ghost",type:"button",onclick:send},"Envoyer à l'autre parent")),
+    MAIL&&mailArea(),out);
+}
+
+/* ---------- The preview by e-mail (paid build with --mail): the link now, one reminder a week later ---------- */
+// The address lives only in this page's memory (never in the browser's storage), for the confirmation.
+const MAIL_RE=/^[A-Za-z0-9._%+-]{1,64}@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,24}$/;
+const mailValid=v=>v.length<=254&&MAIL_RE.test(v)&&!/^\.|\.\.|\.@/.test(v);
+let mailDraft="",mailState=null;   // mailState: {to, tok, st: "wait" | "ok" | "err"}
+const MAIL_INFO="Nous vous envoyons le lien de votre aperçu, puis un seul rappel une semaine plus tard si la quête n'est pas débloquée. Rien d'autre, et vous pouvez vous désinscrire en un clic.";
+function mailField(id,label){
+  const input=h("input",{type:"email",id,name:"email",maxlength:"254",autocomplete:"email",inputmode:"email",autocapitalize:"off",spellcheck:"false",placeholder:"Ex. : prenom@exemple.fr",value:mailDraft});
+  input.addEventListener("input",()=>{mailDraft=input.value.trim();});
+  const box=h("div",{class:"mailbox"},h("label",{for:id},label,input),
+    h("p",{class:"fhelp"},MAIL_INFO+" ",h("a",{href:"legal/confidentialite",target:"_blank",rel:"noopener"},"Vos données")));
+  return {box,input};
+}
+// The setup's field: empty or a full address goes on; anything else is said under the field, and emptying it is enough.
+function mailOk(){const i=MAIL&&document.getElementById("mail-to");if(!i)return true;
+  const v=i.value.trim();mailDraft=v;if(!v||mailValid(v))return true;
+  fieldErr(i,"Cette adresse e-mail semble incomplète. Corrigez-la, ou videz le champ pour continuer sans e-mail.");return false;}
+// Right after a preview is made from the form: sent in the background, the preview is already on screen.
+function mailAfterPreview(){if(MAIL&&PAID&&S.token&&mailDraft&&mailValid(mailDraft))mailSend(mailDraft);}
+async function mailSend(to){
+  const tok=S.token;mailState={to,tok,st:"wait"};mailShow();
+  let ok=false;
+  try{const r=await api("api/rappel",{email:to,apercu:tok,n:S.name,h:S.hero,k:S.kids,ref:ME?"moi":S.ref},20000);ok=!!(r&&r.ok);}catch(e){}
+  if(mailState&&mailState.tok===tok){mailState.st=ok?"ok":"err";mailShow();}
+}
+const mailMine=()=>mailState&&mailState.tok===S.token?mailState:null;
+function mailShow(){const b=document.getElementById("mail-area");if(!b)return;b.hidden=false;b.replaceChildren(...mailAreaKids());
+  const t=document.querySelector("[aria-controls=mail-area]");if(t)t.setAttribute("aria-expanded","true");}
+// In « Gardez cet aperçu », « M'envoyer l'aperçu » opens this area instead of the mail app (folded at first, so the
+// payment stays within two screens of an iPhone); the confirmation shows there when an address was given.
+function mailArea(){return h("div",{id:"mail-area",class:"mailarea",hidden:!mailMine()},...mailAreaKids());}
+function mailToggle(){
+  const b=h("button",{class:"btn ghost",type:"button","aria-controls":"mail-area","aria-expanded":String(!!mailMine())},"M'envoyer l'aperçu");
+  b.addEventListener("click",()=>{const a=document.getElementById("mail-area");if(!a)return;a.hidden=!a.hidden;b.setAttribute("aria-expanded",String(!a.hidden));
+    const i=!a.hidden&&document.getElementById("mail-keep");if(i)i.focus();});
+  return b;
+}
+function mailAreaKids(){
+  const m=mailMine();
+  if(m&&m.st==="wait")return [h("p",{class:"note",text:`Envoi de l'aperçu à ${m.to}…`})];
+  if(m&&m.st==="ok")return [h("p",{class:"mailsent"},`✓ Aperçu envoyé à ${m.to}`,h("span",{text:"Pas reçu d'ici quelques minutes ? Regardez dans les courriers indésirables."}))];
+  const f=mailField("mail-keep","Votre adresse e-mail");
+  const btn=h("button",{class:"btn ghost",type:"button"},"Recevoir l'aperçu par e-mail");
+  const go2=()=>{const v=f.input.value.trim();
+    if(!mailValid(v)){fieldErr(f.input,v?"Cette adresse e-mail semble incomplète : corrigez-la.":"Indiquez votre adresse e-mail.");return;}
+    mailDraft=v;mailSend(v);};
+  btn.addEventListener("click",go2);
+  f.input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go2();}});
+  return [m&&m.st==="err"&&h("p",{class:"mailfail",role:"alert",text:"L'e-mail n'a pas pu partir : gardez ce lien."}),
+    h("div",{class:"mailform"},f.box,btn,
+      // the former way, still there: an e-mail written by the parent's own mail app
+      h("a",{class:"linkish",href:previewMail(),onclick:()=>hit("apercu-garde")},"Ou l'envoyer avec votre application e-mail"))];
 }
 // Before the opening (server variable TESTEURS): the quest is offered to tester families, who answer
 // a few questions at the end. Payment stays hidden until the variable is removed.
@@ -2542,6 +2615,7 @@ async function openShared(token,p){
   let r=null;try{r=await api("api/preview",{token,ref:S.ref||"apercu"});}catch(e){}
   if(!r||!r.ok){go({screen:"home"});note.textContent="Cet aperçu n'a pas pu s'ouvrir : créez-en un nouveau ci-dessous.";return;}
   if(r.price)PRICE=r.price;
+  if(p.get("ref")==="mail")hit("mail-retour");   // the link of the e-mails (dev/worker.js) ends with &ref=mail
   go(Object.assign({},fresh,{ref:S.ref||"apercu",token:r.token,quest:null,start:null,screen:"preview",indoor:!!r.indoorOnly,
     preview:{ok:true,indoorOnly:r.indoorOnly,count:r.count,walkM:r.walkM,minutes:r.minutes,teasers:r.teasers,price:r.price,testeur:!!r.testeur},
     name:(p.get("n")||"").slice(0,24),hero:p.get("h")==="f"?"f":"m",kids:Math.max(2,Math.min(15,parseInt(p.get("k"),10)||8)),town:(p.get("v")||"").slice(0,60)}));

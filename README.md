@@ -27,7 +27,7 @@ Une quête d'anniversaire pour enfants de 7 à 10 ans, au prénom de l'enfant, g
 
 ## Mise en ligne
 
-L'action « Mise en ligne (Cloudflare) » publie la version payante à chaque modification. Elle attend trois secrets du dépôt : `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` et `STRIPE_SECRET_KEY` (clé de test d'abord, clé réelle au lancement). La clé de chiffrement des quêtes (`QUEST_KEY`) est créée une fois chez Cloudflare et ne doit jamais changer.
+L'action « Mise en ligne (Cloudflare) » publie la version payante à chaque modification. Elle attend trois secrets du dépôt : `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` et `STRIPE_SECRET_KEY` (clé de test d'abord, clé réelle au lancement). La clé de chiffrement des quêtes (`QUEST_KEY`) est créée une fois chez Cloudflare et ne doit jamais changer. Un quatrième secret, facultatif, `BREVO_API_KEY` (clé d'API Brevo), allume l'aperçu par e-mail : le champ « Recevoir mon aperçu par e-mail (facultatif) », l'envoi du lien et un seul rappel une semaine plus tard (`/api/rappel` et la tâche quotidienne de `dev/worker.js`, testés par `dev/e2e_mail.py`). Sans lui, rien ne change.
 
 ## Données
 

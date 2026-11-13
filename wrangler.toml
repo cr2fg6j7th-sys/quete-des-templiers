@@ -30,8 +30,17 @@ SITE_HOST = "maquetelegendaire.fr"
 ESPACE_ID = "nathan"
 ESPACE_SALT = "758df55ecee50e7c49222472017e4e99"
 ESPACE_HASH = "f8c98726a21cab7be73b12f2867cb15a5374896171c49a4bde37e0852617befb"
+# The preview by e-mail (and one reminder a week later): on only once the secret BREVO_API_KEY is set
+# (GitHub secret, pushed to Cloudflare by the deploy). The sender's domain must be authenticated at Brevo.
+MAIL_FROM = "bonjour@maquetelegendaire.fr"
+MAIL_FROM_NAME = "Ma Quête Légendaire"
+MAIL_REPLY_TO = "maquetelegendaire@gmail.com"
 
 [observability]
 enabled = true
+
+# Every day at 08:17 UTC: the e-mail reminders due (7 days after the request). Does nothing without BREVO_API_KEY.
+[triggers]
+crons = ["17 8 * * *"]
 
 # Secrets, set by the deploy workflow: STRIPE_SECRET_KEY (from GitHub), QUEST_KEY (generated once).

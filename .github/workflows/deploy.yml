@@ -95,8 +95,11 @@ jobs:
 
       - name: Construire le site et le serveur
         if: steps.ready.outputs.ok == 'true'
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
         run: |
-          python3 dev/build.py --audio
+          # The preview by e-mail is offered only once the optional secret BREVO_API_KEY exists.
+          if [ -n "$BREVO_API_KEY" ]; then python3 dev/build.py --audio --mail; else python3 dev/build.py --audio; fi
           node dev/test.js
           node dev/test-worker.mjs
           if [ -f places-data/index.json ]; then cp -r places-data site/places; echo "::notice::Lieux en ligne : $(cat places-data/index.json)"; fi
@@ -176,10 +179,15 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
         run: |
           set -o pipefail
           report() { tail -n 15 /tmp/secret.log | sed -e 's/\x1b\[[0-9;]*m//g' | grep -v '^\s*$' | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
           printf '%s' "$STRIPE_SECRET_KEY" | npx --yes $WRANGLER secret put STRIPE_SECRET_KEY > /tmp/secret.log 2>&1 || report
+          # Optional: the e-mail service's key (preview by e-mail); without it, nothing is sent.
+          if [ -n "$BREVO_API_KEY" ]; then
+            printf '%s' "$BREVO_API_KEY" | npx --yes $WRANGLER secret put BREVO_API_KEY > /tmp/secret.log 2>&1 || report
+          fi
           # The quest encryption key is created once and never leaves Cloudflare. It must never
           # change: paid quests are reopened with it. If the list cannot be read, the step fails.
           list=$(npx --yes $WRANGLER secret list --format json)

@@ -95,10 +95,12 @@ async def main():
             check(not await pg.is_visible(".paybar") and await pg.evaluate("(()=>{const r=document.getElementById('payer').getBoundingClientRect();return r.top<innerHeight&&r.bottom>0})()"),
                   "barre de prix : mène au paiement et se cache devant lui")
             # keep the preview: an e-mail to oneself (no address asked), or a link to the other parent
-            mail = await pg.get_attribute(".keep a:has-text(\"M'envoyer l'aperçu\")", "href")
+            # (built with --mail, « M'envoyer l'aperçu » first opens the field of dev/e2e_mail.py; the mail app comes second)
+            if await pg.locator("#mail-keep").count(): await pg.click(".keep button:has-text(\"M'envoyer l'aperçu\")")
+            mail = await pg.get_attribute(".keep a[href^='mailto:']", "href")
             check(mail.startswith("mailto:?subject=") and "%3Fapercu%3D" in mail and "%26n%3DMichael" in mail, "aperçu : « M'envoyer l'aperçu » écrit un e-mail sans destinataire, avec le lien")
-            await pg.evaluate("document.querySelector('.keep a').addEventListener('click',e=>e.preventDefault())")
-            await pg.click(".keep a")
+            await pg.evaluate("document.querySelector('.keep a[href^=\"mailto:\"]').addEventListener('click',e=>e.preventDefault())")
+            await pg.click(".keep a[href^='mailto:']")
             # send the preview to the other parent: it opens on another phone, places still hidden
             await pg.evaluate("navigator.clipboard.writeText=t=>{window.__copied=t;return Promise.resolve()};navigator.share=undefined")
             await pg.click("text=Envoyer à l'autre parent")

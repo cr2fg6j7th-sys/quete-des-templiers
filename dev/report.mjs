@@ -103,6 +103,10 @@ ${row("Aperçus créés", "preview")}
 ${row("Voix du Grand Maître écoutée sur l'aperçu", "prologue")}
 ${row("Aperçus retrouvés sur le même téléphone (retour ou rechargement)", "apercu-retour")}
 ${row("Aperçus envoyés à soi-même par e-mail (« M'envoyer l'aperçu »)", "apercu-garde")}
+${row("Adresses laissées pour recevoir l'aperçu par e-mail (envoi par le site)", "mail-demande")}
+${row("Aperçus rouverts depuis le lien de ces e-mails", "mail-retour")}
+${row("Rappels envoyés (une semaine après, quête pas débloquée)", "mail-rappel")}
+${row("Désinscriptions avant le rappel", "mail-stop")}
 ${row("Clics sur la barre de prix en bas de l'aperçu", "paybar")}
 ${row("Pas assez de lieux autour du départ", "few")}
 ${row("Cartes en panne (écran d'erreur)", "neterr")}

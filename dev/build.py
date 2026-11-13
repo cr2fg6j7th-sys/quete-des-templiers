@@ -11,6 +11,8 @@
 #   town pages          added by dev/villes/build.mjs in the deploy, once the places of France are there
 #   home.static.html    the home screen copied into the page for robots without JavaScript (dev/snapshot.py)
 # The audio folder is copied into site/ by the deploy workflow (or with --audio).
+# --mail: the paid site offers to e-mail the preview (and one reminder): the deploy adds it when the secret
+# BREVO_API_KEY exists. Without it, the field is not in the page and the privacy page does not mention it.
 import hashlib, json, re, shutil, subprocess, sys
 from datetime import date
 from pathlib import Path
@@ -55,10 +57,18 @@ ver_tags = "".join(f'<meta name="{n}" content="{ver[k]}">\n' for k, n in (("goog
 
 # The contact address of the sales terms, also offered on the preview after a cancelled payment.
 CONTACT = json.loads((d / "legal" / "identite.json").read_text(encoding="utf-8")).get("email") or ""
+MAIL = "--mail" in sys.argv
+# Legal pages: text between <!--MAIL--> and <!--/MAIL--> exists only with the e-mails on, text between <!--NOMAIL-->
+# and <!--/NOMAIL--> only without them; the other block is removed, markers kept. The dates of the sitemap ignore
+# both blocks (see same_page), so the two builds agree.
+MAIL_BLOCK = re.compile(r"<!--MAIL-->.*?<!--/MAIL-->\n?", re.S)
+NOMAIL_BLOCK = re.compile(r"<!--NOMAIL-->.*?<!--/NOMAIL-->\n?", re.S)
+mail_text = lambda html: (NOMAIL_BLOCK if MAIL else MAIL_BLOCK).sub("", html)
 
 def page(engine_part, paid):
     return (t.replace("/*EMAIL*/", CONTACT).replace("/*GEO*/", geo).replace("/*ENGINE*/", engine_part).replace("/*VOICE*/", voice)
              .replace("const PAID=/*PAID*/false;", f"const PAID={'true' if paid else 'false'};")
+             .replace("const MAIL=/*MAIL*/false;", f"const MAIL={'true' if paid and MAIL else 'false'};")
              .replace("/*PLACES_SITE*/", "" if paid else PLACES_SITE)
              .replace("{{SITE}}", SITE).replace("/*VOICE_VERSION*/", VOICE_VERSION)
              .replace("<!--ROBOTS-->", '<meta name="robots" content="max-image-preview:large">' if paid else '<meta name="robots" content="noindex">')
@@ -126,7 +136,7 @@ for name, html in guide_pages.items():
     (root / name).write_text(with_html(html).replace("</head>", '<meta name="robots" content="noindex">\n</head>', 1), encoding="utf-8")
 legal_pages = {}
 for f in sorted((d / "legal").glob("*.html")):
-    html = f.read_text(encoding="utf-8")
+    html = mail_text(f.read_text(encoding="utf-8"))
     for k, v in fields.items():
         html = html.replace(k, v)
     # one address for search engines, whichever copy (paid site or GitHub Pages) is read
@@ -169,8 +179,10 @@ changed = False
 # The voice cache name (VOICE_VERSION) changes with every voice added by .github/workflows/audio.yml, which
 # does not commit this file: it is left out of the hash, so that does not move the date of the home page.
 voice_cache = f"quete-voix-{VOICE_VERSION}".encode()
+# The e-mail option (--mail) is left out of the hash too: the deploy builds with it, the commits without it.
+same_page = lambda b: NOMAIL_BLOCK.sub("", MAIL_BLOCK.sub("", b.decode("utf-8"))).replace("const MAIL=true;", "const MAIL=false;").encode("utf-8")
 for u in urls:
-    hsh = hashlib.sha256(page_file(u).read_bytes().replace(voice_cache, b"quete-voix-")).hexdigest()[:16]
+    hsh = hashlib.sha256(same_page(page_file(u).read_bytes().replace(voice_cache, b"quete-voix-"))).hexdigest()[:16]
     if lastmod.get(u, {}).get("hash") != hsh:
         lastmod[u] = {"hash": hsh, "date": date.today().isoformat()}
         changed = True
@@ -224,7 +236,11 @@ if "--audio" in sys.argv:
 def for_worker(code):
     code = re.sub(r'\(typeof (\w+) !== "undefined"\) \? \1 : require\("[^"]+"\)', r"\1", code)
     return re.sub(r'^if \(typeof module !== "undefined"\) module\.exports = \w+;\n', "", code, flags=re.M)
+# The e-mails of the preview print a first name only from this list, and the seller's identity in their footer.
+prenoms = json.loads((d / "prenoms.json").read_text(encoding="utf-8"))
+worker = (worker.replace("/*PRENOMS*/[]", json.dumps(prenoms, ensure_ascii=False))
+          .replace("/*IDENTITE*/{}", json.dumps({k: ident.get(k) or "" for k in ("nom", "adresse", "email")}, ensure_ascii=False)))
 bundle = for_worker(geo + "\n" + eng) + "\n" + worker
 assert "require(" not in bundle and "module.exports" not in bundle, "worker bundle still has Node code"
 (root / "dist" / "worker.js").write_text(bundle, encoding="utf-8")
-print("index.html, site/ et dist/worker.js reconstruits")
+print("index.html, site/ et dist/worker.js reconstruits" + (" (avec l'aperçu par e-mail)" if MAIL else ""))

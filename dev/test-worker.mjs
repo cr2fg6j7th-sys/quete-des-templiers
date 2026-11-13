@@ -27,3 +27,127 @@ for (const [path, ref] of [["/tiktok", "tiktok"], ["/TikTok/", "tiktok"], ["/ins
 const viaWww = await go("https://www.maquetelegendaire.fr/tiktok");
 assert.strictEqual(viaWww.headers.get("location"), "https://maquetelegendaire.fr/tiktok", "www goes to the main address first");
 console.log("Adresses du site : tous les tests passent.");
+
+// The preview by e-mail and its one reminder (fake KV, fake Brevo and API Géo: no network, nothing sent).
+{
+  const kv = new Map();
+  const STATS = {
+    put: async (k, v, o = {}) => kv.set(k, { v: String(v), meta: o.metadata || null }),
+    get: async k => kv.has(k) ? kv.get(k).v : null,
+    delete: async k => { kv.delete(k); },
+    list: async ({ prefix = "" } = {}) => ({ keys: [...kv.keys()].filter(k => k.startsWith(prefix)).sort().map(name => ({ name, metadata: kv.get(name).meta })), list_complete: true })
+  };
+  const sent = [];
+  let commune = "<img src=x onerror=alert(1)>";
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (u, init) => {
+    u = String(u);
+    if (u.startsWith("https://api.brevo.com/v3/smtp/email")) { sent.push({ headers: init.headers, body: JSON.parse(init.body) }); return new Response("{}", { status: 201 }); }
+    if (u.startsWith("https://geo.api.gouv.fr/communes?")) return Response.json([{ nom: commune }]);
+    throw new Error("unexpected fetch " + u);
+  };
+  const realNow = Date.now, realLog = console.log;
+  console.log = () => {};   // the worker's one-line logs
+  let days = 0;
+  Date.now = () => realNow() + days * 86400000;
+  const menv = Object.assign({}, env, { STATS, QUEST_KEY: "cle", BREVO_API_KEY: "xkeysib-unit", MAIL_FROM: "bonjour@maquetelegendaire.fr", MAIL_REPLY_TO: "contact@exemple.fr", PRICE_CENTS: "2490" });
+  const call = async (path, body, e = menv) => {
+    const r = await worker.fetch(new Request("https://maquetelegendaire.fr" + path, { method: "POST", body: JSON.stringify(body) }), e, { waitUntil() {} });
+    return [r.status, await r.json()];
+  };
+  const [, home] = await call("/api/preview", { indoor: true });
+  assert.ok(home.token, "preview token");
+
+  assert.deepStrictEqual(await call("/api/rappel", { email: "a@exemple.fr", apercu: home.token }, Object.assign({}, menv, { BREVO_API_KEY: "" })), [503, { ok: false, reason: "off" }], "off without the key");
+  for (const bad of ["", "a@b", "a@exemple", "a b@exemple.fr", "a@exemple.fr\r\nBcc: x@y.fr", "a..b@exemple.fr", ".a@exemple.fr", "a@-x.fr", "x".repeat(250) + "@ex.fr", "<a@exemple.fr>"])
+    assert.strictEqual((await call("/api/rappel", { email: bad, apercu: home.token }))[1].reason, "email", "refused address: " + JSON.stringify(bad));
+  const tampered = home.token.slice(0, -2) + (home.token.slice(-2) === "AA" ? "BB" : "AA");
+  assert.strictEqual((await call("/api/rappel", { email: "a@exemple.fr", apercu: tampered }))[1].reason, "token", "tampered token refused");
+  assert.strictEqual((await call("/api/rappel", { email: "a@exemple.fr", apercu: "pas-un-jeton-du-tout-0123456789" }))[1].reason, "token", "made-up token refused");
+  assert.strictEqual(sent.length, 0, "nothing sent for refused requests");
+
+  // the first name only from the list; the town from the API Géo, escaped; the link on the site's address
+  assert.deepStrictEqual(await call("/api/rappel", { email: "Parent@Exemple.fr", apercu: home.token, n: "<b>x</b>", h: "f", k: 5, ref: "tiktok" }), [200, { ok: true }]);
+  let m = sent.pop().body;
+  assert.strictEqual(m.subject, "L'aperçu de votre quête d'anniversaire");
+  assert.ok(!m.htmlContent.includes("<b>x</b>") && !m.textContent.includes("<b>x</b>"), "no typed text in the e-mail");
+  assert.deepStrictEqual(m.to, [{ email: "parent@exemple.fr" }]);
+  assert.strictEqual(m.sender.email, "bonjour@maquetelegendaire.fr");
+  assert.strictEqual(m.replyTo.email, "contact@exemple.fr");
+  assert.ok(m.textContent.includes("https://maquetelegendaire.fr/?apercu=" + home.token + "&n=&h=f&k=5&v=&ref=mail"), "the preview's link");
+  assert.ok(/^<https:\/\/maquetelegendaire\.fr\/api\/rappel\/stop\?id=[0-9a-f]{16}\.[0-9a-f]{16}&s=[0-9a-f]{32}>$/.test(m.headers["List-Unsubscribe"]), "List-Unsubscribe");
+  assert.ok(!/promo|NOEL/i.test(m.htmlContent + m.textContent), "no promotion code");
+  assert.ok(m.textContent.includes("24,90 €"), "price from PRICE_CENTS");
+  // a quest outdoors: its token holds the start point (the town is asked from the API Géo)
+  const outdoor = await (async () => {
+    const start = { lat: 48.5, lon: 7.47 }, d = (n, e) => ({ lat: start.lat + n / 111320, lon: start.lon + e / 73800 });
+    const els = [["amenity", "place_of_worship", "Église Saint-Martin", 20, -150], ["amenity", "fountain", "Fontaine", -30, 60], ["historic", "city_gate", "Porte Haute", 0, 300],
+      ["historic", "city_gate", "Porte Basse", 10, -420], ["leisure", "park", "Parc", -250, 100], ["historic", "memorial", "Monument", 150, 20]]
+      .map(([k, v, name, n, e], i) => Object.assign({ type: "node", id: i + 1, tags: { [k]: v, name, religion: "christian" } }, d(n, e)));
+    return (await call("/api/preview", { start, elements: els }))[1];
+  })();
+  assert.ok(outdoor.ok && outdoor.token, "outdoor preview");
+  assert.strictEqual((await call("/api/rappel", { email: "b@exemple.fr", apercu: "https://maquetelegendaire.fr/?apercu=" + outdoor.token + "&n=x", n: "léo" }))[0], 200, "token given inside the link");
+  m = sent.pop().body;
+  assert.strictEqual(m.subject, "L'aperçu de la quête de Léo");
+  assert.ok(m.htmlContent.includes("à &lt;img src=x onerror=alert(1)&gt;") && !m.htmlContent.includes("<img"), "the town is escaped");
+  commune = "Le Havre";
+  await call("/api/rappel", { email: "c@exemple.fr", apercu: outdoor.token, n: "Hugo" });
+  m = sent.pop().body;
+  assert.ok(m.subject === "L'aperçu de la quête pour Hugo" && m.textContent.includes("au Havre"), "elision: " + m.subject);
+  // 3 requests per address per 24 hours
+  for (let i = 0; i < 2; i++) assert.strictEqual((await call("/api/rappel", { email: "c@exemple.fr", apercu: outdoor.token }))[0], 200);
+  assert.deepStrictEqual(await call("/api/rappel", { email: "c@exemple.fr", apercu: outdoor.token }), [429, { ok: false, reason: "limit" }], "4th request in 24 h");
+  sent.length = 0;
+
+  // the reminder: not before 7 days, once at 7 days, then the request is gone
+  const records = () => [...kv.keys()].filter(k => k.startsWith("rappel:"));
+  const before = records().length;
+  assert.strictEqual(before, 3, "one record per address and token");
+  days = 6.9; await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
+  assert.strictEqual(sent.length, 0, "no reminder before 7 days");
+  days = 7.01; await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
+  assert.strictEqual(sent.length, 3, "one reminder each at 7 days");
+  assert.ok(sent.every(x => / vous attend$/.test(x.body.subject) && x.body.textContent.includes("C'est le seul rappel que vous recevrez")), "reminder text");
+  assert.ok(sent.some(x => x.body.textContent.includes("S'il pleut")) && sent.some(x => !x.body.textContent.includes("S'il pleut")), "rain line only outdoors");
+  assert.strictEqual(records().length, 0, "records deleted after the reminder");
+  await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
+  assert.strictEqual(sent.length, 3, "never twice");
+
+  // unsubscribe: signed link only
+  days = 0; sent.length = 0;
+  await call("/api/rappel", { email: "d@exemple.fr", apercu: home.token });
+  const stop = sent.pop().body.headers["List-Unsubscribe"].slice(1, -1);
+  const get = async u => { const r = await worker.fetch(new Request(u), menv, { waitUntil() {} }); return [r.status, await r.text()]; };
+  assert.strictEqual((await get(stop.replace(/s=([0-9a-f])/, (x, c) => "s=" + (c === "0" ? "1" : "0"))))[0], 403, "wrong signature refused");
+  assert.strictEqual(records().length, 1);
+  const [st, page] = await get(stop);
+  assert.ok(st === 200 && page.includes("C'est noté : vous ne recevrez pas de rappel."), "unsubscribed");
+  assert.strictEqual(records().length, 0);
+  assert.strictEqual((await get(stop))[0], 200, "works when already gone");
+
+  // Brevo refuses (4xx): kept for one more try; no answer: never sent twice
+  sent.length = 0;
+  await call("/api/rappel", { email: "e@exemple.fr", apercu: home.token });
+  sent.length = 0;
+  globalThis.fetch = async u => { if (String(u).includes("brevo")) return new Response("{}", { status: 400 }); return Response.json([]); };
+  days = 7.1; await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
+  assert.strictEqual(records().length, 1, "refused: kept");
+  assert.deepStrictEqual(Object.keys(kv.get(records()[0]).meta).sort(), ["c", "n", "x"], "refused: not marked as being sent");
+  globalThis.fetch = async u => { if (String(u).includes("brevo")) throw new TypeError("network"); return Response.json([]); };
+  days = 8.1; await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
+  assert.strictEqual(kv.get(records()[0]).meta.p, 1, "no answer: marked");
+  globalThis.fetch = async (u, init) => { if (String(u).includes("brevo")) { sent.push(1); return new Response("{}", { status: 201 }); } return Response.json([]); };
+  days = 9.1; await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
+  assert.ok(records().length === 0 && sent.length === 0, "marked: deleted without a second send");
+  // at most 30 reminders a run: the rest the next day, each once
+  days = 0; sent.length = 0;
+  for (let i = 0; i < 32; i++) await call("/api/rappel", { email: `n${i}@exemple.fr`, apercu: home.token });
+  sent.length = 0;
+  days = 7.2; await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
+  assert.strictEqual(sent.length, 30, "30 reminders in the first run");
+  days = 8.2; await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
+  assert.ok(sent.length === 32 && records().length === 0, "the 2 others the next day");
+  globalThis.fetch = realFetch; Date.now = realNow; console.log = realLog;
+}
+console.log("Aperçu par e-mail : tous les tests passent.");
