@@ -51,8 +51,8 @@ def serve(port, **extra):
         except Exception: time.sleep(0.1)
     return srv
 
-async def new_page(browser, rappel_calls=None):
-    ctx = await browser.new_context(viewport={"width": 390, "height": 860})
+async def new_page(browser, rappel_calls=None, **opts):
+    ctx = await browser.new_context(viewport={"width": 390, "height": 860}, **opts)
     pg = await ctx.new_page()
     pg.errs = []
     pg.on("pageerror", lambda e: pg.errs.append(str(e)))
@@ -320,15 +320,43 @@ async def main():
                     code, j = call(path, dict(body, email="livre@exemple.fr"))
                     check(code == 403 and "exemple" not in json.dumps(j), f"espace : {path} sans le bon code → 403, aucune adresse")
             calls0 = call("/__brevo-events")[1]["calls"]
-            ctx, ep = await new_page(b)
+            ctx, ep = await new_page(b, reduced_motion="reduce")   # instant jumps: the positions below are final
             await ep.goto(BASE + "/espace/")
             check(await ep.get_attribute("meta[name=robots]", "content") == "noindex, nofollow", "espace : noindex")
+            check(not await ep.is_visible("#jump"), "menu : absent avant la connexion")
             await ep.fill("#id", "test"); await ep.fill("#code", "TEST-CODE-0000-0000")
             await ep.click("#go")
             await ep.wait_for_selector("#app:not([hidden])", timeout=8000)
             check(not await ep.evaluate("document.getElementById('mails-box').open") and call("/__brevo-events")[1]["calls"] == calls0,
                   "espace : section E-mails repliée, Brevo pas interrogé à l'ouverture")
-            await ep.click("#mails-box summary")
+            # the jump menu: sticky bar, panel, each entry to its section (just under the bar, not hidden by it)
+            check(await ep.is_visible("#jump") and await ep.inner_text("#jump-now") == "" and await ep.get_attribute("#jump-btn", "aria-expanded") == "false",
+                  "menu : barre visible une fois connecté, aucune section nommée en haut de page")
+            async def menu():
+                await ep.click("#jump-btn"); await ep.wait_for_selector("#jump-panel:not([hidden])", timeout=3000)
+                return re.sub(r"[ \t]+", " ", await ep.inner_text("#jump-panel"))
+            async def go(href):
+                await menu(); await ep.click(f"#jump-panel a[href='#{href}']"); await ep.wait_for_timeout(450)
+            under = lambda sel: ep.evaluate("""s=>{const t=document.querySelector(s).getBoundingClientRect(),b=document.querySelector('.jbar').getBoundingClientRect();
+                return t.top>=b.bottom-1&&t.top<innerHeight-40&&b.top>=0&&b.top<1}""", sel)
+            panel = await menu()
+            check("E-mails\nà charger" in panel and "En erreur" not in panel and "Renvoyer à une adresse" not in panel and "Avis des familles testeuses\n0 avis" in panel
+                  and "Copier les e-mails" not in panel and await ep.get_attribute("#jump-btn", "aria-expanded") == "true" and await ep.get_attribute("#jump-btn", "aria-controls") == "jump-panel",
+                  "menu : sections dans l'ordre, E-mails « à charger », sans sous-entrées ni copie (aucun avis)")
+            check(await ep.evaluate("[...document.querySelectorAll('#jump-panel a')].map(a=>a.getAttribute('href')).join(' ')") == "#emails #frequentation #visites #provenance #parcours #jours #avis"
+                  and await ep.evaluate("[...document.querySelectorAll('#jump-panel a')].every(a=>a.getBoundingClientRect().height>=44)"), "menu : 7 entrées, cibles d'au moins 44 px")
+            check(await ep.evaluate("document.activeElement.closest('#jump-panel')!==null"), "menu : le focus va dans le panneau à l'ouverture")
+            await ep.keyboard.press("Escape")
+            check(await ep.is_hidden("#jump-panel") and await ep.get_attribute("#jump-btn", "aria-expanded") == "false" and await ep.evaluate("document.activeElement.id") == "jump-btn",
+                  "menu : Échap ferme, le focus revient au bouton")
+            for href, sel, name in [("frequentation", "[data-sec=frequentation]", "Fréquentation"), ("visites", "[data-sec=visites]", "Visites par jour"),
+                                    ("provenance", "[data-sec=provenance]", "Provenance"), ("parcours", "[data-sec=parcours]", "Visiteur → diplôme"),
+                                    ("jours", "[data-sec=jours]", "Jour par jour"), ("avis", "#avis-title", "Avis des familles")]:
+                await go(href)
+                check(await under(sel) and await ep.is_hidden("#jump-panel") and await ep.inner_text("#jump-now") == name, f"menu : « {name} » mène à sa section, titre visible sous la barre")
+            await go("emails")
+            check(await ep.evaluate("document.getElementById('mails-box').open") and await ep.evaluate("document.activeElement.id") == "m-load" and await under("#mails-box")
+                  and call("/__brevo-events")[1]["calls"] == calls0, "menu : « E-mails » ouvre la section, focus sur « Charger les e-mails », sans interroger Brevo")
             await ep.click("#m-load")
             await ep.wait_for_selector("#m-err .mi", timeout=8000)
             errt = await ep.inner_text("#m-err")
@@ -342,6 +370,22 @@ async def main():
             summ = await ep.inner_text("#m-sum")
             check(re.sub(r"\s+", " ", summ).startswith("Partis 4 7 jours Délivrés 1 7 jours En erreur 3"), "espace : résumé " + re.sub(r"\s+", " ", summ))
             check(await ep.evaluate("[...document.querySelectorAll('#m-err .mi, #m-sent .mi, #m-dem .mi')].every(x => !x.querySelector('script,img,a'))"), "espace : textes insérés comme texte")
+            # the menu after loading: the red count of e-mails in error, and the sub-entries
+            nerr = await ep.locator("#m-err .mi").count()
+            panel = await menu()
+            check(await ep.inner_text("#jump-panel a[href='#emails'] .pill") == str(nerr) == "3" and await ep.inner_text("#jump-dot") == "3"
+                  and "En erreur (3)" in panel and "Partis (" in panel and "Demandes en cours (5)" in panel and "Renvoyer à une adresse" in panel and "à charger" not in panel,
+                  "menu : pastille rouge = e-mails en erreur (3), sous-entrées après chargement")
+            await ep.mouse.click(195, 820)   # a touch outside the panel: closes it, touches nothing under it
+            check(await ep.is_hidden("#jump-panel") and await ep.get_attribute("#jump-btn", "aria-expanded") == "false", "menu : un toucher en dehors le ferme")
+            for href, sel in [("emails-erreur", "#m-err-t"), ("emails-demandes", "#m-dem-t"), ("emails-renvoi", "#m-manual")]:
+                await go(href)
+                check(await under(sel) and await ep.inner_text("#jump-now") == "E-mails", f"menu : sous-entrée {href} sous la barre")
+            await ep.evaluate("scrollTo(0, document.querySelector('[data-sec=visites]').getBoundingClientRect().top + scrollY - 120)")
+            await ep.wait_for_timeout(400)
+            check(await ep.inner_text("#jump-now") == "Visites par jour", "menu : nom de la section mis à jour au défilement")
+            await ep.click("#jump-top"); await ep.wait_for_timeout(400)
+            check(await ep.evaluate("scrollY") == 0 and await ep.inner_text("#jump-now") == "", "menu : « Haut » remonte en haut de page")
             # « Renvoyer l'aperçu » on the bounce: the same e-mail n°1, the reminder's date unchanged
             meta0 = {k: v["meta"] for k, v in call("/__kv?prefix=rappel:")[1].items()}
             item = ep.locator("#m-err .mi", has_text="rebond@exemple.fr")
@@ -384,6 +428,28 @@ async def main():
                   and "refus@exemple.fr" in await ep.inner_text("#m-err") and await ep.locator("#tiles .tile").count() == 5, "Brevo en panne : message clair, le reste de l'espace fonctionne")
             call("/__brevo-events?fail=0")
             errs += ep.errs
+            await ctx.close()
+            # a direct link (#avis) leads to its section after the code is typed; the next visit offers it back, without scrolling
+            ctx, ep = await new_page(b, reduced_motion="reduce")
+            await ep.goto(BASE + "/espace/#avis")
+            await ep.fill("#id", "test"); await ep.fill("#code", "TEST-CODE-0000-0000"); await ep.click("#go")
+            await ep.wait_for_selector("#app:not([hidden])", timeout=8000); await ep.wait_for_timeout(500)
+            check(await ep.inner_text("#jump-now") == "Avis des familles" and await under("#avis-title"), "menu : lien direct #avis, après la saisie du code")
+            await ep.evaluate("location.hash = '#frequentation'"); await ep.wait_for_timeout(400)
+            check(await ep.inner_text("#jump-now") == "Fréquentation" and await under("[data-sec=frequentation]"), "menu : lien direct #frequentation sur la page ouverte")
+            stored = await ep.evaluate("JSON.stringify(localStorage)")
+            check(json.loads(stored).get("espace-section") == "frequentation", "menu : seule la section est retenue " + stored[:80])
+            ep2 = await ctx.new_page(); ep2.errs = []; ep2.on("pageerror", lambda e: ep2.errs.append(str(e)))
+            await ep2.goto(BASE + "/espace/")
+            await ep2.wait_for_selector("#app:not([hidden])", timeout=8000); await ep2.wait_for_timeout(400)
+            check(await ep2.is_visible("#jump-resume") and "Fréquentation" in await ep2.inner_text("#jump-resume") and await ep2.evaluate("scrollY") == 0,
+                  "menu : prochaine visite, « Reprendre » proposé, la page reste en haut")
+            await ep2.click("#jump-resume"); await ep2.wait_for_timeout(400)
+            check(await ep2.inner_text("#jump-now") == "Fréquentation" and await ep2.is_hidden("#jump-resume"), "menu : « Reprendre » mène à la dernière section")
+            await ep2.click("#logout")
+            check(await ep2.evaluate("localStorage.getItem('espace-section') === null && sessionStorage.getItem('espace-section') === null") and await ep2.is_hidden("#jump"),
+                  "menu : se déconnecter oublie la section, barre cachée")
+            errs += ep.errs + ep2.errs
             await ctx.close()
             # the failed first send, never sent again: one e-mail on the 7th day, saying so, then nothing
             call("/__mails?clear=1")

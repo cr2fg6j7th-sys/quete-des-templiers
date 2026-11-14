@@ -103,6 +103,14 @@ async def main():
             await ep.wait_for_selector("text=Julie Martin", timeout=6000)
             body = await ep.inner_text("body")
             check("julie.martin@exemple.fr" in body and "Le frigo" in body and "Avant-première active" in body, "espace : page avec nom, e-mail et réponses")
+            # the jump menu: the number of answers, and the testers' addresses copied in one touch
+            await ctx.grant_permissions(["clipboard-read", "clipboard-write"], origin=BASE)
+            await ep.click("#jump-btn")
+            check("1 avis" in await ep.inner_text("#jump-panel a[href='#avis']") and "(1)" in await ep.inner_text("#jump-panel a[href='#avis-emails']"),
+                  "menu : « 1 avis » et « Copier les e-mails des testeurs (1) »")
+            await ep.click("#jump-panel a[href='#avis-emails']")
+            await ep.wait_for_selector("#mails:has-text('Copié (1)')", timeout=3000)
+            check(await ep.evaluate("navigator.clipboard.readText()") == "julie.martin@exemple.fr" and await ep.is_hidden("#jump-panel"), "menu : e-mails des testeurs copiés en un geste")
             await ep.screenshot(path=str(ROOT / "dist" / "t3-espace.png"), full_page=True)
             await ep.reload()
             await ep.wait_for_selector("text=Julie Martin", timeout=6000)

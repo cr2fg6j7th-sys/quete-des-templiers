@@ -130,6 +130,42 @@ tfoot td{font-weight:700;border-top:2px solid var(--line)}
 .warn{background:var(--rose-soft);color:var(--ink);border-radius:10px;padding:10px 12px}
 input[type=email]{font:inherit;font-family:var(--body);letter-spacing:0;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink);width:100%}
 .mform{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+/* jump menu: a one-row bar stuck under the iPhone status bar, naming the section on screen; the panel lists them all */
+:root{--navh:57px}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--stone);z-index:12}
+.sec{display:flex;flex-direction:column;gap:16px}
+[data-sec],#m-err-t,#m-sent-t,#m-dem-t,#m-manual,#m-load{scroll-margin-top:calc(env(safe-area-inset-top,0px) + var(--navh) + 12px)}
+[data-sec]:focus,#m-err-t:focus,#m-sent-t:focus,#m-dem-t:focus,#m-manual:focus{outline:none}
+.arrive{animation:arrive 1.4s ease-out}
+.sec.arrive{border-radius:12px}
+@keyframes arrive{from{box-shadow:0 0 0 3px var(--or)}to{box-shadow:0 0 0 3px transparent}}
+@media (prefers-reduced-motion:reduce){.arrive{animation:none}}
+.jump{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;margin:0 calc(-1*max(16px,env(safe-area-inset-right,0px))) 0 calc(-1*max(16px,env(safe-area-inset-left,0px)))}
+.jbar{position:relative;z-index:1;display:flex;align-items:center;gap:8px;height:var(--navh);padding:6px max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px));background:rgba(238,240,245,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.jbar button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;min-height:44px;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap;min-width:0}
+.jt{flex:1 1 auto;padding:0 34px 0 12px;position:relative;text-align:left}
+.jt::after{content:"";position:absolute;right:14px;top:50%;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-70%) rotate(45deg);transition:transform .15s}
+.jt[aria-expanded=true]::after{transform:translateY(-20%) rotate(-135deg)}
+.jk{font-family:var(--label);letter-spacing:.05em;font-size:.88rem;color:var(--muted);flex:none}
+.jn{font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.jr{flex:0 1 auto;padding:0 12px;font-size:.92rem}
+.jr span{overflow:hidden;text-overflow:ellipsis}
+.jbar .jh{flex:none;padding:0 14px;font-family:var(--label);letter-spacing:.05em}
+.pill{display:inline-block;flex:none;min-width:22px;padding:1px 7px;border-radius:999px;background:var(--rose);color:var(--on-rose);font-size:.8rem;font-weight:700;line-height:1.4;text-align:center;font-variant-numeric:tabular-nums}
+.jscrim{position:fixed;inset:0;background:rgba(27,37,71,.18)}
+.jp{position:absolute;z-index:1;top:calc(100% + 6px);left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));list-style:none;padding:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 32px rgba(27,37,71,.18);max-height:calc(100vh - env(safe-area-inset-top,0px) - var(--navh) - 24px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - var(--navh) - 24px);overflow-y:auto;overscroll-behavior:contain}
+.ji{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 12px;border-radius:10px;color:var(--ink);text-decoration:none}
+.ji:hover,.ji:focus{background:var(--stone);outline:none}
+.ji:focus-visible{outline:3px solid var(--or);outline-offset:-3px}
+.ji[aria-current]{font-weight:700;box-shadow:inset 3px 0 0 var(--rose)}
+.ji.sub{padding-left:30px;font-size:.95rem}
+.ji .x{margin-left:auto;font-size:.85rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:400}
+.ji .pill{margin-left:auto}
+.ji .x{max-width:50%;overflow:hidden;text-overflow:ellipsis}
+.ji.bad>span:first-child{color:var(--rose)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#jump-end{height:1px}
+@media (min-width:760px){.jt{flex:0 1 400px}.jp{right:auto;width:420px}.jbar{border-radius:0 0 14px 14px;border:1px solid var(--line);border-top:0}.jr{margin-right:auto}}
 </style>
 </head>
 <body>
@@ -146,17 +182,28 @@ input[type=email]{font:inherit;font-family:var(--body);letter-spacing:0;padding:
   </form>
 
   <section id="app" hidden>
-    <div class="bar">
-      <h1>Mon espace</h1>
-      <div class="tools">
-        <span class="note" id="stamp"></span>
-        <button class="btn ghost" type="button" id="refresh">Actualiser</button>
-        <button class="btn ghost" type="button" id="logout">Se déconnecter</button>
+    <nav class="jump" id="jump" aria-label="Sections de la page">
+      <div class="jscrim" id="jump-scrim" hidden></div>
+      <div class="jbar">
+        <button type="button" class="jt" id="jump-btn" aria-expanded="false" aria-controls="jump-panel"><span class="jk">Aller à…</span><span class="jn" id="jump-now"></span><span class="pill" id="jump-dot" hidden></span></button>
+        <button type="button" class="jr" id="jump-resume" hidden></button>
+        <button type="button" class="jh" id="jump-top" aria-label="Revenir en haut de la page">Haut</button>
       </div>
+      <ul class="jp" id="jump-panel" hidden></ul>
+    </nav>
+    <div class="sec" data-sec="haut">
+      <div class="bar">
+        <h1>Mon espace</h1>
+        <div class="tools">
+          <span class="note" id="stamp"></span>
+          <button class="btn ghost" type="button" id="refresh">Actualiser</button>
+          <button class="btn ghost" type="button" id="logout">Se déconnecter</button>
+        </div>
+      </div>
+      <p class="note" id="mode"></p>
     </div>
-    <p class="note" id="mode"></p>
 
-    <details class="card fold" id="mails-box">
+    <details class="card fold" id="mails-box" data-sec="emails">
       <summary><h2>E-mails</h2><span class="note">aperçus envoyés par Brevo</span></summary>
       <div class="foldin">
         <p class="note">Les e-mails de l'aperçu des 10 derniers jours. Brevo n'est interrogé que lorsque vous touchez « Charger les e-mails ».</p>
@@ -179,17 +226,19 @@ input[type=email]{font:inherit;font-family:var(--body);letter-spacing:0;padding:
       </div>
     </details>
 
-    <div class="bar">
-      <h2>Fréquentation du site</h2>
-      <div class="seg" role="group" aria-label="Période">
-        <button type="button" data-n="7" aria-pressed="false">7 jours</button>
-        <button type="button" data-n="14" aria-pressed="true">14 jours</button>
-        <button type="button" data-n="30" aria-pressed="false">30 jours</button>
+    <div class="sec" data-sec="frequentation">
+      <div class="bar">
+        <h2>Fréquentation du site</h2>
+        <div class="seg" role="group" aria-label="Période">
+          <button type="button" data-n="7" aria-pressed="false">7 jours</button>
+          <button type="button" data-n="14" aria-pressed="true">14 jours</button>
+          <button type="button" data-n="30" aria-pressed="false">30 jours</button>
+        </div>
       </div>
+      <div class="tiles" id="tiles"></div>
     </div>
-    <div class="tiles" id="tiles"></div>
 
-    <div class="card">
+    <div class="card" data-sec="visites">
       <div class="bar"><h3>Visites par jour</h3><span class="note" id="chart-sum"></span></div>
       <div class="legend" id="legend"></div>
       <div class="chartwrap" id="chart"></div>
@@ -197,20 +246,23 @@ input[type=email]{font:inherit;font-family:var(--body);letter-spacing:0;padding:
     </div>
 
     <div class="two">
-      <div class="card"><h3>D'où viennent les visites</h3><div class="hb" id="refs"></div>
+      <div class="card" data-sec="provenance"><h3>D'où viennent les visites</h3><div class="hb" id="refs"></div>
         <p class="note">« direct » : le lien n'avait pas de ?ref (adresse tapée, favori, lien en bio sans ?ref=…).</p></div>
-      <div class="card"><h3>Du visiteur au diplôme</h3><div class="hb" id="funnel"></div>
+      <div class="card" data-sec="parcours"><h3>Du visiteur au diplôme</h3><div class="hb" id="funnel"></div>
         <p class="note">En pourcentage des visites de la période.</p></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-sec="jours">
       <div class="bar"><h3>Jour par jour</h3><button class="btn ghost" type="button" id="csv">Exporter (CSV)</button></div>
       <div class="tablewrap"><table id="table"></table></div>
     </div>
 
-    <div class="bar"><h2 id="avis-title">Avis des familles testeuses</h2>
-      <button class="btn ghost" type="button" id="mails">Copier les e-mails</button></div>
-    <div id="avis" class="avislist"></div>
+    <div class="sec" data-sec="avis">
+      <div class="bar"><h2 id="avis-title">Avis des familles testeuses</h2>
+        <button class="btn ghost" type="button" id="mails">Copier les e-mails</button></div>
+      <div id="avis" class="avislist"></div>
+    </div>
+    <div id="jump-end" aria-hidden="true"></div>
   </section>
 </main>
 <script>
@@ -218,10 +270,10 @@ const $=s=>document.querySelector(s);
 const el=(tag,attrs,...kids)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs||{}))if(v!=null)k==="text"?e.textContent=v:e.setAttribute(k,v);e.append(...kids.filter(x=>x!=null));return e;};
 const SVG="http://www.w3.org/2000/svg";
 const sv=(tag,attrs)=>{const e=document.createElementNS(SVG,tag);for(const[k,v]of Object.entries(attrs||{}))e.setAttribute(k,v);return e;};
-const KEY="espace-acces";
+const KEY="espace-acces",NAVKEY="espace-section";   // NAVKEY: only the id of the last section seen, kept where the login is kept
 const store={get(){try{return JSON.parse(localStorage.getItem(KEY)||sessionStorage.getItem(KEY)||"null");}catch(e){return null;}},
   set(v,keep){try{(keep?localStorage:sessionStorage).setItem(KEY,JSON.stringify(v));}catch(e){}},
-  clear(){try{localStorage.removeItem(KEY);sessionStorage.removeItem(KEY);}catch(e){}}};
+  clear(){try{for(const k of[KEY,NAVKEY]){localStorage.removeItem(k);sessionStorage.removeItem(k);}}catch(e){}}};
 let data=null,period=14,loaded=0,creds=null,loadedAt=null;
 
 // The server keeps 60 days at most; a period is compared with the one just before it, so load twice the period.
@@ -243,7 +295,7 @@ $("#login").addEventListener("submit",async e=>{
   catch(err){$("#msg").className="note err";$("#msg").textContent=err.message==="login"?"Identifiant ou code incorrect.":"Le serveur ne répond pas. Réessayez dans un instant.";}
   $("#go").disabled=false;
 });
-$("#logout").addEventListener("click",()=>{store.clear();creds=null;data=null;mdata=null;$("#m-out").hidden=true;$("#m-msg").textContent="";$("#m-addr").value="";$("#m-addr-msg").textContent="";$("#m-choice").replaceChildren();$("#m-load").textContent="Charger les e-mails";$("#app").hidden=true;$("#login").hidden=false;$("#code").value="";$("#msg").textContent="";});
+$("#logout").addEventListener("click",()=>{store.clear();creds=null;data=null;mdata=null;$("#m-out").hidden=true;$("#m-msg").textContent="";$("#m-addr").value="";$("#m-addr-msg").textContent="";$("#m-choice").replaceChildren();$("#m-load").textContent="Charger les e-mails";navStop();$("#app").hidden=true;$("#login").hidden=false;$("#code").value="";$("#msg").textContent="";});
 async function reload(){const b=$("#refresh");b.disabled=true;b.textContent="…";
   try{data=await load(creds);show();}catch(e){$("#stamp").textContent="Actualisation impossible, réessayez.";}b.disabled=false;b.textContent="Actualiser";}
 $("#refresh").addEventListener("click",reload);
@@ -284,12 +336,12 @@ const dayLabel=(day,opts)=>new Date(day+"T12:00:00Z").toLocaleDateString("fr-FR"
 const L={adore:"adoré",bien:"bien aimé",bof:"bof",court:"trop courte",juste:"juste bien",long:"trop longue",oui:"oui","peut-etre":"peut-être",non:"non"};
 const when=s=>{try{return new Date(s).toLocaleString("fr-FR",{timeZone:"Europe/Paris",weekday:"short",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});}catch(e){return s;}};
 
-function show(){$("#login").hidden=true;$("#app").hidden=false;render();}
+function show(){$("#login").hidden=true;$("#app").hidden=false;render();if(!navOn)navStart();}
 function render(){
   $("#mode").textContent=data.testeurs?"Avant-première active : la quête est offerte aux familles testeuses, aucun paiement possible.":"Vente ouverte : paiements actifs.";
   $("#stamp").textContent=loadedAt?"Mis à jour à "+loadedAt.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):"";
   const days=dayList(period),prev=loaded>=2*period?dayList(period,period):null;
-  tiles(days,prev);chart(days);sources(days);funnel(days);table(days);avis();
+  tiles(days,prev);chart(days);sources(days);funnel(days);table(days);avis();navRefresh();
 }
 
 // ---- KPI tiles, each compared with the period just before ----
@@ -439,11 +491,12 @@ $("#m-load").addEventListener("click",async()=>{
   const b=$("#m-load"),msg=$("#m-msg");b.disabled=true;msg.className="note";msg.textContent="Lecture du journal de Brevo…";
   try{const j=await post("/api/espace/mails");
     if(!j.ok)throw new Error("server");
+    moff=!j.on;
     if(!j.on){msg.textContent="L'envoi par e-mail n'est pas activé sur le site (secret BREVO_API_KEY absent).";$("#m-out").hidden=true;}
     else{mdata=j;msg.textContent="Chargé à "+hm(Date.now())+".";mrender();}
     b.textContent="Recharger";}
   catch(e){msg.className="note err";msg.textContent=e.message==="login"?"Identifiant ou code refusé : reconnectez-vous.":"Le serveur ne répond pas. Réessayez dans un instant.";}
-  b.disabled=false;
+  b.disabled=false;navRefresh();
 });
 // one resend: by request (rid) or by address (email); the answer is shown next to the button
 async function resend(body,btn,out){
@@ -454,6 +507,7 @@ async function resend(body,btn,out){
   if(j.ok){out.className="res ok";out.textContent="✓ Aperçu renvoyé à "+j.to+" à "+hm(j.at)+(j.renvoisJour?" ("+j.renvoisJour+"/"+((mdata&&mdata.renvoiMax)||3)+" en 24 h)":"");
     btn.textContent="Renvoyer encore";btn.disabled=j.renvoisJour>=((mdata&&mdata.renvoiMax)||3);}
   else{out.className="res err";out.textContent=j.message||"Échec (code "+j.status+").";btn.disabled=["introuvable","limit","bad"].includes(j.reason);}
+  navRefresh();
   return j;
 }
 function resendBtn(rid,why){
@@ -518,6 +572,7 @@ function mrender(){
       el("p",{class:"sub",text:"Rappel prévu le "+dshort(d.rappelLe)+(d.st==="echec"?" (ce sera son premier e-mail, s'il n'est pas renvoyé d'ici là)":"")}),
       el("p",{class:"state"+(st==="Délivré"?" good":""),text:st}),lastResend(d));
   }):[el("p",{class:"empty",text:"Aucune demande en cours."})]));
+  mcount={err:errs.length,sent:ok.length,dem:j.demandes.length};navRefresh();
 }
 $("#m-manual").addEventListener("submit",async e=>{
   e.preventDefault();
@@ -531,7 +586,172 @@ $("#m-manual").addEventListener("submit",async e=>{
     el("p",{class:"sub",text:[d.name||"prénom non écrit",d.indoor?"à la maison":d.town||"commune inconnue"].join(" · ")}),resendBtn(d.rid,""))));
 });
 
-let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(data&&!$("#app").hidden)chart(dayList(period));},150);});
+// ---- jump menu: the bar names the section on screen; its panel reaches any section, with what is there ----
+// Nothing here calls the server: the panel only reads what the page has already loaded.
+const SECS=[["emails","E-mails"],["frequentation","Fréquentation du site","Fréquentation"],["visites","Visites par jour"],
+  ["provenance","D'où viennent les visites","Provenance"],["parcours","Du visiteur au diplôme","Visiteur → diplôme"],["jours","Jour par jour"],
+  ["avis","Avis des familles testeuses","Avis des familles"]];
+const SUBS={"emails-erreur":"#m-err-t","emails-partis":"#m-sent-t","emails-demandes":"#m-dem-t","emails-renvoi":"#m-manual"};
+const ALIAS={mails:"emails","e-mails":"emails",erreurs:"emails-erreur",renvoi:"emails-renvoi",sources:"provenance",diplome:"parcours",diplomes:"parcours",tableau:"jours",testeurs:"avis"};
+const isSec=id=>SECS.some(s=>s[0]===id);
+const secName=id=>(SECS.find(s=>s[0]===id)||[])[1]||"";
+const secShort=id=>{const s=SECS.find(x=>x[0]===id);return s?s[2]||s[1]:"";};
+const secEl=id=>document.querySelector(`#app [data-sec="${id}"]`);
+const calm=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+const plural=(n,w)=>nf.format(n)+" "+w+(n>1?"s":"");
+const testerMails=()=>[...new Set(((data&&data.avis)||[]).map(a=>a.email).filter(Boolean))];
+let mcount=null,moff=false,navOn=false,navIO=null,endIO=null,navEnd=false,navLock=0,navNow=null;
+const navVis=new Set();
+const navStore={get(){try{const v=localStorage.getItem(NAVKEY)||sessionStorage.getItem(NAVKEY);return isSec(v)?v:null;}catch(e){return null;}},
+  set(v){try{(localStorage.getItem(KEY)?localStorage:sessionStorage).setItem(NAVKEY,v);}catch(e){}}};
+function hashSec(){let h="";try{h=decodeURIComponent(location.hash.slice(1)).toLowerCase();}catch(e){}
+  h=ALIAS[h]||h;return isSec(h)||SUBS[h]?h:null;}
+
+// what each entry says, from the data already on the page
+function secInfo(id){
+  const days=dayList(period);
+  if(id==="emails")return moff?{t:"non activés"}:mcount?(mcount.err?{pill:mcount.err}:{t:"aucune erreur"}):{t:"à charger"};
+  if(id==="frequentation")return{t:plural(sumDays(days,"home"),"visite")+" · "+period+" j"};
+  if(id==="visites")return{t:"aujourd'hui : "+nf.format(count(iso(new Date()),"home"))};
+  if(id==="provenance"){const r=byRef(days);return r.length?{t:"surtout : "+refName(r[0][0])}:null;}
+  if(id==="parcours")return{t:plural(sumDays(days,"diploma"),"diplôme")};
+  if(id==="jours")return{t:"tableau et CSV"};
+  if(id==="avis")return{t:nf.format((data.avis||[]).length)+" avis"};
+  return null;
+}
+function navItems(){
+  const out=[];
+  for(const[id,name]of SECS){
+    out.push({id,name,info:secInfo(id)});
+    if(id==="emails"&&mcount&&!moff)out.push({id:"emails-erreur",name:"En erreur ("+mcount.err+")",sub:1,bad:mcount.err>0},
+      {id:"emails-partis",name:"Partis ("+mcount.sent+")",sub:1},{id:"emails-demandes",name:"Demandes en cours ("+mcount.dem+")",sub:1},
+      {id:"emails-renvoi",name:"Renvoyer à une adresse",sub:1});
+    if(id==="avis"){const k=testerMails().length;if(k)out.push({id:"avis-emails",name:"Copier les e-mails des testeurs",sub:1,info:{t:"("+k+")"}});}
+  }
+  return out;
+}
+function navBuild(){
+  const p=$("#jump-panel"),had=p.contains(document.activeElement)?document.activeElement.getAttribute("href"):null;
+  p.replaceChildren(...navItems().map(it=>{
+    const a=el("a",{class:"ji"+(it.sub?" sub":"")+(it.bad?" bad":""),href:"#"+it.id,"aria-current":it.id===navNow?"location":null},el("span",{text:it.name}));
+    if(it.info&&it.info.pill)a.append(el("span",{class:"pill",text:nf.format(it.info.pill)}),el("span",{class:"vh",text:" en erreur"}));
+    else if(it.info)a.append(el("span",{class:"x",text:it.info.t}));
+    a.addEventListener("click",e=>{e.preventDefault();navPick(it.id);});
+    return el("li",null,a);}));
+  if(had)p.querySelector(`a[href="${had}"]`)?.focus();
+}
+// the bar: current section, the red count of e-mails in error, and the open panel kept up to date
+function navRefresh(){
+  if(!navOn)return;
+  const n=!moff&&mcount?mcount.err:0,dot=$("#jump-dot");
+  dot.hidden=!n;dot.textContent=n?nf.format(n):"";
+  $("#jump-btn").setAttribute("aria-label","Aller à une section"+(navNow&&navNow!=="haut"?" (ici : "+secName(navNow)+")":"")+(n?", "+plural(n,"e-mail")+" en erreur":""));
+  if(!$("#jump-panel").hidden)navBuild();
+}
+function navSet(id){
+  if(id===navNow)return;
+  navNow=id;$("#jump-now").textContent=id==="haut"?"":secShort(id);
+  if(id!=="haut"){navStore.set(id);navResume(null);}
+  navRefresh();
+}
+// the section on screen: the one that fills most of the band just under the bar (its top 30 %)
+let navBand={top:0,bot:0};
+function navTrack(){
+  if(!navOn||navLock)return;
+  if(navEnd)return navSet("avis");
+  let best=null,bh=0;
+  for(const id of["haut",...SECS.map(s=>s[0])])if(navVis.has(id)){
+    const r=secEl(id).getBoundingClientRect(),h=Math.min(r.bottom,navBand.bot)-Math.max(r.top,navBand.top);
+    if(h>bh){bh=h;best=id;}}
+  if(best)navSet(best);
+}
+function navWatch(){
+  if(!("IntersectionObserver"in window))return;
+  if(navIO)navIO.disconnect();navVis.clear();
+  const nav=$("#jump"),top=Math.round((parseFloat(getComputedStyle(nav).top)||0)+nav.offsetHeight),bot=Math.round(top+.3*(innerHeight-top));
+  navBand={top,bot};
+  navIO=new IntersectionObserver(es=>{for(const e of es)e.isIntersecting?navVis.add(e.target.dataset.sec):navVis.delete(e.target.dataset.sec);navTrack();},
+    {rootMargin:`-${top}px 0px -${Math.max(0,innerHeight-bot)}px 0px`,threshold:[0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1]});
+  document.querySelectorAll("#app [data-sec]").forEach(x=>navIO.observe(x));
+  if(!endIO){endIO=new IntersectionObserver(es=>{navEnd=es[es.length-1].isIntersecting;navTrack();});endIO.observe($("#jump-end"));}
+}
+// while the page scrolls to a chosen section, the bar keeps that name: held until the scroll has stopped
+// (a long smooth scroll can take seconds) or the owner touches the page; then the next scroll updates it
+let holdT=null;
+function navHold(){
+  clearTimeout(holdT);navLock=1;
+  let last=-1;const t0=Date.now();
+  const tick=()=>{if(scrollY===last||Date.now()-t0>4000){navLock=0;return;}last=scrollY;holdT=setTimeout(tick,120);};
+  holdT=setTimeout(tick,120);
+}
+const navFree=()=>{if(navLock){clearTimeout(holdT);navLock=0;}};
+addEventListener("touchstart",navFree,{passive:true});addEventListener("wheel",navFree,{passive:true});
+// go to a section: open it if folded, scroll (gently unless reduced motion), move the focus there.
+// E-mails not loaded yet: open the section and focus « Charger les e-mails », never load them for the owner.
+function navGo(id,focus=true){
+  const top=SUBS[id]?"emails":id,box=secEl(top);if(!box)return;
+  let target=box,fx=box;
+  if(top==="emails"){
+    box.open=true;
+    const shown=!$("#m-out").hidden;
+    if(SUBS[id]&&(id==="emails-renvoi"||shown))target=fx=$(SUBS[id]);
+    else if(!shown)fx=$("#m-load");
+    else fx=box.querySelector("summary");
+  }
+  if(!fx.hasAttribute("tabindex")&&fx.tabIndex<0)fx.setAttribute("tabindex","-1");
+  navHold();navSet(top);navResume(null);
+  if(focus)fx.focus({preventScroll:true});
+  target.scrollIntoView({behavior:calm()?"auto":"smooth",block:"start"});
+  target.classList.remove("arrive");void target.offsetWidth;target.classList.add("arrive");
+  setTimeout(()=>target.classList.remove("arrive"),1500);
+}
+function navPick(id){
+  navClose(false);
+  // copy at once, inside the touch (the clipboard needs it), and show the button with its « Copié (n) »
+  if(id==="avis-emails"){$("#mails").click();navGo("avis",false);$("#mails").focus({preventScroll:true});return;}
+  navGo(id);
+}
+function navOpen(){
+  navBuild();
+  $("#jump-panel").hidden=false;$("#jump-scrim").hidden=false;$("#jump-btn").setAttribute("aria-expanded","true");
+  const p=$("#jump-panel");(p.querySelector("[aria-current]")||p.querySelector("a")).focus();
+}
+function navClose(back){
+  if($("#jump-panel").hidden)return;
+  $("#jump-panel").hidden=true;$("#jump-scrim").hidden=true;$("#jump-btn").setAttribute("aria-expanded","false");
+  if(back)$("#jump-btn").focus();
+}
+// the last section seen, offered back on the next visit (never scrolled to on its own)
+function navResume(id){
+  const b=$("#jump-resume");b.hidden=!id;b.dataset.go=id||"";
+  if(id){b.replaceChildren(el("span",{text:"↩ "+secShort(id)}));b.setAttribute("aria-label","Reprendre à « "+secName(id)+" », la dernière section consultée");b.title="Reprendre où vous en étiez";}
+}
+function navStart(){
+  navOn=true;navNow=null;navEnd=false;
+  const saved=navStore.get(),want=hashSec();
+  navSet("haut");
+  requestAnimationFrame(()=>{navWatch();
+    if(want)setTimeout(()=>navGo(want),60);
+    else if(saved&&scrollY<80)navResume(saved);});
+}
+function navStop(){
+  navClose(false);navResume(null);navOn=false;navNow=null;mcount=null;moff=false;
+  if(navIO)navIO.disconnect();navIO=null;navVis.clear();
+  $("#jump-now").textContent="";$("#jump-dot").hidden=true;
+}
+$("#jump-btn").addEventListener("click",()=>$("#jump-panel").hidden?navOpen():navClose(true));
+$("#jump-scrim").addEventListener("click",()=>navClose(false));
+$("#jump-resume").addEventListener("click",e=>{const id=e.currentTarget.dataset.go;navClose(false);navResume(null);if(id)navGo(id);});
+$("#jump-top").addEventListener("click",()=>{navClose(false);navHold();navSet("haut");scrollTo({top:0,behavior:calm()?"auto":"smooth"});});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#jump-panel").hidden){e.preventDefault();navClose(true);}});
+$("#jump-panel").addEventListener("keydown",e=>{
+  const a=[...$("#jump-panel").querySelectorAll("a")],i=a.indexOf(document.activeElement);
+  const k={ArrowDown:i+1,ArrowUp:i-1,Home:0,End:a.length-1}[e.key];
+  if(k==null||!a.length)return;e.preventDefault();a[(k+a.length)%a.length].focus();});
+$("#jump").addEventListener("focusout",e=>{if(e.relatedTarget&&!$("#jump").contains(e.relatedTarget))navClose(false);});
+addEventListener("hashchange",()=>{const id=hashSec();if(navOn&&id)navGo(id);});
+
+let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(data&&!$("#app").hidden){chart(dayList(period));if(navOn)navWatch();}},150);});
 (async()=>{const c=store.get();if(!c)return;
   $("#id").value=c.id||"";$("#msg").textContent="Connexion…";
   try{data=await load(c);creds=c;show();}catch(e){if(e.message==="login")store.clear();$("#msg").textContent="";}})();
