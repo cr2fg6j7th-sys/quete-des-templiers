@@ -328,6 +328,22 @@ console.log("Adresses du site : tous les tests passent.");
     assert.ok(st === 502 && r.reason === "send" && /code 403/.test(r.message) && recOf(d.bloque.rid).rec.last.ok === false, "resend refused by Brevo: " + r.message);
     brevoSend = "ok";
 
+    // the request deleted while the resend is going out (the parent unsubscribes, or the cron sends its reminder):
+    // it is not written back, so no reminder after an unsubscribe and never a second reminder
+    for (const [who, meanwhile] of [["course-stop", async (rid, stopUrl) => { await worker.fetch(new Request(stopUrl), eenv, { waitUntil() {} }); }],
+      ["course-rappel", async rid => { const e = kv.get("rappel:" + rid); kv.set("rappel:" + rid, { v: e.v, meta: Object.assign({}, e.meta, { p: 1 }) }); }]]) {
+      sent.length = 0;
+      assert.strictEqual((await call("/api/rappel", { email: who + "@exemple.fr", apercu: (await call("/api/preview", { indoor: true }))[1].token }, eenv))[0], 200);
+      const stopUrl = sent[0].body.headers["List-Unsubscribe"].slice(1, -1), rid = new URL(stopUrl).searchParams.get("id");
+      const keepFetch = globalThis.fetch;
+      globalThis.fetch = async (u, init) => { if (String(u) === "https://api.brevo.com/v3/smtp/email") await meanwhile(rid, stopUrl); return keepFetch(u, init); };
+      [st, r] = await call("/api/espace/renvoi", Object.assign({ rid }, login), eenv);
+      globalThis.fetch = keepFetch;
+      assert.ok(st === 200 && r.ok, who + ": the resend went");
+      if (who === "course-stop") assert.ok(!kv.has("rappel:" + rid), "unsubscribed during the resend: the request is not brought back");
+      else assert.strictEqual(kv.get("rappel:" + rid).meta.p, 1, "reminder going out during the resend: its mark is kept");
+    }
+
     // by address: the requests of the mailbox (aliases too), sent to the address the parent gave; none: nothing sent
     sent.length = 0;
     [st, r] = await call("/api/espace/renvoi", Object.assign({ email: " Livre+autre@Exemple.fr " }, login), eenv);

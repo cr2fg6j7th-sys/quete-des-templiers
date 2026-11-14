@@ -918,8 +918,12 @@ async function espaceResend(request, env, ctx) {
   rec.renvois = renvois.filter(t => now - t < KEEP_DAYS * DAY).concat(now);
   rec.last = sent.res === "ok" ? { at: now, ok: true } : { at: now, ok: false, status: sent.status, code: sent.code || "", message: sent.message || "" };
   if (sent.res === "ok") { rec.st = "envoye"; if (sent.messageId) rec.mids = (rec.mids || []).concat(sent.messageId).slice(-6); }
-  // the same expiration and metadata: the reminder's date does not move
-  await env.STATS.put(key, JSON.stringify(rec), { expiration: exp, metadata: { c: created, x: exp, n: Number(m.n) || 0 } }).catch(() => {});
+  // the same expiration and metadata: the reminder's date does not move. Read again first: if the request was deleted
+  // during the send (unsubscribed, paid, its reminder sent by the cron) or its reminder is going out, it is not written
+  // back, so it is never brought back to life (a reminder after an unsubscribe, or a second reminder).
+  const again = await env.STATS.list({ prefix: key }).then(p => p.keys.find(k => k.name === key), () => null);
+  if (again && !(again.metadata || {}).p)
+    await env.STATS.put(key, JSON.stringify(rec), { expiration: exp, metadata: { c: created, x: exp, n: Number(m.n) || 0 } }).catch(() => {});
   log("renvoi", { ok: sent.res === "ok", res: sent.res, status: sent.status });
   if (sent.res !== "ok") return reply({ ok: false, reason: "send", to: rec.email, status: sent.status,
     message: `Brevo n'a pas pris l'e-mail${sent.status ? " (code " + sent.status + ")" : ""}${sent.message ? " : " + sent.message : ""}.` }, 502);
