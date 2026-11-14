@@ -9,6 +9,8 @@
      POST /api/testeur  before the opening: sealed token -> full quest, free, for a family who tests it
      POST /api/avis     before the opening: a tester's answers to the questionnaire at the end of the quest
      POST /api/espace   Nathan's private page (/espace): login + code -> counts and testers' answers
+     POST /api/espace/mails   login + code -> the e-mails of the preview: requests kept here, crossed with Brevo's log
+     POST /api/espace/renvoi  login + code + a request (or an address) -> the preview's e-mail sent again
      POST /api/rappel   optional: e-mail the preview's link now, and one reminder 7 days later if still unpaid
      GET  /api/rappel/stop  the unsubscribe link of those e-mails (signed); POST too, for one-click unsubscribe
    And a daily cron (wrangler.toml [triggers]) that sends the reminders due (scheduled handler).
@@ -321,16 +323,23 @@ async function stats(request, env) {
 
 // Nathan's private page (/espace): login + code, checked against a salted SHA-256 kept in wrangler.toml
 // (ESPACE_ID, ESPACE_SALT, ESPACE_HASH). The code is random (about 80 bits): the hash can stay public.
-async function espace(request, env) {
+// Every route of the private page goes through this one check, at every call (the page sends the login and the
+// code each time; nothing else is kept by the browser). Returns [body, null] or [null, the refusal to send].
+async function espaceLogin(request, env) {
   const b = await readJSON(request);
-  if (!env.ESPACE_HASH || !env.ESPACE_SALT || !env.ESPACE_ID) return reply({ ok: false, reason: "off" }, 503);
+  if (!env.ESPACE_HASH || !env.ESPACE_SALT || !env.ESPACE_ID) return [null, reply({ ok: false, reason: "off" }, 503)];
   const id = String(b && b.id || "").trim().toLowerCase(), code = String(b && b.code || "").trim().toUpperCase().replace(/\s+/g, "");
   const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${env.ESPACE_SALT}:${id}:${code}`));
   const h = [...new Uint8Array(d)].map(x => x.toString(16).padStart(2, "0")).join("");
   let diff = h.length ^ env.ESPACE_HASH.length;
   for (let i = 0; i < h.length; i++) diff |= h.charCodeAt(i) ^ (env.ESPACE_HASH.charCodeAt(i) || 0);
-  if (id !== env.ESPACE_ID || diff) { await new Promise(r => setTimeout(r, 400)); return reply({ ok: false, reason: "login" }, 403); }
-  if (!env.STATS) return reply({ ok: false, reason: "off" }, 503);
+  if (id !== env.ESPACE_ID || diff) { await new Promise(r => setTimeout(r, 400)); return [null, reply({ ok: false, reason: "login" }, 403)]; }
+  if (!env.STATS) return [null, reply({ ok: false, reason: "off" }, 503)];
+  return [b, null];
+}
+async function espace(request, env) {
+  const [b, refused] = await espaceLogin(request, env);
+  if (refused) return refused;
   return reply(Object.assign({ ok: true, testeurs: testers(env) }, await collect(env, b.days || 28)));
 }
 
@@ -366,16 +375,20 @@ async function collect(env, nDays) {
    the town from the State's API Géo (from the token's start point), the first name only if it is one of the
    1,000 most given in France (dev/prenoms.json); anything else reads « votre enfant ».
    Keys in the KV (binding STATS), next to the counts:
-     rappel:<t>.<e>      one request: { email, link, name, hero, kids, town, indoor, count, walkM, minutes, created, ref },
+     rappel:<t>.<e>      one request: { email, link, name, hero, kids, town, indoor, count, walkM, minutes, created, ref,
+                           st: "envoye" | "echec" (the first e-mail went, or Brevo did not take it), err: Brevo's answer then,
+                           mids: Brevo's message ids, renvois: times the owner sent it again, last: the last of those },
                          metadata { c: created (ms), x: expiration (s), n: reminder attempts, p: 1 while a reminder is going out }.
                          Expires 10 days after the request; deleted after the reminder, on payment, on unsubscribe.
+                         Kept even when the first e-mail could not go, so the owner can send it again from /espace;
+                         then the e-mail of the 7th day says so (kind 3) instead of reading as a reminder.
      rappel-n:<e>        times of the requests for one address, kept 24 hours (at most 3 per 24 hours)
      rappel-jour:<date>  e-mails sent that UTC day (the route stops at MAIL_DAY_MAX, 200 by default), kept 2 days
      rappel-paye:<t>     this quest was paid: no reminder, kept 10 days
    <t> and <e> are HMACs of the token and of the address (key derived from QUEST_KEY, which itself never changes),
    cut to 16 hex characters: no address in a key name, and no key can be guessed from an address. */
 const DAY = 86400000, REMIND_AFTER = 7 * DAY, KEEP_DAYS = 10;
-const PER_ADDRESS = 3, MAX_SENDS_PER_RUN = 30, MAX_SEEN_PER_RUN = 400, STRIPE_PAGES = 3;
+const PER_ADDRESS = 3, MAX_SENDS_PER_RUN = 30, MAX_SEEN_PER_RUN = 400, STRIPE_PAGES = 3, RESEND_MAX = 3;
 const mailOn = env => !!(env.BREVO_API_KEY && env.MAIL_FROM && env.STATS && env.QUEST_KEY);
 const dayCap = env => parseInt(env.MAIL_DAY_MAX || "200", 10) || 200;
 // Put here by dev/build.py: the first names the e-mails may print, and the seller's identity (dev/legal/identite.json).
@@ -439,15 +452,16 @@ async function communeAt(env, a) {
 const ofName = n => /^h/i.test(n) ? "pour " + n : /^y[aeiouàâäéèêëîïôöùûü]/i.test(n) ? "de " + n : (/^[aeiouyàâäæéèêëîïôöœùûü]/i.test(n) ? "d'" : "de ") + n;
 const inTown = w => { const m = w.match(/^(les?)\s+(.+)$/i); return m ? (m[1].length === 3 ? "aux " : "au ") + m[2] : "à " + w; };
 
-// The two e-mails (kind 1: the preview, at once; kind 2: the reminder, 7 days later), HTML and plain text.
-// Every value is escaped; the promises are those of the payment card of the preview (dev/app.template.html).
+// The e-mails (kind 1: the preview, at once, or sent again by the owner; kind 2: the reminder, 7 days later;
+// kind 3: on the 7th day when the first one never went: the preview, late, saying so, and the last message), HTML
+// and plain text. Every value is escaped; the promises are those of the payment card of the preview (dev/app.template.html).
 function mailOf(env, rec, kind, stop) {
   const who = rec.name ? ofName(rec.name) : "", price = priceLabel(env), n = rec.count;
   const km = (Number(rec.walkM || 0) / 1000).toFixed(1).replace(".", ",");
   const quest = who ? `la quête d'anniversaire ${who}` : "votre quête d'anniversaire";
   const where = rec.indoor ? `${n} cachettes à la maison, environ ${rec.minutes} minutes de jeu`
     : `${n} étapes à pied ${rec.town ? inTown(rec.town) : "autour de votre point de départ"}, environ ${km} km et ${rec.minutes} minutes de jeu`;
-  const subject = kind === 1 ? (who ? `L'aperçu de la quête ${who}` : "L'aperçu de votre quête d'anniversaire")
+  const subject = kind !== 2 ? (who ? `L'aperçu de la quête ${who}` : "L'aperçu de votre quête d'anniversaire")
     : (who ? `La quête ${who} vous attend` : "Votre quête d'anniversaire vous attend");
   const steps = rec.indoor ? `Les ${n} cachettes et leurs cartes à imprimer, la voix du Grand Maître, les défis et les énigmes`
     : `Les ${n} étapes, la voix du Grand Maître, les défis et les énigmes`;
@@ -462,6 +476,13 @@ function mailOf(env, rec, kind, stop) {
     ["list", "Dans la quête complète", list],
     `${price} pour tout le groupe, seulement si vous décidez de la débloquer ; l'aperçu, lui, est gratuit. Paiement sécurisé par Stripe.`,
     "Nous vous écrirons une seule autre fois, dans une semaine, si la quête n'est pas débloquée. Une question ? Répondez simplement à ce message."
+  ] : kind === 3 ? [
+    `Il y a une semaine, vous avez demandé à recevoir l'aperçu de ${quest} par e-mail, mais notre envoi n'avait pas pu partir. Le voici : ${where}.`,
+    "Ce lien ouvre l'aperçu sur n'importe quel téléphone ou ordinateur, sans compte :",
+    ["button"],
+    ["list", `Si vous la débloquez (${price} pour tout le groupe)`, list],
+    "Paiement sécurisé par Stripe : carte, Apple Pay ou Google Pay. Un souci le jour J ? Nous vous aidons. Si la quête ne peut vraiment pas fonctionner, nous vous remboursons.",
+    "C'est le seul message que vous recevrez de notre part : nous effaçons votre adresse de notre serveur juste après son envoi. Une question ? Répondez simplement à ce message."
   ] : [
     `Il y a une semaine, vous avez créé l'aperçu de ${quest} : ${where}. Il vous attend toujours :`,
     ["button"],
@@ -483,7 +504,7 @@ function mailOf(env, rec, kind, stop) {
   const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${esc(subject)}</title></head>
 <body style="margin:0;padding:0;background:#f4ecda">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(kind === 1 ? "Le lien de votre aperçu, à ouvrir sur n'importe quel appareil." : "Votre aperçu vous attend toujours. C'est notre seul rappel.")}</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(kind === 1 ? "Le lien de votre aperçu, à ouvrir sur n'importe quel appareil." : kind === 3 ? "Notre premier envoi n'avait pas pu partir : voici le lien de votre aperçu." : "Votre aperçu vous attend toujours. C'est notre seul rappel.")}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4ecda"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#fffaf0;border:1px solid #e2d3ae;border-radius:12px">
 <tr><td style="background:#1b2547;border-radius:11px 11px 0 0;padding:18px 24px;font-family:Georgia,'Times New Roman',serif;font-size:19px;color:#f4ecda">Ma Quête Légendaire
@@ -503,17 +524,22 @@ ${body.map(p => p[0] === "button"
 <p style="margin:0 0 8px">${esc(why)}</p>
 <p style="margin:0">${esc(stopText)} : <a href="${esc(stop)}" style="color:#b8505c">se désinscrire en un clic</a> · <a href="${esc(privacy)}" style="color:#5b6482">vos données</a></p>
 </td></tr></table></td></tr></table></body></html>`;
-  return { subject, html, text, stop };
+  return { subject, html, text, stop, tag: kind === 2 ? "rappel" : "apercu" };
 }
 
-// The only call to the e-mail service: Brevo's transactional API (POST /v3/smtp/email, header api-key).
-// Returns "ok", "refused" (Brevo answered with a 4xx: nothing was sent) or "unknown" (no answer, or a 5xx: maybe sent).
+// Any address in a text from Brevo, before it goes to the logs (kept by Cloudflare) or into a record.
+const noAddress = s => String(s || "").replace(/[^\s"'<>@:,]+@[^\s"'<>@:,]+/g, "<adresse>");
+
+// The only call that sends: Brevo's transactional API (POST /v3/smtp/email, header api-key).
+// Returns { res, status, code, message, messageId }: res is "ok", "refused" (Brevo answered with a 4xx: nothing was
+// sent) or "unknown" (no answer, or a 5xx: maybe sent); code and message are Brevo's, without any address.
 async function sendMail(env, to, m) {
   const body = {
     sender: { name: env.MAIL_FROM_NAME || "Ma Quête Légendaire", email: env.MAIL_FROM },
     to: [{ email: to }],
     subject: m.subject, htmlContent: m.html, textContent: m.text,
-    headers: { "List-Unsubscribe": `<${m.stop}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" }
+    headers: { "List-Unsubscribe": `<${m.stop}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+    tags: [m.tag || "apercu"]
   };
   if (env.MAIL_REPLY_TO) body.replyTo = { email: env.MAIL_REPLY_TO, name: env.MAIL_FROM_NAME || "Ma Quête Légendaire" };
   let r;
@@ -522,11 +548,18 @@ async function sendMail(env, to, m) {
       method: "POST", signal: AbortSignal.timeout(10000), body: JSON.stringify(body),
       headers: { "api-key": env.BREVO_API_KEY, "content-type": "application/json", accept: "application/json" }
     });
-  } catch (e) { console.log("brevo: no answer " + String(e && e.name || e)); return "unknown"; }
-  if (r.ok) return "ok";
-  // Brevo's answer, without any address it may quote (the logs are kept by Cloudflare)
-  console.log("brevo " + r.status + " " + (await r.text().catch(() => "")).replace(/[^\s"'<>@:,]+@[^\s"'<>@:,]+/g, "<adresse>").slice(0, 300));
-  return r.status >= 500 ? "unknown" : "refused";
+  } catch (e) {
+    console.log("brevo: no answer " + String(e && e.name || e));
+    return { res: "unknown", status: 0, code: String(e && e.name || "network"), message: "Brevo n'a pas répondu" };
+  }
+  const raw = await r.text().catch(() => "");
+  let j = {};
+  try { j = JSON.parse(raw) || {}; } catch (e) { j = {}; }
+  if (r.ok) return { res: "ok", status: r.status, messageId: typeof j.messageId === "string" ? j.messageId.slice(0, 200) : "" };
+  // Brevo's answer, without any address it may quote
+  console.log("brevo " + r.status + " " + noAddress(raw).slice(0, 300));
+  return { res: r.status >= 500 ? "unknown" : "refused", status: r.status,
+    code: noAddress(typeof j.code === "string" ? j.code : "").slice(0, 60), message: noAddress(typeof j.message === "string" ? j.message : raw).slice(0, 300) };
 }
 
 // POST /api/rappel { email, apercu: the preview's token (or link), n, h, k: name, hero, kids, ref }
@@ -557,12 +590,15 @@ async function askReminder(request, env, ctx) {
   const link = `${base}/?apercu=${token}&n=${encodeURIComponent(name)}&h=${hero}&k=${kids}&v=${encodeURIComponent(town)}&ref=mail`;
   const rec = { email, link, name, hero, kids, town, indoor: !!quest.indoorOnly, count: p.count, walkM: p.walkM, minutes: p.minutes, created: now, ref };
   const key = "rappel:" + id, expiration = Math.floor(now / 1000) + KEEP_DAYS * 86400;
-  await env.STATS.put(key, JSON.stringify(rec), { expiration, metadata: { c: now, x: expiration, n: 0 } });
-  const res = await sendMail(env, email, mailOf(env, rec, 1, await stopLink(env, base, id)));
-  if (res !== "ok") {
-    // not sent: nothing kept, the visitor is told to keep the link another way
-    await env.STATS.delete(key).catch(() => {});
-    log("rappel", { ok: false, reason: "send", res });
+  const sent = await sendMail(env, email, mailOf(env, rec, 1, await stopLink(env, base, id)));
+  // The request is kept either way (10 days at most, as always): when the e-mail could not go, the owner can send it
+  // again from /espace, and the e-mail of the 7th day says the first one never went (kind 3). The visitor is told it failed.
+  if (sent.res === "ok") Object.assign(rec, { st: "envoye", mids: sent.messageId ? [sent.messageId] : [] });
+  else Object.assign(rec, { st: "echec", err: { at: now, status: sent.status, code: sent.code || "", message: sent.message || "" }, mids: [] });
+  await env.STATS.put(key, JSON.stringify(rec), { expiration, metadata: { c: now, x: expiration, n: 0 } })
+    .catch(e => console.log("rappel: not kept " + String(e && e.message || e).slice(0, 200)));
+  if (sent.res !== "ok") {
+    log("rappel", { ok: false, reason: "send", res: sent.res, status: sent.status, kept: true });
     return reply({ ok: false, reason: "send" }, 502);
   }
   const done = env.STATS.put(dayKey, String(today + 1), { expirationTtl: 2 * 86400 }).catch(() => {});
@@ -611,7 +647,9 @@ async function sendDueReminders(env, ctx, now) {
       if (paid.has(tokenOf(rec.link))) { await env.STATS.delete(k.name); continue; }
       const meta = { c: created, x: exp, n: (Number(m.n) || 0) + 1 };
       await env.STATS.put(k.name, raw, { expiration: exp, metadata: Object.assign({ p: 1 }, meta) });
-      const res = await sendMail(env, rec.email, mailOf(env, rec, 2, await stopLink(env, new URL(rec.link).origin, k.name.slice("rappel:".length))));
+      // the first e-mail never went (and was not sent again from /espace): this one is the preview, saying so
+      const kind = rec.st === "echec" ? 3 : 2;
+      const res = (await sendMail(env, rec.email, mailOf(env, rec, kind, await stopLink(env, new URL(rec.link).origin, k.name.slice("rappel:".length))))).res;
       if (res === "ok") { sent++; await env.STATS.delete(k.name); count(env, ctx, "mail-rappel", rec.ref); }
       else if (res === "refused") await env.STATS.put(k.name, raw, { expiration: exp, metadata: meta });
     } catch (e) { console.log("reminder: " + String(e && e.message || e)); }
@@ -701,6 +739,194 @@ ${contact}<p><a href="/">Retour au site</a></p></main></body></html>`;
   return new Response(html, { status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex", "referrer-policy": "no-referrer" } });
 }
 
+/* ---------- The e-mails in the owner's private page (/espace): what went, what came back, send again ----------
+   Two sources: the requests kept here (rappel:…, the site's own truth) and Brevo's log of the transactional e-mails,
+   read on demand (when the owner loads the section) with the server's key. Addresses go to the browser only after
+   the login; none in the logs, the URLs or the counts. */
+
+// Brevo's event names, as known (API v3, GET /v3/smtp/statistics/events), folded to one state; anything else is "autre"
+// and shown as Brevo named it.
+const BREVO_EVENTS = {
+  requests: "parti", request: "parti", sent: "parti", delivered: "delivre",
+  hardbounces: "rebond-definitif", hardbounce: "rebond-definitif", softbounces: "rebond-temporaire", softbounce: "rebond-temporaire",
+  bounces: "rebond", bounce: "rebond", blocked: "bloque", invalid: "invalide", invalidemail: "invalide", error: "erreur", errors: "erreur",
+  deferred: "differe", spam: "spam", complaint: "spam", complaints: "spam",
+  opened: "ouvert", opens: "ouvert", open: "ouvert", uniqueopened: "ouvert", clicks: "ouvert", click: "ouvert",
+  loadedbyproxy: "ouvert", proxyopen: "ouvert", uniqueproxyopen: "ouvert", unsubscribed: "desinscrit", unsubscribe: "desinscrit"
+};
+const HARD_FAIL = ["rebond-definitif", "bloque", "invalide", "erreur", "spam"], SOFT_FAIL = ["rebond-temporaire", "rebond", "differe"];
+const midOf = v => String(v || "").trim().replace(/^<|>$/g, "").toLowerCase();
+const timeOf = v => { const t = Date.parse(v); return isFinite(t) ? t : 0; };
+
+// The one call to Brevo's log: the events of the last days, newest first, grouped by message, each with its last state.
+// Tolerant: a missing field is left empty, an unknown event is kept as "autre", an empty answer is an empty list.
+// Returns { ok: true, messages, pages, more } or { ok: false, status, message } (status 0: no answer within 8 s).
+async function brevoEvents(env, days) {
+  const base = (env.BREVO_API || "https://api.brevo.com") + "/v3/smtp/statistics/events";
+  const signal = AbortSignal.timeout(8000), LIMIT = 100, PAGES = 5, events = [];
+  let pages = 0, more = false;
+  try {
+    for (let offset = 0; pages < PAGES; offset += LIMIT) {
+      const r = await fetch(`${base}?limit=${LIMIT}&offset=${offset}&days=${days}&sort=desc`,
+        { signal, headers: { "api-key": env.BREVO_API_KEY, accept: "application/json" } });
+      if (r.status === 204) break;   // nothing in the period
+      const raw = await r.text();
+      if (!r.ok) {
+        let j = {};
+        try { j = JSON.parse(raw) || {}; } catch (e) {}
+        console.log("brevo events " + r.status);
+        return { ok: false, status: r.status, message: noAddress(typeof j.message === "string" ? j.message : "").slice(0, 200) };
+      }
+      let j = null;
+      try { j = raw.trim() ? JSON.parse(raw) : {}; } catch (e) { j = null; }
+      if (!j || typeof j !== "object") return { ok: false, status: r.status, format: true, message: "réponse illisible (pas du JSON)" };
+      if (j.events !== undefined && !Array.isArray(j.events)) return { ok: false, status: r.status, format: true, message: "« events » n'est pas une liste" };
+      const list = j.events || [];
+      pages++;
+      events.push(...list.filter(e => e && typeof e === "object"));
+      if (list.length < LIMIT) break;
+      if (pages === PAGES) more = true;
+    }
+  } catch (e) {
+    console.log("brevo events: no answer " + String(e && e.name || e));
+    return { ok: false, status: 0, message: e && e.name === "TimeoutError" ? "pas de réponse en 8 secondes" : "pas de réponse" };
+  }
+  const by = new Map();
+  events.forEach((e, i) => {
+    const mid = midOf(e.messageId) || "sans-id-" + i;
+    const raw = String(e.event == null ? "" : e.event).slice(0, 60);
+    const ev = { e: BREVO_EVENTS[raw.toLowerCase().replace(/[^a-z]/g, "")] || "autre", raw, at: timeOf(e.date), date: String(e.date || "").slice(0, 40),
+      reason: String(e.reason || "").slice(0, 300) };
+    const m = by.get(mid) || { mid, email: "", subject: "", tag: "", events: [] };
+    if (!m.email && typeof e.email === "string") m.email = e.email.slice(0, 254).toLowerCase();
+    if (!m.subject && typeof e.subject === "string") m.subject = e.subject.slice(0, 200);
+    if (!m.tag && e.tag != null) m.tag = String(Array.isArray(e.tag) ? e.tag.join(", ") : e.tag).slice(0, 60);
+    m.events.push(ev);
+    by.set(mid, m);
+  });
+  const messages = [...by.values()].map(m => {
+    m.events.sort((a, b) => a.at - b.at);
+    const last = list => m.events.filter(x => list.includes(x.e)).pop();
+    const decisive = last(HARD_FAIL) || last(["delivre", "ouvert"]) || last(SOFT_FAIL) || last(["parti"]) || last(["desinscrit", "autre"]) || m.events[m.events.length - 1];
+    const state = decisive.e === "ouvert" ? "delivre" : decisive.e;
+    return { mid: m.mid, email: m.email, subject: m.subject, tag: m.tag, state, raw: decisive.raw, reason: decisive.reason,
+      at: m.events[0].at, date: m.events[0].date, lastAt: decisive.at, opened: m.events.some(x => x.e === "ouvert"),
+      spam: m.events.some(x => x.e === "spam" || x.e === "desinscrit"),
+      erreur: HARD_FAIL.includes(state) || SOFT_FAIL.includes(state),
+      events: m.events.slice(-12).map(x => ({ e: x.e, raw: x.raw, date: x.date, reason: x.reason })) };
+  }).sort((a, b) => b.at - a.at);
+  return { ok: true, messages, pages, more };
+}
+
+// The requests kept here, newest first: [{ key, rid, meta, rec }] (400 at most, as the cron).
+async function keptRequests(env) {
+  const keys = [];
+  let cursor;
+  do {
+    const page = await env.STATS.list({ prefix: "rappel:", cursor });
+    keys.push(...page.keys);
+    cursor = page.list_complete ? null : page.cursor;
+  } while (cursor && keys.length < MAX_SEEN_PER_RUN);
+  const out = [];
+  for (const k of keys.slice(0, MAX_SEEN_PER_RUN)) {
+    let rec = null;
+    try { rec = JSON.parse(await env.STATS.get(k.name)); } catch (e) { rec = null; }
+    if (rec && cleanEmail(rec.email)) out.push({ key: k.name, rid: k.name.slice("rappel:".length), meta: k.metadata || {}, rec });
+  }
+  return out.sort((a, b) => (Number(b.rec.created) || 0) - (Number(a.rec.created) || 0));
+}
+
+// POST /api/espace/mails { id, code }: the requests kept here and Brevo's log of the last 10 days, crossed.
+async function espaceMails(request, env, ctx) {
+  const [, refused] = await espaceLogin(request, env);
+  if (refused) return refused;
+  if (!mailOn(env)) return reply({ ok: true, on: false });
+  const now = Date.now(), kept = await keptRequests(env);
+  const brevo = await brevoEvents(env, KEEP_DAYS);
+  const byMid = new Map();
+  for (const k of kept) for (const mid of k.rec.mids || []) byMid.set(midOf(mid), k);
+  const forgotten = new Set();
+  if (brevo.ok) for (const m of brevo.messages) {
+    // the request of this message: by Brevo's message id, else the request for the same address made just before it
+    let k = byMid.get(m.mid);
+    if (!k && m.email) k = kept.filter(x => x.rec.email === m.email && (!m.at || (Number(x.rec.created) || 0) <= m.at + 60000))[0];
+    m.rid = k ? k.rid : "";
+    // marked as spam (or unsubscribed at Brevo): consent withdrawn, the request is deleted (no reminder, no resend)
+    if (k && m.spam && !forgotten.has(k.rid)) { forgotten.add(k.rid); await env.STATS.delete(k.key).catch(() => {}); }
+    if (k && !forgotten.has(k.rid)) (k.msgs = k.msgs || []).push({ mid: m.mid, state: m.state, at: m.at });
+  }
+  if (brevo.ok) for (const m of brevo.messages) if (forgotten.has(m.rid)) m.rid = "";
+  const day = 86400000, limit = renvois => (renvois || []).filter(t => now - t < day).length;
+  const demandes = kept.filter(k => !forgotten.has(k.rid)).map(({ rid, meta, rec, msgs }) => {
+    const created = Number(meta.c) || Number(rec.created) || 0;
+    return { rid, email: rec.email, name: rec.name || "", town: rec.town || "", indoor: !!rec.indoor, created, rappelLe: created + REMIND_AFTER,
+      expire: (Number(meta.x) || 0) * 1000, envoiEnCours: !!meta.p, st: rec.st || "envoye", err: rec.err || null,
+      renvois: (rec.renvois || []).length, renvoisJour: limit(rec.renvois), last: rec.last || null,
+      livraison: msgs && msgs.length ? msgs.sort((a, b) => b.at - a.at)[0].state : "" };
+  });
+  log("espace-mails", { demandes: demandes.length, brevo: brevo.ok ? brevo.messages.length : "status " + brevo.status, oublies: forgotten.size });
+  return reply({ ok: true, on: true, now, demandes, renvoiMax: RESEND_MAX, brevo });
+}
+
+// POST /api/espace/renvoi { id, code, rid } or { id, code, email }: the preview's e-mail (kind 1: the same template,
+// link and unsubscribe link) sent again to the address of a request still kept. Never to an address that asked
+// nothing (no request, no consent, no link), nor once the request is gone (paid, unsubscribed, older than 10 days).
+// The reminder's date does not move. At most RESEND_MAX a request per 24 hours, within the cap of the day.
+async function espaceResend(request, env, ctx) {
+  const [b, refused] = await espaceLogin(request, env);
+  if (refused) return refused;
+  if (!mailOn(env)) return reply({ ok: false, reason: "off", message: "L'envoi par e-mail n'est pas activé sur le site." }, 503);
+  const now = Date.now();
+  const gone = { ok: false, reason: "introuvable", message: "Demande introuvable : le parent a payé, s'est désinscrit, ou la demande a plus de 10 jours." };
+  let rid = String(b.rid || "");
+  if (!rid) {
+    const email = cleanEmail(b.email);
+    if (!email) return reply({ ok: false, reason: "email", message: "Cette adresse e-mail n'est pas valable." }, 400);
+    // the requests of this mailbox (its aliases too: the same fingerprint as the limits)
+    const he = await mac(env, "e:" + mailbox(email), 16), found = (await keptRequests(env)).filter(k => k.rid.endsWith("." + he));
+    if (!found.length) return reply({ ok: false, reason: "introuvable", message: "Aucune demande en cours pour cette adresse : elle n'a rien demandé ces 10 derniers jours, ou le parent a payé ou s'est désinscrit. Impossible d'envoyer l'aperçu sans demande." }, 404);
+    if (found.length > 1) return reply({ ok: false, reason: "plusieurs", message: "Plusieurs demandes pour cette adresse : choisissez laquelle renvoyer.",
+      demandes: found.map(({ rid, rec }) => ({ rid, email: rec.email, name: rec.name || "", town: rec.town || "", indoor: !!rec.indoor, created: Number(rec.created) || 0 })) }, 409);
+    rid = found[0].rid;
+  }
+  if (!/^[0-9a-f]{16}\.[0-9a-f]{16}$/.test(rid)) return reply({ ok: false, reason: "bad", message: "Demande non valable." }, 400);
+  const key = "rappel:" + rid, ht = rid.split(".")[0];
+  const page = await env.STATS.list({ prefix: key });
+  const entry = page.keys.find(k => k.name === key), raw = entry ? await env.STATS.get(key) : null;
+  let rec = null;
+  try { rec = JSON.parse(raw); } catch (e) { rec = null; }
+  if (!rec || !cleanEmail(rec.email) || !rec.link) return reply(gone, 404);
+  const m = entry.metadata || {}, created = Number(m.c) || Number(rec.created) || now;
+  const exp = Number(m.x) || Math.floor(created / 1000) + KEEP_DAYS * 86400;
+  if (exp * 1000 - now < 120000) return reply(gone, 404);
+  if (m.p) return reply({ ok: false, reason: "rappel", message: "Le rappel de cette demande est en cours d'envoi : pas de renvoi." }, 409);
+  const renvois = (rec.renvois || []).filter(t => typeof t === "number");
+  if (renvois.filter(t => now - t < DAY).length >= RESEND_MAX)
+    return reply({ ok: false, reason: "limit", message: `Déjà ${RESEND_MAX} renvois pour cette demande en 24 heures : réessayez plus tard.` }, 429);
+  const dayKey = "rappel-jour:" + new Date(now).toISOString().slice(0, 10);
+  const today = parseInt(await env.STATS.get(dayKey), 10) || 0;
+  if (today >= dayCap(env)) return reply({ ok: false, reason: "full", message: `Plafond du jour atteint (${dayCap(env)} e-mails) : réessayez demain.` }, 503);
+  // paid: never sent again (the mark of /api/unlock, then Stripe itself for a payment without return to the site)
+  const token = tokenOf(rec.link);
+  const forget = async () => { await env.STATS.delete(key).catch(() => {}); return reply(gone, 404); };
+  if (await env.STATS.get("rappel-paye:" + ht)) return forget();
+  const paid = await paidTokens(env, now);
+  if (paid === null) return reply({ ok: false, reason: "stripe", message: "Stripe ne répond pas : impossible de vérifier que la quête n'est pas payée. Réessayez dans un instant." }, 503);
+  if (paid.has(token)) return forget();
+
+  const sent = await sendMail(env, rec.email, mailOf(env, rec, 1, await stopLink(env, new URL(rec.link).origin, rid)));
+  rec.renvois = renvois.filter(t => now - t < KEEP_DAYS * DAY).concat(now);
+  rec.last = sent.res === "ok" ? { at: now, ok: true } : { at: now, ok: false, status: sent.status, code: sent.code || "", message: sent.message || "" };
+  if (sent.res === "ok") { rec.st = "envoye"; if (sent.messageId) rec.mids = (rec.mids || []).concat(sent.messageId).slice(-6); }
+  // the same expiration and metadata: the reminder's date does not move
+  await env.STATS.put(key, JSON.stringify(rec), { expiration: exp, metadata: { c: created, x: exp, n: Number(m.n) || 0 } }).catch(() => {});
+  log("renvoi", { ok: sent.res === "ok", res: sent.res, status: sent.status });
+  if (sent.res !== "ok") return reply({ ok: false, reason: "send", to: rec.email, status: sent.status,
+    message: `Brevo n'a pas pris l'e-mail${sent.status ? " (code " + sent.status + ")" : ""}${sent.message ? " : " + sent.message : ""}.` }, 502);
+  await env.STATS.put(dayKey, String(today + 1), { expirationTtl: 2 * 86400 }).catch(() => {});
+  return reply({ ok: true, to: rec.email, at: now, renvoisJour: rec.renvois.filter(t => now - t < DAY).length });
+}
+
 const SHORT = { "/tiktok": "tiktok", "/insta": "instagram", "/instagram": "instagram", "/pinterest": "pinterest", "/youtube": "youtube" };
 
 export default {
@@ -729,6 +955,8 @@ export default {
         if (url.pathname === "/api/hit") return await hit(request, env, ctx);
         if (url.pathname === "/api/stats") return await stats(request, env);
         if (url.pathname === "/api/espace") return await espace(request, env);
+        if (url.pathname === "/api/espace/mails") return await espaceMails(request, env, ctx);
+        if (url.pathname === "/api/espace/renvoi") return await espaceResend(request, env, ctx);
         if (url.pathname === "/api/testeur") return await testeur(request, env, ctx);
         if (url.pathname === "/api/avis") return await avis(request, env, ctx);
         if (url.pathname === "/api/rappel") return await askReminder(request, env, ctx);

@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 // (a pretend checkout page with "Payer" and "Annuler"). Build first: python3 dev/build.py
 // It also fakes Brevo (the e-mails are kept in memory, never sent: GET /__mails) and the API Géo, and offers
 // a simulated clock (/__clock?days=7) and the daily cron (/__cron). NOBREVO=1: no e-mail key, as before it is set.
+// Brevo's log of those e-mails answers too (/__brevo-status sets what happened to them, /__brevo-events breaks it).
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
@@ -27,9 +28,36 @@ const mails = [];
 let brevoFail = "0";
 // Fake API Géo: the commune of any point (/__geo?nom=… changes it).
 let geoName = "Bourg-Test";
+// Its log (GET /v3/smtp/statistics/events), made from the e-mails above: each one "requests", then the events set by
+// /__brevo-status?to=<address>&event=delivered|hardBounces|softBounces|blocked|error|deferred|spam|…&reason=…
+// (on every e-mail sent so far to that address). /__brevo-events?fail=500|net|slow|format|0 breaks this API alone.
+let eventsFail = "0", eventsCalls = 0;
+function brevoLog(url) {
+  const all = [];
+  mails.forEach((m, i) => {
+    const one = (event, at, reason) => all.push(Object.assign({ email: m.to[0], date: new Date(at).toISOString().replace("Z", "+00:00"), subject: m.subject,
+      messageId: m.messageId, event, tag: (m.tags || [])[0] || "", from: m.from.email, ts: Math.floor(at / 1000) }, reason ? { reason } : {}));
+    one("requests", m.at);
+    (m.events || []).forEach(([event, reason], k) => one(event, m.at + 1000 * (k + 1), reason));
+  });
+  const days = parseInt(url.searchParams.get("days") || "0", 10), limit = parseInt(url.searchParams.get("limit") || "2500", 10), offset = parseInt(url.searchParams.get("offset") || "0", 10);
+  const since = days ? Date.now() - days * 86400000 : 0;
+  const list = all.filter(e => Date.parse(e.date) >= since).sort((a, b) => url.searchParams.get("sort") === "asc" ? a.ts - b.ts : b.ts - a.ts);
+  return list.slice(offset, offset + limit);
+}
 globalThis.fetch = async (input, init) => {
   const u = String(input && input.url || input);
   if (/overpass/.test(u) && fs.existsSync(fixture)) return new Response(fs.readFileSync(fixture), { headers: { "content-type": "application/json" } });
+  if (u.startsWith("https://api.brevo.com/v3/smtp/statistics/events")) {
+    eventsCalls++;
+    if (new Headers(init && init.headers).get("api-key") !== "xkeysib-test-local") return Response.json({ code: "unauthorized", message: "Key not found" }, { status: 401 });
+    if (eventsFail === "net") throw new TypeError("fetch failed");
+    if (eventsFail === "slow") { await new Promise((ok, ko) => { const t = setTimeout(ok, 20000); init.signal && init.signal.addEventListener("abort", () => { clearTimeout(t); ko(init.signal.reason); }); }); }
+    if (eventsFail === "format") return Response.json({ data: [] });
+    if (eventsFail !== "0") return Response.json({ code: "internal_error", message: "fake failure" }, { status: parseInt(eventsFail, 10) });
+    const list = brevoLog(new URL(u));
+    return list.length ? Response.json({ events: list }) : Response.json({});
+  }
   if (u.startsWith("https://api.brevo.com/")) {
     if (brevoFail === "net") throw new TypeError("fetch failed");
     if (brevoFail !== "0") return Response.json({ code: "fake_error", message: "fake failure" }, { status: parseInt(brevoFail, 10) });
@@ -38,8 +66,10 @@ globalThis.fetch = async (input, init) => {
       return Response.json({ code: "unauthorized", message: "Key not found" }, { status: 401 });
     const b = JSON.parse(init.body);
     if (!b.sender || !b.sender.email || !Array.isArray(b.to) || !b.to[0] || !b.subject || !b.htmlContent) return Response.json({ code: "missing_parameter" }, { status: 400 });
-    mails.push({ to: b.to.map(x => x.email), from: b.sender, replyTo: b.replyTo || null, subject: b.subject, html: b.htmlContent, text: b.textContent || "", headers: b.headers || {}, at: Date.now() });
-    return Response.json({ messageId: `<fake${mails.length}@smtp-relay.test>` }, { status: 201 });
+    const messageId = `<20261114.fake${mails.length + 1}@smtp-relay.test>`;
+    mails.push({ to: b.to.map(x => x.email), from: b.sender, replyTo: b.replyTo || null, subject: b.subject, html: b.htmlContent, text: b.textContent || "",
+      headers: b.headers || {}, tags: b.tags || [], at: Date.now(), messageId, events: [] });
+    return Response.json({ messageId }, { status: 201 });
   }
   if (u.startsWith("https://geo.api.gouv.fr/communes?")) return Response.json(geoName ? [{ nom: geoName, code: "67999" }] : []);
   return realFetch(input, init);
@@ -158,10 +188,17 @@ http.createServer(async (nreq, nres) => {
     else if (url.pathname === "/__counts") res = Response.json([...kv.keys()].filter(k => !k.startsWith("rappel") && alive(k)));
     else if (url.pathname === "/__mails") { res = Response.json(mails); if (url.searchParams.get("clear")) mails.length = 0; }
     else if (url.pathname === "/__brevo") { brevoFail = url.searchParams.get("fail") || "0"; res = Response.json({ fail: brevoFail }); }
+    else if (url.pathname === "/__brevo-events") { if (url.searchParams.has("fail")) eventsFail = url.searchParams.get("fail") || "0"; res = Response.json({ fail: eventsFail, calls: eventsCalls }); }
+    else if (url.pathname === "/__brevo-status") {
+      const to = (url.searchParams.get("to") || "").toLowerCase(), hit = mails.filter(m => m.to[0] === to);
+      for (const m of hit) m.events.push([url.searchParams.get("event") || "delivered", url.searchParams.get("reason") || ""]);
+      res = Response.json({ mails: hit.length });
+    }
     else if (url.pathname === "/__geo") { geoName = url.searchParams.get("nom") || ""; res = Response.json({ nom: geoName }); }
     else if (url.pathname === "/__clock") { offset = parseFloat(url.searchParams.get("days") || "0") * 86400000; res = Response.json({ now: new Date(Date.now()).toISOString() }); }
     else if (url.pathname === "/__kv") {
       if (req.method === "POST") { const b = await req.json(); await STATS.put(b.key, b.value, b.options || {}); }
+      if (req.method === "DELETE") await STATS.delete(url.searchParams.get("key") || "");
       res = Response.json(Object.fromEntries([...kv.keys()].filter(k => k.startsWith(url.searchParams.get("prefix") || "") && alive(k)).map(k => [k, kv.get(k)])));
     }
     else if (url.pathname === "/__cron") {

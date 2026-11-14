@@ -43,7 +43,9 @@ records = lambda: [k for k in call("/__kv?prefix=rappel:")[1]]
 today = lambda: time.strftime("%Y-%m-%d", time.gmtime())
 
 def serve(port, **extra):
-    srv = subprocess.Popen(["node", str(ROOT / "dev" / "serve.mjs"), str(port)], env=dict(os.environ, **extra), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # the server's output (the worker's logs) goes to a file, read at the end: no address may be in it
+    out = open(ROOT / "dist" / f"serve-{port}.log", "a", encoding="utf-8")
+    srv = subprocess.Popen(["node", str(ROOT / "dev" / "serve.mjs"), str(port)], env=dict(os.environ, **extra), stdout=out, stderr=subprocess.STDOUT)
     for _ in range(50):
         try: urllib.request.urlopen(f"http://127.0.0.1:{port}/", timeout=1); break
         except Exception: time.sleep(0.1)
@@ -91,6 +93,7 @@ async def main():
     seq = "".join("\x1e" + json.dumps({"type": "Feature", "geometry": {"type": "Point", "coordinates": [e["lon"], e["lat"]]},
                    "properties": dict(e["tags"], **{"@type": e["type"], "@id": e["id"]})}) + "\n" for e in fixture["elements"])
     (ROOT / "dist" / "fixture.geojsonseq").write_text(seq, encoding="utf-8")
+    for port in (PORT, PORT_OFF): (ROOT / "dist" / f"serve-{port}.log").write_text("", encoding="utf-8")
     subprocess.run(["node", str(ROOT / "dev" / "places" / "build.mjs"), str(ROOT / "dist" / "fixture.geojsonseq"), str(ROOT / "site" / "places")], check=True, stdout=subprocess.DEVNULL)
     srv = serve(PORT, KV_PAGE="3")
     errs = []
@@ -184,9 +187,28 @@ async def main():
             await pg.fill("#mail-keep", "panne@exemple.fr")
             await pg.click(".mailform button")
             await pg.wait_for_selector("text=L'e-mail n'a pas pu partir : gardez ce lien.", timeout=8000)
-            check(await pg.locator("#mail-keep").is_visible() and await pg.locator(".keep a[href^='mailto:']").count() == 1, "échec d'envoi : message visible, on peut réessayer ou garder le lien")
-            check(len(records()) == 2, "échec d'envoi : rien de gardé (seules les 2 demandes réussies restent)")
+            check(await pg.locator("#mail-keep").is_visible() and await pg.locator(".keep a[href^='mailto:']").count() == 1, "échec d'envoi (502) : message visible, on peut réessayer ou garder le lien")
+            kept = [json.loads(v["v"]) for v in call("/__kv?prefix=rappel:")[1].values()]
+            failed = [r for r in kept if r["email"] == "panne@exemple.fr"]
+            check(len(kept) == 3 and len(failed) == 1 and failed[0]["st"] == "echec" and failed[0]["err"]["status"] == 500,
+                  "échec d'envoi : la demande est gardée, marquée « échec » (pour un renvoi depuis l'espace)")
             call("/__brevo?fail=0")
+            # 429: three requests for this address today already
+            for _ in range(3): call("/api/rappel", {"email": "limite@exemple.fr", "apercu": token})
+            await pg.fill("#mail-keep", "limite@exemple.fr")
+            await pg.click(".mailform button")
+            await pg.wait_for_selector("text=Cette adresse a déjà reçu plusieurs aperçus aujourd'hui : réessayez demain, ou gardez ce lien.", timeout=8000)
+            check(await pg.locator(".mailfail").count() == 1, "limite atteinte (429) : son propre message")
+            # 503: the cap of the day
+            day = call("/__kv?prefix=rappel-jour:")[1]["rappel-jour:" + today()]["v"]
+            call("/__kv", {"key": "rappel-jour:" + today(), "value": "200", "options": {"expirationTtl": 172800}})
+            await pg.fill("#mail-keep", "plafond@exemple.fr")
+            await pg.click(".mailform button")
+            await pg.wait_for_selector("text=L'envoi par e-mail est momentanément indisponible : gardez ce lien.", timeout=8000)
+            check(await pg.locator(".mailfail").count() == 1 and await pg.locator(".keep a[href^='mailto:']").count() == 1, "service complet (503) : son propre message, le lien reste")
+            call("/__kv", {"key": "rappel-jour:" + today(), "value": day, "options": {"expirationTtl": 172800}})
+            for k, v in call("/__kv?prefix=rappel:")[1].items():   # keep the next counts simple
+                if json.loads(v["v"])["email"] in ("panne@exemple.fr", "limite@exemple.fr"): call("/__kv?key=" + urllib.parse.quote(k), method="DELETE")
             errs += pg.errs
             await ctx.close()
 
@@ -276,6 +298,100 @@ async def main():
             with open(ROOT / "dist" / "mail-2.html", "w", encoding="utf-8") as fh: fh.write(rm["html"])
             call("/__clock?days=0")
 
+            # 6b. the owner's private page: section « E-mails » (Brevo's log, faked by dev/serve.mjs)
+            call("/__mails?clear=1")
+            for k in call("/__kv?prefix=rappel")[1]: call("/__kv?key=" + urllib.parse.quote(k), method="DELETE")
+            etok = {}
+            for who in ["livre", "rebond", "bloque", "attente", "refus"]:
+                _, pv = call("/api/preview", {"indoor": True})
+                etok[who] = pv["token"]
+                call("/__brevo?fail=" + ("400" if who == "refus" else "0"))
+                check(call("/api/rappel", {"email": who + "@exemple.fr", "apercu": pv["token"], "n": "Léo"})[0] == (502 if who == "refus" else 200), "espace : demande " + who)
+            call("/__brevo?fail=0")
+            call("/__brevo-status?to=livre@exemple.fr&event=delivered")
+            call("/__brevo-status?to=rebond@exemple.fr&event=hardBounces&reason=" + urllib.parse.quote("550 5.1.1 user unknown"))
+            call("/__brevo-status?to=bloque@exemple.fr&event=blocked&reason=" + urllib.parse.quote("domaine d'envoi non authentifié"))
+            first = {m["to"][0]: m for m in mails()}
+            for body in [{}, {"id": "test", "code": "TEST-CODE-0000-0001"}, {"id": "nathan", "code": "TEST-CODE-0000-0000"}]:
+                for path in ["/api/espace/mails", "/api/espace/renvoi"]:
+                    code, j = call(path, dict(body, email="livre@exemple.fr"))
+                    check(code == 403 and "exemple" not in json.dumps(j), f"espace : {path} sans le bon code → 403, aucune adresse")
+            calls0 = call("/__brevo-events")[1]["calls"]
+            ctx, ep = await new_page(b)
+            await ep.goto(BASE + "/espace/")
+            check(await ep.get_attribute("meta[name=robots]", "content") == "noindex, nofollow", "espace : noindex")
+            await ep.fill("#id", "test"); await ep.fill("#code", "TEST-CODE-0000-0000")
+            await ep.click("#go")
+            await ep.wait_for_selector("#app:not([hidden])", timeout=8000)
+            check(not await ep.evaluate("document.getElementById('mails-box').open") and call("/__brevo-events")[1]["calls"] == calls0,
+                  "espace : section E-mails repliée, Brevo pas interrogé à l'ouverture")
+            await ep.click("#mails-box summary")
+            await ep.click("#m-load")
+            await ep.wait_for_selector("#m-err .mi", timeout=8000)
+            errt = await ep.inner_text("#m-err")
+            check("rebond@exemple.fr" in errt and "Adresse inexistante ou refusée" in errt and "550 5.1.1 user unknown" in errt
+                  and "bloque@exemple.fr" in errt and "Bloqué par Brevo" in errt and "refus@exemple.fr" in errt and "Refusé par Brevo au moment de l'envoi" in errt,
+                  "espace : « En erreur » (rebond, bloqué, échec d'envoi) avec la raison")
+            sentt = await ep.inner_text("#m-sent")
+            check("livre@exemple.fr" in sentt and "Délivré" in sentt and "attente@exemple.fr" in sentt and "en attente de livraison" in sentt and "rebond@" not in sentt, "espace : « Partis » avec leur état")
+            dem = await ep.inner_text("#m-dem")
+            check(dem.count("@exemple.fr") == 5 and "Premier envoi échoué" in dem and "Rappel prévu le" in dem, "espace : « Demandes en cours »")
+            summ = await ep.inner_text("#m-sum")
+            check(re.sub(r"\s+", " ", summ).startswith("Partis 4 7 jours Délivrés 1 7 jours En erreur 3"), "espace : résumé " + re.sub(r"\s+", " ", summ))
+            check(await ep.evaluate("[...document.querySelectorAll('#m-err .mi, #m-sent .mi, #m-dem .mi')].every(x => !x.querySelector('script,img,a'))"), "espace : textes insérés comme texte")
+            # « Renvoyer l'aperçu » on the bounce: the same e-mail n°1, the reminder's date unchanged
+            meta0 = {k: v["meta"] for k, v in call("/__kv?prefix=rappel:")[1].items()}
+            item = ep.locator("#m-err .mi", has_text="rebond@exemple.fr")
+            await item.locator("button").click()
+            await item.locator(".res.ok").wait_for(timeout=8000)
+            check("Aperçu renvoyé à rebond@exemple.fr" in await item.locator(".res").inner_text(), "espace : renvoi réussi, affiché")
+            again = mails()[-1]
+            check(again["to"] == ["rebond@exemple.fr"] and all(again[f] == first["rebond@exemple.fr"][f] for f in ("subject", "html", "text", "headers")),
+                  "renvoi : même e-mail n°1 (gabarit, lien, désinscription)")
+            meta1 = {k: v["meta"] for k, v in call("/__kv?prefix=rappel:")[1].items()}
+            check(meta0 == meta1, "renvoi : date du rappel inchangée")
+            await ep.screenshot(path=str(ROOT / "dist" / "espace-mails.png"), full_page=True)
+            for _ in range(2):
+                await item.locator("button").click()
+                await ep.wait_for_timeout(300)
+                await item.locator(".res.ok").wait_for(timeout=8000)
+            check(await item.locator("button").is_disabled(), "renvoi : bouton désactivé après 3 renvois")
+            rid = next(k for k, v in call("/__kv?prefix=rappel:")[1].items() if json.loads(v["v"])["email"] == "rebond@exemple.fr")[len("rappel:"):]
+            n = len(mails())
+            code, j = call("/api/espace/renvoi", {"id": "test", "code": "TEST-CODE-0000-0000", "rid": rid})
+            check(code == 429 and j["reason"] == "limit" and len(mails()) == n, "renvoi : 4e refusé en 24 h, rien d'envoyé")
+            # paid: the request is gone, the button says so, nothing is sent
+            pay(etok["bloque"])
+            item = ep.locator("#m-err .mi", has_text="bloque@exemple.fr")
+            await item.locator("button").click()
+            await item.locator(".res.err").wait_for(timeout=8000)
+            check("Demande introuvable : le parent a payé" in await item.locator(".res").inner_text() and len(mails()) == n, "renvoi après paiement : introuvable, aucun envoi")
+            # by address: an alias of a request is sent to the address given by the parent; an unknown one, nothing
+            await ep.fill("#m-addr", "inconnu@exemple.fr"); await ep.click("#m-addr-go")
+            await ep.wait_for_selector("#m-addr-msg.err", timeout=8000)
+            check("Aucune demande en cours pour cette adresse" in await ep.inner_text("#m-addr-msg") and len(mails()) == n, "renvoi à une adresse qui n'a rien demandé : refusé")
+            await ep.fill("#m-addr", "Livre+essai@exemple.fr"); await ep.click("#m-addr-go")
+            await ep.wait_for_selector("#m-addr-msg.ok", timeout=8000)
+            check("renvoyé à livre@exemple.fr" in await ep.inner_text("#m-addr-msg") and mails()[-1]["to"] == ["livre@exemple.fr"], "renvoi par adresse (alias) : à l'adresse de la demande")
+            # Brevo's log down: said, the rest of the section still there
+            call("/__brevo-events?fail=500")
+            await ep.click("#m-load")
+            await ep.wait_for_selector("#m-brevo:not([hidden])", timeout=8000)
+            check("Brevo n'a pas répondu (code 500)" in await ep.inner_text("#m-brevo") and (await ep.inner_text("#m-dem")).count("@exemple.fr") == 4
+                  and "refus@exemple.fr" in await ep.inner_text("#m-err") and await ep.locator("#tiles .tile").count() == 5, "Brevo en panne : message clair, le reste de l'espace fonctionne")
+            call("/__brevo-events?fail=0")
+            errs += ep.errs
+            await ctx.close()
+            # the failed first send, never sent again: one e-mail on the 7th day, saying so, then nothing
+            call("/__mails?clear=1")
+            call("/__clock?days=7.05")
+            call("/__cron")
+            late = [m for m in mails() if m["to"] == ["refus@exemple.fr"]]
+            check(len(late) == 1 and "notre envoi n'avait pas pu partir" in late[0]["text"] and etok["refus"] in late[0]["text"] and late[0]["subject"] == "L'aperçu de la quête de Léo",
+                  "échec d'envoi : un seul e-mail à 7 jours, qui le dit, avec le lien")
+            check(call("/__cron")[1]["sent"] == 0 and not records(), "échec d'envoi : jamais deux fois, demande effacée")
+            call("/__clock?days=0")
+
             # 7. anonymous counts for the report
             counts = call("/__counts")[1]
             events = {k.split("|")[1]: k.split("|")[2] for k in counts}
@@ -318,6 +434,8 @@ async def main():
     finally:
         srv.terminate()
 
+    logs = "".join((ROOT / "dist" / f"serve-{port}.log").read_text(encoding="utf-8") for port in (PORT, PORT_OFF))
+    check("rappel" in logs and "renvoi" in logs and not re.search(r"exemple\.fr|@exemple", logs, re.I), "aucune adresse dans les journaux du serveur")
     print("\n" + ("TOUT EST BON" if not fails else f"{len(fails)} échec(s)"))
     sys.exit(1 if fails else 0)
 

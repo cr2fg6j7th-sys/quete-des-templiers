@@ -47,7 +47,8 @@ console.log("Adresses du site : tous les tests passent.");
     throw new Error("unexpected fetch " + u);
   };
   const realNow = Date.now, realLog = console.log;
-  console.log = () => {};   // the worker's one-line logs
+  const allLogs = [], quiet = s => allLogs.push(String(s));
+  console.log = quiet;   // the worker's one-line logs, kept to check that none holds an address
   let days = 0;
   Date.now = () => realNow() + days * 86400000;
   const menv = Object.assign({}, env, { STATS, QUEST_KEY: "cle", BREVO_API_KEY: "xkeysib-unit", MAIL_FROM: "bonjour@maquetelegendaire.fr", MAIL_REPLY_TO: "contact@exemple.fr", PRICE_CENTS: "2490" });
@@ -108,27 +109,39 @@ console.log("Adresses du site : tous les tests passent.");
   // Brevo's error message never puts an address in the logs
   {
     const logs = [], keep = globalThis.fetch;
-    console.log = s => logs.push(String(s));
+    console.log = s => { logs.push(String(s)); quiet(s); };
     globalThis.fetch = async (u, init) => String(u).includes("brevo") ? Response.json({ code: "invalid_parameter", message: "Invalid email address journal@exemple.fr" }, { status: 400 }) : keep(u, init);
     assert.strictEqual((await call("/api/rappel", { email: "journal@exemple.fr", apercu: home.token }))[0], 502);
-    globalThis.fetch = keep; console.log = () => {};
+    globalThis.fetch = keep; console.log = quiet;
     assert.ok(logs.some(l => l.startsWith("brevo 400") && l.includes("<adresse>")) && !logs.some(l => l.includes("journal@")), "no address in the logs: " + logs.join(" | "));
+    // refused by Brevo: the request is kept, marked as failed with Brevo's answer (without the address quoted in it)
+    const k = [...kv.keys()].find(x => x.startsWith("rappel:") && JSON.parse(kv.get(x).v).email === "journal@exemple.fr");
+    const r = k && JSON.parse(kv.get(k).v);
+    assert.ok(r && r.st === "echec" && r.err.status === 400 && r.err.code === "invalid_parameter" && r.err.message === "Invalid email address <adresse>", "failed send kept: " + JSON.stringify(r && r.err));
+    assert.deepStrictEqual(Object.keys(kv.get(k).meta).sort(), ["c", "n", "x"], "failed send: the reminder stays planned");
   }
   sent.length = 0;
 
   // the reminder: not before 7 days, once at 7 days, then the request is gone
   const records = () => [...kv.keys()].filter(k => k.startsWith("rappel:"));
   const before = records().length;
-  assert.strictEqual(before, 3, "one record per address and token");
+  assert.strictEqual(before, 4, "one record per address and token (the failed one too)");
   days = 6.9; await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
   assert.strictEqual(sent.length, 0, "no reminder before 7 days");
   days = 7.01; await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
-  assert.strictEqual(sent.length, 3, "one reminder each at 7 days");
+  assert.strictEqual(sent.length, 4, "one reminder each at 7 days");
+  const late = sent.filter(x => x.body.to[0].email === "journal@exemple.fr");
+  assert.ok(late.length === 1 && late[0].body.subject === "L'aperçu de votre quête d'anniversaire" && late[0].body.textContent.includes("notre envoi n'avait pas pu partir")
+    && late[0].body.textContent.includes("C'est le seul message que vous recevrez") && !late[0].body.textContent.includes("seul rappel") && !late[0].body.textContent.includes("pour ne pas recevoir le rappel") && late[0].body.textContent.includes("?apercu=" + home.token),
+    "the first e-mail never went: the 7th day's e-mail says so, with the link");
+  sent.splice(sent.indexOf(late[0]), 1);
   assert.ok(sent.every(x => / vous attend$/.test(x.body.subject) && x.body.textContent.includes("C'est le seul rappel que vous recevrez")), "reminder text");
+  assert.ok(sent.every(x => x.body.tags[0] === "rappel") && late[0].body.tags[0] === "apercu", "Brevo tags");
+  sent.push(late[0]);
   assert.ok(sent.some(x => x.body.textContent.includes("S'il pleut")) && sent.some(x => !x.body.textContent.includes("S'il pleut")), "rain line only outdoors");
   assert.strictEqual(records().length, 0, "records deleted after the reminder");
   await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
-  assert.strictEqual(sent.length, 3, "never twice");
+  assert.strictEqual(sent.length, 4, "never twice");
 
   // unsubscribe: signed link only
   days = 0; sent.length = 0;
@@ -207,6 +220,172 @@ console.log("Adresses du site : tous les tests passent.");
     assert.strictEqual(stripeCalls.length, 0, "no reminder due: no call to Stripe");
     kv.clear(); sent.length = 0;
   }
+
+  // The owner's private page: the e-mails crossed with Brevo's log, and « Renvoyer l'aperçu »
+  {
+    const { createHash } = await import("node:crypto");
+    const eenv = Object.assign({}, menv, { ESPACE_ID: "test", ESPACE_SALT: "sel", ESPACE_HASH: createHash("sha256").update("sel:test:TEST-CODE-0000-0000").digest("hex"),
+      STRIPE_SECRET_KEY: "sk_test_unit", STRIPE_API: "https://stripe.test", MAIL_DAY_MAX: "200" });
+    const login = { id: "test", code: "TEST-CODE-0000-0000" };
+    const blog = [];   // what fake Brevo took: { mid, body, at, events: [[event, reason]] }
+    let brevoSend = "ok", brevoLog = "up", logCalls = 0, paidSessions = [];
+    const chunks = t => { const m = {}; for (let i = 0; i * 490 < t.length; i++) m["t" + i] = t.slice(i * 490, (i + 1) * 490); return m; };
+    globalThis.fetch = async (u, init) => {
+      u = String(u);
+      if (u === "https://api.brevo.com/v3/smtp/email") {
+        const b = JSON.parse(init.body);
+        if (brevoSend === "refuse") return Response.json({ code: "permission_denied", message: "Sender not allowed to send to " + b.to[0].email }, { status: 403 });
+        const mid = `<m${blog.length + 1}@relay.test>`;
+        blog.push({ mid, body: b, at: Date.now(), events: [] }); sent.push({ body: b });
+        return Response.json({ messageId: mid }, { status: 201 });
+      }
+      if (u.startsWith("https://api.brevo.com/v3/smtp/statistics/events?")) {
+        logCalls++;
+        assert.strictEqual(new Headers(init.headers).get("api-key"), "xkeysib-unit", "Brevo's log: the server's key");
+        if (brevoLog === "down") return Response.json({ code: "unavailable", message: "down" }, { status: 503 });
+        if (brevoLog === "net") throw new TypeError("fetch failed");
+        if (brevoLog === "format") return Response.json({ events: "nope" });
+        const q = new URL(u).searchParams;
+        assert.ok(+q.get("limit") <= 100 && q.get("days") === "10" && q.get("sort") === "desc", "Brevo's log: query " + u);
+        const ev = blog.flatMap(m => [{ email: m.body.to[0].email, date: new Date(m.at).toISOString(), subject: m.body.subject, messageId: m.mid, event: "requests", tag: m.body.tags[0], from: "x" },
+          ...m.events.map(([event, reason], i) => Object.assign({ email: m.body.to[0].email, date: new Date(m.at + 1000 * (i + 1)).toISOString(), messageId: m.mid, event }, reason ? { reason } : {}))]).reverse();
+        return Response.json({ events: ev.slice(+q.get("offset"), +q.get("offset") + +q.get("limit")) });
+      }
+      if (u.startsWith("https://stripe.test/v1/checkout/sessions/")) return Response.json(paidSessions.find(s => u.endsWith(s.id)) || {}, { status: paidSessions.some(s => u.endsWith(s.id)) ? 200 : 404 });
+      if (u.startsWith("https://stripe.test/")) return Response.json({ data: paidSessions, has_more: false });
+      if (u.startsWith("https://geo.api.gouv.fr/")) return Response.json([{ nom: "Obernai" }]);
+      throw new Error("unexpected fetch " + u);
+    };
+    const status = (to, event, reason) => blog.filter(m => m.body.to[0].email === to).forEach(m => m.events.push([event, reason]));
+    const mails = async () => { const [st, j] = await call("/api/espace/mails", login, eenv); assert.strictEqual(st, 200); return j; };
+    const ridOf = (j, email) => (j.demandes.find(d => d.email === email) || {}).rid;
+    days = 0; sent.length = 0;
+    const tok = {};
+    for (const who of ["livre", "rebond", "bloque", "bizarre", "refus", "refus2", "paye", "parti", "stop", "plainte"]) {
+      tok[who] = (await call("/api/preview", { indoor: true }))[1].token;
+      brevoSend = who.startsWith("refus") ? "refuse" : "ok";
+      const [st] = await call("/api/rappel", { email: who + "@exemple.fr", apercu: tok[who], n: "Léo" }, eenv);
+      assert.strictEqual(st, who.startsWith("refus") ? 502 : 200, "request " + who);
+    }
+    brevoSend = "ok";
+    status("livre@exemple.fr", "delivered"); status("livre@exemple.fr", "opened");
+    status("rebond@exemple.fr", "hardBounces", "550 5.1.1 <rebond@exemple.fr>: user unknown");
+    status("bloque@exemple.fr", "blocked", "sender domain not authenticated");
+    status("bizarre@exemple.fr", "superNewEvent", "something");
+    status("plainte@exemple.fr", "delivered"); status("plainte@exemple.fr", "spam");
+    const first = Object.fromEntries(blog.map(m => [m.body.to[0].email, m.body]));
+
+    // no login, a wrong code, another login: 403, nothing else (the same check as /api/espace)
+    for (const bad of [{}, { id: "test" }, { id: "test", code: "TEST-CODE-0000-0001" }, { id: "autre", code: "TEST-CODE-0000-0000" }, { id: "test", code: "" }])
+      for (const path of ["/api/espace/mails", "/api/espace/renvoi"]) {
+        const t0 = performance.now();
+        const [st, j] = await call(path, Object.assign({ email: "livre@exemple.fr", rid: "0".repeat(16) + "." + "0".repeat(16) }, bad), eenv);
+        assert.deepStrictEqual([st, j], [403, { ok: false, reason: "login" }], path + " " + JSON.stringify(bad));
+        assert.ok(performance.now() - t0 >= 390, "the same 400 ms delay on a failed login");
+      }
+    assert.ok(logCalls === 0 && blog.length === 8, "refused logins: Brevo neither read nor used");
+    assert.strictEqual((await call("/api/espace/mails", { id: " TEST ", code: "test-code-0000-0000 " }, eenv))[0], 200, "the same login rules (case, spaces)");
+
+    // the list: the requests kept here, Brevo's messages with their last state, crossed
+    let j = await mails();
+    assert.ok(j.ok && j.on && j.brevo.ok && j.renvoiMax === 3, "list: " + JSON.stringify(j.brevo).slice(0, 200));
+    const d = Object.fromEntries(j.demandes.map(x => [x.email.split("@")[0], x]));
+    assert.deepStrictEqual(Object.keys(d).sort(), ["bizarre", "bloque", "livre", "parti", "paye", "rebond", "refus", "refus2", "stop"], "requests (the spam complaint is forgotten)");
+    assert.ok(d.refus.st === "echec" && d.refus.err.status === 403 && d.refus.err.code === "permission_denied" && !d.refus.err.message.includes("@"), "failed send: visible, Brevo's reason without the address");
+    assert.ok(d.livre.st === "envoye" && d.livre.livraison === "delivre" && d.livre.name === "Léo" && d.livre.rappelLe - d.livre.created === 7 * 86400000, "request: delivered, reminder date");
+    const msg = Object.fromEntries(j.brevo.messages.map(m => [m.email.split("@")[0], m]));
+    assert.deepStrictEqual(Object.keys(msg).sort(), ["bizarre", "bloque", "livre", "parti", "paye", "plainte", "rebond", "stop"], "Brevo's messages (none for the refused sends)");
+    assert.ok(msg.livre.state === "delivre" && msg.livre.opened && !msg.livre.erreur && msg.livre.rid === d.livre.rid, "delivered and opened");
+    assert.ok(msg.rebond.state === "rebond-definitif" && msg.rebond.erreur && msg.rebond.reason.includes("user unknown") && msg.rebond.rid === d.rebond.rid, "hard bounce, with Brevo's reason");
+    assert.ok(msg.bloque.state === "bloque" && msg.bloque.erreur && msg.bloque.reason === "sender domain not authenticated", "blocked");
+    assert.ok(msg.bizarre.state === "parti" && msg.bizarre.events.some(e => e.e === "autre" && e.raw === "superNewEvent"), "an unknown event is kept as is");
+    assert.ok(msg.plainte.state === "spam" && msg.plainte.rid === "" && !kv.has("rappel:" + msg.plainte.rid), "spam complaint: no resend possible");
+    assert.ok(msg.parti.state === "parti" && msg.parti.subject === "L'aperçu de la quête de Léo" && msg.parti.tag === "apercu", "sent, waiting");
+
+    // « Renvoyer l'aperçu »: the same e-mail n°1 (template, link, unsubscribe), the reminder's date unchanged
+    const recOf = rid => ({ rec: JSON.parse(kv.get("rappel:" + rid).v), meta: kv.get("rappel:" + rid).meta });
+    const before = recOf(d.rebond.rid);
+    sent.length = 0; days = 1;
+    let [st, r] = await call("/api/espace/renvoi", Object.assign({ rid: d.rebond.rid }, login), eenv);
+    assert.ok(st === 200 && r.ok && r.to === "rebond@exemple.fr" && r.renvoisJour === 1, "resend: " + JSON.stringify(r));
+    assert.strictEqual(sent.length, 1);
+    for (const f of ["subject", "htmlContent", "textContent", "headers", "to", "sender", "replyTo", "tags"]) assert.deepStrictEqual(sent[0].body[f], first["rebond@exemple.fr"][f], "resend: the same " + f);
+    const after = recOf(d.rebond.rid);
+    assert.deepStrictEqual(after.meta, before.meta, "resend: the reminder's date and expiration unchanged");
+    assert.ok(after.rec.renvois.length === 1 && after.rec.last.ok === true && after.rec.mids.length === 2 && after.rec.created === before.rec.created, "resend: kept on the request");
+    for (let i = 0; i < 2; i++) assert.strictEqual((await call("/api/espace/renvoi", Object.assign({ rid: d.rebond.rid }, login), eenv))[0], 200);
+    [st, r] = await call("/api/espace/renvoi", Object.assign({ rid: d.rebond.rid }, login), eenv);
+    assert.ok(st === 429 && r.reason === "limit" && sent.length === 3, "a 4th resend in 24 hours: refused, nothing sent");
+    j = await mails();
+    assert.ok(j.demandes.find(x => x.rid === d.rebond.rid).renvoisJour === 3, "the count shown");
+
+    // the failed first send: sent again from here; the request is then an ordinary one
+    [st, r] = await call("/api/espace/renvoi", Object.assign({ rid: d.refus.rid }, login), eenv);
+    assert.ok(st === 200 && recOf(d.refus.rid).rec.st === "envoye", "failed send, resent");
+    // Brevo refuses the resend: said with its reason, the request stays as it was
+    brevoSend = "refuse";
+    [st, r] = await call("/api/espace/renvoi", Object.assign({ rid: d.bloque.rid }, login), eenv);
+    assert.ok(st === 502 && r.reason === "send" && /code 403/.test(r.message) && recOf(d.bloque.rid).rec.last.ok === false, "resend refused by Brevo: " + r.message);
+    brevoSend = "ok";
+
+    // by address: the requests of the mailbox (aliases too), sent to the address the parent gave; none: nothing sent
+    sent.length = 0;
+    [st, r] = await call("/api/espace/renvoi", Object.assign({ email: " Livre+autre@Exemple.fr " }, login), eenv);
+    assert.ok(st === 200 && r.to === "livre@exemple.fr" && sent.length === 1 && sent[0].body.to[0].email === "livre@exemple.fr", "by address (alias): to the requested address");
+    [st, r] = await call("/api/espace/renvoi", Object.assign({ email: "inconnu@exemple.fr" }, login), eenv);
+    assert.ok(st === 404 && r.reason === "introuvable" && sent.length === 1, "an address that asked nothing: nothing sent");
+    assert.strictEqual((await call("/api/espace/renvoi", Object.assign({ email: "pas une adresse" }, login), eenv))[1].reason, "email");
+    await call("/api/rappel", { email: "livre@exemple.fr", apercu: tok.bizarre }, eenv);
+    sent.length = 0;
+    [st, r] = await call("/api/espace/renvoi", Object.assign({ email: "livre@exemple.fr" }, login), eenv);
+    assert.ok(st === 409 && r.reason === "plusieurs" && r.demandes.length === 2 && sent.length === 0, "two requests: the owner chooses");
+
+    // gone: paid (back on the site, or not), unsubscribed, a made-up request: « introuvable », nothing sent
+    paidSessions = [{ id: "cs_test_" + "x".repeat(20), status: "complete", payment_status: "paid", created: Math.floor(Date.now() / 1000), metadata: Object.assign(chunks(tok.paye), { n: "Léo" }) }];
+    assert.strictEqual((await call("/api/unlock", { session: paidSessions[0].id }, eenv)).at(0), 200);
+    await new Promise(ok => setTimeout(ok, 20));
+    paidSessions.push({ id: "cs_test_" + "y".repeat(20), status: "complete", payment_status: "paid", created: Math.floor(Date.now() / 1000), metadata: chunks(tok.parti) });
+    await worker.fetch(new Request(first["stop@exemple.fr"].headers["List-Unsubscribe"].slice(1, -1)), eenv, { waitUntil() {} });
+    for (const who of ["paye", "parti", "stop"]) {
+      [st, r] = await call("/api/espace/renvoi", Object.assign({ rid: d[who].rid }, login), eenv);
+      assert.ok(st === 404 && r.reason === "introuvable" && r.message.startsWith("Demande introuvable : le parent a payé, s'est désinscrit"), who + ": " + JSON.stringify(r));
+      assert.ok(!kv.has("rappel:" + d[who].rid), who + ": the request is gone");
+    }
+    assert.strictEqual((await call("/api/espace/renvoi", Object.assign({ rid: "1".repeat(16) + "." + "2".repeat(16) }, login), eenv))[0], 404);
+    assert.strictEqual(sent.length, 0, "nothing sent to a request that is gone");
+    paidSessions = [];
+
+    // the cap of the day applies to the resends too
+    const dayKey = "rappel-jour:" + new Date(Date.now()).toISOString().slice(0, 10), keepDay = kv.get(dayKey);
+    kv.set(dayKey, { v: "200", meta: null });
+    [st, r] = await call("/api/espace/renvoi", Object.assign({ rid: d.bizarre.rid }, login), eenv);
+    assert.ok(st === 503 && r.reason === "full" && sent.length === 0, "cap of the day");
+    if (keepDay) kv.set(dayKey, keepDay); else kv.delete(dayKey);
+
+    // Brevo's log down, unreadable, or no answer: said, the rest of the section still there
+    for (const [state, check] of [["down", b => b.status === 503], ["net", b => b.status === 0], ["format", b => b.format === true]]) {
+      brevoLog = state;
+      j = await mails();
+      assert.ok(j.ok && !j.brevo.ok && check(j.brevo) && j.demandes.length >= 5, "Brevo's log " + state + ": " + JSON.stringify(j.brevo));
+    }
+    brevoLog = "up";
+    assert.deepStrictEqual(await call("/api/espace/mails", login, Object.assign({}, eenv, { BREVO_API_KEY: "" })), [200, { ok: true, on: false }], "e-mails off: said");
+
+    // the 7th day: one e-mail each; the failed first send never resent gets the late preview, once
+    sent.length = 0;
+    days = 6.9; await worker.scheduled({ scheduledTime: Date.now() }, eenv, { waitUntil() {} });
+    assert.strictEqual(sent.length, 0, "resends do not move the reminder: nothing before 7 days");
+    days = 7.05; await worker.scheduled({ scheduledTime: Date.now() }, eenv, { waitUntil() {} });
+    const to = Object.fromEntries(sent.map(x => [x.body.to[0].email.split("@")[0], x.body]));
+    assert.ok(to.refus2 && to.refus2.textContent.includes("notre envoi n'avait pas pu partir") && to.refus && / vous attend$/.test(to.refus.subject) && to.rebond && / vous attend$/.test(to.rebond.subject),
+      "7th day: " + Object.keys(to).join(", "));
+    assert.ok(!to.paye && !to.parti && !to.stop && !to.plainte, "none after payment, unsubscribe or spam complaint");
+    const n = sent.length;
+    days = 7.6; await worker.scheduled({ scheduledTime: Date.now() }, eenv, { waitUntil() {} });
+    assert.strictEqual(sent.length, n, "once only");
+    kv.clear(); sent.length = 0; days = 0;
+  }
+  assert.ok(allLogs.length > 20 && !allLogs.some(l => /exemple\.fr|@exemple/i.test(l)), "no address in the logs: " + allLogs.filter(l => /exemple/.test(l)).join(" | "));
   globalThis.fetch = realFetch; Date.now = realNow; console.log = realLog;
 }
-console.log("Aperçu par e-mail : tous les tests passent.");
+console.log("Aperçu par e-mail et section E-mails de l'espace : tous les tests passent.");

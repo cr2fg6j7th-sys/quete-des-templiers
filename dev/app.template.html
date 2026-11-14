@@ -2217,7 +2217,7 @@ function keepPreview(){
 // The address lives only in this page's memory (never in the browser's storage), for the confirmation.
 const MAIL_RE=/^[A-Za-z0-9._%+-]{1,64}@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,24}$/;
 const mailValid=v=>v.length<=254&&MAIL_RE.test(v)&&!/^\.|\.\.|\.@/.test(v);
-let mailDraft="",mailState=null;   // mailState: {to, tok, st: "wait" | "ok" | "err"}
+let mailDraft="",mailState=null;   // mailState: {to, tok, st: "wait" | "ok" | "err", why: the server's reason}
 const MAIL_INFO="Nous vous envoyons le lien de votre aperçu, puis un seul rappel une semaine plus tard si la quête n'est pas débloquée. Rien d'autre, et vous pouvez vous désinscrire en un clic.";
 function mailField(id,label){
   const input=h("input",{type:"email",id,name:"email",maxlength:"254",autocomplete:"email",inputmode:"email",autocapitalize:"off",spellcheck:"false",placeholder:"Ex. : prenom@exemple.fr",value:mailDraft});
@@ -2234,9 +2234,9 @@ function mailOk(){const i=MAIL&&document.getElementById("mail-to");if(!i)return 
 function mailAfterPreview(){if(MAIL&&PAID&&S.token&&mailDraft&&mailValid(mailDraft))mailSend(mailDraft);}
 async function mailSend(to){
   const tok=S.token;mailState={to,tok,st:"wait"};mailShow();
-  let ok=false;
-  try{const r=await api("api/rappel",{email:to,apercu:tok,n:S.name,h:S.hero,k:S.kids,ref:ME?"moi":S.ref},20000);ok=!!(r&&r.ok);}catch(e){}
-  if(mailState&&mailState.tok===tok){mailState.st=ok?"ok":"err";mailShow();}
+  let ok=false,why="";
+  try{const r=await api("api/rappel",{email:to,apercu:tok,n:S.name,h:S.hero,k:S.kids,ref:ME?"moi":S.ref},20000);ok=!!(r&&r.ok);why=r&&r.reason||"";}catch(e){}
+  if(mailState&&mailState.tok===tok){mailState.st=ok?"ok":"err";mailState.why=why;mailShow();}
 }
 const mailMine=()=>mailState&&mailState.tok===S.token?mailState:null;
 function mailShow(){const b=document.getElementById("mail-area");if(!b)return;b.hidden=false;b.replaceChildren(...mailAreaKids());
@@ -2261,7 +2261,10 @@ function mailAreaKids(){
     mailDraft=v;mailSend(v);};
   btn.addEventListener("click",go2);
   f.input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go2();}});
-  return [m&&m.st==="err"&&h("p",{class:"mailfail",role:"alert",text:"L'e-mail n'a pas pu partir : gardez ce lien."}),
+  // the server's refusals: 429 limit of the address, 503 the day's cap or e-mails off, else (502) the send failed
+  const fail=!m||m.st!=="err"?"":m.why==="limit"?"Cette adresse a déjà reçu plusieurs aperçus aujourd'hui : réessayez demain, ou gardez ce lien."
+    :m.why==="full"||m.why==="off"?"L'envoi par e-mail est momentanément indisponible : gardez ce lien.":"L'e-mail n'a pas pu partir : gardez ce lien.";
+  return [...(fail?[h("p",{class:"mailfail",role:"alert",text:fail})]:[]),
     h("div",{class:"mailform"},f.box,btn,
       // the former way, still there: an e-mail written by the parent's own mail app
       h("a",{class:"linkish",href:previewMail(),onclick:()=>hit("apercu-garde")},"Ou l'envoyer avec votre application e-mail"))];

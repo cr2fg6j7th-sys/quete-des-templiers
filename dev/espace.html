@@ -102,6 +102,34 @@ tfoot td{font-weight:700;border-top:2px solid var(--line)}
 #app{display:flex;flex-direction:column;gap:16px}
 .bar h2{margin-top:6px}
 [hidden]{display:none!important}
+/* e-mails of the preview (Brevo): folded, loaded on demand */
+.fold{padding:0;gap:0}
+.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;min-height:52px}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:-4px 4px 0 0;flex:none;transition:transform .15s}
+.fold[open]>summary::after{transform:rotate(-135deg);margin-top:4px}
+.fold>summary .note{margin-left:auto}
+.foldin{display:flex;flex-direction:column;gap:12px;padding:0 16px 16px;border-top:1px solid var(--line);padding-top:14px}
+.m3{grid-template-columns:repeat(3,minmax(0,1fr))}.m3 .tile:last-child{grid-column:auto}
+.m3 .tile b{font-size:1.6rem}
+.mlist{display:flex;flex-direction:column;gap:10px}
+.mi{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--card)}
+.mi.bad{border-left:4px solid var(--rose)}
+.mi.good{border-left:4px solid var(--ok)}
+.mi .top{display:flex;justify-content:space-between;align-items:baseline;gap:4px 10px;flex-wrap:wrap}
+.mi .addr{font-weight:700;word-break:break-all}
+.mi .when,.mi .raw,.mi .sub{font-size:.85rem;color:var(--muted)}
+.mi .raw{word-break:break-word}
+.mi .why{font-weight:700;color:var(--rose)}
+.mi .state{font-weight:700}
+.mi .state.good{color:var(--ok)}
+.mi .act{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:4px}
+.small{padding:9px 14px;font-size:.92rem}
+.res{font-size:.9rem}.res.ok{color:var(--ok);font-weight:700}.res.err{color:var(--rose);font-weight:700}
+.chip{display:inline-block;font-size:.75rem;border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--muted);margin-left:6px;vertical-align:1px}
+.warn{background:var(--rose-soft);color:var(--ink);border-radius:10px;padding:10px 12px}
+input[type=email]{font:inherit;font-family:var(--body);letter-spacing:0;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--stone);color:var(--ink);width:100%}
+.mform{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
 </style>
 </head>
 <body>
@@ -127,6 +155,29 @@ tfoot td{font-weight:700;border-top:2px solid var(--line)}
       </div>
     </div>
     <p class="note" id="mode"></p>
+
+    <details class="card fold" id="mails-box">
+      <summary><h2>E-mails</h2><span class="note">aperçus envoyés par Brevo</span></summary>
+      <div class="foldin">
+        <p class="note">Les e-mails de l'aperçu des 10 derniers jours. Brevo n'est interrogé que lorsque vous touchez « Charger les e-mails ».</p>
+        <button class="btn" type="button" id="m-load">Charger les e-mails</button>
+        <p class="note" id="m-msg" role="status"></p>
+        <div id="m-out" class="mlist" hidden>
+          <div class="tiles m3" id="m-sum"></div>
+          <p class="warn" id="m-brevo" role="alert" hidden></p>
+          <h3 id="m-err-t">En erreur</h3><div class="mlist" id="m-err"></div>
+          <h3 id="m-sent-t">Partis</h3><div class="mlist" id="m-sent"></div>
+          <h3 id="m-dem-t">Demandes en cours</h3><div class="mlist" id="m-dem"></div>
+        </div>
+        <form class="mform" id="m-manual" novalidate>
+          <label>Renvoyer l'aperçu à une adresse<input type="email" id="m-addr" autocomplete="off" autocapitalize="none" spellcheck="false" inputmode="email" placeholder="adresse@exemple.fr"></label>
+          <button class="btn ghost" type="submit" id="m-addr-go">Renvoyer l'aperçu</button>
+          <p class="note" id="m-addr-msg" role="status"></p>
+          <div class="mlist" id="m-choice"></div>
+          <p class="note">Seulement à une adresse qui a demandé l'aperçu ces 10 derniers jours et n'a ni payé ni annulé : elle reçoit le même e-mail, avec le même lien. Jamais à une adresse qui n'a rien demandé.</p>
+        </form>
+      </div>
+    </details>
 
     <div class="bar">
       <h2>Fréquentation du site</h2>
@@ -192,7 +243,7 @@ $("#login").addEventListener("submit",async e=>{
   catch(err){$("#msg").className="note err";$("#msg").textContent=err.message==="login"?"Identifiant ou code incorrect.":"Le serveur ne répond pas. Réessayez dans un instant.";}
   $("#go").disabled=false;
 });
-$("#logout").addEventListener("click",()=>{store.clear();creds=null;data=null;$("#app").hidden=true;$("#login").hidden=false;$("#code").value="";$("#msg").textContent="";});
+$("#logout").addEventListener("click",()=>{store.clear();creds=null;data=null;mdata=null;$("#m-out").hidden=true;$("#m-msg").textContent="";$("#m-addr").value="";$("#m-addr-msg").textContent="";$("#m-choice").replaceChildren();$("#m-load").textContent="Charger les e-mails";$("#app").hidden=true;$("#login").hidden=false;$("#code").value="";$("#msg").textContent="";});
 async function reload(){const b=$("#refresh");b.disabled=true;b.textContent="…";
   try{data=await load(creds);show();}catch(e){$("#stamp").textContent="Actualisation impossible, réessayez.";}b.disabled=false;b.textContent="Actualiser";}
 $("#refresh").addEventListener("click",reload);
@@ -368,6 +419,117 @@ function card(a){
     a.prefere?el("div",null,el("p",{class:"note",text:"Leur moment préféré"}),el("p",{class:"quote",text:a.prefere})):null,
     a.coince?el("div",null,el("p",{class:"note",text:"Ce qui a coincé"}),el("p",{class:"quote",text:a.coince})):null);
 }
+
+// ---- e-mails of the preview: the requests kept by the server, crossed with Brevo's log (loaded on demand) ----
+const MS={"rebond-definitif":"Adresse inexistante ou refusée","rebond-temporaire":"Boîte pleine ou serveur momentanément indisponible",rebond:"Message revenu (rebond)",
+  bloque:"Bloqué par Brevo",invalide:"Adresse invalide",erreur:"Erreur d'envoi chez Brevo",differe:"Envoi retardé : Brevo réessaie",spam:"Signalé comme indésirable par le destinataire",
+  delivre:"Délivré",parti:"Parti, en attente de livraison",desinscrit:"Désinscrit chez Brevo",autre:"État inconnu"};
+const MKIND={"rebond-definitif":"rebond définitif","rebond-temporaire":"rebond temporaire"};
+const GONE="Demande introuvable : le parent a payé, s'est désinscrit, ou la demande a plus de 10 jours.";
+let mdata=null;
+const hm=t=>new Date(t).toLocaleTimeString("fr-FR",{timeZone:"Europe/Paris",hour:"2-digit",minute:"2-digit"});
+const dshort=t=>new Date(t).toLocaleDateString("fr-FR",{timeZone:"Europe/Paris",weekday:"short",day:"numeric",month:"short"});
+async function post(path,body){
+  const r=await fetch(path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(Object.assign({id:creds.id,code:creds.code},body||{}))});
+  const j=await r.json().catch(()=>({}));
+  if(r.status===403&&j.reason==="login")throw new Error("login");
+  return Object.assign({status:r.status},j);
+}
+$("#m-load").addEventListener("click",async()=>{
+  const b=$("#m-load"),msg=$("#m-msg");b.disabled=true;msg.className="note";msg.textContent="Lecture du journal de Brevo…";
+  try{const j=await post("/api/espace/mails");
+    if(!j.ok)throw new Error("server");
+    if(!j.on){msg.textContent="L'envoi par e-mail n'est pas activé sur le site (secret BREVO_API_KEY absent).";$("#m-out").hidden=true;}
+    else{mdata=j;msg.textContent="Chargé à "+hm(Date.now())+".";mrender();}
+    b.textContent="Recharger";}
+  catch(e){msg.className="note err";msg.textContent=e.message==="login"?"Identifiant ou code refusé : reconnectez-vous.":"Le serveur ne répond pas. Réessayez dans un instant.";}
+  b.disabled=false;
+});
+// one resend: by request (rid) or by address (email); the answer is shown next to the button
+async function resend(body,btn,out){
+  btn.disabled=true;out.className="res";out.textContent="Envoi…";
+  let j;
+  try{j=await post("/api/espace/renvoi",body);}
+  catch(e){out.className="res err";out.textContent=e.message==="login"?"Identifiant ou code refusé : reconnectez-vous.":"Le serveur ne répond pas. Réessayez.";btn.disabled=false;return null;}
+  if(j.ok){out.className="res ok";out.textContent="✓ Aperçu renvoyé à "+j.to+" à "+hm(j.at)+(j.renvoisJour?" ("+j.renvoisJour+"/"+((mdata&&mdata.renvoiMax)||3)+" en 24 h)":"");
+    btn.textContent="Renvoyer encore";btn.disabled=j.renvoisJour>=((mdata&&mdata.renvoiMax)||3);}
+  else{out.className="res err";out.textContent=j.message||"Échec (code "+j.status+").";btn.disabled=["introuvable","limit","bad"].includes(j.reason);}
+  return j;
+}
+function resendBtn(rid,why){
+  const out=el("span",{class:"res"}),btn=el("button",{class:"btn small",type:"button",text:"Renvoyer l'aperçu"});
+  if(why){btn.disabled=true;out.className="res note";out.textContent=why;}
+  else btn.addEventListener("click",()=>resend({rid},btn,out));
+  return el("div",{class:"act"},btn,out);
+}
+const demOf=rid=>rid&&mdata.demandes.find(d=>d.rid===rid);
+// why a request cannot be sent again (or "")
+function blocked(m,d){
+  if(m&&m.spam)return "Le destinataire a signalé le message comme indésirable ou s'est désinscrit : pas de renvoi.";
+  if(!d)return GONE;
+  if(d.envoiEnCours)return "Le rappel de cette demande est en cours d'envoi.";
+  if(d.renvoisJour>=mdata.renvoiMax)return "Déjà "+mdata.renvoiMax+" renvois en 24 heures pour cette demande.";
+  return "";
+}
+const lastResend=d=>d&&d.last?el("p",{class:"sub",text:"Renvoyé "+dshort(d.last.at)+" à "+hm(d.last.at)+(d.last.ok?" : parti":" : échec"+(d.last.status?" (code "+d.last.status+")":""))+(d.renvois>1?" · "+d.renvois+" renvois":"")}):null;
+const rawOf=m=>"Brevo : « "+m.raw+" »"+(m.reason?" · "+m.reason:"");
+function mrender(){
+  const j=mdata,now=j.now||Date.now(),week=now-7*864e5,b=j.brevo||{},msgs=b.ok?b.messages:[];
+  $("#m-out").hidden=false;
+  // the failed first sends (Brevo refused at once: no message in its log)
+  const failed=j.demandes.filter(d=>d.st==="echec");
+  const recent=msgs.filter(m=>(m.at||now)>=week);
+  const nErr=recent.filter(m=>m.erreur).length+failed.filter(d=>d.created>=week).length;
+  $("#m-sum").replaceChildren(...[["Partis",b.ok?recent.length:null],["Délivrés",b.ok?recent.filter(m=>m.state==="delivre").length:null],["En erreur",nErr]].map(([k,v])=>
+    el("div",{class:"tile"},el("span",{class:"k",text:k}),el("b",{text:v==null?"—":nf.format(v)}),el("span",{class:"d",text:v==null?"Brevo muet":"7 jours"}))));
+  const w=$("#m-brevo");
+  w.hidden=!!b.ok&&!b.more;
+  w.textContent=b.ok?"Plus de 500 événements chez Brevo : seuls les plus récents sont affichés."
+    :b.format?"Brevo a répondu dans un format inattendu ("+(b.message||"?")+") : le journal des envois ne peut pas être lu. Les demandes en cours restent ci-dessous."
+    :"Brevo n'a pas répondu ("+(b.status?"code "+b.status:b.message||"pas de réponse")+")"+(b.status&&b.message?" : "+b.message:"")+". Le journal des envois n'est pas disponible ; les demandes en cours restent ci-dessous.";
+  // 1. in error, newest first
+  const errs=[...msgs.filter(m=>m.erreur).map(m=>({at:m.at,m})),...failed.map(d=>({at:d.created,d}))].sort((x,y)=>y.at-x.at);
+  $("#m-err-t").textContent="En erreur ("+errs.length+")";
+  $("#m-err").replaceChildren(...(errs.length?errs.map(({m,d})=>{
+    if(m){const dd=demOf(m.rid);
+      return el("article",{class:"mi bad"},el("div",{class:"top"},el("span",{class:"addr",text:m.email||"(adresse non donnée)"}),el("span",{class:"when",text:m.at?when(m.at):m.date})),
+        el("p",{class:"sub",text:m.subject||"(sans objet)"}),el("p",{class:"why",text:(MS[m.state]||m.state)+(MKIND[m.state]?" ("+MKIND[m.state]+")":"")}),
+        el("p",{class:"raw",text:rawOf(m)}),lastResend(dd),resendBtn(m.rid,blocked(m,dd)));}
+    return el("article",{class:"mi bad"},el("div",{class:"top"},el("span",{class:"addr",text:d.email}),el("span",{class:"when",text:when(d.created)})),
+      el("p",{class:"sub",text:"L'aperçu"+(d.name?" de la quête de "+d.name:"")+" (premier envoi)"}),el("p",{class:"why",text:"Refusé par Brevo au moment de l'envoi : rien n'est parti"}),
+      el("p",{class:"raw",text:"Brevo : "+[d.err&&d.err.status?"code "+d.err.status:"pas de réponse",d.err&&d.err.code,d.err&&d.err.message].filter(Boolean).join(" · ")}),
+      lastResend(d),resendBtn(d.rid,blocked(null,d)));
+  }):[el("p",{class:"empty",text:b.ok?"Aucun e-mail en erreur.":"Aucun échec d'envoi enregistré par le site."})]));
+  // 2. sent
+  const ok=msgs.filter(m=>!m.erreur);
+  $("#m-sent-t").textContent="Partis ("+ok.length+")";
+  $("#m-sent").replaceChildren(...(ok.length?ok.map(m=>el("article",{class:"mi"+(m.state==="delivre"?" good":"")},
+    el("div",{class:"top"},el("span",{class:"addr",text:m.email||"(adresse non donnée)"}),el("span",{class:"when",text:m.at?when(m.at):m.date})),
+    el("p",{class:"sub"},document.createTextNode(m.subject||"(sans objet)"),m.tag?el("span",{class:"chip",text:m.tag}):null),
+    el("p",{class:"state"+(m.state==="delivre"?" good":""),text:(m.state==="autre"?"État inconnu : « "+m.raw+" »":MS[m.state]||m.state)+(m.opened?" · ouvert":"")}))):
+    [el("p",{class:"empty",text:b.ok?"Aucun e-mail parti ces 10 derniers jours.":"Journal de Brevo indisponible."})]));
+  // 3. requests kept by the site
+  $("#m-dem-t").textContent="Demandes en cours ("+j.demandes.length+")";
+  $("#m-dem").replaceChildren(...(j.demandes.length?j.demandes.map(d=>{
+    const st=d.st==="echec"?"Premier envoi échoué":d.livraison?MS[d.livraison]||d.livraison:"Envoyé";
+    return el("article",{class:"mi"+(d.st==="echec"||["rebond-definitif","rebond-temporaire","rebond","bloque","invalide","erreur","differe"].includes(d.livraison)?" bad":"")},
+      el("div",{class:"top"},el("span",{class:"addr",text:d.email}),el("span",{class:"when",text:when(d.created)})),
+      el("p",{class:"sub",text:[d.name||"prénom non écrit",d.indoor?"à la maison":d.town||"commune inconnue"].join(" · ")}),
+      el("p",{class:"sub",text:"Rappel prévu le "+dshort(d.rappelLe)+(d.st==="echec"?" (ce sera son premier e-mail, s'il n'est pas renvoyé d'ici là)":"")}),
+      el("p",{class:"state"+(st==="Délivré"?" good":""),text:st}),lastResend(d));
+  }):[el("p",{class:"empty",text:"Aucune demande en cours."})]));
+}
+$("#m-manual").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const v=$("#m-addr").value.trim(),out=$("#m-addr-msg"),btn=$("#m-addr-go");
+  $("#m-choice").replaceChildren();
+  if(!v){out.className="res err";out.textContent="Indiquez une adresse e-mail.";return;}
+  const j=await resend({email:v},btn,out);
+  btn.textContent="Renvoyer l'aperçu";btn.disabled=false;
+  if(j&&j.reason==="plusieurs")$("#m-choice").replaceChildren(...j.demandes.map(d=>el("article",{class:"mi"},
+    el("div",{class:"top"},el("span",{class:"addr",text:d.email}),el("span",{class:"when",text:when(d.created)})),
+    el("p",{class:"sub",text:[d.name||"prénom non écrit",d.indoor?"à la maison":d.town||"commune inconnue"].join(" · ")}),resendBtn(d.rid,""))));
+});
 
 let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(data&&!$("#app").hidden)chart(dayList(period));},150);});
 (async()=>{const c=store.get();if(!c)return;
