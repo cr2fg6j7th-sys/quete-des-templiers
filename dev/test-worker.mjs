@@ -400,6 +400,25 @@ console.log("Adresses du site : tous les tests passent.");
     days = 7.6; await worker.scheduled({ scheduledTime: Date.now() }, eenv, { waitUntil() {} });
     assert.strictEqual(sent.length, n, "once only");
     kv.clear(); sent.length = 0; days = 0;
+
+    // a request written before the section « E-mails » (no st, mids, renvois, last; metadata { c, x, n }), as kept in
+    // production: listed, can be sent again, gets its ordinary reminder once
+    {
+      const t = (await call("/api/preview", { indoor: true }))[1].token;
+      assert.strictEqual((await call("/api/rappel", { email: "ancien@exemple.fr", apercu: t, n: "Léo" }, eenv))[0], 200);
+      const key = [...kv.keys()].find(k => k.startsWith("rappel:")), rec = JSON.parse(kv.get(key).v), meta = kv.get(key).meta;
+      for (const f of ["st", "err", "mids", "renvois", "last"]) delete rec[f];
+      assert.deepStrictEqual(Object.keys(rec).sort(), ["created", "count", "email", "hero", "indoor", "kids", "link", "minutes", "name", "ref", "town", "walkM"].sort(), "the former record's fields");
+      kv.set(key, { v: JSON.stringify(rec), meta: { c: meta.c, x: meta.x, n: 0 } });
+      j = await mails();
+      assert.ok(j.demandes.length === 1 && j.demandes[0].st === "envoye" && j.demandes[0].renvois === 0 && j.demandes[0].err === null, "former record listed: " + JSON.stringify(j.demandes));
+      sent.length = 0;
+      assert.strictEqual((await call("/api/espace/renvoi", Object.assign({ rid: key.slice(7) }, login), eenv))[0], 200, "former record: sent again");
+      days = 7.05; await worker.scheduled({ scheduledTime: Date.now() }, eenv, { waitUntil() {} });
+      days = 7.6; await worker.scheduled({ scheduledTime: Date.now() }, eenv, { waitUntil() {} });
+      assert.ok(sent.length === 2 && / vous attend$/.test(sent[1].body.subject) && !kv.has(key), "former record: one ordinary reminder");
+      kv.clear(); sent.length = 0; days = 0;
+    }
   }
   assert.ok(allLogs.length > 20 && !allLogs.some(l => /exemple\.fr|@exemple/i.test(l)), "no address in the logs: " + allLogs.filter(l => /exemple/.test(l)).join(" | "));
   globalThis.fetch = realFetch; Date.now = realNow; console.log = realLog;
