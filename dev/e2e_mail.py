@@ -88,6 +88,9 @@ def pay(token):
 
 async def main():
     subprocess.run([sys.executable, str(ROOT / "dev" / "build.py"), "--mail"], check=True)
+    priv = (ROOT / "site" / "legal" / "confidentialite.html").read_text(encoding="utf-8")
+    check("tant que votre demande est enregistrée, nous pouvons vous renvoyer le même message" in priv and "ou vous désinscrivez auprès de Brevo" in priv,
+          "confidentialité (--mail) : le renvoi depuis l'espace décrit comme le code le permet")
     (ROOT / "dist").mkdir(exist_ok=True)
     (ROOT / "dist" / "osm-fixture.json").write_text(json.dumps(fixture), encoding="utf-8")
     seq = "".join("\x1e" + json.dumps({"type": "Feature", "geometry": {"type": "Point", "coordinates": [e["lon"], e["lat"]]},
