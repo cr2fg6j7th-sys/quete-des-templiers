@@ -24,7 +24,7 @@ reels/
 
 ## Règles absolues
 
-1. **Promesses** : uniquement celles de `reels/faits-produit.md`. Jamais de prix chiffré, d'avis, de nombre de clients, de note, de récompense ni de fonctionnalité absente du fichier. Si le sujet demande une promesse non listée (ou marquée ⚠️ dans la banque), **arrête-toi et pose la question** au lieu d'inventer.
+1. **Promesses** : uniquement celles de `reels/faits-produit.md`. Seul prix chiffré autorisé : 24,90 € pour tout le groupe. Jamais d'avis, de nombre de clients, de note, de récompense ni de fonctionnalité absente du fichier. Si le sujet demande une promesse non listée (ou marquée ⚠️ dans la banque), **arrête-toi et pose la question** au lieu d'inventer.
 2. **Lignes de titre ≤ 22 caractères** (espaces et ponctuation compris). Le titre seul doit faire comprendre la scène sans le son.
 3. **Zones protégées** (Instagram Reels, TikTok, Story) : rien d'important au-dessus de y≈130, rien sous y≈1480, rien dans la colonne de boutons x>940 entre y≈1000 et 1750 ; stickers dans x 60→940. Le moteur le vérifie et refuse de rendre en cas d'erreur : corrige le script plutôt que d'utiliser `--force`.
 4. **Ne jamais publier ni programmer** sans accord explicite de l'utilisateur.
@@ -91,5 +91,5 @@ Ton : chaleureux, complice, un peu d'humour, vouvoiement, phrases courtes, 2-3 e
 
 ### 7. Historique et rendu à l'utilisateur
 - Ajoute une ligne **en haut** du tableau de `reels/historique.md` (date, dossier, sujet + n°, accroche, mot-clé principal, secondaires, « non » pour publié).
-- Réponds avec : le chemin de `reel.mp4`, la planche de contrôle, la légende Instagram et la légende TikTok prêtes à copier (blocs de code), le commentaire épinglé, le texte de couverture, et toute question ouverte (promesse à confirmer, etc.).
+- Réponds de façon **concise** (pas de récapitulatif détaillé du travail) avec : le chemin de `reel.mp4`, la planche de contrôle, la légende Instagram et la légende TikTok prêtes à copier (blocs de code), le commentaire épinglé, le texte de couverture, et toute question ouverte (promesse à confirmer, etc.).
 - Publication/programmation : **seulement si l'utilisateur le demande explicitement**. Alors, si Metricool est connecté : meilleur créneau avec `getBestTimeToPostByNetwork`, propose-le, puis `createScheduledPost` après son accord.
