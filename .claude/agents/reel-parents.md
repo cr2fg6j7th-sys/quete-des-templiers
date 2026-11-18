@@ -80,7 +80,7 @@ Le moteur sort une vidéo 1080×1920, 30 i/s, H.264 (`-preset veryfast -crf 18 -
 ```
 ffmpeg -v error -y -i reel.mp4 -vf "fps=1,scale=270:-1,tile=8x3" -frames:v 1 planche.jpg
 ```
-Regarde `planche.jpg` (Read) et au besoin 2-3 images en pleine résolution (`--apercu`). Vérifie : textes non coupés et lisibles, aucune ligne trop longue, rien dans les zones protégées, compte à rebours cohérent (jusqu'à 1 s avant la solution), stickers apparus puis barrés, pas d'image vide ni floue, bouton CTA qui ne touche pas le titre. Compare à `reels/reference/planche-reference.jpg` (même rythme, mêmes tailles de texte, mêmes emplacements). Corrige et re-rends si besoin.
+Regarde `planche.jpg` (Read) et au besoin 2-3 images en pleine résolution (`--apercu`). Vérifie : textes non coupés et lisibles, aucune ligne trop longue, rien dans les zones protégées, compte à rebours cohérent (jusqu'à 1 s avant la solution), stickers apparus puis barrés, pas d'image vide ni floue, bouton CTA qui ne touche pas le titre. Compare à `reels/reference/planche-reference-validee.jpg`, la vidéo validée par Nathan (même rythme, mêmes tailles de texte, mêmes emplacements, CTA sur chaque slide). Corrige et re-rends si besoin.
 
 ### 6. Description SEO → `description.md`
 En tête : **mot-clé principal + 3 secondaires**, promesses utilisées. Puis :

@@ -12,3 +12,4 @@
 2. **Musique de fond différente de celle du site** : par défaut `reels/musique/aventure.mp3` (composée par `musique.py`). Ne jamais utiliser `audio/musique/accueil.mp3`. Bruitages toujours présents.
 3. **Prix** : 24,90 € pour tout le groupe, autant d'enfants qu'on veut (voir `faits-produit.md`).
 4. **Réponses concises** : comptes rendus courts, sans récapitulatif détaillé.
+5. **Vidéo de référence validée par Nathan (18/11/2026)** : `reference/reference-validee_il-pleut.mp4` (script : `reference/reference-validee_il-pleut.script.json`, planche : `reference/planche-reference-validee.jpg`). Rendu, rythme, CTA, musique et bruitages « parfaits » : chaque nouveau Reel doit avoir le même niveau et la même structure ; ne changer que le sujet, les textes et les images. Comparer la planche de chaque nouvelle vidéo à cette planche.
