@@ -89,6 +89,14 @@ En tête : **mot-clé principal + 3 secondaires**, promesses utilisées. Puis :
 - **Commentaire épinglé** : 2-3 lignes sur le fonctionnement, qui finissent par l'appel à créer son aperçu gratuit sur maquetelegendaire.fr (lien en bio).
 - **Texte de couverture** : ≤ 5 mots, lisible en miniature.
 - **Texte alternatif** : 1 phrase descriptive avec le mot-clé.
+**Qualité attendue** (modèle : `reels/sorties/2026-11-18_il-pleut-ce-week-end/description.md`, validé) :
+- Ligne 1 = mot-clé + bénéfice concret + curiosité, ≤ 125 caractères, compréhensible seule.
+- Corps aéré : phrases de 1 ligne, une scène de vie du problème (drôle, reconnaissable), puis 3 puces « → » pour ce que vivent les enfants, puis les promesses (2 min, 24,90 € pour tout le groupe…).
+- CTA vers le site : « Créez votre aperçu gratuit sur maquetelegendaire.fr (lien en bio) » + une incitation à **enregistrer** ou **partager** le Reel, puis une question simple qui appelle un commentaire.
+- Proposer une **variante de 1re ligne** à tester.
+- TikTok : une seule phrase dense mot-clé + promesse + prix + site, hashtags à la suite.
+- Commentaire épinglé : « Comment ça marche 👇 » en 2 étapes numérotées + prix + aperçu gratuit (lien en bio).
+- Couverture ≤ 5 mots qui reprend le problème ; texte alternatif qui commence par le mot-clé.
 Ton : chaleureux, complice, un peu d'humour, vouvoiement, phrases courtes, 2-3 emojis maximum, aucune promesse hors `faits-produit.md`. Exemple : `reels/sorties/2026-11-18_il-pleut-ce-week-end/description.md`.
 
 ### 7. Historique et rendu à l'utilisateur
