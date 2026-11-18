@@ -31,7 +31,7 @@ Activité enfant pluie : une chasse au trésor de chevaliers à la maison, prêt
 
 **Mots-clés à dire ou écrire à l'écran (recherche TikTok)** : « activité enfant pluie », « que faire quand il pleut avec les enfants », « chasse au trésor à la maison » (déjà à l'écran : « Il pleut ce week-end ? », « Une chasse au trésor à la maison »).
 
-## Commentaire épinglé (« Détails en commentaire »)
+## Commentaire épinglé (renvoie vers le site)
 
 ```
 Comment ça marche : sur maquetelegendaire.fr, vous créez la quête en 2 minutes. Vos chevaliers de 7 à 10 ans suivent les énigmes et les indices du Grand Maître jusqu'au mot secret et au trésor final, même à la maison quand il pleut. Rien à envoyer, et l'aperçu est gratuit 👉 maquetelegendaire.fr

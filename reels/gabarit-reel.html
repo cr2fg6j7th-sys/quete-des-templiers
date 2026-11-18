@@ -84,7 +84,7 @@ const scenes = DATA.scenes.map((s, i) => {
   if (s.badge) h += `<div class="c badge" data-cle data-ligne>${esc(s.badge)}</div>`;
   else if (s.surtitre) h += `<div class="c sur${i === iSolution ? " fort" : ""}" data-cle data-ligne>${esc(s.surtitre)}</div>`;
   h += `<div class="c l1" data-cle data-ligne data-titre>${esc(s.l1 || "")}</div><div class="c l2" data-cle data-ligne data-titre>${esc(s.l2 || "")}</div>`;
-  if (s.type === "cta") h += `<div class="c bouton" data-cle data-ligne>${esc(s.bouton || "CRÉER MON APERÇU GRATUIT")}</div><div class="c sous" data-cle data-ligne>${esc(s.sous_bouton || "Détails en commentaire")}</div>`;
+  if (s.type === "cta") h += `<div class="c bouton" data-cle data-ligne>${esc(s.bouton || "CRÉER MON APERÇU GRATUIT")}</div><div class="c sous" data-cle data-ligne>${esc(s.sous_bouton || "Détails sur notre site · lien en bio")}</div>`;
   h += `<div class="carte"><img src="${s.image}"></div>`;
   (s.stickers || []).forEach((st, k) => {
     const o = typeof st === "string" ? {texte: st} : st;

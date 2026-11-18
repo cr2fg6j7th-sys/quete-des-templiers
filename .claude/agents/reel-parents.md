@@ -50,7 +50,7 @@ Crée `reels/sorties/AAAA-MM-JJ_<slug>/script.json` (date du jour). Minutage mes
 | 3 | `solution` | 7-11 s | `surtitre` « LA SOLUTION », titre « Une chasse au trésor / dans votre ville. » (ou variante), `pastille` |
 | 4 | `benefice` | 11-14,5 s | réponse directe au problème (ex. surtitre « PAS DE SALLE À LOUER ») |
 | 5 | `benefice` | 14,5-18 s | émotion (« Énigmes, trésor, / et des rires partagés. ») |
-| 6 | `cta` | 18-22 s | `surtitre` « MAQUETELEGENDAIRE.FR », titre 2 lignes, `bouton` « CRÉER MON APERÇU GRATUIT », `sous_bouton` « Détails en commentaire » |
+| 6 | `cta` | 18-22 s | `surtitre` « MAQUETELEGENDAIRE.FR », titre 2 lignes, `bouton` « CRÉER MON APERÇU GRATUIT », `sous_bouton` « Détails sur notre site · lien en bio » (jamais « Détails en commentaire ») |
 
 Champs d'une scène : `type`, `debut`, `fin`, `badge` (scène 1) ou `surtitre` (majuscules, ≤ ~34 caractères), `l1` (serif marine), `l2` (serif italique bordeaux), `image` (`img/sN.jpg`), `prompt` (anglais, sans le préfixe de style), et selon le cas `stickers` (liste de textes courts ≤ ~18 caractères, ou objets `{"texte","x","y","rot"}` ; placement automatique sinon), `barrer` (`false` pour ne pas barrer), `barrer_a` (instant en s ; par défaut fin−0,85 s), `pastille` (majuscules, ≤ ~28 caractères), `bouton`, `sous_bouton`, `cta` (**obligatoire** sur les scènes solution et bénéfice : CTA de rétention sous l'image, voir `consignes.md`). En tête : `titre`, `sujet`, `promesses` (identifiants de `faits-produit.md`), `musique` ("defaut").
 
@@ -86,7 +86,7 @@ Regarde `planche.jpg` (Read) et au besoin 2-3 images en pleine résolution (`--a
 En tête : **mot-clé principal + 3 secondaires**, promesses utilisées. Puis :
 - **Instagram** (≤ 2 200 caractères, idéalement 400-800) : **ligne 1 ≤ 125 caractères** commençant par le mot-clé principal (« Idée d'anniversaire enfant pas chère : … ») ; 2-4 phrases courtes problème → solution → bénéfice avec 2-3 mots-clés secondaires placés naturellement (idée sortie enfant, activité enfant pluie, chasse au trésor enfant, jeu de piste, anniversaire 7/8/10 ans, activité famille Alsace, Obernai, Rosheim…) ; CTA « Créez votre aperçu gratuit → lien en bio » ; une question qui appelle le commentaire ; **3 à 5 hashtags** en fin (1 large, 2-3 de niche, 1 local).
 - **TikTok** (~150-300 caractères) : mot-clé principal dans la 1re phrase, accroche + CTA + 3-5 hashtags ; liste des **mots-clés à dire ou à écrire à l'écran**.
-- **Commentaire épinglé** : 2-3 lignes sur le fonctionnement + maquetelegendaire.fr.
+- **Commentaire épinglé** : 2-3 lignes sur le fonctionnement, qui finissent par l'appel à créer son aperçu gratuit sur maquetelegendaire.fr (lien en bio).
 - **Texte de couverture** : ≤ 5 mots, lisible en miniature.
 - **Texte alternatif** : 1 phrase descriptive avec le mot-clé.
 Ton : chaleureux, complice, un peu d'humour, vouvoiement, phrases courtes, 2-3 emojis maximum, aucune promesse hors `faits-produit.md`. Exemple : `reels/sorties/2026-11-18_il-pleut-ce-week-end/description.md`.
