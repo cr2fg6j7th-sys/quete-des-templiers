@@ -70,6 +70,7 @@ def main():
         page.goto(tmp_html.as_uri())
         page.evaluate("document.fonts.ready")
         page.wait_for_function("[...document.images].every(i => i.complete && i.naturalWidth > 0)")
+        page.evaluate("ajuster()")
 
         # contrôle des zones protégées au milieu (et juste après l'apparition des stickers) de chaque scène
         problemes = []

@@ -14,11 +14,11 @@ reels/
   render_reel_probleme.py   moteur de rendu (Playwright + ffmpeg) — contrôle aussi les zones protégées
   gabarit-reel.html         gabarit animé (DA) piloté par le moteur ; ne le modifier que pour corriger la DA
   generer_image.py          illustrations (Hugging Face d'abord, fal.ai en secours)
-  fonts/                    Playfair Display + Montserrat (OFL)
+  fonts/                    DejaVu Serif Bold + DejaVu Sans Bold (polices de la référence)
   faits-produit.md          SEULES promesses autorisées
   banque-sujets.md          problèmes de parents + accroches + stickers + mots-clés
   historique.md             vidéos déjà faites (anti-répétition)
-  reference/                vidéo de référence + images de style
+  reference/                vidéo de référence (Ma_Quete_Legendaire_Anniversaire_Petit_Prix.mp4) + planche
   sorties/AAAA-MM-JJ_<slug>/  script.json, img/, reel.mp4, planche.jpg, description.md
 ```
 
@@ -39,13 +39,13 @@ reels/
 - Évite de réutiliser une accroche déjà présente dans l'historique.
 
 ### 2. Écrire le script
-Crée `reels/sorties/AAAA-MM-JJ_<slug>/script.json` (date du jour). Structure type ≈ 22 s, 6 scènes contiguës (la `fin` de l'une = le `debut` de la suivante), durée totale 20-25 s :
+Crée `reels/sorties/AAAA-MM-JJ_<slug>/script.json` (date du jour). Minutage mesuré sur la vidéo de référence (22 s), 6 scènes contiguës (la `fin` de l'une = le `debut` de la suivante), durée totale 20-25 s :
 
 | # | type | temps | contenu |
 |---|---|---|---|
-| 1 | `probleme` | 0-4 s | `badge` « PARENTS, REGARDEZ JUSQU'À LA FIN » + question qui pique ; image du parent face au problème |
-| 2 | `probleme` | 4-7,5 s | `surtitre` « AVEC… » + titre de l'engrenage ; 2-4 `stickers` qui s'empilent puis sont barrés |
-| 3 | `solution` | 7,5-11 s | `surtitre` « LA SOLUTION », titre « Une chasse au trésor / dans votre ville. » (ou variante), `pastille` |
+| 1 | `probleme` | 0-3,5 s | `badge` « PARENTS, REGARDEZ JUSQU'À LA FIN » + question qui pique ; image du parent face au problème |
+| 2 | `probleme` | 3,5-7 s | `surtitre` « AVEC… » + titre de l'engrenage ; 4 `stickers` (2 rangées de 2) qui apparaissent toutes les 0,5 s puis sont barrés d'un trait par rangée |
+| 3 | `solution` | 7-11 s | `surtitre` « LA SOLUTION », titre « Une chasse au trésor / dans votre ville. » (ou variante), `pastille` |
 | 4 | `benefice` | 11-14,5 s | réponse directe au problème (ex. surtitre « PAS DE SALLE À LOUER ») |
 | 5 | `benefice` | 14,5-18 s | émotion (« Énigmes, trésor, / et des rires partagés. ») |
 | 6 | `cta` | 18-22 s | `surtitre` « MAQUETELEGENDAIRE.FR », titre 2 lignes, `bouton` « CRÉER MON APERÇU GRATUIT », `sous_bouton` « Détails en commentaire » |
@@ -78,7 +78,7 @@ Musique : facultative. Sans fichier fourni, laisse la piste muette et rappelle q
 ```
 ffmpeg -v error -y -i reel.mp4 -vf "fps=1,scale=270:-1,tile=8x3" -frames:v 1 planche.jpg
 ```
-Regarde `planche.jpg` (Read) et au besoin 2-3 images en pleine résolution (`--apercu`). Vérifie : textes non coupés et lisibles, aucune ligne trop longue, rien dans les zones protégées, compte à rebours cohérent (jusqu'à 1 s avant la solution), stickers apparus puis barrés, pas d'image vide ni floue, bouton CTA qui ne touche pas le titre. Compare à `reels/reference/` si la vidéo de référence y est. Corrige et re-rends si besoin.
+Regarde `planche.jpg` (Read) et au besoin 2-3 images en pleine résolution (`--apercu`). Vérifie : textes non coupés et lisibles, aucune ligne trop longue, rien dans les zones protégées, compte à rebours cohérent (jusqu'à 1 s avant la solution), stickers apparus puis barrés, pas d'image vide ni floue, bouton CTA qui ne touche pas le titre. Compare à `reels/reference/planche-reference.jpg` (même rythme, mêmes tailles de texte, mêmes emplacements). Corrige et re-rends si besoin.
 
 ### 6. Description SEO → `description.md`
 En tête : **mot-clé principal + 3 secondaires**, promesses utilisées. Puis :
