@@ -7,7 +7,7 @@
     "pret-2-minutes",
     "apercu-gratuit"
   ],
-  "musique": null,
+  "musique": "defaut",
   "scenes": [
     {
       "type": "probleme",

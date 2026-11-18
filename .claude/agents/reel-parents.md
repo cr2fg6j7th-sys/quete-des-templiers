@@ -50,7 +50,7 @@ Crée `reels/sorties/AAAA-MM-JJ_<slug>/script.json` (date du jour). Minutage mes
 | 5 | `benefice` | 14,5-18 s | émotion (« Énigmes, trésor, / et des rires partagés. ») |
 | 6 | `cta` | 18-22 s | `surtitre` « MAQUETELEGENDAIRE.FR », titre 2 lignes, `bouton` « CRÉER MON APERÇU GRATUIT », `sous_bouton` « Détails en commentaire » |
 
-Champs d'une scène : `type`, `debut`, `fin`, `badge` (scène 1) ou `surtitre` (majuscules, ≤ ~34 caractères), `l1` (serif marine), `l2` (serif italique bordeaux), `image` (`img/sN.jpg`), `prompt` (anglais, sans le préfixe de style), et selon le cas `stickers` (liste de textes courts ≤ ~18 caractères, ou objets `{"texte","x","y","rot"}` ; placement automatique sinon), `barrer` (`false` pour ne pas barrer), `barrer_a` (instant en s ; par défaut fin−0,85 s), `pastille` (majuscules, ≤ ~28 caractères), `bouton`, `sous_bouton`. En tête : `titre`, `sujet`, `promesses` (identifiants de `faits-produit.md`), `musique` (`null` ou chemin d'un fichier audio libre de droits relatif au script).
+Champs d'une scène : `type`, `debut`, `fin`, `badge` (scène 1) ou `surtitre` (majuscules, ≤ ~34 caractères), `l1` (serif marine), `l2` (serif italique bordeaux), `image` (`img/sN.jpg`), `prompt` (anglais, sans le préfixe de style), et selon le cas `stickers` (liste de textes courts ≤ ~18 caractères, ou objets `{"texte","x","y","rot"}` ; placement automatique sinon), `barrer` (`false` pour ne pas barrer), `barrer_a` (instant en s ; par défaut fin−0,85 s), `pastille` (majuscules, ≤ ~28 caractères), `bouton`, `sous_bouton`. En tête : `titre`, `sujet`, `promesses` (identifiants de `faits-produit.md`), `musique` ("defaut").
 
 Le compte à rebours « ⏳ La solution arrive dans N s » et sa barre sont automatiques sur les scènes `probleme` ; la ligne « Chasses au trésor pour enfants » apparaît automatiquement à partir de la première scène non-problème.
 
@@ -71,8 +71,8 @@ cd reels/sorties/<dossier>
 python3 ../../render_reel_probleme.py script.json apercu/a.jpg --apercu 1,6.9,9.5,13,16,20.5   # images fixes pour régler vite
 python3 ../../render_reel_probleme.py script.json reel.mp4                                     # vidéo complète (~45 s)
 ```
-Le moteur sort une vidéo 1080×1920, 30 i/s, H.264 (`-preset veryfast -crf 18 -pix_fmt yuv420p -movflags +faststart`) avec piste AAC (musique du script ou piste muette). Supprime ensuite `apercu/`.
-Musique : facultative. Sans fichier fourni, laisse la piste muette et rappelle que l'on peut ajouter un son tendance dans l'appli. (Avec un accès Hugging Face, on peut générer une piste MusicGen « joyful medieval adventure, lute and light percussion, uplifting » et la référencer dans `musique`.)
+Le moteur sort une vidéo 1080×1920, 30 i/s, H.264 (`-preset veryfast -crf 18 -pix_fmt yuv420p -movflags +faststart`), son AAC normalisé à −14 LUFS. Supprime ensuite `apercu/`.
+**Son** (`reels/sons.py`, automatique) : musique de fond du site (`audio/musique/accueil.mp3`, « musique »: "defaut") + bruitages calés sur l'animation (tic-tac du compte à rebours, whoosh aux changements de scène, pop des stickers, trait de feutre au barrage, éclat de clochettes à la solution, ding sur le bouton). Options du script : `musique` ("defaut", chemin d'un fichier libre de droits, ou `null`), `musique_debut` (s), `musique_db` (−12 par défaut), `bruitages` (`false` pour les couper). On peut toujours remplacer la musique par un son tendance dans l'appli.
 
 ### 5. Contrôle qualité
 ```

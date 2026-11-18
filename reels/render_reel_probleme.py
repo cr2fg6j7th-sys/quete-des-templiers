@@ -6,12 +6,14 @@
 - Vérifie le script (lignes ≤ 22 caractères, scènes contiguës, images présentes, durée 20-25 s).
 - Anime reels/gabarit-reel.html image par image dans Chromium (Playwright, 1080×1920, 30 i/s).
 - Contrôle les zones protégées (Instagram/TikTok) au milieu de chaque scène : s'arrête en cas d'erreur, sauf --force.
-- Assemble en H.264 + AAC avec ffmpeg (musique du script si « musique » est donné, sinon piste muette).
+- Bande son (sons.py) : musique de fond (« musique » : "defaut" = musique du site, un chemin, ou null) + bruitages
+  calés sur l'animation (« bruitages » : false pour les couper) ; assemble en H.264 + AAC avec ffmpeg.
 - --apercu : n'écrit que des images fixes aux instants donnés (pour régler vite), sans vidéo.
 """
 import argparse, json, math, subprocess, sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from sons import bande_son
 
 ICI = Path(__file__).resolve().parent
 FPS, W, H = 30, 1080, 1920
@@ -94,11 +96,9 @@ def main():
                 page.screenshot(path=str(f), type="jpeg", quality=92); print(f)
             nav.close(); tmp_html.unlink(missing_ok=True); return
 
-        musique = s.get("musique")
-        if musique:
-            musique = (script_path.parent / musique).resolve()
-        audio = (["-i", str(musique)] if musique else ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"])
-        afilt = (["-af", f"afade=t=in:d=0.4,afade=t=out:st={duree-1.2}:d=1.2,volume=0.9"] if musique else [])
+        audio_wav = sortie.with_suffix(".tmp.wav")
+        bande_son(s, duree, audio_wav, script_path.parent)
+        audio, afilt = ["-i", str(audio_wav)], ["-af", "loudnorm=I=-14:TP=-1.5:LRA=11", "-ar", "44100"]
         sortie.parent.mkdir(parents=True, exist_ok=True)
         tmp_mp4 = sortie.with_suffix(".tmp.mp4")
         ff = subprocess.Popen(
@@ -117,6 +117,7 @@ def main():
             sys.exit("ffmpeg a échoué")
         nav.close()
     tmp_mp4.replace(sortie)
+    audio_wav.unlink(missing_ok=True)
     tmp_html.unlink(missing_ok=True)
     print(f"Vidéo : {sortie} ({duree:.1f} s, {n} images)")
 

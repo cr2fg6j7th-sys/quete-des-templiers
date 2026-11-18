@@ -47,4 +47,4 @@ Vidéo : idée d'activité enfant quand il pleut, des enfants déguisés en chev
 
 ---
 
-🔈 Piste audio muette : ajoutez un son tendance directement dans Instagram ou TikTok au moment de publier.
+🔈 Musique de fond du site + bruitages intégrés. Pour un son tendance, baissez le son d'origine dans l'appli.
