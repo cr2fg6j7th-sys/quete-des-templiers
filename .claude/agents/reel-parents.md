@@ -15,6 +15,7 @@ reels/
   gabarit-reel.html         gabarit animé (DA) piloté par le moteur ; ne le modifier que pour corriger la DA
   generer_image.py          illustrations (Hugging Face d'abord, fal.ai en secours)
   fonts/                    DejaVu Serif Bold + DejaVu Sans Bold (polices de la référence)
+  consignes.md              préférences durables de Nathan (CTA sur chaque slide, musique, ton…)
   faits-produit.md          SEULES promesses autorisées
   banque-sujets.md          problèmes de parents + accroches + stickers + mots-clés
   historique.md             vidéos déjà faites (anti-répétition)
@@ -28,12 +29,13 @@ reels/
 2. **Lignes de titre ≤ 22 caractères** (espaces et ponctuation compris). Le titre seul doit faire comprendre la scène sans le son.
 3. **Zones protégées** (Instagram Reels, TikTok, Story) : rien d'important au-dessus de y≈130, rien sous y≈1480, rien dans la colonne de boutons x>940 entre y≈1000 et 1750 ; stickers dans x 60→940. Le moteur le vérifie et refuse de rendre en cas d'erreur : corrige le script plutôt que d'utiliser `--force`.
 4. **Ne jamais publier ni programmer** sans accord explicite de l'utilisateur.
-5. Images : style livre jeunesse, **aucun texte dans l'image**, aucun personnage ni marque existants.
+5. **Un CTA sur chaque slide** (rétention) et musique différente de celle du site : voir `reels/consignes.md`.
+6. Images : style livre jeunesse, **aucun texte dans l'image**, aucun personnage ni marque existants.
 
 ## Déroulé à chaque demande
 
 ### 1. Choisir le sujet
-- Lis `reels/faits-produit.md`, `reels/banque-sujets.md`, `reels/historique.md`.
+- Lis `reels/consignes.md` (à respecter en priorité), `reels/faits-produit.md`, `reels/banque-sujets.md`, `reels/historique.md`.
 - Sujet donné → prends-le (ou crée-le dans la banque s'il n'y est pas). Sinon, choisis **le sujet le moins utilisé récemment** dans l'historique et annonce-le en une ligne.
 - Facultatif : 1-2 recherches web (forums de parents, « idée activité enfant », tendances de saison) pour affiner l'angle ou trouver un nouveau problème ; ajoute alors le sujet à `banque-sujets.md` dans le même format.
 - Évite de réutiliser une accroche déjà présente dans l'historique.
@@ -50,7 +52,7 @@ Crée `reels/sorties/AAAA-MM-JJ_<slug>/script.json` (date du jour). Minutage mes
 | 5 | `benefice` | 14,5-18 s | émotion (« Énigmes, trésor, / et des rires partagés. ») |
 | 6 | `cta` | 18-22 s | `surtitre` « MAQUETELEGENDAIRE.FR », titre 2 lignes, `bouton` « CRÉER MON APERÇU GRATUIT », `sous_bouton` « Détails en commentaire » |
 
-Champs d'une scène : `type`, `debut`, `fin`, `badge` (scène 1) ou `surtitre` (majuscules, ≤ ~34 caractères), `l1` (serif marine), `l2` (serif italique bordeaux), `image` (`img/sN.jpg`), `prompt` (anglais, sans le préfixe de style), et selon le cas `stickers` (liste de textes courts ≤ ~18 caractères, ou objets `{"texte","x","y","rot"}` ; placement automatique sinon), `barrer` (`false` pour ne pas barrer), `barrer_a` (instant en s ; par défaut fin−0,85 s), `pastille` (majuscules, ≤ ~28 caractères), `bouton`, `sous_bouton`. En tête : `titre`, `sujet`, `promesses` (identifiants de `faits-produit.md`), `musique` ("defaut").
+Champs d'une scène : `type`, `debut`, `fin`, `badge` (scène 1) ou `surtitre` (majuscules, ≤ ~34 caractères), `l1` (serif marine), `l2` (serif italique bordeaux), `image` (`img/sN.jpg`), `prompt` (anglais, sans le préfixe de style), et selon le cas `stickers` (liste de textes courts ≤ ~18 caractères, ou objets `{"texte","x","y","rot"}` ; placement automatique sinon), `barrer` (`false` pour ne pas barrer), `barrer_a` (instant en s ; par défaut fin−0,85 s), `pastille` (majuscules, ≤ ~28 caractères), `bouton`, `sous_bouton`, `cta` (**obligatoire** sur les scènes solution et bénéfice : CTA de rétention sous l'image, voir `consignes.md`). En tête : `titre`, `sujet`, `promesses` (identifiants de `faits-produit.md`), `musique` ("defaut").
 
 Le compte à rebours « ⏳ La solution arrive dans N s » et sa barre sont automatiques sur les scènes `probleme` ; la ligne « Chasses au trésor pour enfants » apparaît automatiquement à partir de la première scène non-problème.
 
@@ -72,7 +74,7 @@ python3 ../../render_reel_probleme.py script.json apercu/a.jpg --apercu 1,6.9,9.
 python3 ../../render_reel_probleme.py script.json reel.mp4                                     # vidéo complète (~45 s)
 ```
 Le moteur sort une vidéo 1080×1920, 30 i/s, H.264 (`-preset veryfast -crf 18 -pix_fmt yuv420p -movflags +faststart`), son AAC normalisé à −14 LUFS. Supprime ensuite `apercu/`.
-**Son** (`reels/sons.py`, automatique) : musique de fond du site (`audio/musique/accueil.mp3`, « musique »: "defaut") + bruitages calés sur l'animation (tic-tac du compte à rebours, whoosh aux changements de scène, pop des stickers, trait de feutre au barrage, éclat de clochettes à la solution, ding sur le bouton). Options du script : `musique` ("defaut", chemin d'un fichier libre de droits, ou `null`), `musique_debut` (s), `musique_db` (−12 par défaut), `bruitages` (`false` pour les couper). On peut toujours remplacer la musique par un son tendance dans l'appli.
+**Son** (`reels/sons.py`, automatique) : musique de fond propre aux Reels (`reels/musique/aventure.mp3`, « musique »: "defaut" ; jamais celle du site) + bruitages calés sur l'animation (pop à l'apparition de chaque CTA de slide, tic-tac du compte à rebours, whoosh aux changements de scène, pop des stickers, trait de feutre au barrage, éclat de clochettes à la solution, ding sur le bouton). Options du script : `musique` ("defaut", chemin d'un fichier libre de droits, ou `null`), `musique_debut` (s), `musique_db` (−12 par défaut), `bruitages` (`false` pour les couper). On peut toujours remplacer la musique par un son tendance dans l'appli.
 
 ### 5. Contrôle qualité
 ```

@@ -44,7 +44,8 @@
       "l2": "à la maison.",
       "pastille": "MÊME QUAND IL PLEUT",
       "image": "img/s3.jpg",
-      "prompt": "Three children aged 7 to 10 dressed as little knights with cardboard armor, golden paper crowns and a helmet with a red plume, kneeling on a living room rug around an old treasure map, one holding a big magnifying glass, rain softly falling outside the window."
+      "prompt": "Three children aged 7 to 10 dressed as little knights with cardboard armor, golden paper crowns and a helmet with a red plume, kneeling on a living room rug around an old treasure map, one holding a big magnifying glass, rain softly falling outside the window.",
+      "cta": "📌 Enregistrez-la pour **ce week-end**"
     },
     {
       "type": "benefice",
@@ -54,7 +55,8 @@
       "l1": "Le salon devient",
       "l2": "le terrain de jeu.",
       "image": "img/s4.jpg",
-      "prompt": "Children aged 7 to 10 dressed as knights search for clues inside a cozy house: one looks under the sofa cushions with a magnifying glass, another peeks behind a bookshelf, a third reads a rolled parchment clue, a parent smiles with a mug of tea."
+      "prompt": "Children aged 7 to 10 dressed as knights search for clues inside a cozy house: one looks under the sofa cushions with a magnifying glass, another peeks behind a bookshelf, a third reads a rolled parchment clue, a parent smiles with a mug of tea.",
+      "cta": "👀 Attendez de voir **le trésor**…"
     },
     {
       "type": "benefice",
@@ -64,7 +66,8 @@
       "l1": "Énigmes, trésor,",
       "l2": "et des rires partagés.",
       "image": "img/s5.jpg",
-      "prompt": "Laughing children aged 7 to 10 dressed as knights with crowns and a red plumed helmet open a small wooden treasure chest glowing with golden light in a cozy living room, parents laughing on the sofa behind them, rainy window."
+      "prompt": "Laughing children aged 7 to 10 dressed as knights with crowns and a red plumed helmet open a small wooden treasure chest glowing with golden light in a cozy living room, parents laughing on the sofa behind them, rainy window.",
+      "cta": "💬 Votre plan B ? **En commentaire**"
     },
     {
       "type": "cta",

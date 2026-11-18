@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bande son des Reels : bruitages synthétisés ici (libres, ne doivent rien à personne) + musique de fond du site.
+"""Bande son des Reels : bruitages synthétisés ici (libres, ne doivent rien à personne) + musique de fond propre aux Reels.
 
     python3 reels/sons.py            # (re)crée reels/sons/*.wav
     (le moteur appelle aussi bande_son() pour mixer chaque Reel)
@@ -8,7 +8,7 @@ Bruitages placés automatiquement d'après le minutage du gabarit (gabarit-reel.
   whoosh  changement de scène          pop     apparition d'un sticker
   trait   sticker barré                tic/toc compte à rebours (chaque seconde)
   eclat   arrivée de la solution       ding    bouton du CTA
-Musique : audio/musique/accueil.mp3 (musique du site), en boucle, sous les bruitages, fondu final.
+Musique : reels/musique/aventure.mp3 (composée par musique.py, différente de celle du site), en boucle, sous les bruitages, fondu final.
 """
 import math, subprocess, wave
 from pathlib import Path
@@ -16,7 +16,7 @@ import numpy as np
 
 ICI = Path(__file__).resolve().parent
 SONS = ICI / "sons"
-MUSIQUE_DEFAUT = ICI.parent / "audio/musique/accueil.mp3"
+MUSIQUE_DEFAUT = ICI / "musique/aventure.mp3"      # composée par musique.py (différente de celle du site)
 SR = 44100
 rng = np.random.default_rng(11)
 
@@ -119,6 +119,9 @@ def evenements(script):
     cta = next((s for s in sc if s["type"] == "cta"), None)
     if cta:
         ev.append((cta["debut"] + 0.3, "ding", 0.35))
+    for s in sc:                                               # CTA de chaque slide
+        if s.get("cta") and s["type"] != "cta":
+            ev.append((s["debut"] + 0.9, "pop", 0.3))
     return ev
 
 
@@ -131,7 +134,7 @@ def bande_son(script, duree, sortie: Path, base: Path):
     m = script.get("musique", "defaut")
     if m:
         p = MUSIQUE_DEFAUT if m == "defaut" else (base / m).resolve()
-        mus = lire_audio(p, duree, script.get("musique_debut", 1.8))[:n]
+        mus = lire_audio(p, duree, script.get("musique_debut", 0))[:n]
         mus = np.pad(mus, (0, n - len(mus)))
         tt = np.arange(n) / SR
         fondu = np.minimum(1, tt / 0.5) * np.clip((duree - tt) / 1.5, 0, 1)

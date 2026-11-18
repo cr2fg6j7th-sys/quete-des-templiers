@@ -35,6 +35,8 @@ def charger(script_path: Path):
         if not img.exists():
             err.append(f"scène {i+1} : image introuvable {img}")
         sc["image"] = img.as_uri()
+        if sc["type"] in ("solution", "benefice") and not sc.get("cta"):
+            err.append(f"scène {i+1} : CTA de slide manquant (champ « cta »)")
     if scenes[-1]["type"] != "cta":
         err.append("la dernière scène doit être de type « cta »")
     duree = scenes[-1]["fin"]
