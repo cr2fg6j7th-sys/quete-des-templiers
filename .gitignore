@@ -43,3 +43,7 @@ dev/video/telephone/ecrans/
 /demo-quete.jpg
 /fontaine-obernai*.jpg
 /accueil-defi-640.webp
+
+# reels « problème de parent » : fichiers temporaires du rendu
+reels/sorties/*/_reel.html
+reels/sorties/*/apercu/

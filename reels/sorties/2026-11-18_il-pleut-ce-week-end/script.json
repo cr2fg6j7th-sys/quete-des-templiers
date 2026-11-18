@@ -1,0 +1,60 @@
+{
+  "titre": "Il pleut ce week-end",
+  "sujet": "Il pleut / mauvais temps",
+  "promesses": ["mauvais-temps", "prix-par-groupe", "pret-2-minutes", "apercu-gratuit"],
+  "musique": null,
+  "scenes": [
+    {
+      "type": "probleme", "debut": 0, "fin": 4,
+      "badge": "PARENTS, REGARDEZ JUSQU'À LA FIN",
+      "l1": "Il pleut ce week-end ?",
+      "l2": "Ils tournent en rond.",
+      "image": "img/s1.jpg",
+      "prompt": "A tired but smiling French mother and father sit on a sofa in a cozy living room, looking at a big window streaked with heavy rain; two bored children aged 8 lie upside down on the armchair, a soggy umbrella dripping by the door, rain boots on the floor."
+    },
+    {
+      "type": "probleme", "debut": 4, "fin": 7.5,
+      "surtitre": "AVEC LA PLUIE QUI NE S'ARRÊTE PAS…",
+      "l1": "Écrans, disputes,",
+      "l2": "et « on s'ennuie ! »",
+      "stickers": ["Parc : annulé", "Écrans × 3 h", "« Je m'ennuie ! »"],
+      "image": "img/s2.jpg",
+      "prompt": "Inside a cozy French home on a rainy afternoon: a slightly overwhelmed father holds a phone while three bored children aged 7 to 10 pull his sleeves, toys scattered on the floor, rain on the window, a cat asleep."
+    },
+    {
+      "type": "solution", "debut": 7.5, "fin": 11,
+      "surtitre": "LA SOLUTION",
+      "l1": "Une chasse au trésor",
+      "l2": "à la maison.",
+      "pastille": "MÊME QUAND IL PLEUT",
+      "image": "img/s3.jpg",
+      "prompt": "Three children aged 7 to 10 dressed as little knights with cardboard armor, golden paper crowns and a helmet with a red plume, kneeling on a living room rug around an old treasure map, one holding a big magnifying glass, rain softly falling outside the window."
+    },
+    {
+      "type": "benefice", "debut": 11, "fin": 14.5,
+      "surtitre": "PRÊTE EN 2 MINUTES",
+      "l1": "Le salon devient",
+      "l2": "le terrain de jeu.",
+      "image": "img/s4.jpg",
+      "prompt": "Children aged 7 to 10 dressed as knights search for clues inside a cozy house: one looks under the sofa cushions with a magnifying glass, another peeks behind a bookshelf, a third reads a rolled parchment clue, a parent smiles with a mug of tea."
+    },
+    {
+      "type": "benefice", "debut": 14.5, "fin": 18,
+      "surtitre": "AUTANT D'ENFANTS QUE VOUS VOULEZ",
+      "l1": "Énigmes, trésor,",
+      "l2": "et des rires partagés.",
+      "image": "img/s5.jpg",
+      "prompt": "Laughing children aged 7 to 10 dressed as knights with crowns and a red plumed helmet open a small wooden treasure chest glowing with golden light in a cozy living room, parents laughing on the sofa behind them, rainy window."
+    },
+    {
+      "type": "cta", "debut": 18, "fin": 22,
+      "surtitre": "MAQUETELEGENDAIRE.FR",
+      "l1": "Il pleut ?",
+      "l2": "La quête continue.",
+      "bouton": "CRÉER MON APERÇU GRATUIT",
+      "sous_bouton": "Détails en commentaire",
+      "image": "img/s6.jpg",
+      "prompt": "A kind old wise man with a long white beard and a burgundy cloak knights a proud child aged 8 wearing a paper crown and cardboard armor, with a wooden sword, in a cozy home decorated with garlands, other children knights cheering, treasure chest open with golden coins."
+    }
+  ]
+}

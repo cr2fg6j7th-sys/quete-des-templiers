@@ -1,0 +1,157 @@
+<!doctype html>
+<!-- Gabarit du Reel « problème de parent → solution » (Ma Quête Légendaire).
+     Rempli et piloté image par image par render_reel_probleme.py : window.render(t) dessine l'instant t (en s).
+     Coordonnées sur 1080×1920 ; un « y » de la DA = centre vertical de l'élément. -->
+<html lang="fr"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:"Playfair";src:url("__FONTS__/PlayfairDisplay.woff2") format("woff2");font-weight:400 900;font-style:normal}
+@font-face{font-family:"Playfair";src:url("__FONTS__/PlayfairDisplay-Italic.woff2") format("woff2");font-weight:400 900;font-style:italic}
+@font-face{font-family:"Montserrat";src:url("__FONTS__/Montserrat.woff2") format("woff2");font-weight:100 900}
+:root{--bordeaux:#a33350;--bordeaux2:#97314c;--marine:#1f2a3d;--or:#9a6a2a;--filet:#c09e7c;--creme:#fdf8ef;--beige:#e3d3bd}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden}
+body{background:linear-gradient(180deg,#f6e6d9 0%,#efe6da 50%,#e5e9d8 100%);position:relative;font-family:"Montserrat",sans-serif;-webkit-font-smoothing:antialiased}
+#points{position:absolute;inset:0}
+.c{position:absolute;left:540px;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;line-height:1.15}
+#marque{top:150px;line-height:1;font-weight:800;font-size:34px;letter-spacing:.18em;color:var(--bordeaux);padding-left:.18em}
+#filet{top:198px;width:230px;height:3px;background:var(--filet);border-radius:2px}
+#accroche{top:234px;font-family:"Playfair";font-style:italic;font-weight:700;font-size:32px;color:var(--marine)}
+.scene{position:absolute;inset:0}
+.sur{top:308px;font-weight:800;font-size:28px;letter-spacing:.08em;color:var(--or)}
+.badge{top:308px;font-weight:800;font-size:26px;letter-spacing:.06em;color:#fff;background:var(--bordeaux);padding:12px 24px;border-radius:12px;box-shadow:0 6px 16px rgba(163,51,80,.25)}
+.l1,.l2{font-family:"Playfair";font-weight:700;font-size:66px;line-height:1.1}
+.l1{top:385px;color:var(--marine)}
+.l2{top:470px;color:var(--bordeaux2);font-style:italic}
+.carte{position:absolute;left:50px;top:575px;width:980px;height:755px;border-radius:24px;overflow:hidden;border:5px solid #fff;box-shadow:0 26px 50px rgba(120,70,40,.22),0 4px 12px rgba(120,70,40,.12);background:#efe3d3}
+.carte img{width:100%;height:100%;object-fit:cover;transform-origin:50% 50%}
+.cta .carte{top:705px;height:670px}
+.sticker{position:absolute;transform:translate(-50%,-50%);background:#fff;border:4px solid var(--bordeaux);color:var(--bordeaux);font-weight:800;font-size:34px;padding:10px 24px;border-radius:8px;white-space:nowrap;box-shadow:0 8px 18px rgba(80,30,30,.22)}
+.sticker .barre{position:absolute;left:-6%;top:50%;height:6px;background:var(--bordeaux);border-radius:3px;transform:translateY(-50%) rotate(-5deg);transform-origin:0 50%;width:0}
+.pastille{top:1400px;font-weight:800;font-size:24px;letter-spacing:.08em;color:#fff;background:var(--bordeaux);padding:16px 32px;border-radius:999px;box-shadow:0 8px 18px rgba(163,51,80,.22)}
+#rebours{top:1400px;font-weight:700;font-size:30px;color:var(--marine);background:var(--creme);border:2px solid var(--beige);padding:14px 34px;border-radius:999px}
+#rebours b{color:var(--bordeaux);font-weight:800}
+#rail{top:1458px;width:520px;height:8px;background:#e7dccb;border-radius:4px;overflow:hidden;transform:translate(-50%,-50%)}
+#rail i{display:block;height:100%;width:0;background:var(--bordeaux);border-radius:4px}
+.bouton{top:562px;font-weight:800;font-size:28px;letter-spacing:.05em;color:#fff;background:var(--marine);padding:18px 46px;border-radius:999px;box-shadow:0 10px 22px rgba(31,42,61,.28)}
+.sous{top:630px;font-weight:800;font-size:30px;color:var(--bordeaux)}
+</style></head>
+<body>
+<svg id="points" width="1080" height="1920"></svg>
+<div id="marque" class="c" data-cle>MA QUÊTE LÉGENDAIRE</div>
+<div id="filet" class="c"></div>
+<div id="accroche" class="c" data-cle>Chasses au trésor pour enfants</div>
+<div id="scenes"></div>
+<div id="rebours" class="c" data-cle>⏳ La solution arrive dans <b>3 s</b></div>
+<div id="rail" class="c"><i></i></div>
+<script>
+const DATA = __DATA__;
+const $ = (s, r = document) => r.querySelector(s);
+const ease = x => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const FONDU = 0.3;
+
+// fins points beiges épars (pseudo-aléatoire fixe : même fond à chaque rendu)
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+let pts = ""; for (let i = 0; i < 170; i++) pts += `<circle cx="${(rnd()*1080).toFixed(1)}" cy="${(rnd()*1920).toFixed(1)}" r="${(1.2+rnd()*2.2).toFixed(1)}" fill="#d8c3a8" opacity="${(.25+rnd()*.35).toFixed(2)}"/>`;
+$("#points").innerHTML = pts;
+
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+// positions automatiques des stickers (centres), toutes dans x 60→940 et hors colonne de droite
+const SLOTS = [[285, 700], [745, 770], [300, 930], [700, 1010], [330, 1170], [640, 1250]];
+const ROTS = [-5, 4, -4, 6, -6, 5];
+
+const scenes = DATA.scenes.map((s, i) => {
+  const el = document.createElement("div");
+  el.className = "scene " + s.type;
+  let h = "";
+  if (s.badge) h += `<div class="c badge" data-cle data-ligne>${esc(s.badge)}</div>`;
+  else if (s.surtitre) h += `<div class="c sur" data-cle data-ligne>${esc(s.surtitre)}</div>`;
+  h += `<div class="c l1" data-cle data-ligne>${esc(s.l1 || "")}</div><div class="c l2" data-cle data-ligne>${esc(s.l2 || "")}</div>`;
+  if (s.type === "cta") h += `<div class="c bouton" data-cle>${esc(s.bouton || "CRÉER MON APERÇU GRATUIT")}</div><div class="c sous" data-cle>${esc(s.sous_bouton || "Détails en commentaire")}</div>`;
+  h += `<div class="carte"><img src="${s.image}"></div>`;
+  (s.stickers || []).forEach((st, k) => {
+    const o = typeof st === "string" ? {texte: st} : st;
+    const [x, y] = o.x ? [o.x, o.y] : SLOTS[k % SLOTS.length];
+    h += `<div class="sticker" data-cle data-sticker style="left:${x}px;top:${y}px" data-rot="${o.rot ?? ROTS[k % ROTS.length]}">${esc(o.texte)}<span class="barre"></span></div>`;
+  });
+  if (s.pastille) h += `<div class="c pastille" data-cle>${esc(s.pastille)}</div>`;
+  el.innerHTML = h;
+  $("#scenes").appendChild(el);
+  return {s, el, i};
+});
+
+const fin = DATA.scenes[DATA.scenes.length - 1].fin;
+const debutSolution = (DATA.scenes.find(s => s.type !== "probleme") || {debut: fin}).debut;
+
+function monte(el, u, decal) {           // texte qui monte de 40 px avec un léger décalage
+  const p = ease((u - decal) / 0.5);
+  el.style.opacity = p;
+  el.style.transform = `translate(-50%, calc(-50% + ${(1 - p) * 40}px))`;
+}
+
+window.render = function (t) {
+  for (const {s, el, i} of scenes) {
+    const premier = i === 0, dernier = i === scenes.length - 1;
+    // fondu enchaîné centré sur la frontière : jamais d'image vide
+    const aIn = premier ? 1 : clamp((t - (s.debut - FONDU / 2)) / FONDU);
+    const aOut = dernier ? 1 : 1 - clamp((t - (s.fin - FONDU / 2)) / FONDU);
+    const a = Math.min(aIn, aOut);
+    el.style.display = a <= 0 ? "none" : "block";
+    if (a <= 0) continue;
+    el.style.opacity = a;
+    const u = t - s.debut + (premier ? 0.25 : 0);   // la toute première image n'est pas vide
+    const lignes = el.querySelectorAll("[data-ligne]");
+    lignes.forEach((l, k) => monte(l, u, k * 0.1));
+    const carte = $(".carte", el), pc = ease(u / 0.6);
+    carte.style.opacity = pc;
+    carte.style.transform = `translateY(${(1 - pc) * 70}px)`;
+    $("img", carte).style.transform = `scale(${1 + 0.03 * clamp((t - s.debut) / (s.fin - s.debut))})`;
+    // stickers : apparaissent un par un, puis barrés avant la solution
+    const sts = el.querySelectorAll("[data-sticker]"), n = sts.length;
+    const t0 = s.debut + 0.55, barre = s.barrer === false ? Infinity : (s.barrer_a ?? s.fin - 0.85);
+    const pas = n ? Math.min(0.6, (barre - 0.3 - t0) / n) : 0;
+    sts.forEach((st, k) => {
+      const v = (t - (t0 + k * pas)) / 0.35, rot = +st.dataset.rot;
+      const sc = v <= 0 ? 0 : v < 0.6 ? ease(v / 0.6) * 1.12 : 1.12 - 0.12 * ease((v - 0.6) / 0.4);
+      st.style.opacity = clamp(v * 3);
+      st.style.transform = `translate(-50%,-50%) rotate(${rot * clamp(v)}deg) scale(${sc})`;
+      $(".barre", st).style.width = (112 * ease((t - barre - k * 0.08) / 0.25)) + "%";
+    });
+    const pa = $(".pastille", el);
+    if (pa) { const p = ease((u - 0.5) / 0.45); pa.style.opacity = p; pa.style.transform = `translate(-50%,-50%) scale(${0.85 + 0.15 * p})`; }
+    const bo = $(".bouton", el);
+    if (bo) { const p = ease((u - 0.35) / 0.45); bo.style.opacity = p;
+      bo.style.transform = `translate(-50%,-50%) scale(${(0.9 + 0.1 * p) * (1 + 0.035 * Math.max(0, Math.sin((u - 0.8) * Math.PI * 1.6)))})`; }
+    const so = $(".sous", el);
+    if (so) monte(so, u, 0.55);
+  }
+  // en-tête : l'accroche de marque n'apparaît qu'à partir de la solution
+  const ac = clamp((t - (debutSolution - FONDU / 2)) / 0.5);
+  $("#accroche").style.opacity = ac;
+  // compte à rebours (scènes problème) : décompte réel à la seconde + barre qui se remplit
+  const rb = 1 - clamp((t - (debutSolution - FONDU / 2)) / FONDU);
+  const rbIn = ease((t + 0.25) / 0.5);
+  $("#rebours").style.opacity = $("#rail").style.opacity = Math.min(rb, rbIn);
+  $("#rebours").style.display = $("#rail").style.display = rb <= 0 ? "none" : "block";
+  $("#rebours b").textContent = Math.max(1, Math.ceil(debutSolution - t - 1e-6)) + " s";
+  $("#rail i").style.width = (100 * clamp(t / debutSolution)) + "%";
+};
+
+// contrôle des zones protégées et des textes coupés, sur l'image courante
+window.controle = function () {
+  const err = [];
+  document.querySelectorAll("[data-cle]").forEach(e => {
+    const cs = getComputedStyle(e);
+    let p = e; while (p && p !== document.body) { if (getComputedStyle(p).display === "none" || +getComputedStyle(p).opacity < 0.5) return; p = p.parentElement; }
+    const r = e.getBoundingClientRect(), nom = e.textContent.trim().slice(0, 40);
+    if (r.top < 130) err.push(`« ${nom} » au-dessus de y=130 (${r.top|0})`);
+    if (r.bottom > 1480) err.push(`« ${nom} » sous y=1480 (${r.bottom|0})`);
+    if (r.left < 40 || r.right > 1040) err.push(`« ${nom} » sort de l'écran en largeur (${r.left|0}→${r.right|0})`);
+    if (r.right > 940 && r.bottom > 1000 && r.top < 1750) err.push(`« ${nom} » dans la colonne de boutons (x>940, y 1000→1750)`);
+    if (e.hasAttribute("data-sticker") && (r.left < 60 || r.right > 940)) err.push(`sticker « ${nom} » hors de x 60→940 (${r.left|0}→${r.right|0})`);
+    if (!e.hasAttribute("data-sticker") && e.scrollWidth > e.clientWidth + 2) err.push(`« ${nom} » coupé`);
+  });
+  return err;
+};
+</script>
+</body></html>
