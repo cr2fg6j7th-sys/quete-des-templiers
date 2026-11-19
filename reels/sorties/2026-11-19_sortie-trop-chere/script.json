@@ -1,0 +1,85 @@
+{
+  "titre": "Une sortie sans vous ruiner",
+  "sujet": "Une sortie coûte vite trop cher",
+  "promesses": [
+    "prix-par-groupe",
+    "prix-24-90",
+    "ville",
+    "apercu-gratuit"
+  ],
+  "musique": "defaut",
+  "scenes": [
+    {
+      "type": "probleme",
+      "debut": 0,
+      "fin": 3.5,
+      "badge": "PARENTS, REGARDEZ JUSQU'À LA FIN",
+      "l1": "Une sortie en famille",
+      "l2": "sans vous ruiner ?",
+      "image": "img/s1.jpg",
+      "prompt": "A worried but amused French mother and father sit at a cozy kitchen table counting a few coins next to an open empty piggy bank and a calculator, while three excited children aged 7 to 10 in coats and scarves wait by the door, ready to go out."
+    },
+    {
+      "type": "probleme",
+      "debut": 3.5,
+      "fin": 7,
+      "surtitre": "AVEC UN BILLET PAR ENFANT…",
+      "l1": "Billets, parking,",
+      "l2": "goûter, souvenirs…",
+      "stickers": [
+        "4 billets €€€",
+        "Parking €€",
+        "Goûter €€",
+        "Souvenirs €€"
+      ],
+      "image": "img/s2.jpg",
+      "prompt": "Inside a cozy French home: a surprised father holds a very long blank paper receipt that unrolls all the way to the floor, a mother raises her eyebrows with a smile, three children aged 7 to 10 hold balloons and plush toys, a cat plays with the end of the receipt."
+    },
+    {
+      "type": "solution",
+      "debut": 7,
+      "fin": 11,
+      "surtitre": "LA SOLUTION",
+      "l1": "Une chasse au trésor",
+      "l2": "dans votre ville.",
+      "pastille": "PETIT PRIX · GRAND SOUVENIR",
+      "image": "img/s3.jpg",
+      "prompt": "Three children aged 7 to 10 dressed as little knights with cardboard armor, golden paper crowns and a helmet with a red plume, unrolling an old treasure map in a sunny cobbled lane of an Alsatian village lined with colorful half-timbered houses and flower boxes full of red geraniums, one holding a big magnifying glass.",
+      "cta": "🎁 Testez l'aperçu **gratuit**"
+    },
+    {
+      "type": "benefice",
+      "debut": 11,
+      "fin": 14.5,
+      "surtitre": "24,90 € POUR TOUT LE GROUPE",
+      "l1": "Pas un centime de plus",
+      "l2": "par enfant.",
+      "image": "img/s4.jpg",
+      "prompt": "A big joyful group of six children aged 7 to 10 dressed as knights with crowns and a red plumed helmet run together through a flowery cobbled street of an Alsatian town with half-timbered houses, following clues, smiling parents walking behind them.",
+      "cta": "📍 Votre ville : **lien en bio**"
+    },
+    {
+      "type": "benefice",
+      "debut": 14.5,
+      "fin": 18,
+      "surtitre": "VOS RUES, LE TERRAIN DE JEU",
+      "l1": "Énigmes, trésor,",
+      "l2": "et rires en famille.",
+      "image": "img/s5.jpg",
+      "prompt": "Laughing children aged 7 to 10 dressed as knights with crowns and a red plumed helmet open a small wooden treasure chest glowing with golden light next to a stone fountain in a flowery Alsatian village square with half-timbered houses, parents laughing behind them.",
+      "cta": "👀 Restez pour **le trésor**…"
+    },
+    {
+      "type": "cta",
+      "debut": 18,
+      "fin": 22,
+      "surtitre": "MAQUETELEGENDAIRE.FR",
+      "l1": "Grande aventure,",
+      "l2": "tout petit budget.",
+      "bouton": "CRÉER MON APERÇU GRATUIT",
+      "sous_bouton": "Détails sur notre site · lien en bio",
+      "image": "img/s6.jpg",
+      "prompt": "A kind old wise man with a long white beard and a burgundy cloak knights a proud child aged 8 wearing a paper crown and cardboard armor, with a wooden sword, in a sunny cobbled Alsatian lane with half-timbered houses and geranium flower boxes, other children knights cheering, treasure chest open with golden coins."
+    }
+  ]
+}
