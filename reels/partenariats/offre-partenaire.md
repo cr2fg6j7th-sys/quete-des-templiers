@@ -1,7 +1,7 @@
 # Offre partenaire — À COMPLÉTER PAR NATHAN
 
 > L'agent `partenariats-insta` lit ce fichier et **n'invente jamais** ces valeurs.
-> Un champ laissé vide apparaît dans les messages sous la forme `[À COMPLÉTER : …]`.
+> Les messages restent toujours prêts à copier-coller : un champ vide n'y apparaît pas, il est seulement signalé dans le résumé de l'agent.
 > Remplir après les deux-points, sur la même ligne.
 
 ## Code promo

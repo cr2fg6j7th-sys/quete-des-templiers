@@ -50,19 +50,24 @@ Ma Quête Légendaire (maquetelegendaire.fr) : chasses au trésor / quêtes de c
 
 ## Message de contact (pour chaque compte)
 
-- **Version message privé Instagram : ≤ 600 caractères** (compte-les avec `python3`, repères `[À COMPLÉTER : …]` inclus).
-- **Version e-mail** seulement si un e-mail pro public est trouvé : objet + 120-180 mots.
+**Règle absolue : le message est prêt à copier-coller tel quel.** Aucun crochet, aucun repère `[À COMPLÉTER]`, aucun champ à remplir, aucune valeur inventée. Si une info de `offre-partenaire.md` est vide (montant du code, durée…), le message n'en parle simplement pas en détail (« un petit code promo pour vos abonnés » suffit). Les repères `[À COMPLÉTER]` ne vont que dans la ligne finale « à compléter », jamais dans un message.
 
-Structure :
-1. Salutation avec le prénom ou le nom du compte **s'il est public** (sinon « Bonjour ! »).
-2. **Une phrase personnalisée et sincère** sur un contenu réel du compte. Jamais de compliment générique (« j'adore votre contenu »).
-3. Présentation (1-2 phrases) : papa alsacien, créateur de Ma Quête Légendaire, des chasses au trésor de chevaliers pour les 7-10 ans, adaptées à leur ville, prêtes en 2 minutes.
-4. Proposition : partager la vidéo (format de `offre-partenaire.md`, sinon « story ou Reel en collaboration ») avec **un code promo pour leurs abonnés** (valeur de l'offre ou repère) et **une quête offerte** pour leurs enfants s'ils veulent tester d'abord (seulement si la gratuité est à « oui » ou vide ; si elle est à « non », ne pas la proposer).
-5. Rappel légal, poli et court : la publication devra porter la mention **« Collaboration commerciale »** ou **« Publicité »** (loi du 9 juin 2023 sur l'influence commerciale ; la quête offerte et le code promo sont des contreparties).
-6. Ouverture : « Ça vous parlerait ? Je peux vous envoyer la vidéo et le code. »
-7. Signature : Nathan — Ma Quête Légendaire, maquetelegendaire.fr, maquetelegendaire@gmail.com.
+- **Version message privé Instagram : 300 à 500 caractères** (compte-les avec `python3`). Court, comme un vrai message entre parents.
+- **Version e-mail** seulement si un e-mail pro public est trouvé : objet simple + 100-150 mots, même ton.
 
-Ton : chaleureux, direct, **vouvoiement par défaut** (tutoiement seulement si le compte tutoie clairement sa communauté, et l'indiquer), pas de jargon marketing (« collab win-win », « visibilité », « synergie » interdits), **1 emoji maximum**. Pour tenir dans 600 caractères en DM, la signature peut être raccourcie en « Nathan — maquetelegendaire.fr ».
+**Esprit** : un papa qui écrit à un autre parent, avec joie de vivre et chaleur, pas une marque qui démarche. On propose de **collaborer, de faire quelque chose ensemble**, pas de « partager une vidéo » ni de « mettre en avant » quoi que ce soit. **Ne jamais parler de vidéo, de Reel, de story, de format ou de publication** dans le premier message : les modalités viendront si la personne répond.
+
+Structure (souple, naturelle) :
+1. Bonjour chaleureux avec le prénom ou le nom du compte **s'il est public** (sinon « Bonjour ! »).
+2. **Une phrase sincère et personnelle** sur un contenu réel du compte (ce qui a fait sourire, ce qui a donné une idée). Jamais de compliment générique (« j'adore votre contenu »). Si aucun contenu précis n'a été vu, parler simplement et honnêtement du thème du compte.
+3. Qui je suis, en une phrase simple : papa en Alsace, j'ai créé Ma Quête Légendaire, des chasses au trésor de chevaliers pour les 7-10 ans, dans leur propre ville.
+4. L'envie de collaborer, dite simplement : « J'aimerais beaucoup qu'on fasse quelque chose ensemble », avec, si la gratuité n'est pas à « non », **une quête offerte pour leurs enfants** (pour la vivre en famille) et **un petit code promo pour leurs abonnés**.
+5. Ouverture légère : « Ça vous dirait ? » / « Ça vous tente ? »
+6. Signature courte : « Belle journée, Nathan — Ma Quête Légendaire » (+ maquetelegendaire.fr si la place le permet). En e-mail, ajouter maquetelegendaire@gmail.com.
+
+Ton : simple, humain, joyeux, chaleureux. Phrases courtes, mots de tous les jours. **Vouvoiement par défaut** (tutoiement seulement si le compte tutoie clairement sa communauté, et l'indiquer). Aucun jargon marketing (« collaboration win-win », « visibilité », « synergie », « audience », « partenariat gagnant » interdits). **1 emoji maximum**, bienvenu s'il est naturel.
+
+**Mention légale** : la loi du 9 juin 2023 impose la mention « Collaboration commerciale » ou « Publicité » sur la publication. **Elle ne figure pas dans le premier message** : rédige en plus, une seule fois dans le fichier du jour, un court **message de suivi** générique (à envoyer quand un compte accepte) qui rappelle cette mention avec gentillesse, et donne les détails pratiques (code, quête offerte), toujours sans crochets.
 
 ## Écritures (avant de répondre)
 
