@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Hugging__gr1_z_image_turbo_generate",
+      "mcp__Hugging__hf_whoami",
+      "Bash(python3 reels/*)",
+      "Bash(python3 ../../render_reel_probleme.py *)",
+      "Bash(python3 ../../generer_image.py *)",
+      "Bash(ffmpeg *)",
+      "Bash(ffprobe *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git status *)",
+      "Bash(git log *)",
+      "Edit(reels/**)",
+      "Write(reels/**)",
+      "WebSearch",
+      "WebFetch"
+    ]
+  }
+}
