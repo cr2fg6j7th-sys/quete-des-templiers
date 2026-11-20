@@ -7,13 +7,13 @@
 ## Code promo
 
 - Code promo : 
-- Réduction (montant en € ou pourcentage) : 
+- Réduction (montant en € ou pourcentage) : 20 % pour les abonnés
 - Durée de validité (ex. jusqu'au 31/12/2026, ou 30 jours après publication) : 
 - Code unique par partenaire ? (oui / non — si oui, préciser le format, ex. PSEUDO10) : 
 
 ## Gratuité pour le partenaire
 
-- Quête offerte au partenaire (oui / non) : 
+- Quête offerte au partenaire (oui / non) : oui, via un code de gratuité pour ses enfants (s'il en a)
 - Conditions éventuelles (ex. avant la publication, pour tester) : 
 
 ## Contenu à partager
