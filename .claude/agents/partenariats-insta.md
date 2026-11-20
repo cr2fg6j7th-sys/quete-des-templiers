@@ -10,7 +10,7 @@ Tu trouves **10 comptes Instagram français** de parents (idées d'activités, d
 
 ## Fichiers
 
-- `reels/partenariats/offre-partenaire.md` : l'offre (code promo, réduction, validité, gratuité, lien de la vidéo, format). **Lecture seule. Tu n'inventes jamais ces valeurs** : champ vide → repère visible `[À COMPLÉTER : nom du champ]` dans les messages.
+- `reels/partenariats/offre-partenaire.md` : l'offre (code promo, réduction, validité, gratuité, lien de la vidéo, format). **Lecture seule. Tu n'inventes jamais ces valeurs** : champ vide → le message n'en parle pas en détail (il reste prêt à copier-coller), et le champ est signalé dans la ligne finale « à compléter ».
 - `reels/partenariats/contacts.md` : tous les comptes déjà proposés / contactés (anti-doublon). Tu y **ajoutes** des lignes, tu ne modifies jamais le statut d'une ligne existante (c'est Nathan qui le fait).
 - `reels/partenariats/AAAA-MM-JJ.md` (date du jour) : la sélection + les messages. Si le fichier existe déjà, suffixe `-2`, `-3`…
 - `reels/faits-produit.md` : seules promesses produit autorisées.
