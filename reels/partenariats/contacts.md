@@ -9,3 +9,4 @@
 | @mama.etcetera | https://www.instagram.com/mama.etcetera/ | Strasbourg, Alsace | 2026-11-19 | proposé | | Abonnés et activité à vérifier | 2026-11-19.md |
 | @lesptitsloupsenbalade | https://www.instagram.com/lesptitsloupsenbalade/ | Île-de-France | 2026-11-20 | proposé | | Abonnés et activité à vérifier | 2026-11-20.md |
 | @sortieskidsidf | https://www.instagram.com/sortieskidsidf/ | Île-de-France | 2026-11-20 | proposé | | Abonnés et activité à vérifier | 2026-11-20.md |
+| @laroutineyt | https://www.instagram.com/laroutineyt/ | Strasbourg, Alsace | 2026-11-20 | proposé | | Abonnés (~19 k) et activité à vérifier ; pseudo confirmé par une seule source | 2026-11-20-2.md |
