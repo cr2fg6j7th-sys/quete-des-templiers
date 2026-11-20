@@ -7,3 +7,5 @@
 | Compte | Lien | Ville / région | Date proposé | Statut | Date dernier échange | Notes | Sélection |
 |---|---|---|---|---|---|---|---|
 | @mama.etcetera | https://www.instagram.com/mama.etcetera/ | Strasbourg, Alsace | 2026-11-19 | proposé | | Abonnés et activité à vérifier | 2026-11-19.md |
+| @lesptitsloupsenbalade | https://www.instagram.com/lesptitsloupsenbalade/ | Île-de-France | 2026-11-20 | proposé | | Abonnés et activité à vérifier | 2026-11-20.md |
+| @sortieskidsidf | https://www.instagram.com/sortieskidsidf/ | Île-de-France | 2026-11-20 | proposé | | Abonnés et activité à vérifier | 2026-11-20.md |
