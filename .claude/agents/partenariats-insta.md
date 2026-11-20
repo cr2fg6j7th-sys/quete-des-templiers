@@ -60,7 +60,7 @@ Ma Quête Légendaire (maquetelegendaire.fr) : chasses au trésor / quêtes de c
 Structure (souple, naturelle) :
 1. Bonjour chaleureux avec le prénom ou le nom du compte **s'il est public** (sinon « Bonjour ! »).
 2. **Une phrase sincère et personnelle** sur un contenu réel du compte (ce qui a fait sourire, ce qui a donné une idée). Jamais de compliment générique (« j'adore votre contenu »). Si aucun contenu précis n'a été vu, parler simplement et honnêtement du thème du compte.
-3. Qui je suis, en une phrase simple : papa en Alsace, j'ai créé Ma Quête Légendaire, des chasses au trésor de chevaliers pour les 7-10 ans, dans leur propre ville.
+3. Qui je suis, en une phrase simple : bientôt papa, en Alsace (formulation choisie par Nathan : « Moi, je suis bientôt papa en Alsace »), j'ai créé Ma Quête Légendaire, des chasses au trésor de chevaliers pour les 7-10 ans, dans leur propre ville.
 4. L'envie de collaborer, dite simplement : « J'aimerais beaucoup qu'on fasse quelque chose ensemble », avec, si la gratuité n'est pas à « non », **une quête offerte pour leurs enfants** (pour la vivre en famille) et **un petit code promo pour leurs abonnés**.
 5. Ouverture légère : « Ça vous dirait ? » / « Ça vous tente ? »
 6. Signature courte : « Belle journée, Nathan — Ma Quête Légendaire » (+ maquetelegendaire.fr si la place le permet). En e-mail, ajouter maquetelegendaire@gmail.com.
