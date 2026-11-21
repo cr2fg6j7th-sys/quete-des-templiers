@@ -52,6 +52,27 @@ jobs:
           [ -n "$ns" ] || ns=$(dig +norec NS "$D" @d.nic.fr | awk '/IN[[:space:]]+NS/ {print $5}' | sort | tr '\n' ' ')
           ds=$(dig +short DS "$D" @d.nic.fr | tr '\n' ' ')
           echo "::notice::Registre .fr : serveurs de noms déclarés = ${ns:-aucun} ; DNSSEC (enregistrement DS) = ${ds:-aucun, donc désactivé}"
+      - name: E-mails (Brevo, SPF, DKIM, DMARC)
+        # Why a message may land in the spam folder: is the sending domain authenticated at Brevo, and what
+        # the public DNS answers for it. Prints statuses and records, never the key.
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          D: ${{ inputs.domaine }}
+        run: |
+          sudo apt-get install -y -qq dnsutils >/dev/null 2>&1 || true
+          q() { dig +short "$1" "$2" @1.1.1.1 | tr '\n' ' ' | cut -c1-300; }
+          echo "::notice::DNS e-mail de $D : SPF/TXT = $(q TXT "$D" | grep -o '"[^"]*"' | tr '\n' ' ' | cut -c1-300) ; MX = $(q MX "$D") ; DMARC = $(q TXT "_dmarc.$D") ; DKIM brevo1 = $(q CNAME "brevo1._domainkey.$D") ; DKIM brevo2 = $(q CNAME "brevo2._domainkey.$D") ; DKIM mail = $(q TXT "mail._domainkey.$D" | cut -c1-60)"
+          if [ -z "$BREVO_API_KEY" ]; then echo "::warning::Pas de clé Brevo dans les secrets"; exit 0; fi
+          H=(-H "api-key: $BREVO_API_KEY" -H "accept: application/json")
+          doms=$(curl -s -m 20 "${H[@]}" https://api.brevo.com/v3/senders/domains)
+          echo "::notice::Brevo, domaines : $(echo "$doms" | jq -c '[.domains[]? | {domaine: .domain_name, authentifie: .authenticated, verifie: .verified}]' 2>/dev/null || echo "illisible")"
+          one=$(curl -s -m 20 "${H[@]}" "https://api.brevo.com/v3/senders/domains/$D")
+          echo "::notice::Brevo, $D : $(echo "$one" | jq -c '{authentifie: .authenticated, verifie: .verified, enregistrements: ((.dns_records // {}) | to_entries | map({(.key): {type: .value.type, hote: .value.host_name, valeur: ((.value.value // "") | .[0:90]), ok: .value.status}}) | add)}' 2>/dev/null || echo "illisible")"
+          snd=$(curl -s -m 20 "${H[@]}" https://api.brevo.com/v3/senders)
+          # The repository is public: only the senders of the site's own domain are named.
+          echo "::notice::Brevo, expéditeurs : $(echo "$snd" | jq -c --arg d "@$D" '[.senders[]? | select(.email | endswith($d)) | {email, actif: .active}] + [{autres_adresses: ([.senders[]? | select(.email | endswith($d) | not)] | length)}]' 2>/dev/null || echo "illisible")"
+          acc=$(curl -s -m 20 "${H[@]}" https://api.brevo.com/v3/account)
+          echo "::notice::Brevo, offre : $(echo "$acc" | jq -c '[.plan[]? | {type, credits: .credits, creditsType}] , {relais: (.relay.enabled // null)}' 2>/dev/null | tr '\n' ' ' | head -c 300)"
       - name: Le site répond-il ?
         env:
           D: ${{ inputs.domaine }}
