@@ -160,11 +160,14 @@ window.render = function (t) {
       l.querySelectorAll(".zoom").forEach(z => {
         if (premier) {                      // 1re image déjà composée (miniature) : simple pulsation d'insistance
           const q = clamp((t - ZOOM_PREMIER) / ZOOM_DUREE);
-          z.style.transform = `scale(${1 + 0.18 * Math.sin(Math.PI * q)})`; return;
+          const s1 = 1 + 0.18 * Math.sin(Math.PI * q);
+          z.style.transform = `scale(${s1})`; z.style.margin = `0 ${(s1 - 1) * z.offsetWidth / 2}px`; return;
         }
         const p = (u - k * DECAL - ZOOM_RETARD) / ZOOM_DUREE;
         z.style.opacity = clamp(p * 2.5);
-        z.style.transform = `scale(${1.9 - 0.9 * easeBack(p)})`;
+        const sz = 1.9 - 0.9 * easeBack(p);
+        z.style.transform = `scale(${sz})`;
+        z.style.margin = `0 ${Math.max(0, sz - 1) * z.offsetWidth / 2}px`;   // écarte les mots voisins pendant le grossissement
       });
     });
     const carte = $(".carte", el), pc = ease((u - CARTE_RETARD) / CARTE);
