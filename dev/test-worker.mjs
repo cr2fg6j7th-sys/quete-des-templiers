@@ -91,7 +91,7 @@ console.log("Adresses du site : tous les tests passent.");
   assert.strictEqual((await call("/api/rappel", { email: "b@exemple.fr", apercu: "https://maquetelegendaire.fr/?apercu=" + outdoor.token + "&n=x", n: "léo" }))[0], 200, "token given inside the link");
   m = sent.pop().body;
   assert.strictEqual(m.subject, "L'aperçu de la quête de Léo");
-  assert.ok(m.htmlContent.includes("à &lt;img src=x onerror=alert(1)&gt;") && !m.htmlContent.includes("<img"), "the town is escaped");
+  assert.ok(m.htmlContent.includes("à &lt;img src=x onerror=alert(1)&gt;") && !m.htmlContent.includes("<img src=x"), "the town is escaped");
   commune = "Le Havre";
   await call("/api/rappel", { email: "c@exemple.fr", apercu: outdoor.token, n: "Hugo" });
   m = sent.pop().body;

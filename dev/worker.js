@@ -468,23 +468,29 @@ function mailOf(env, rec, kind, stop) {
   const list = kind === 1 ? [steps, "Le guide de l'adulte, l'invitation et les diplômes"]
     : [steps, !rec.indoor && "S'il pleut : la même quête à la maison, sans rien racheter", "Le guide de l'adulte, l'invitation et les diplômes",
        "Le lien de la quête, valable au moins douze mois", "Jouable sans réseau, une fois la voix enregistrée"].filter(Boolean);
-  // paragraphs: [text] or ["list", title, items] or ["button"]
+  // paragraphs: a text, or { t, h } (t in the plain text; h, shorter, in the HTML, where the figures stand in the
+  // card of the quest), or ["fiche"] (that card: HTML only), ["list", title, items] or ["button"]
   const body = kind === 1 ? [
-    `Voici l'aperçu de ${quest}, « La Quête du Chevalier » : ${where}.`,
+    { t: `Voici l'aperçu de ${quest}, « La Quête du Chevalier » : ${where}.`, h: `Voici l'aperçu de ${quest}, « La Quête du Chevalier ».` },
+    ["fiche"],
     "Ce lien ouvre l'aperçu sur n'importe quel téléphone ou ordinateur, sans compte :",
     ["button"],
     ["list", "Dans la quête complète", list],
     `${price} pour tout le groupe, seulement si vous décidez de la débloquer ; l'aperçu, lui, est gratuit. Paiement sécurisé par Stripe.`,
     "Nous vous écrirons une seule autre fois, dans une semaine, si la quête n'est pas débloquée. Une question ? Répondez simplement à ce message."
   ] : kind === 3 ? [
-    `Il y a une semaine, vous avez demandé à recevoir l'aperçu de ${quest} par e-mail, mais notre envoi n'avait pas pu partir. Le voici : ${where}.`,
+    { t: `Il y a une semaine, vous avez demandé à recevoir l'aperçu de ${quest} par e-mail, mais notre envoi n'avait pas pu partir. Le voici : ${where}.`,
+      h: `Il y a une semaine, vous avez demandé à recevoir l'aperçu de ${quest} par e-mail, mais notre envoi n'avait pas pu partir. Le voici.` },
+    ["fiche"],
     "Ce lien ouvre l'aperçu sur n'importe quel téléphone ou ordinateur, sans compte :",
     ["button"],
     ["list", `Si vous la débloquez (${price} pour tout le groupe)`, list],
     "Paiement sécurisé par Stripe : carte, Apple Pay ou Google Pay. Un souci le jour J ? Nous vous aidons. Si la quête ne peut vraiment pas fonctionner, nous vous remboursons.",
     "C'est le seul message que vous recevrez de notre part : nous effaçons votre adresse de notre serveur juste après son envoi. Une question ? Répondez simplement à ce message."
   ] : [
-    `Il y a une semaine, vous avez créé l'aperçu de ${quest} : ${where}. Il vous attend toujours :`,
+    { t: `Il y a une semaine, vous avez créé l'aperçu de ${quest} : ${where}. Il vous attend toujours :`,
+      h: `Il y a une semaine, vous avez créé l'aperçu de ${quest}. Il vous attend toujours :` },
+    ["fiche"],
     ["button"],
     ["list", `Si vous la débloquez (${price} pour tout le groupe)`, list],
     "Paiement sécurisé par Stripe : carte, Apple Pay ou Google Pay. Un souci le jour J ? Nous vous aidons. Si la quête ne peut vraiment pas fonctionner, nous vous remboursons.",
@@ -493,37 +499,64 @@ function mailOf(env, rec, kind, stop) {
   const seller = [IDENT.nom, "entrepreneur individuel", IDENT.adresse].filter(Boolean).join(", ");
   const why = `Ce message vous est envoyé par Ma Quête Légendaire${seller ? " (" + seller + ")" : ""}, parce que vous avez demandé à recevoir l'aperçu de votre quête par e-mail sur ${new URL(rec.link).host}.`;
   const stopText = kind === 1 ? "Pour ne pas recevoir le rappel" : "Rien d'autre ne vous sera envoyé. Désinscription";
-  const privacy = new URL(rec.link).origin + "/legal/confidentialite";
+  const site = new URL(rec.link).origin, privacy = site + "/legal/confidentialite";
 
   const text = [ "Bonjour,", "",
-    ...body.flatMap(p => p[0] === "button" ? [rec.link, ""] : p[0] === "list" ? [p[1] + " :", ...p[2].map(x => "- " + x), ""] : [p, ""]),
+    ...body.flatMap(p => p[0] === "fiche" ? [] : p[0] === "button" ? [rec.link, ""] : p[0] === "list" ? [p[1] + " :", ...p[2].map(x => "- " + x), ""] : [p.t || p, ""]),
+    "À très bientôt,", "Ma Quête Légendaire", "",
     "--", why, `${stopText} : ${stop}`, `Vos données : ${privacy}` ].join("\n");
 
-  const F = "font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;";
-  const P = s => `<p style="margin:0 0 16px">${esc(s)}</p>`;
+  // The look of the site (dev/app.template.html): ink #192342, rose #a03244, parchment #f7f0df, gold #e9c46a. Tables
+  // and inline styles, for every mail program; the images (made by dev/video/mail.py) come from the site, each with a
+  // text that stands in for it when the program does not show them. 600 px wide, narrower on a phone.
+  const INK = "#192342", ROSE = "#a03244", MUTED = "#5b5045", PARCH = "#f7f0df", LINE = "#e6d6ae";
+  const F = "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;", G = "font-family:Georgia,'Times New Roman',serif;";
+  const strong = s => esc(s).replace(esc(price), `<strong style="color:${ROSE};white-space:nowrap">${esc(price)}</strong>`);
+  const P = s => `<p style="margin:0 0 16px">${strong(s)}</p>`;
+  const named = rec.name ? esc(who.slice(0, who.length - rec.name.length)) + `<span style="color:${ROSE}">${esc(rec.name)}</span>` : "";
+  const h1 = !who ? esc(subject) : kind !== 2 ? esc("L'aperçu de la quête ") + named : esc("La quête ") + named + esc(" vous attend");
+  const kicker = kind === 2 ? "Petit rappel" : "Votre aperçu gratuit";
+  const tiles = rec.indoor ? [[n, "cachettes"], [rec.minutes, "minutes de jeu"]] : [[n, "étapes"], [km, "km à pied"], [rec.minutes, "minutes de jeu"]];
+  const place = rec.indoor ? "À la maison, avec des cartes à imprimer" : "Autour de votre point de départ" + (rec.town ? ", " + inTown(rec.town) : "");
+  const fiche = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:2px 0 8px"><tr>${tiles.map(([v, l], i) =>
+    `${i ? '<td width="10" style="font-size:0;line-height:0">&nbsp;</td>' : ""}<td width="${Math.floor(100 / tiles.length)}%" align="center" valign="top" style="background:${PARCH};border:1px solid ${LINE};border-radius:12px;padding:12px 4px 11px">
+<div class="tv" style="${G}font-size:30px;line-height:1.1;color:${INK}">${esc(v)}</div><div style="font-size:13px;line-height:1.3;color:${MUTED};margin-top:3px">${esc(l)}</div></td>`).join("")}</tr></table>
+<p style="margin:0 0 22px;font-size:14px;line-height:1.4;color:${MUTED};text-align:center">${esc(place)}</p>`;
+  const button = `<table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:6px auto 12px"><tr><td align="center" bgcolor="${INK}" style="background:${INK};border-radius:999px">
+<a href="${esc(rec.link)}" style="display:inline-block;padding:16px 34px;${F}font-size:17px;font-weight:bold;line-height:1.2;color:#fffaf0;text-decoration:none;border-radius:999px">Retrouver l'aperçu&nbsp;&rarr;</a></td></tr></table>
+<p style="margin:0 0 24px;font-size:12px;line-height:1.45;color:${MUTED};text-align:center">Si le bouton ne s'ouvre pas, copiez ce lien dans le navigateur :<br><a href="${esc(rec.link)}" style="color:${MUTED};word-break:break-all">${esc(rec.link)}</a></p>`;
+  const card = (title, items) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${PARCH};border:1px solid ${LINE};border-radius:14px;margin:0 0 22px"><tr>
+<td valign="top" style="padding:18px 6px 16px 18px"><p style="margin:0 0 10px;${G}font-size:19px;line-height:1.3;color:${INK}">${strong(title)}</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0">${items.map(x => `<tr><td valign="top" width="30" style="padding:3px 10px 3px 0"><div style="width:20px;height:20px;line-height:20px;border-radius:10px;background:${INK};color:#e9c46a;text-align:center;font-size:12px;font-weight:bold">&#10003;</div></td>
+<td style="padding:3px 0;font-size:15px;line-height:1.45">${esc(x)}</td></tr>`).join("")}</table></td>
+<td width="76" valign="bottom" style="padding:12px 10px 0 0;font-size:0;line-height:0"><img src="${site}/mail-dragon.png" width="76" height="113" alt="" style="display:block;border:0;border-radius:0 0 13px 0"></td></tr></table>`;
+  const pic = kind === 2 ? ["mail-rappel.jpg", "Des enfants déguisés en chevaliers découvrent une carte au trésor qui brille"]
+    : ["mail-quete.jpg", "Des enfants déguisés en chevaliers courent dans une vieille ville, parchemins à la main"];
+
   const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${esc(subject)}</title></head>
-<body style="margin:0;padding:0;background:#f4ecda">
+<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${esc(subject)}</title>
+<style>@media (max-width:480px){.px{padding-left:20px!important;padding-right:20px!important}.h1{font-size:25px!important}.tv{font-size:26px!important}}</style></head>
+<body style="margin:0;padding:0;background:#efe6d1">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(kind === 1 ? "Le lien de votre aperçu, à ouvrir sur n'importe quel appareil." : kind === 3 ? "Notre premier envoi n'avait pas pu partir : voici le lien de votre aperçu." : "Votre aperçu vous attend toujours. C'est notre seul rappel.")}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4ecda"><tr><td align="center" style="padding:24px 12px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#fffaf0;border:1px solid #e2d3ae;border-radius:12px">
-<tr><td style="background:#1b2547;border-radius:11px 11px 0 0;padding:18px 24px;font-family:Georgia,'Times New Roman',serif;font-size:19px;color:#f4ecda">Ma Quête Légendaire
-<div style="height:2px;width:44px;background:#c9a04a;margin-top:8px;font-size:0;line-height:0">&nbsp;</div></td></tr>
-<tr><td style="padding:24px;${F}font-size:16px;line-height:1.55;color:#1b2547">
-<h1 style="font-family:Georgia,'Times New Roman',serif;font-weight:normal;font-size:24px;line-height:1.25;margin:0 0 18px;color:#1b2547">${esc(subject)}</h1>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#efe6d1"><tr><td align="center" style="padding:24px 10px">
+<!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#fffaf0;border:1px solid #e2d3ae;border-radius:16px">
+<tr><td bgcolor="${INK}" style="background:${INK};border-radius:15px 15px 0 0;font-size:0;line-height:0"><a href="${site}/" style="text-decoration:none"><img src="${site}/mail-entete.png" width="600" height="112" alt="Ma Quête Légendaire" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:15px 15px 0 0;${G}font-size:24px;line-height:1.3;color:#fffaf0"></a></td></tr>
+<tr><td style="height:3px;background:#c9a04a;font-size:0;line-height:0">&nbsp;</td></tr>
+<tr><td style="font-size:0;line-height:0;background:#ead9b3"><img src="${site}/${pic[0]}" width="600" height="270" alt="${esc(pic[1])}" style="display:block;width:100%;max-width:600px;height:auto;border:0;${F}font-size:13px;line-height:1.4;color:${MUTED}"></td></tr>
+<tr><td class="px" style="padding:28px 32px 10px;${F}font-size:16px;line-height:1.55;color:${INK}">
+<p style="margin:0 0 6px;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:${ROSE}">${esc(kicker)}</p>
+<h1 class="h1" style="${G}font-weight:normal;font-size:29px;line-height:1.2;margin:0 0 20px;color:${INK}">${h1}</h1>
 ${P("Bonjour,")}
-${body.map(p => p[0] === "button"
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 10px"><tr><td style="background:#1b2547;border-radius:8px"><a href="${esc(rec.link)}" style="display:inline-block;padding:13px 22px;${F}font-size:16px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:8px">Retrouver l'aperçu</a></td></tr></table>
-<p style="margin:0 0 20px;font-size:12px;line-height:1.4;color:#5b6482">Si le bouton ne s'ouvre pas, copiez ce lien dans le navigateur :<br><a href="${esc(rec.link)}" style="color:#5b6482;word-break:break-all">${esc(rec.link)}</a></p>`
-    : p[0] === "list"
-    ? `<p style="margin:0 0 6px;font-weight:bold;color:#1b2547">${esc(p[1])}</p><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px">${p[2].map(x =>
-        `<tr><td valign="top" style="padding:3px 10px 3px 0;color:#a87a1f;font-weight:bold">&#10003;</td><td style="padding:3px 0">${esc(x)}</td></tr>`).join("")}</table>`
-    : P(p)).join("\n")}
+${body.map(p => p[0] === "fiche" ? fiche : p[0] === "button" ? button : p[0] === "list" ? card(p[1], p[2]) : P(p.h || p)).join("\n")}
+<p style="margin:26px 0 22px;${G}font-size:18px;line-height:1.4;color:${INK}">À très bientôt,<br><em>Ma Quête Légendaire</em></p>
 </td></tr>
-<tr><td style="padding:16px 24px 22px;border-top:1px solid #e2d3ae;${F}font-size:13px;line-height:1.5;color:#5b6482">
+<tr><td class="px" bgcolor="${PARCH}" style="background:${PARCH};padding:18px 32px 22px;border-top:1px solid #e2d3ae;border-radius:0 0 15px 15px;${F}font-size:12.5px;line-height:1.5;color:${MUTED}">
 <p style="margin:0 0 8px">${esc(why)}</p>
-<p style="margin:0">${esc(stopText)} : <a href="${esc(stop)}" style="color:#b8505c">se désinscrire en un clic</a> · <a href="${esc(privacy)}" style="color:#5b6482">vos données</a></p>
-</td></tr></table></td></tr></table></body></html>`;
+<p style="margin:0">${esc(stopText)} : <a href="${esc(stop)}" style="color:${ROSE}">se désinscrire en un clic</a> · <a href="${esc(privacy)}" style="color:${MUTED}">vos données</a></p>
+</td></tr></table>
+<!--[if mso]></td></tr></table><![endif]-->
+</td></tr></table></body></html>`;
   return { subject, html, text, stop, tag: kind === 2 ? "rappel" : "apercu" };
 }
 
