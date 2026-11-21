@@ -27,7 +27,7 @@ def charger(script_path: Path):
     scenes = s["scenes"]
     for i, sc in enumerate(scenes):
         for k in ("l1", "l2"):
-            if len(sc.get(k, "")) > MAX_CAR:
+            if len(sc.get(k, "").replace("**", "")) > MAX_CAR:
                 err.append(f"scène {i+1} : {k} « {sc[k]} » fait {len(sc[k])} caractères (max {MAX_CAR})")
         if i and abs(sc["debut"] - scenes[i-1]["fin"]) > 1e-6:
             err.append(f"scène {i+1} : commence à {sc['debut']} au lieu de {scenes[i-1]['fin']}")

@@ -56,6 +56,8 @@ Champs d'une scène : `type`, `debut`, `fin`, `badge` (scène 1) ou `surtitre` (
 
 Le compte à rebours « ⏳ La solution arrive dans N s » et sa barre sont automatiques sur les scènes `probleme` ; la ligne « Chasses au trésor pour enfants » apparaît automatiquement à partir de la première scène non-problème.
 
+Mots clés en grossissement : dans chaque scène, entoure de `**…**` 1 à 2 éléments les plus importants (voir `consignes.md`, point 7).
+
 Vérifie avant de continuer : chaque `l1`/`l2` ≤ 22 caractères, chaque promesse figure dans `faits-produit.md`. Exemple complet : `reels/sorties/2026-11-18_il-pleut-ce-week-end/script.json`.
 
 ### 3. Illustrations (paysage ~4:3)

@@ -1,48 +1,70 @@
 {
   "titre": "Des heures à préparer",
   "sujet": "Organiser une activité prend des heures (3)",
-  "promesses": ["pret-2-minutes", "rien-a-preparer", "prix-24-90", "prix-par-groupe", "ville", "apercu-gratuit"],
+  "promesses": [
+    "pret-2-minutes",
+    "rien-a-preparer",
+    "prix-24-90",
+    "prix-par-groupe",
+    "ville",
+    "apercu-gratuit"
+  ],
   "musique": "defaut",
   "scenes": [
     {
-      "type": "probleme", "debut": 0, "fin": 3.5,
+      "type": "probleme",
+      "debut": 0,
+      "fin": 3.5,
       "badge": "PARENTS, REGARDEZ JUSQU'À LA FIN",
       "l1": "Des heures à préparer",
-      "l2": "pour 1 h de jeu ?",
+      "l2": "pour **1 h de jeu** ?",
       "image": "img/s1.jpg",
       "prompt": "A tired but smiling French father at a kitchen table late in the evening, surrounded by piles of paper, scissors, glue, tape, crumpled drafts and a half-made cardboard treasure chest, a wall clock, a cat asleep on the papers, a child in pajamas peeking from the doorway."
     },
     {
-      "type": "probleme", "debut": 3.5, "fin": 7,
+      "type": "probleme",
+      "debut": 3.5,
+      "fin": 7,
       "surtitre": "ENTRE L'IDÉE ET LE MATÉRIEL…",
       "l1": "Énigmes, indices,",
-      "l2": "parcours, matériel…",
-      "stickers": ["Trouver l'idée", "Écrire les énigmes", "Imprimer, découper", "Cacher les indices"],
+      "l2": "parcours, **matériel…**",
+      "stickers": [
+        "Trouver l'idée",
+        "Écrire les énigmes",
+        "Imprimer, découper",
+        "Cacher les indices"
+      ],
       "image": "img/s2.jpg",
       "prompt": "A busy French mother on the living room floor cutting paper clues and taping envelopes, craft supplies everywhere, a laptop open, three impatient children aged 7 to 10 waiting on the sofa with arms crossed, a dog carrying a roll of tape."
     },
     {
-      "type": "solution", "debut": 7, "fin": 11,
+      "type": "solution",
+      "debut": 7,
+      "fin": 11,
       "surtitre": "LA SOLUTION",
       "l1": "Une quête prête",
-      "l2": "en 2 minutes.",
+      "l2": "en **2 minutes.**",
       "pastille": "RIEN À ENVOYER",
       "cta": "⏱️ 2 minutes : **lien en bio**",
       "image": "img/s3.jpg",
       "prompt": "A relaxed smiling French mother sits on a sofa holding a smartphone with a blank screen, while three children aged 7 to 10 dressed as little knights with cardboard armor, golden paper crowns and a helmet with a red plume jump with excitement around her."
     },
     {
-      "type": "benefice", "debut": 11, "fin": 14.5,
+      "type": "benefice",
+      "debut": 11,
+      "fin": 14.5,
       "surtitre": "DANS VOTRE VILLE",
       "l1": "Énigmes et indices :",
-      "l2": "tout est déjà prêt.",
+      "l2": "tout est **déjà prêt.**",
       "cta": "👀 Attendez **le trésor**…",
       "image": "img/s4.jpg",
       "prompt": "Four children aged 7 to 10 dressed as knights with crowns and a red plumed helmet read a rolled parchment clue together, one pointing with a magnifying glass at an old stone door, in a cobbled Alsatian lane with half-timbered houses and red geraniums."
     },
     {
-      "type": "benefice", "debut": 14.5, "fin": 18,
-      "surtitre": "24,90 € POUR TOUT LE GROUPE",
+      "type": "benefice",
+      "debut": 14.5,
+      "fin": 18,
+      "surtitre": "**24,90 €** POUR TOUT LE GROUPE",
       "l1": "Vous, vous profitez,",
       "l2": "eux, ils jouent.",
       "cta": "📲 Créez la vôtre : **lien en bio**",
@@ -50,10 +72,12 @@
       "prompt": "Two relaxed parents sit on a wooden bench with coffee cups, smiling, in a flowery Alsatian village square with half-timbered houses, watching a group of children aged 7 to 10 dressed as knights with crowns solving a riddle near a stone fountain, laughing together."
     },
     {
-      "type": "cta", "debut": 18, "fin": 22,
+      "type": "cta",
+      "debut": 18,
+      "fin": 22,
       "surtitre": "MAQUETELEGENDAIRE.FR",
       "l1": "2 minutes pour vous,",
-      "l2": "des souvenirs à eux.",
+      "l2": "des **souvenirs** à eux.",
       "bouton": "CRÉER MON APERÇU GRATUIT",
       "sous_bouton": "Détails sur notre site · lien en bio",
       "image": "img/s6.jpg",

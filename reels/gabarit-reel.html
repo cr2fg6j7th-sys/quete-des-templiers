@@ -22,6 +22,7 @@ body{background:linear-gradient(180deg,#f6e6d9 0%,#efe6da 50%,#e5e9d8 100%);posi
 .sur{top:310px;font-size:31px;letter-spacing:.05em;padding-left:.05em;color:var(--or)}
 .sur.fort{top:318px;font-size:48px;letter-spacing:.02em;color:var(--bordeaux)}
 .badge{top:272px;font-size:34px;letter-spacing:.085em;padding:12px 30px 12px calc(30px + .085em);color:#fff;background:var(--bordeaux);border-radius:8px}
+.zoom{display:inline-block;transform-origin:50% 55%;opacity:1}
 .l1,.l2{font-family:"Titre";font-size:66px;line-height:1.1}
 .l1{top:385px;color:var(--marine)}
 .l2{top:470px;color:var(--bordeaux2);font-style:italic}
@@ -63,6 +64,7 @@ const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const ease = x => 1 - Math.pow(1 - clamp(x), 3);          // ease-out cubique
 // Minutage mesuré sur la référence : l'ancienne scène s'efface en 0,2 s autour de la frontière,
 // les textes de la nouvelle montent (40 px, 0,45 s, décalés de 0,12 s), la carte suit 0,25 s plus tard.
+const ZOOM_RETARD = 0.15, ZOOM_DUREE = 0.5, ZOOM_PREMIER = 0.3;   // grossissement des mots clés
 const SORTIE = 0.2, TXT = 0.45, DECAL = 0.12, CARTE_RETARD = 0.25, CARTE = 0.45;
 
 // fins points beiges épars (pseudo-aléatoire fixe : même fond à chaque rendu)
@@ -72,6 +74,9 @@ $("#points").innerHTML = pts;
 
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 const gras = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");   // **mot** = mis en valeur
+// Titres : **mot** = mot clé qui apparaît en grossissement (gros → taille normale, puis statique) pour accrocher l'œil
+const zoom = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<span class="zoom">$1</span>');
+const easeBack = x => { x = clamp(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
 // emplacements des stickers (centres), par rangées de deux comme dans la référence ; tous dans x 60→940
 const SLOTS = [[240, 690], [745, 745], [255, 1095], [730, 1140], [300, 900], [700, 920]];
 const ROTS = [-5, 5, 4, -5, -4, 5];
@@ -81,9 +86,9 @@ const scenes = DATA.scenes.map((s, i) => {
   const el = document.createElement("div");
   el.className = "scene " + s.type + (s.badge ? " accroche-scene" : "");
   let h = "";
-  if (s.badge) h += `<div class="c badge" data-cle data-ligne>${esc(s.badge)}</div>`;
-  else if (s.surtitre) h += `<div class="c sur${i === iSolution ? " fort" : ""}" data-cle data-ligne>${esc(s.surtitre)}</div>`;
-  h += `<div class="c l1" data-cle data-ligne data-titre>${esc(s.l1 || "")}</div><div class="c l2" data-cle data-ligne data-titre>${esc(s.l2 || "")}</div>`;
+  if (s.badge) h += `<div class="c badge" data-cle data-ligne>${zoom(s.badge)}</div>`;
+  else if (s.surtitre) h += `<div class="c sur${i === iSolution ? " fort" : ""}" data-cle data-ligne>${zoom(s.surtitre)}</div>`;
+  h += `<div class="c l1" data-cle data-ligne data-titre>${zoom(s.l1 || "")}</div><div class="c l2" data-cle data-ligne data-titre>${zoom(s.l2 || "")}</div>`;
   if (s.type === "cta") h += `<div class="c bouton" data-cle data-ligne>${esc(s.bouton || "CRÉER MON APERÇU GRATUIT")}</div><div class="c sous" data-cle data-ligne>${esc(s.sous_bouton || "Détails sur notre site · lien en bio")}</div>`;
   h += `<div class="carte"><img src="${s.image}"></div>`;
   (s.stickers || []).forEach((st, k) => {
@@ -149,7 +154,19 @@ window.render = function (t) {
     if (!visible) continue;
     el.style.opacity = aOut;
     const u = premier ? 99 : t - s.debut;          // la première image est déjà composée (miniature)
-    el.querySelectorAll("[data-ligne]").forEach((l, k) => monte(l, u, k * DECAL));
+    el.querySelectorAll("[data-ligne]").forEach((l, k) => {
+      monte(l, u, k * DECAL);
+      // mots clés en grossissement : arrivent 1,9× plus gros, se posent avec un léger rebond, puis restent statiques
+      l.querySelectorAll(".zoom").forEach(z => {
+        if (premier) {                      // 1re image déjà composée (miniature) : simple pulsation d'insistance
+          const q = clamp((t - ZOOM_PREMIER) / ZOOM_DUREE);
+          z.style.transform = `scale(${1 + 0.18 * Math.sin(Math.PI * q)})`; return;
+        }
+        const p = (u - k * DECAL - ZOOM_RETARD) / ZOOM_DUREE;
+        z.style.opacity = clamp(p * 2.5);
+        z.style.transform = `scale(${1.9 - 0.9 * easeBack(p)})`;
+      });
+    });
     const carte = $(".carte", el), pc = ease((u - CARTE_RETARD) / CARTE);
     carte.style.opacity = pc;
     carte.style.transform = `translateY(${(1 - pc) * 60}px)`;

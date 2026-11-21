@@ -119,6 +119,11 @@ def evenements(script):
     cta = next((s for s in sc if s["type"] == "cta"), None)
     if cta:
         ev.append((cta["debut"] + 0.3, "ding", 0.35))
+    for i, s in enumerate(sc):                                 # mots clés en grossissement (voir gabarit)
+        champs = [c for c in ("badge" if s.get("badge") else "surtitre", "l1", "l2") if s.get(c)]
+        for k, c in enumerate(champs):
+            if "**" in s[c]:
+                ev.append((0.3 if i == 0 else s["debut"] + k * 0.12 + 0.15, "pop", 0.28))
     for s in sc:                                               # CTA de chaque slide
         if s.get("cta") and s["type"] != "cta":
             ev.append((s["debut"] + 0.9, "pop", 0.3))
