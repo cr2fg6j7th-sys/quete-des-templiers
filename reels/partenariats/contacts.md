@@ -14,7 +14,7 @@
 | @onfaitquoi_maman | https://www.instagram.com/onfaitquoi_maman/ | Lyon | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
 | @mammaganglyon | https://www.instagram.com/mammaganglyon/ | Lyon | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
 | @motherintown | https://www.instagram.com/motherintown/ | Toulouse | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
-| @enfant.bordeaux | https://www.instagram.com/enfant.bordeaux/ | Bordeaux | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
+| @enfant.bordeaux | https://www.instagram.com/enfant.bordeaux/ | Bordeaux | 2026-11-22 | réponse | 2026-11-22 | Réponse auto de « Papa Yann » : contact par e-mail pro papayann@enfant-bordeaux.fr ; e-mail envoyé par Nathan | 2026-11-22.md |
 | @quefaireenfamille | https://www.instagram.com/quefaireenfamille/ | Marseille, Bouches-du-Rhône | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
 | @mother_in_lille | https://www.instagram.com/mother_in_lille/ | Lille | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
 | @en_voila_une_idee_lilloise | https://www.instagram.com/en_voila_une_idee_lilloise/ | Lille | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
