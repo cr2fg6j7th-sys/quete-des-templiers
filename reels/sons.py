@@ -138,7 +138,8 @@ def bande_son(script, duree, sortie: Path, base: Path):
     mix = np.zeros(n)
     m = script.get("musique", "defaut")
     if m:
-        p = MUSIQUE_DEFAUT if m == "defaut" else (base / m).resolve()
+        nom = ICI / "musique" / f"{m}.mp3"
+        p = MUSIQUE_DEFAUT if m == "defaut" else nom if nom.exists() else (base / m).resolve()
         mus = lire_audio(p, duree, script.get("musique_debut", 0))[:n]
         mus = np.pad(mus, (0, n - len(mus)))
         tt = np.arange(n) / SR

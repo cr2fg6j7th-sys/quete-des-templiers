@@ -1,0 +1,86 @@
+{
+  "titre": "Toujours sur l'écran ?",
+  "sujet": "Enfants scotchés aux écrans (4)",
+  "promesses": [
+    "ville",
+    "pret-2-minutes",
+    "prix-24-90",
+    "prix-par-groupe",
+    "apercu-gratuit"
+  ],
+  "musique": "marche-des-chevaliers",
+  "scenes": [
+    {
+      "type": "probleme",
+      "debut": 0,
+      "fin": 3.5,
+      "badge": "PARENTS, REGARDEZ JUSQU'À LA FIN",
+      "l1": "Toujours sur l'écran ?",
+      "l2": "**Même au soleil.**",
+      "image": "img/s1.jpg",
+      "prompt": "Three children aged 7 to 10 slumped on a sofa, faces lit by tablets and a game console, while a French mother stands in the doorway with hands on hips and an amused raised eyebrow, sunny weather outside the window, untouched toys on the floor."
+    },
+    {
+      "type": "probleme",
+      "debut": 3.5,
+      "fin": 7,
+      "surtitre": "ENTRE LA TABLETTE ET LA CONSOLE…",
+      "l1": "« Encore 5 minutes ! »",
+      "l2": "et la journée **file.**",
+      "stickers": [
+        "Tablette",
+        "Console",
+        "Dessins animés",
+        "Encore 5 min !"
+      ],
+      "image": "img/s2.jpg",
+      "prompt": "A French father in a living room holds up a wall clock with a comic pleading face, while one child aged 8 plays with a game controller in front of a television, another stares at a tablet and a third watches a phone, board games stacked and untouched, a cat yawning."
+    },
+    {
+      "type": "solution",
+      "debut": 7,
+      "fin": 11,
+      "surtitre": "LA SOLUTION",
+      "l1": "Une chasse au trésor",
+      "l2": "**dans vos rues.**",
+      "pastille": "ÉNIGMES À RÉSOUDRE ENSEMBLE",
+      "cta": "🎁 Testez l'aperçu **gratuit**",
+      "image": "img/s3.jpg",
+      "prompt": "Three children aged 7 to 10 dressed as little knights with cardboard armor, golden paper crowns and a helmet with a red plume burst out of a front door into a sunny cobbled Alsatian lane with half-timbered houses and geraniums, one waving an old treasure map, a smiling parent following with a phone."
+    },
+    {
+      "type": "benefice",
+      "debut": 11,
+      "fin": 14.5,
+      "surtitre": "PRÊTE EN 2 MINUTES",
+      "l1": "Ils courent, fouillent",
+      "l2": "et **réfléchissent.**",
+      "cta": "👀 Attendez **le trésor**…",
+      "image": "img/s4.jpg",
+      "prompt": "Children aged 7 to 10 dressed as knights with crowns and a red plumed helmet search for hidden clues in a flowery Alsatian village square: one looks behind a stone fountain with a magnifying glass, one peeks under a wooden bench, one finds a rolled parchment in a flower pot, half-timbered houses around. Plain surfaces, no carvings, no inscriptions."
+    },
+    {
+      "type": "benefice",
+      "debut": 14.5,
+      "fin": 18,
+      "surtitre": "**24,90 €** POUR TOUT LE GROUPE",
+      "l1": "Énigmes, mot secret,",
+      "l2": "et **le trésor final.**",
+      "cta": "📲 Votre ville : **lien en bio**",
+      "image": "img/s5.jpg",
+      "prompt": "Children aged 7 to 10 dressed as knights with crowns and a red plumed helmet whisper a secret word to each other and open a small wooden treasure chest glowing with golden light under a big old tree, half-timbered Alsatian houses in the background, delighted faces."
+    },
+    {
+      "type": "cta",
+      "debut": 18,
+      "fin": 22,
+      "surtitre": "MAQUETELEGENDAIRE.FR",
+      "l1": "Posez la tablette,",
+      "l2": "**place à l'aventure.**",
+      "bouton": "CRÉER MON APERÇU GRATUIT",
+      "sous_bouton": "Détails sur notre site · lien en bio",
+      "image": "img/s6.jpg",
+      "prompt": "A proud little parade of children aged 7 to 10 dressed as knights with wooden swords, crowns and a red plumed helmet marches down a flowery Alsatian street with half-timbered houses, led by a kind old wise man with a long white beard and a burgundy cloak, parents waving and smiling."
+    }
+  ]
+}

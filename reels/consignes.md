@@ -9,7 +9,7 @@
    - dernière scène : bouton « CRÉER MON APERÇU GRATUIT » + « Détails sur notre site · lien en bio » (variante possible : « Aperçu gratuit sur maquetelegendaire.fr »).
    - **Ne plus écrire « Détails en commentaire »** dans les vidéos : tout renvoie vers le site / le lien en bio. La légende et le commentaire épinglé poussent aussi vers le site.
    Varier les CTA d'une vidéo à l'autre (voir `historique.md`).
-2. **Musique de fond différente de celle du site** : par défaut `reels/musique/aventure.mp3` (composée par `musique.py`). Ne jamais utiliser `audio/musique/accueil.mp3`. Bruitages toujours présents.
+2. **Musique de fond différente de celle du site, et différente à chaque vidéo** (consigne du 22/11/2026) : dans `script.json`, `"musique": "<nom>"` = `reels/musique/<nom>.mp3`. Choisir une piste **jamais utilisée** (`python3 reels/musique_variee.py --liste`) ; s'il n'en reste plus, en composer une inédite (`python3 reels/musique_variee.py --nouvelle`). Accorder l'ambiance au sujet (marche joyeuse, mystère, fête…). Ne jamais utiliser `audio/musique/accueil.mp3`. Bruitages toujours présents.
 3. **Prix** : 24,90 € pour tout le groupe, autant d'enfants qu'on veut (voir `faits-produit.md`).
 4. **Réponses concises** : comptes rendus courts, sans récapitulatif détaillé.
 5. **Vidéo de référence validée par Nathan (18/11/2026)** : `reference/reference-validee_il-pleut.mp4` (script : `reference/reference-validee_il-pleut.script.json`, planche : `reference/planche-reference-validee.jpg`). Rendu, rythme, CTA, musique et bruitages « parfaits » : chaque nouveau Reel doit avoir le même niveau et la même structure ; ne changer que le sujet, les textes et les images. Comparer la planche de chaque nouvelle vidéo à cette planche.
