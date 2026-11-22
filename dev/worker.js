@@ -247,7 +247,9 @@ async function unlock(request, env, ctx) {
   let s;
   try { s = await stripe(env, "GET", "/v1/checkout/sessions/" + id); }
   catch (e) { console.log(String(e)); return reply({ ok: false, reason: "unknown" }, 404); }
-  if (s.payment_status !== "paid") { log("unlock", { ok: false, reason: "unpaid" }); return reply({ ok: false, reason: "unpaid" }, 402); }
+  // a 100 % promotion code (quest offered to a partner): Stripe completes the session with nothing to pay
+  const free = s.status === "complete" && s.payment_status === "no_payment_required";
+  if (s.payment_status !== "paid" && !free) { log("unlock", { ok: false, reason: "unpaid" }); return reply({ ok: false, reason: "unpaid" }, 402); }
   const m = s.metadata || {};
   let token = "";
   for (let i = 0; m["t" + i]; i++) token += m["t" + i];
