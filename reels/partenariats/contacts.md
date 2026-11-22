@@ -10,3 +10,12 @@
 | @lesptitsloupsenbalade | https://www.instagram.com/lesptitsloupsenbalade/ | Île-de-France | 2026-11-20 | réponse | 2026-11-20 | Floriane curieuse, veut découvrir le projet ; réponse détaillée envoyée par Nathan | 2026-11-20.md |
 | @sortieskidsidf | https://www.instagram.com/sortieskidsidf/ | Île-de-France | 2026-11-20 | proposé | | Abonnés et activité à vérifier | 2026-11-20.md |
 | @laroutineyt | https://www.instagram.com/laroutineyt/ | Strasbourg, Alsace | 2026-11-20 | proposé | | Abonnés (~19 k) et activité à vérifier ; pseudo confirmé par une seule source | 2026-11-20-2.md |
+| @sorties.en.famille.alsace | https://www.instagram.com/sorties.en.famille.alsace/ | Strasbourg, Alsace | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
+| @onfaitquoi_maman | https://www.instagram.com/onfaitquoi_maman/ | Lyon | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
+| @mammaganglyon | https://www.instagram.com/mammaganglyon/ | Lyon | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
+| @motherintown | https://www.instagram.com/motherintown/ | Toulouse | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
+| @enfant.bordeaux | https://www.instagram.com/enfant.bordeaux/ | Bordeaux | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
+| @quefaireenfamille | https://www.instagram.com/quefaireenfamille/ | Marseille, Bouches-du-Rhône | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
+| @mother_in_lille | https://www.instagram.com/mother_in_lille/ | Lille | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
+| @en_voila_une_idee_lilloise | https://www.instagram.com/en_voila_une_idee_lilloise/ | Lille | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
+| @le_22_avec_eux | https://www.instagram.com/le_22_avec_eux/ | Saint-Brieuc, Côtes-d'Armor | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |

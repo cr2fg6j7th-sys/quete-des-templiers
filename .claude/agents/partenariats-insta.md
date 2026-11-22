@@ -35,7 +35,7 @@ Ma Quête Légendaire (maquetelegendaire.fr) : chasses au trésor / quêtes de c
 ## Méthode (fiable, sans inventer)
 
 1. Lis `contacts.md`, `offre-partenaire.md`, `reels/faits-produit.md`.
-2. **WebSearch** (charge-le avec ToolSearch `select:WebSearch` s'il est différé ; mode `standard`, lance plusieurs requêtes dans le même tour). Varie les requêtes, par exemple :
+2. **WebSearch** (charge-le avec ToolSearch `select:WebSearch` s'il est différé ; **mode `extended`** (le mode standard ne remonte presque aucun profil Instagram ; l'extended renvoie les pages instagram.com avec abonnés et bio), lance 4 requêtes par tour, une ville ou un thème par requête). Varie les requêtes, par exemple :
    - `site:instagram.com idée anniversaire enfant`, `site:instagram.com maman Strasbourg activités enfants`
    - `instagram maman blogueuse activités enfants Alsace`, `instagrammeuse sorties en famille Strasbourg`, `que faire avec les enfants à Strasbourg instagram`
    - `compte instagram DIY anniversaire enfant France`, `comptes Instagram de parents à suivre`, `classement influenceuses parentalité micro-influence`
