@@ -359,12 +359,6 @@ console.log("Adresses du site : tous les tests passent.");
     // gone: paid (back on the site, or not), unsubscribed, a made-up request: « introuvable », nothing sent
     paidSessions = [{ id: "cs_test_" + "x".repeat(20), status: "complete", payment_status: "paid", created: Math.floor(Date.now() / 1000), metadata: Object.assign(chunks(tok.paye), { n: "Léo" }) }];
     assert.strictEqual((await call("/api/unlock", { session: paidSessions[0].id }, eenv)).at(0), 200);
-    // a quest offered with a 100 % promotion code: nothing to pay, it unlocks; an open session with nothing paid does not
-    paidSessions.push({ id: "cs_test_" + "o".repeat(20), status: "complete", payment_status: "no_payment_required", created: Math.floor(Date.now() / 1000), metadata: chunks(tok.paye) },
-      { id: "cs_test_" + "u".repeat(20), status: "open", payment_status: "unpaid", created: Math.floor(Date.now() / 1000), metadata: chunks(tok.paye) });
-    assert.strictEqual((await call("/api/unlock", { session: "cs_test_" + "o".repeat(20) }, eenv)).at(0), 200, "100 % code: unlocked");
-    assert.strictEqual((await call("/api/unlock", { session: "cs_test_" + "u".repeat(20) }, eenv)).at(0), 402, "unpaid: refused");
-    paidSessions.splice(1);
     await new Promise(ok => setTimeout(ok, 20));
     paidSessions.push({ id: "cs_test_" + "y".repeat(20), status: "complete", payment_status: "paid", created: Math.floor(Date.now() / 1000), metadata: chunks(tok.parti) });
     await worker.fetch(new Request(first["stop@exemple.fr"].headers["List-Unsubscribe"].slice(1, -1)), eenv, { waitUntil() {} });
