@@ -33,7 +33,9 @@ body{background:linear-gradient(180deg,#f6e6d9 0%,#efe6da 50%,#e5e9d8 100%);posi
 .cta .carte{top:705px;height:670px}
 .sticker{position:absolute;transform:translate(-50%,-50%);background:var(--creme);border:3px solid var(--bordeaux);color:var(--bordeaux);font-size:38px;padding:10px 28px;border-radius:10px;white-space:nowrap;box-shadow:0 8px 18px rgba(80,30,30,.18)}
 .barres{position:absolute;inset:0;pointer-events:none}
-.barres line{stroke:var(--barre);stroke-width:10;stroke-linecap:round}
+.barres path{stroke:var(--barre);stroke-width:10;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.feutre{position:absolute;inset:0;pointer-events:none}
+.feutre path{stroke:var(--bordeaux);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;fill:none;opacity:.85}
 .pastille{top:1406px;font-size:27px;letter-spacing:.085em;padding:15px 36px 15px calc(36px + .085em);color:#fff;background:var(--bordeaux);border-radius:999px}
 #rebours{top:1402px;font-size:37px;color:var(--marine);background:var(--creme);border:2px solid var(--beige);padding:11px 34px;border-radius:999px}
 #rebours b{color:var(--bordeaux)}
@@ -55,7 +57,7 @@ body{background:linear-gradient(180deg,#f6e6d9 0%,#efe6da 50%,#e5e9d8 100%);posi
   <div id="accroche" class="c" data-cle>Chasses au trésor pour enfants</div>
 </div>
 <div id="scenes"></div>
-<div id="rebours" class="c" data-cle>⏳ La solution arrive dans <b>3 s</b></div>
+<div id="rebours" class="c" data-cle>⏳ <span>La solution arrive dans</span> <b>3 s</b></div>
 <div id="rail" class="c"><i></i></div>
 <script>
 const DATA = __DATA__;
@@ -82,6 +84,31 @@ const SLOTS = [[240, 690], [745, 745], [255, 1095], [730, 1140], [300, 900], [70
 const ROTS = [-5, 5, 4, -5, -4, 5];
 const iSolution = DATA.scenes.findIndex(x => x.type === "solution");
 
+// ---- Montage « humain » (consigne de Nathan, 23/11/2026) : chaque vidéo a ses petites irrégularités ----
+// Graine propre à la vidéo (champ « humain » du script, sinon le titre) : mouvements de caméra variés, léger
+// tremblé de cadre, transitions différentes, stickers placés à la main, traits et soulignés dessinés au feutre.
+// "humain": false dans le script = montage d'origine, parfaitement régulier.
+const HUMAIN = DATA.humain !== false;
+let hs = [...String(DATA.humain ?? DATA.titre ?? "q")].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 2147483647, 97) || 97;
+const hr = () => (hs = (hs * 48271) % 2147483647) / 2147483647;          // aléatoire reproductible
+const hv = (a, b) => a + (b - a) * hr();
+const PLANS = ["avant", "arriere", "gauche", "droite"];
+const reglages = DATA.scenes.map((s, i) => HUMAIN ? {
+  plan: PLANS[Math.floor(hr() * 4)],                                       // mouvement de caméra sur l'image
+  phase: hv(0, 6.28), amp: hv(0.6, 1.2),                                   // tremblé de cadre
+  entree: i === 0 ? "fondu" : (s.type === "cta" ? "fondu" : ["fondu", "coupe", "glisse", "coupe", "glisse"][Math.floor(hr() * 5)]),
+  decal: [0, 1, 2, 3].map(() => hv(-0.03, 0.04)),                          // décalages des lignes
+  souligne: i > 0 && hr() < 0.6,                                           // soulignage au feutre d'un mot clé
+} : {plan: "avant", phase: 0, amp: 0, entree: "fondu", decal: [0, 0, 0, 0], souligne: false});
+function trace(x0, y0, x1, y1, n, j) {                                    // trait « à la main » (légèrement ondulé)
+  let d = `M${x0.toFixed(1)},${y0.toFixed(1)}`;
+  for (let k = 1; k <= n; k++) {
+    const f = k / n, x = x0 + (x1 - x0) * f, y = y0 + (y1 - y0) * f + (k < n ? hv(-j, j) : 0);
+    d += ` L${x.toFixed(1)},${y.toFixed(1)}`;
+  }
+  return d;
+}
+
 const scenes = DATA.scenes.map((s, i) => {
   const el = document.createElement("div");
   el.className = "scene " + s.type + (s.badge ? " accroche-scene" : "");
@@ -93,10 +120,13 @@ const scenes = DATA.scenes.map((s, i) => {
   h += `<div class="carte"><img src="${s.image}"></div>`;
   (s.stickers || []).forEach((st, k) => {
     const o = typeof st === "string" ? {texte: st} : st;
-    const [x, y] = o.x ? [o.x, o.y] : SLOTS[k % SLOTS.length];
-    h += `<div class="sticker" data-cle data-sticker style="left:${x}px;top:${y}px" data-rot="${o.rot ?? ROTS[k % ROTS.length]}">${esc(o.texte)}</div>`;
+    let [x, y] = o.x ? [o.x, o.y] : SLOTS[k % SLOTS.length];
+    let rot = o.rot ?? ROTS[k % ROTS.length];
+    if (HUMAIN && !o.x) { x += hv(-25, 25); y += hv(-18, 18); rot = Math.sign(rot) * hv(2.5, 7.5); }   // posés à la main
+    h += `<div class="sticker" data-cle data-sticker style="left:${x}px;top:${y}px" data-rot="${rot}">${esc(o.texte)}</div>`;
   });
   if ((s.stickers || []).length) h += `<svg class="barres" width="1080" height="1920"></svg>`;
+  h += `<svg class="feutre" width="1080" height="1920"></svg>`;
   if (s.pastille) h += `<div class="c pastille" data-cle>${esc(s.pastille)}</div>`;
   if (s.cta && s.type !== "cta") h += `<div class="c ${s.pastille ? "cta-ligne" : "cta-pill"}" data-cle data-ctaslide>${gras(s.cta)}</div>`;
   el.innerHTML = h;
@@ -127,10 +157,21 @@ window.ajuster = function () {
       if (b) { const m = (b[1] - a[1]) / (b[0] - a[0]); x0 = 80; x1 = 1000; y0 = a[1] + m * (x0 - a[0]); y1 = a[1] + m * (x1 - a[0]); }
       else { x0 = a[0] - 190; x1 = a[0] + 190; y0 = a[1] + 12; y1 = a[1] - 12; }
       if (y1 > 980) { const m = (y1 - y0) / (x1 - x0); y1 = y0 + m * (940 - x0); x1 = 940; }   // colonne de boutons
-      const len = Math.hypot(x1 - x0, y1 - y0);
-      l += `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke-dasharray="${len}" stroke-dashoffset="${len}" data-len="${len}"/>`;
+      const len = Math.hypot(x1 - x0, y1 - y0) * 1.02;
+      const d = HUMAIN ? trace(x0, y0 + hv(-4, 4), x1, y1 + hv(-4, 4), 9, 2.2) : `M${x0},${y0} L${x1},${y1}`;
+      l += `<path d="${d}" style="stroke-width:${HUMAIN ? hv(8.5, 11.5).toFixed(1) : 10}" stroke-dasharray="${len}" stroke-dashoffset="${len}" data-len="${len}"/>`;
     }
     svg.innerHTML = l;
+  }
+  // soulignage au feutre sous un mot clé (titre), tracé après son arrivée
+  for (const {el, i} of scenes) {
+    if (!reglages[i].souligne) continue;
+    const z = el.querySelector(".l1 .zoom, .l2 .zoom"); if (!z) continue;
+    const r = z.getBoundingClientRect(), ligne = z.closest("[data-ligne]");
+    const y = r.bottom - r.height * 0.06;
+    const x0 = r.left + hv(-6, 4), x1 = r.right + hv(-4, 8);
+    const d = trace(x0, y + hv(-2, 3), x1, y + hv(-5, 2), 6, 2.6);
+    $(".feutre", el).innerHTML = `<path d="${d}" stroke-dasharray="${(x1 - x0) * 1.05}" stroke-dashoffset="${(x1 - x0) * 1.05}" data-len="${(x1 - x0) * 1.05}" data-ligne-k="${[...el.querySelectorAll("[data-ligne]")].indexOf(ligne)}"/>`;
   }
 };
 
@@ -148,14 +189,16 @@ const bosse = (t, c, d) => clamp(1 - Math.abs(t - c) / d);   // triangle centré
 window.render = function (t) {
   for (const {s, el, i} of scenes) {
     const premier = i === 0, dernier = i === scenes.length - 1;
-    const aOut = dernier ? 1 : 1 - clamp((t - (s.fin - SORTIE / 2)) / SORTIE);
+    const rg = reglages[i], suivant = reglages[i + 1];
+    const sortie = suivant && suivant.entree === "coupe" ? 0.06 : SORTIE;     // coupe franche
+    const aOut = dernier ? 1 : 1 - clamp((t - (s.fin - sortie / 2)) / sortie);
     const visible = (premier || t >= s.debut) && aOut > 0;
     el.style.display = visible ? "block" : "none";
     if (!visible) continue;
     el.style.opacity = aOut;
     const u = premier ? 99 : t - s.debut;          // la première image est déjà composée (miniature)
     el.querySelectorAll("[data-ligne]").forEach((l, k) => {
-      monte(l, u, k * DECAL);
+      monte(l, u, k * DECAL + rg.decal[k % 4]);
       // mots clés en grossissement : arrivent 1,9× plus gros, se posent avec un léger rebond, puis restent statiques
       l.querySelectorAll(".zoom").forEach(z => {
         if (premier) {                      // 1re image déjà composée (miniature) : simple pulsation d'insistance
@@ -170,10 +213,26 @@ window.render = function (t) {
         z.style.margin = `0 ${Math.max(0, sz - 1) * z.offsetWidth / 2}px`;   // écarte les mots voisins pendant le grossissement
       });
     });
-    const carte = $(".carte", el), pc = ease((u - CARTE_RETARD) / CARTE);
-    carte.style.opacity = pc;
-    carte.style.transform = `translateY(${(1 - pc) * 60}px)`;
-    $("img", carte).style.transform = `scale(${1 + 0.03 * clamp((t - s.debut) / (s.fin - s.debut))})`;
+    const carte = $(".carte", el);
+    // tremblé de cadre très léger (caméra tenue à la main)
+    const tx = rg.amp * (2.2 * Math.sin(t * 0.9 + rg.phase) + 0.8 * Math.sin(t * 2.3 + rg.phase * 2));
+    const ty = rg.amp * (1.6 * Math.cos(t * 0.7 + rg.phase) + 0.6 * Math.sin(t * 1.9 + rg.phase));
+    const rr = rg.amp * 0.3 * Math.sin(t * 0.5 + rg.phase);
+    if (rg.entree === "coupe") {                                            // coupe franche + petit coup de zoom
+      const q = ease(u / 0.3); carte.style.opacity = premier ? 1 : clamp(u / 0.04);
+      carte.style.transform = `translate(${tx}px,${ty}px) rotate(${rr}deg) scale(${1.07 - 0.07 * q})`;
+    } else if (rg.entree === "glisse") {                                    // arrive de côté, comme un geste de la main
+      const q = ease((u - 0.1) / 0.4); carte.style.opacity = clamp((u - 0.1) / 0.15);
+      carte.style.transform = `translate(${tx + (1 - q) * 160}px,${ty}px) rotate(${rr + (1 - q) * 2.5}deg)`;
+    } else {
+      const pc = ease((u - CARTE_RETARD) / CARTE);
+      carte.style.opacity = pc;
+      carte.style.transform = `translate(${tx}px,${ty + (1 - pc) * 60}px) rotate(${rr}deg)`;
+    }
+    const f = clamp((t - s.debut) / (s.fin - s.debut)), K = 0.06;
+    const cam = {avant: `scale(${1 + K * f})`, arriere: `scale(${1 + K * (1 - f)})`,
+                 gauche: `scale(${1 + K}) translateX(${(0.5 - f) * 4}%)`, droite: `scale(${1 + K}) translateX(${(f - 0.5) * 4}%)`};
+    $("img", carte).style.transform = HUMAIN ? cam[rg.plan] : `scale(${1 + 0.03 * f})`;
     // stickers : un toutes les 0,5 s à partir de debut+0,57 s, puis barrés par rangée
     const sts = el.querySelectorAll("[data-sticker]"), n = sts.length;
     const t0 = s.debut + 0.57;
@@ -185,7 +244,11 @@ window.render = function (t) {
       st.style.opacity = clamp(v * 3);
       st.style.transform = `translate(-50%,-50%) rotate(${rot * (0.4 + 0.6 * clamp(v))}deg) scale(${sc})`;
     });
-    el.querySelectorAll(".barres line").forEach((ln, k) => {
+    el.querySelectorAll(".feutre path").forEach(pt => {
+      const len = +pt.dataset.len, k = +pt.dataset.ligneK;
+      pt.setAttribute("stroke-dashoffset", len * (1 - ease((u - k * DECAL - ZOOM_RETARD - ZOOM_DUREE - 0.05) / 0.3)));
+    });
+    el.querySelectorAll(".barres path").forEach((ln, k) => {
       const len = +ln.dataset.len;
       ln.setAttribute("stroke-dashoffset", len * (1 - ease((t - barre - k * 0.17) / 0.15)));
     });
@@ -207,6 +270,7 @@ window.render = function (t) {
   const rb = 1 - clamp((t - (debutSolution - SORTIE / 2)) / SORTIE);
   $("#rebours").style.opacity = $("#rail").style.opacity = rb;
   $("#rebours").style.display = $("#rail").style.display = rb <= 0 ? "none" : "block";
+  $("#rebours span").textContent = DATA.rebours || "La solution arrive dans";
   $("#rebours b").textContent = Math.max(1, Math.ceil(debutSolution - t - 1e-6)) + " s";
   $("#rail i").style.width = (100 * clamp(t / debutSolution)) + "%";
 };

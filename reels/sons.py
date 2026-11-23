@@ -147,7 +147,11 @@ def bande_son(script, duree, sortie: Path, base: Path):
         mix += mus * fondu * 10 ** (script.get("musique_db", -12) / 20)
     if script.get("bruitages", True):
         cache = {}
+        alea = np.random.default_rng(sum(map(ord, str(script.get("humain", script.get("titre", "q"))))))
+        humain = script.get("humain", True) is not False
         for t0, nom, g in evenements(script):
+            if humain:                                   # bruitages joués « à la main » : volume et calage légèrement variables
+                g *= alea.uniform(0.82, 1.15); t0 += alea.uniform(-0.02, 0.03)
             x = cache.setdefault(nom, lire_wav(SONS / f"{nom}.wav"))
             i = int(max(0, t0) * SR)
             if i < n:

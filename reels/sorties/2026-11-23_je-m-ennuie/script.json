@@ -13,8 +13,8 @@
     {
       "type": "probleme",
       "debut": 0,
-      "fin": 3.5,
-      "badge": "PARENTS, REGARDEZ JUSQU'À LA FIN",
+      "fin": 3.3,
+      "badge": "RESTEZ JUSQU'AU BOUT",
       "l1": "Mercredi, 14 h :",
       "l2": "**« Je m'ennuie ! »**",
       "image": "img/s1.jpg",
@@ -22,8 +22,8 @@
     },
     {
       "type": "probleme",
-      "debut": 3.5,
-      "fin": 7,
+      "debut": 3.3,
+      "fin": 7.0,
       "surtitre": "ET ÇA RECOMMENCE TOUTES LES 5 MIN…",
       "l1": "« On fait quoi ? »",
       "l2": "« Encore **le parc ?** »",
@@ -38,8 +38,8 @@
     },
     {
       "type": "solution",
-      "debut": 7,
-      "fin": 11,
+      "debut": 7.0,
+      "fin": 10.8,
       "surtitre": "LA SOLUTION",
       "l1": "Une vraie quête,",
       "l2": "**prête en 2 minutes.**",
@@ -50,8 +50,8 @@
     },
     {
       "type": "benefice",
-      "debut": 11,
-      "fin": 14.5,
+      "debut": 10.8,
+      "fin": 14.4,
       "surtitre": "MERCREDIS ET VACANCES",
       "l1": "Énigmes, indices,",
       "l2": "et **mot secret.**",
@@ -61,8 +61,8 @@
     },
     {
       "type": "benefice",
-      "debut": 14.5,
-      "fin": 18,
+      "debut": 14.4,
+      "fin": 18.1,
       "surtitre": "**24,90 €** POUR TOUT LE GROUPE",
       "l1": "Copains, cousins :",
       "l2": "**tout le monde joue.**",
@@ -72,7 +72,7 @@
     },
     {
       "type": "cta",
-      "debut": 18,
+      "debut": 18.1,
       "fin": 22,
       "surtitre": "MAQUETELEGENDAIRE.FR",
       "l1": "Fini l'ennui,",
@@ -82,5 +82,6 @@
       "image": "img/s6.jpg",
       "prompt": "Children aged 7 to 10 dressed as knights raise wooden swords and a small glowing treasure chest triumphantly on a little stone bridge over a stream in an Alsatian village with half-timbered houses and flowers, golden late afternoon light, smiling parents waving."
     }
-  ]
+  ],
+  "rebours": "Réponse dans"
 }
