@@ -56,6 +56,8 @@ Champs d'une scène : `type`, `debut`, `fin`, `badge` (scène 1) ou `surtitre` (
 
 Le compte à rebours « ⏳ La solution arrive dans N s » et sa barre sont automatiques sur les scènes `probleme` ; la ligne « Chasses au trésor pour enfants » apparaît automatiquement à partir de la première scène non-problème.
 
+Parcours du regard : une idée par slide, mot clé de préférence en fin de ligne 2, surtitre ≤ 4 mots, 3 blocs de texte au plus (voir `consignes.md`, point 9).
+
 Montage « humain » : varier durées, badge, `rebours`, CTA et style des descriptions (voir `consignes.md`, point 8) ; le gabarit ajoute seul les irrégularités visuelles.
 
 Mots clés en grossissement : dans chaque scène, entoure de `**…**` 1 à 2 éléments les plus importants (voir `consignes.md`, point 7).

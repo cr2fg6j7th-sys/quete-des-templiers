@@ -126,7 +126,7 @@ def evenements(script):
                 ev.append((0.3 if i == 0 else s["debut"] + k * 0.12 + 0.15, "pop", 0.28))
     for s in sc:                                               # CTA de chaque slide
         if s.get("cta") and s["type"] != "cta":
-            ev.append((s["debut"] + 0.9, "pop", 0.3))
+            ev.append((s["debut"] + max(1.7, (s["fin"] - s["debut"]) * 0.5), "pop", 0.3))   # T_CTA du gabarit
     return ev
 
 

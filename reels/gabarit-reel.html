@@ -67,6 +67,9 @@ const ease = x => 1 - Math.pow(1 - clamp(x), 3);          // ease-out cubique
 // Minutage mesuré sur la référence : l'ancienne scène s'efface en 0,2 s autour de la frontière,
 // les textes de la nouvelle montent (40 px, 0,45 s, décalés de 0,12 s), la carte suit 0,25 s plus tard.
 const ZOOM_RETARD = 0.15, ZOOM_DUREE = 0.5, ZOOM_PREMIER = 0.3;   // grossissement des mots clés
+// Parcours du regard (consigne du 23/11/2026) : un seul point focal à la fois, dans l'ordre
+// titre (et son mot clé) → image (stickers) → appel à l'action. Ce qui n'est pas le point focal est discrètement atténué.
+const T_CTA = d => Math.max(1.7, d * 0.5);               // le CTA de slide arrive une fois le titre lu et l'image vue
 const SORTIE = 0.2, TXT = 0.45, DECAL = 0.12, CARTE_RETARD = 0.25, CARTE = 0.45;
 
 // fins points beiges épars (pseudo-aléatoire fixe : même fond à chaque rendu)
@@ -233,6 +236,11 @@ window.render = function (t) {
     const cam = {avant: `scale(${1 + K * f})`, arriere: `scale(${1 + K * (1 - f)})`,
                  gauche: `scale(${1 + K}) translateX(${(0.5 - f) * 4}%)`, droite: `scale(${1 + K}) translateX(${(f - 0.5) * 4}%)`};
     $("img", carte).style.transform = HUMAIN ? cam[rg.plan] : `scale(${1 + 0.03 * f})`;
+    // image légèrement en retrait pendant la lecture du titre et quand le CTA prend le relais
+    const dur = s.fin - s.debut, tCta = T_CTA(dur);
+    const aCta = (s.cta || s.type === "cta") && !premier ? ease((u - tCta) / 0.4) : 0;
+    const focusImg = premier ? 1 : ease((u - 0.55) / 0.45) * (1 - 0.6 * aCta);
+    $("img", carte).style.filter = `brightness(${0.9 + 0.1 * focusImg}) saturate(${0.88 + 0.12 * focusImg})`;
     // stickers : un toutes les 0,5 s à partir de debut+0,57 s, puis barrés par rangée
     const sts = el.querySelectorAll("[data-sticker]"), n = sts.length;
     const t0 = s.debut + 0.57;
@@ -241,7 +249,9 @@ window.render = function (t) {
     sts.forEach((st, k) => {
       const v = (t - (t0 + k * pas)) / 0.3, rot = +st.dataset.rot;
       const sc = v <= 0 ? 0 : v < 0.6 ? ease(v / 0.6) * 1.12 : 1.12 - 0.12 * ease((v - 0.6) / 0.4);
-      st.style.opacity = clamp(v * 3);
+      // le dernier sticker arrivé est le point focal ; les précédents se mettent un peu en retrait
+      const suivantArrive = k < n - 1 ? clamp((t - (t0 + (k + 1) * pas)) / 0.2) : 0;
+      st.style.opacity = clamp(v * 3) * (1 - 0.22 * suivantArrive * (1 - clamp((t - barre) / 0.2)));
       st.style.transform = `translate(-50%,-50%) rotate(${rot * (0.4 + 0.6 * clamp(v))}deg) scale(${sc})`;
     });
     el.querySelectorAll(".feutre path").forEach(pt => {
@@ -253,9 +263,9 @@ window.render = function (t) {
       ln.setAttribute("stroke-dashoffset", len * (1 - ease((t - barre - k * 0.17) / 0.15)));
     });
     const pa = $(".pastille", el);
-    if (pa) { const p = ease((u - CARTE_RETARD - 0.3) / 0.4); pa.style.opacity = p; pa.style.transform = `translate(-50%,-50%) scale(${0.85 + 0.15 * p})`; }
+    if (pa) { const p = ease((u - (s.cta ? 0.75 : CARTE_RETARD + 0.3)) / 0.4); pa.style.opacity = p; pa.style.transform = `translate(-50%,-50%) scale(${0.85 + 0.15 * p})`; }
     const cs = $("[data-ctaslide]", el);
-    if (cs) { const p = ease((u - 0.9) / 0.4), b = Math.max(0, Math.sin((u - 1.6) * Math.PI * 1.2));
+    if (cs) { const p = ease((u - tCta) / 0.4), b = Math.max(0, Math.sin((u - tCta - 0.6) * Math.PI * 1.2));
       cs.style.opacity = p; cs.style.transform = `translate(-50%, calc(-50% + ${(1 - p) * 20}px)) scale(${1 + 0.03 * b})`; }
     const bo = $(".bouton", el);
     if (bo) { const p = ease((u - 2 * DECAL) / TXT);
@@ -264,7 +274,8 @@ window.render = function (t) {
   // en-tête : léger creux à chaque transition, presque complet au passage à la solution (mesuré)
   let creux = 0;
   for (const f of frontieres) creux = Math.max(creux, (f === debutSolution ? 0.9 : 0.17) * bosse(t, f, 0.12));
-  $("#tete").style.opacity = 1 - creux;
+  // l'en-tête de marque reste présent mais en retrait après l'accroche (il ne doit pas voler le regard)
+  $("#tete").style.opacity = (1 - creux) * (1 - 0.2 * clamp((t - DATA.scenes[0].fin) / 0.4));
   $("#accroche").style.opacity = clamp((t - debutSolution) / 0.3);
   // compte à rebours (scènes problème) : décompte réel à la seconde + barre qui se remplit
   const rb = 1 - clamp((t - (debutSolution - SORTIE / 2)) / SORTIE);
