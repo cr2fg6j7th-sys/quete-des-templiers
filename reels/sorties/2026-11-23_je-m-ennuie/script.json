@@ -1,0 +1,86 @@
+{
+  "titre": "Je m'ennuie !",
+  "sujet": "« Je m'ennuie ! » mercredis et vacances (5)",
+  "promesses": [
+    "pret-2-minutes",
+    "ville",
+    "prix-24-90",
+    "prix-par-groupe",
+    "apercu-gratuit"
+  ],
+  "musique": "ruelles-en-fete",
+  "scenes": [
+    {
+      "type": "probleme",
+      "debut": 0,
+      "fin": 3.5,
+      "badge": "PARENTS, REGARDEZ JUSQU'À LA FIN",
+      "l1": "Mercredi, 14 h :",
+      "l2": "**« Je m'ennuie ! »**",
+      "image": "img/s1.jpg",
+      "prompt": "A bored child aged 8 lies upside down on a sofa with legs over the backrest and a dramatic sigh, toys scattered and ignored, while a French parent working on a laptop at a desk glances over with an amused smile, afternoon light."
+    },
+    {
+      "type": "probleme",
+      "debut": 3.5,
+      "fin": 7,
+      "surtitre": "ET ÇA RECOMMENCE TOUTES LES 5 MIN…",
+      "l1": "« On fait quoi ? »",
+      "l2": "« Encore **le parc ?** »",
+      "stickers": [
+        "Je m'ennuie !",
+        "On fait quoi ?",
+        "Encore le parc ?",
+        "Il est quelle heure ?"
+      ],
+      "image": "img/s2.jpg",
+      "prompt": "Three bored children aged 7 to 10 follow a French mother around the kitchen in a line like ducklings, one dragging a blanket, one sighing dramatically, one holding an empty ball, the mother holds a coffee cup with an amused, slightly desperate smile."
+    },
+    {
+      "type": "solution",
+      "debut": 7,
+      "fin": 11,
+      "surtitre": "LA SOLUTION",
+      "l1": "Une vraie quête,",
+      "l2": "**prête en 2 minutes.**",
+      "pastille": "DANS VOTRE VILLE",
+      "cta": "🔗 Votre quête : **lien en bio**",
+      "image": "img/s3.jpg",
+      "prompt": "In a cozy home hallway, three children aged 7 to 10 put on cardboard knight armor, golden paper crowns and a helmet with a red plume, eyes wide with excitement, while a smiling parent shows them an old rolled treasure map, the front door open onto a sunny street."
+    },
+    {
+      "type": "benefice",
+      "debut": 11,
+      "fin": 14.5,
+      "surtitre": "MERCREDIS ET VACANCES",
+      "l1": "Énigmes, indices,",
+      "l2": "et **mot secret.**",
+      "cta": "👀 La suite est **encore mieux**…",
+      "image": "img/s4.jpg",
+      "prompt": "Children aged 7 to 10 dressed as knights with crowns and a red plumed helmet solve a riddle together in front of an old half-timbered Alsatian house: one counts the windows with a pointing finger, one holds a magnifying glass, one scratches his head thinking, geranium flower boxes. Plain surfaces, no inscriptions."
+    },
+    {
+      "type": "benefice",
+      "debut": 14.5,
+      "fin": 18,
+      "surtitre": "**24,90 €** POUR TOUT LE GROUPE",
+      "l1": "Copains, cousins :",
+      "l2": "**tout le monde joue.**",
+      "cta": "📲 Créez la vôtre : **lien en bio**",
+      "image": "img/s5.jpg",
+      "prompt": "A big group of eight children aged 7 to 10, friends and cousins of different looks, dressed as knights with crowns and red plumed helmets, cheer and give high fives in a sunny flowery Alsatian village square with half-timbered houses and a stone fountain."
+    },
+    {
+      "type": "cta",
+      "debut": 18,
+      "fin": 22,
+      "surtitre": "MAQUETELEGENDAIRE.FR",
+      "l1": "Fini l'ennui,",
+      "l2": "**place à la quête.**",
+      "bouton": "CRÉER MON APERÇU GRATUIT",
+      "sous_bouton": "Détails sur notre site · lien en bio",
+      "image": "img/s6.jpg",
+      "prompt": "Children aged 7 to 10 dressed as knights raise wooden swords and a small glowing treasure chest triumphantly on a little stone bridge over a stream in an Alsatian village with half-timbered houses and flowers, golden late afternoon light, smiling parents waving."
+    }
+  ]
+}
