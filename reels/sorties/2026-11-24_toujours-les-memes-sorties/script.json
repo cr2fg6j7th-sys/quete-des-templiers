@@ -1,0 +1,86 @@
+{
+  "titre": "Toujours les mêmes sorties",
+  "sujet": "Toujours les mêmes sorties (7)",
+  "promesses": [
+    "ville",
+    "pret-2-minutes",
+    "prix-par-groupe",
+    "apercu-gratuit"
+  ],
+  "musique": "enigme-du-grand-maitre",
+  "rebours": "Nouvelle idée dans",
+  "scenes": [
+    {
+      "type": "probleme",
+      "debut": 0,
+      "fin": 3.2,
+      "badge": "NE ZAPPEZ PAS",
+      "l1": "Samedi, le parc.",
+      "l2": "Dimanche… **le parc.**",
+      "image": "img/s1.jpg",
+      "prompt": "A French family of two parents and three children aged 7 to 10 walk into the same small city park for the hundredth time, the children drag their feet with exaggerated bored faces, one child slumps on the same old swing, the father pushes it with a resigned amused smile, the mother holds the same paper bag of snacks, autumn trees, gently funny everyday scene."
+    },
+    {
+      "type": "probleme",
+      "debut": 3.2,
+      "fin": 6.9,
+      "surtitre": "ET LE WEEK-END D'APRÈS",
+      "l1": "Ciné, magasins…",
+      "l2": "**le même circuit.**",
+      "stickers": [
+        "Le parc",
+        "Le ciné",
+        "Les magasins",
+        "Le même goûter"
+      ],
+      "image": "img/s2.jpg",
+      "prompt": "A French family of two parents and three children aged 7 to 10 walks through a big bright shopping mall gallery, the children trail behind with slumped shoulders and long bored faces, one child yawns hugely, a parent carries shopping bags and checks the time with an amused sigh, plain shop windows without signs."
+    },
+    {
+      "type": "solution",
+      "debut": 6.9,
+      "fin": 10.9,
+      "surtitre": "LA SOLUTION",
+      "l1": "Une chasse au trésor",
+      "l2": "**dans votre ville.**",
+      "pastille": "PRÊTE EN 2 MINUTES",
+      "cta": "🔗 Aperçu gratuit : **lien en bio**",
+      "image": "img/s3.jpg",
+      "prompt": "Three children aged 7 to 10 dressed as knights with cardboard armor, golden paper crowns and a helmet with a red plume burst out of a front door onto a sunny street with an old rolled treasure map and a magnifying glass, eyes wide with excitement, a smiling parent follows them, half-timbered Alsatian houses with flower boxes."
+    },
+    {
+      "type": "benefice",
+      "debut": 10.9,
+      "fin": 14.3,
+      "surtitre": "ENFIN DU NOUVEAU",
+      "l1": "Énigmes, mot secret,",
+      "l2": "dans **vos propres rues.**",
+      "cta": "👀 Et à la fin… **le trésor**",
+      "image": "img/s4.jpg",
+      "prompt": "Children aged 7 to 10 dressed as knights with crowns and a red plumed helmet look at a familiar village street with new eyes: one points up at a carved wooden beam of a half-timbered Alsatian house, one peers through a magnifying glass at an old stone fountain, one checks a treasure map, geranium flower boxes, plain surfaces, no inscriptions."
+    },
+    {
+      "type": "benefice",
+      "debut": 14.3,
+      "fin": 17.8,
+      "surtitre": "PETIT PRIX",
+      "l1": "Toute la bande joue,",
+      "l2": "**même prix pour tous.**",
+      "cta": "📲 Votre ville en 2 min : **lien en bio**",
+      "image": "img/s5.jpg",
+      "prompt": "A joyful group of seven children aged 7 to 10, friends and cousins of different looks, dressed as knights with crowns and red plumed helmets, run together laughing down a sunny cobbled Alsatian lane with half-timbered houses and flowers, following a treasure map, parents smiling behind them."
+    },
+    {
+      "type": "cta",
+      "debut": 17.8,
+      "fin": 21.9,
+      "surtitre": "MAQUETELEGENDAIRE.FR",
+      "l1": "Ce week-end,",
+      "l2": "**on sort du circuit.**",
+      "bouton": "CRÉER MON APERÇU GRATUIT",
+      "sous_bouton": "Aperçu gratuit sur maquetelegendaire.fr",
+      "image": "img/s6.jpg",
+      "prompt": "Children aged 7 to 10 dressed as knights open a small golden treasure chest glowing with warm light in a flowery Alsatian village square with half-timbered houses, an old kind bearded Grand Master in a long cloak smiles beside them, parents cheering, golden late afternoon light."
+    }
+  ]
+}
