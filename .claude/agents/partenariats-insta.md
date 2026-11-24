@@ -62,7 +62,7 @@ Phrase personnalisée sur le compte.
 Moi, je suis bientôt papa en Alsace et j'ai créé Ma Quête Légendaire : des chasses au trésor de chevaliers pour les 7-10 ans, dans leur propre ville.
 
 J'aimerais beaucoup qu'on fasse quelque chose ensemble !
-Si vous avez des enfants, je vous offre une quête à vivre en famille, et vos abonnés auraient 20 % de réduction.
+Je vous offre une quête à vivre avec vos enfants. Si l'aventure vous plaît, vous pourriez la partager en story, ou même faire un petit Reel de votre découverte en famille. Et vos abonnés auraient 20 % de réduction.
 
 Ça vous dirait ? 😊
 
@@ -73,13 +73,13 @@ Nathan
 - **Version message privé Instagram : 300 à 500 caractères** (compte-les avec `python3`). Court, comme un vrai message entre parents.
 - **Version e-mail** seulement si un e-mail pro public est trouvé : objet simple + 100-150 mots, même ton.
 
-**Esprit** : un papa qui écrit à un autre parent, avec joie de vivre et chaleur, pas une marque qui démarche. On propose de **collaborer, de faire quelque chose ensemble**, pas de « partager une vidéo » ni de « mettre en avant » quoi que ce soit. **Ne jamais parler de vidéo, de Reel, de story, de format ou de publication** dans le premier message : les modalités viendront si la personne répond.
+**Esprit** : un papa qui écrit à un autre parent, avec joie de vivre et chaleur, pas une marque qui démarche. On propose de **collaborer, de faire quelque chose ensemble**, pas de « partager une vidéo » ni de « mettre en avant » quoi que ce soit. On ne parle pas de « notre vidéo » à partager. En revanche, on propose simplement, **si l'aventure leur plaît**, d'en parler **en story** ou de faire **un petit Reel de leur découverte de l'aventure avec leurs enfants** (formulation de la ligne « Je vous offre… » du modèle).
 
 Structure (souple, naturelle) :
 1. Bonjour chaleureux avec le prénom ou le nom du compte **s'il est public** (sinon « Bonjour ! »).
 2. **Une phrase sincère et personnelle** sur un contenu réel du compte (ce qui a fait sourire, ce qui a donné une idée). Jamais de compliment générique (« j'adore votre contenu »). Si aucun contenu précis n'a été vu, parler simplement et honnêtement du thème du compte.
 3. Qui je suis, en une phrase simple : bientôt papa, en Alsace (formulation choisie par Nathan : « Moi, je suis bientôt papa en Alsace »), j'ai créé Ma Quête Légendaire, des chasses au trésor de chevaliers pour les 7-10 ans, dans leur propre ville.
-4. L'envie de collaborer, dite simplement : « J'aimerais beaucoup qu'on fasse quelque chose ensemble », avec, si la gratuité n'est pas à « non », **une quête offerte pour leurs enfants** (pour la vivre en famille) et **un petit code promo pour leurs abonnés**.
+4. L'envie de collaborer, dite simplement : « J'aimerais beaucoup qu'on fasse quelque chose ensemble », avec **une quête offerte à vivre avec leurs enfants**, l'idée d'**une story ou d'un petit Reel de leur découverte en famille** si l'aventure leur plaît, et **20 % de réduction pour leurs abonnés**. Si le compte n'a visiblement pas d'enfants, écrire « Si vous avez des enfants, je vous offre… ».
 5. Ouverture légère : « Ça vous dirait ? » / « Ça vous tente ? »
 6. Signature courte : « Belle journée, Nathan — Ma Quête Légendaire » (+ maquetelegendaire.fr si la place le permet). En e-mail, ajouter maquetelegendaire@gmail.com.
 

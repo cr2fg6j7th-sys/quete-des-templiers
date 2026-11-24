@@ -25,3 +25,10 @@
 | @bonsplans2naima | https://www.instagram.com/bonsplans2naima/ | Paris (blog Les bons plans de Naïma) | 2026-11-24 | proposé | | Abonnés et activité à vérifier | 2026-11-24.md |
 | @delflesbonsplans | https://www.instagram.com/delflesbonsplans/ | à vérifier | 2026-11-24 | proposé | | Abonnés et activité à vérifier | 2026-11-24.md |
 | @charlotteandfamily | https://www.instagram.com/charlotteandfamily/ | à vérifier | 2026-11-24 | proposé | | Abonnés et activité à vérifier | 2026-11-24.md |
+| @boho_addict | https://www.instagram.com/boho_addict/ | Toulouse | 2026-11-24-2 | proposé | | Abonnés et activité à vérifier | 2026-11-24-2.md |
+| @lyon.familycrunch | https://www.instagram.com/lyon.familycrunch/ | Lyon | 2026-11-24-2 | proposé | | Abonnés et activité à vérifier | 2026-11-24-2.md |
+| @lebazardalison | https://www.instagram.com/lebazardalison/ | Lyon | 2026-11-24-2 | proposé | | Abonnés et activité à vérifier | 2026-11-24-2.md |
+| @papablogueur | https://www.instagram.com/papablogueur/ | Lille | 2026-11-24-2 | proposé | | Abonnés et activité à vérifier | 2026-11-24-2.md |
+| @papa_ratatam | https://www.instagram.com/papa_ratatam/ | à vérifier | 2026-11-24-2 | proposé | | Abonnés et activité à vérifier | 2026-11-24-2.md |
+| @charlie_et_ses_drolesdemomes | https://www.instagram.com/charlie_et_ses_drolesdemomes/ | à vérifier | 2026-11-24-2 | proposé | | Abonnés et activité à vérifier | 2026-11-24-2.md |
+| @lesmercredissouslapluie | https://www.instagram.com/lesmercredissouslapluie/ | à vérifier | 2026-11-24-2 | proposé | | Abonnés et activité à vérifier | 2026-11-24-2.md |
