@@ -1,0 +1,67 @@
+{
+  "titre": "Encore 5 minutes",
+  "sujet": "Enfants scotchés aux écrans",
+  "test": "accroche scène-constat sans question (0-3,5 s) ; appel au partage en scène finale",
+  "promesses": ["ville", "pret-2-minutes", "apercu-gratuit"],
+  "musique": null,
+  "scenes": [
+    {
+      "type": "probleme", "debut": 0, "fin": 3.5,
+      "badge": "PARENTS, REGARDEZ JUSQU'À LA FIN",
+      "l1": "Dimanche, 16 h :",
+      "l2": "« Encore 5 min ! »",
+      "stickers": [
+        {"texte": "Encore 5 min !", "x": 300, "y": 720, "rot": -5},
+        {"texte": "Encore 5 min !!", "x": 640, "y": 900, "rot": 4},
+        {"texte": "ENCORE 5 MIN !!!", "x": 420, "y": 1120, "rot": -3}
+      ],
+      "barrer": false,
+      "image": "img/s1.jpg",
+      "prompt": "In a cozy French living room on a Sunday afternoon, a child aged 8 sprawled on the sofa stares at a glowing tablet with a blank glowing screen, another child aged 9 holds a game controller in front of a dark television, a father stands in the doorway holding up his hand with five fingers spread, amused and slightly exasperated expression, a wall clock, warm lamp light."
+    },
+    {
+      "type": "probleme", "debut": 3.5, "fin": 7,
+      "surtitre": "ET ÇA DURE DEPUIS CE MATIN…",
+      "l1": "Tablette, console,",
+      "l2": "dessins animés…",
+      "stickers": ["Tablette", "Console", "Dessins animés"],
+      "image": "img/s2.jpg",
+      "prompt": "Inside a cozy French home: a tired but smiling mother sits at the kitchen table with a mug of tea, sighing, while in the background three children aged 7 to 10 sit in a row on the sofa all lit by the glow of screens, a tablet, a handheld console and a television, a sleepy cat on the armrest, toys untouched in a basket."
+    },
+    {
+      "type": "solution", "debut": 7, "fin": 10.5,
+      "surtitre": "LA SOLUTION",
+      "l1": "Une chasse au trésor",
+      "l2": "dans votre ville.",
+      "pastille": "ÉNIGMES · INDICES · TRÉSOR",
+      "image": "img/s3.jpg",
+      "prompt": "Three children aged 7 to 10 dressed as little knights with cardboard armor, golden paper crowns and a helmet with a red plume, running joyfully through a charming Alsatian street with half-timbered houses and flower boxes, one holding an old treasure map, another a big magnifying glass, a smiling parent following behind."
+    },
+    {
+      "type": "benefice", "debut": 10.5, "fin": 14,
+      "surtitre": "LES INDICES DU GRAND MAÎTRE",
+      "l1": "Énigmes et indices",
+      "l2": "à résoudre ensemble.",
+      "image": "img/s4.jpg",
+      "prompt": "Children aged 7 to 10 dressed as knights with paper crowns and a red plumed helmet gather around a stone fountain in a flowered Alsatian square with half-timbered houses, reading a rolled parchment clue together, one pointing at a carved stone detail with a magnifying glass, a parent crouching beside them, curious and happy."
+    },
+    {
+      "type": "benefice", "debut": 14, "fin": 17.5,
+      "surtitre": "PRÊTE EN 2 MINUTES",
+      "l1": "Mot secret, trésor,",
+      "l2": "et des rires partagés.",
+      "image": "img/s5.jpg",
+      "prompt": "Laughing children aged 7 to 10 dressed as knights with crowns and a red plumed helmet open a small wooden treasure chest glowing with golden light in a cobbled Alsatian lane with half-timbered houses and red geraniums, parents laughing and clapping behind them, late afternoon golden light."
+    },
+    {
+      "type": "cta", "debut": 17.5, "fin": 22,
+      "surtitre": "MAQUETELEGENDAIRE.FR",
+      "l1": "Envoyez-le au parent",
+      "l2": "du « encore 5 min ».",
+      "bouton": "CRÉER MON APERÇU GRATUIT",
+      "sous_bouton": "Détails en commentaire",
+      "image": "img/s6.jpg",
+      "prompt": "A kind old wise man with a long white beard and a burgundy cloak knights a proud child aged 8 wearing a paper crown and cardboard armor with a wooden sword, in a flowered Alsatian street with half-timbered houses, other children knights cheering, an open treasure chest with golden coins, parents smiling."
+    }
+  ]
+}
