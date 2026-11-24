@@ -22,3 +22,10 @@
 9. **Parcours du regard** (consigne du 23/11/2026) : le spectateur ne doit regarder qu'**un seul endroit à la fois**, dans l'ordre voulu.
    - Automatique dans le gabarit : dans chaque slide, le titre et son mot clé arrivent d'abord (image légèrement assombrie pendant la lecture), puis l'image prend la lumière (stickers : le dernier arrivé est au premier plan, les précédents passent en retrait), puis la pastille, et enfin le CTA de slide (à mi-scène, au moins 1,7 s), pendant que l'image se remet un peu en retrait. L'en-tête de marque s'atténue après l'accroche pour ne pas voler le regard.
    - À respecter en écrivant : **une seule idée par slide** ; la ligne 1 pose le contexte, la ligne 2 porte la chute, et le mot clé en grossissement est de préférence **en fin de ligne 2** (là où l'œil termine sa lecture) ; surtitre très court (≤ 4 mots) ; au plus 3 blocs de texte visibles en même temps hors en-tête (surtitre, titre, et soit pastille soit CTA ; pastille + CTA ensemble seulement sur la slide solution) ; stickers de 1 à 3 mots ; pas de mot clé dans le surtitre ET dans le titre de la même slide.
+10. **Changements du 24/11/2026 (à appliquer aux prochains Reels, à partir du sujet 7)** :
+   - **Accroche 0-3 s = scène-constat en action, sans question** : une situation qu'on voit et qu'on reconnaît, pas une question au spectateur (ex. « Samedi, parc. / Dimanche, centre commercial. Encore. »). L'image de la scène 1 montre l'action.
+   - **Appel au partage** dans la légende : « Envoyez ce Reel au parent qui… » (plus de « enregistrez »).
+   - Mot-clé principal en début de 1re ligne de légende (pour le sujet 7 : « idée sortie enfant originale »).
+   - **Aucun prix chiffré** dans la vidéo ni dans les textes (prime sur le point 3 jusqu'à nouvel ordre) : parler de « même prix quel que soit le nombre d'enfants », « petit prix ».
+   - Donner un créneau conseillé de publication sans rien programmer.
+   - Noter dans `historique.md` le changement testé (colonne Accroche : « TEST : … »).
