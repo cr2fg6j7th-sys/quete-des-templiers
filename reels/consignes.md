@@ -29,12 +29,12 @@
    - **Aucun prix chiffré** dans la vidéo ni dans les textes (prime sur le point 3 jusqu'à nouvel ordre) : parler de « même prix quel que soit le nombre d'enfants », « petit prix ».
    - Donner un créneau conseillé de publication sans rien programmer.
    - Noter dans `historique.md` le changement testé (colonne Accroche : « TEST : … »).
-11. **TEST « Oui… mais » (consigne du 24/11/2026) — Reels des sujets 8 puis 9 uniquement**, à lancer **une fois le Reel du sujet 7 mesuré** par analyse-reels (ne pas les produire avant).
+11. **TEST « Oui… mais » (consigne du 24/11/2026, avancé par Nathan) — dès le Reel du sujet 7, puis sujets 8 et 9** (la validation porte sur les 2 premiers Reels mesurés).
    - Seul changement : l'accroche 0-3 s devient un **constat en deux temps, sans question, en texte** (pas d'écran partagé). Ligne 1 = ce qu'on accepte, **finissant par « Mais »** ; ligne 2 = la bascule (mot clé `**…**` sur la bascule). 22 caractères max par ligne. L'image de la scène 1 montre l'action.
      - Sujet 8 : « Oui, un jeu. Mais » / « pas le même jeu. »
      - Sujet 9 : « Oui, on sort. Mais » / « ça traîne des pieds. »
-     - (Sujet 7, pour mémoire : « Oui, le parc. Mais » / « c'est encore samedi. »)
+     - Sujet 7 : « Oui, le parc. Mais » / « c'est encore samedi. »
    - Tout le reste est inchangé : 6 scènes, CTA site sur chaque slide, DA de la référence validée, zones protégées, promesses de `faits-produit.md` uniquement, **aucun prix chiffré**, description SEO, légende avec appel au partage.
    - Bonus : reprendre **le mot-clé principal tel quel** dans le texte de couverture (≤ 5 mots) et dans la **1re phrase du commentaire épinglé**.
-   - Validation (analyse-reels) : taux de visionnage > 3 s **au-dessus de 33 %** sur les 2 Reels (médiane du compte : 23,1 %). Sinon, retour à la scène-constat simple (point 10).
+   - Validation (analyse-reels) : taux de visionnage > 3 s **au-dessus de 33 %** sur les 2 premiers Reels du test (médiane du compte : 23,1 %). Sinon, retour à la scène-constat simple (point 10).
    - Dans `historique.md`, colonne Accroche : « TEST : Oui… mais ».
