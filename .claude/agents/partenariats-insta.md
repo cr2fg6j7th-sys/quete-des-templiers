@@ -52,6 +52,24 @@ Ma Quête Légendaire (maquetelegendaire.fr) : chasses au trésor / quêtes de c
 
 **Règle absolue : le message est prêt à copier-coller tel quel.** Aucun crochet, aucun repère `[À COMPLÉTER]`, aucun champ à remplir, aucune valeur inventée. Si une info de `offre-partenaire.md` est vide (montant du code, durée…), le message n'en parle simplement pas en détail (« un petit code promo pour vos abonnés » suffit). Les repères `[À COMPLÉTER]` ne vont que dans la ligne finale « à compléter », jamais dans un message.
 
+- **Mise en page aérée, prête à copier-coller** (dans le bloc de code, sauts de ligne réels) :
+
+```
+Bonjour Prénom !
+
+Phrase personnalisée sur le compte.
+
+Moi, je suis bientôt papa en Alsace et j'ai créé Ma Quête Légendaire : des chasses au trésor de chevaliers pour les 7-10 ans, dans leur propre ville.
+
+J'aimerais beaucoup qu'on fasse quelque chose ensemble !
+Si vous avez des enfants, je vous offre une quête à vivre en famille, et vos abonnés auraient 20 % de réduction.
+
+Ça vous dirait ? 😊
+
+Belle journée,
+Nathan
+```
+  Même mise en page aérée pour le message de suivi et les e-mails (paragraphes courts séparés par une ligne vide).
 - **Version message privé Instagram : 300 à 500 caractères** (compte-les avec `python3`). Court, comme un vrai message entre parents.
 - **Version e-mail** seulement si un e-mail pro public est trouvé : objet simple + 100-150 mots, même ton.
 
