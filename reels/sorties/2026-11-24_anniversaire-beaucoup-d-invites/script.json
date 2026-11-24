@@ -3,7 +3,6 @@
   "sujet": "Anniversaire avec beaucoup d'invités (6)",
   "promesses": [
     "ville",
-    "prix-24-90",
     "prix-par-groupe",
     "apercu-gratuit"
   ],
@@ -13,8 +12,8 @@
     {
       "type": "probleme",
       "badge": "ATTENDEZ LA FIN",
-      "l1": "12 invités,",
-      "l2": "et un **petit salon ?**",
+      "l1": "Samedi, 12 invités.",
+      "l2": "Le salon : **35 m².**",
       "image": "img/s1.jpg",
       "prompt": "A French parent in a very small apartment living room measures the tiny space with a tape measure, looking worried but amused, while a child aged 8 holds a long stack of birthday invitation envelopes, a few balloons squeezed against the ceiling, furniture crammed together.",
       "debut": 0,
@@ -61,7 +60,7 @@
     },
     {
       "type": "benefice",
-      "surtitre": "24,90 € POUR LE GROUPE",
+      "surtitre": "PETIT PRIX",
       "l1": "12 invités ou 15 :",
       "l2": "**même prix.**",
       "cta": "📲 Votre aperçu : **lien en bio**",
