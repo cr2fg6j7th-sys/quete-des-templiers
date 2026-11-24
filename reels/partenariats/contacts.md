@@ -19,3 +19,9 @@
 | @mother_in_lille | https://www.instagram.com/mother_in_lille/ | Lille | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
 | @en_voila_une_idee_lilloise | https://www.instagram.com/en_voila_une_idee_lilloise/ | Lille | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
 | @le_22_avec_eux | https://www.instagram.com/le_22_avec_eux/ | Saint-Brieuc, Côtes-d'Armor | 2026-11-22 | proposé | | Abonnés et activité à vérifier | 2026-11-22.md |
+| @minisrennais | https://www.instagram.com/minisrennais/ | Rennes | 2026-11-24 | proposé | | Abonnés et activité à vérifier | 2026-11-24.md |
+| @lesmomesdemontpellier | https://www.instagram.com/lesmomesdemontpellier/ | Montpellier et Nîmes | 2026-11-24 | proposé | | Abonnés et activité à vérifier | 2026-11-24.md |
+| @leparisdesminis | https://www.instagram.com/leparisdesminis/ | Paris | 2026-11-24 | proposé | | Abonnés et activité à vérifier | 2026-11-24.md |
+| @bonsplans2naima | https://www.instagram.com/bonsplans2naima/ | Paris (blog Les bons plans de Naïma) | 2026-11-24 | proposé | | Abonnés et activité à vérifier | 2026-11-24.md |
+| @delflesbonsplans | https://www.instagram.com/delflesbonsplans/ | à vérifier | 2026-11-24 | proposé | | Abonnés et activité à vérifier | 2026-11-24.md |
+| @charlotteandfamily | https://www.instagram.com/charlotteandfamily/ | à vérifier | 2026-11-24 | proposé | | Abonnés et activité à vérifier | 2026-11-24.md |
