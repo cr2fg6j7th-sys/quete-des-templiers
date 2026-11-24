@@ -32,3 +32,9 @@
 | @papa_ratatam | https://www.instagram.com/papa_ratatam/ | à vérifier | 2026-11-24-2 | proposé | | Abonnés et activité à vérifier | 2026-11-24-2.md |
 | @charlie_et_ses_drolesdemomes | https://www.instagram.com/charlie_et_ses_drolesdemomes/ | à vérifier | 2026-11-24-2 | proposé | | Abonnés et activité à vérifier | 2026-11-24-2.md |
 | @lesmercredissouslapluie | https://www.instagram.com/lesmercredissouslapluie/ | à vérifier | 2026-11-24-2 | proposé | | Abonnés et activité à vérifier | 2026-11-24-2.md |
+| @familin.paris | https://www.instagram.com/familin.paris/ | Paris, Île-de-France | 2026-11-24-3 | proposé | | Abonnés et activité à vérifier | 2026-11-24-3.md |
+| @esquissesadelaide | https://www.instagram.com/esquissesadelaide/ | Val-d'Oise, Yvelines, Vexin | 2026-11-24-3 | proposé | | Abonnés et activité à vérifier | 2026-11-24-3.md |
+| @the.mother.of.two | https://www.instagram.com/the.mother.of.two/ | à vérifier | 2026-11-24-3 | proposé | | Abonnés et activité à vérifier | 2026-11-24-3.md |
+| @mama_assia_ | https://www.instagram.com/mama_assia_/ | Paris | 2026-11-24-3 | proposé | | Abonnés et activité à vérifier | 2026-11-24-3.md |
+| @papacube | https://www.instagram.com/papacube/ | à vérifier | 2026-11-24-3 | proposé | | Abonnés et activité à vérifier | 2026-11-24-3.md |
+| @papapositive | https://www.instagram.com/papapositive/ | à vérifier | 2026-11-24-3 | proposé | | Abonnés et activité à vérifier | 2026-11-24-3.md |
