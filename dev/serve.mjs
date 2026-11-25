@@ -104,6 +104,7 @@ function file(p, search = "") {
 
 // Fake Stripe: sessions kept in memory.
 const sessions = new Map();
+const buyer = { email: "parent.test@exemple.fr", name: "Parent Test" };
 let n = 0;
 async function fakeStripe(req, url) {
   const auth = req.headers.get("authorization") || "";
@@ -113,7 +114,7 @@ async function fakeStripe(req, url) {
     const id = "cs_test_" + "a1B2c3D4e5".repeat(3) + String(++n).padStart(4, "0");
     const metadata = {};
     for (const [k, v] of p) { const m = k.match(/^metadata\[(.+)\]$/); if (m) metadata[m[1]] = v; }
-    sessions.set(id, { id, payment_status: "unpaid", status: "open", metadata, params: Object.fromEntries(p) });
+    sessions.set(id, { id, payment_status: "unpaid", status: "open", created: Math.floor(Date.now() / 1000), customer_details: null, metadata, params: Object.fromEntries(p) });
     return Response.json({ id, url: `${base}/fake-checkout?id=${id}` });
   }
   if (req.method === "GET" && url.pathname === "/stripe/v1/checkout/sessions")
@@ -131,6 +132,9 @@ function fakeCheckout(url) {
   if (!s) return new Response("no session", { status: 404 });
   if (url.searchParams.get("pay")) {
     s.payment_status = "paid"; s.status = "complete";
+    // the buyer as Stripe would give it (/__buyer?email=…&name=… sets the next one)
+    s.customer_details = { email: buyer.email, name: buyer.name };
+    s.total_details = { amount_discount: 0 };
     return Response.redirect(s.params.success_url.replace("{CHECKOUT_SESSION_ID}", s.id), 303);
   }
   return new Response(`<!doctype html><meta charset="utf-8"><title>Fake Stripe</title><h1>Paiement factice</h1>
@@ -184,7 +188,11 @@ http.createServer(async (nreq, nres) => {
   try {
     if (url.pathname.startsWith("/stripe/")) res = await fakeStripe(req, url);
     else if (url.pathname === "/fake-checkout") res = fakeCheckout(url);
-    else if (url.pathname === "/__sessions") res = Response.json([...sessions.values()]);
+    else if (url.pathname === "/__sessions") {
+      // POST: a payment page as Stripe would list it (examples for /espace), added to the fake sessions
+      if (req.method === "POST") { const b = await req.json(); sessions.set(b.id, b); }
+      res = Response.json([...sessions.values()]);
+    }
     else if (url.pathname === "/__counts") res = Response.json([...kv.keys()].filter(k => !k.startsWith("rappel") && alive(k)));
     else if (url.pathname === "/__mails") { res = Response.json(mails); if (url.searchParams.get("clear")) mails.length = 0; }
     else if (url.pathname === "/__brevo") { brevoFail = url.searchParams.get("fail") || "0"; res = Response.json({ fail: brevoFail }); }

@@ -345,6 +345,18 @@ async def main():
             await ep.wait_for_selector("#app:not([hidden])", timeout=8000)
             check(not await ep.evaluate("document.getElementById('mails-box').open") and call("/__brevo-events")[1]["calls"] == calls0,
                   "espace : section E-mails repliée, Brevo pas interrogé à l'ouverture")
+            # the day at a glance, hour by hour, the sales (from the fake Stripe, with the buyer) and the whole journey
+            await ep.wait_for_function("document.querySelector('#v-paid .mi')!==null||/Aucun achat/.test(document.querySelector('#v-paid').textContent)", timeout=8000)
+            vt = await ep.inner_text("[data-sec=ventes]")
+            check("parent.test@exemple.fr" in vt and "Clé de test de Stripe" in vt and "Achats (" in vt, "espace : ventes lues chez Stripe, avec l'acheteur")
+            check(await ep.locator("#cd-tiles .tile").count() == 6 and "Aujourd'hui" in await ep.inner_text("#cd-days")
+                  and await ep.locator("#cd-days button").count() == 8, "espace : coup d'œil, 8 jours au choix")
+            dr = await ep.inner_text("#dr")
+            check("Aperçu demandé par e-mail" in dr and re.search(r"\d h", dr) and "Achat" in dr, "espace : déroulé heure par heure, avec l'achat")
+            check("Diplôme atteint" in await ep.inner_text("#pc") and await ep.locator("#pc details").count() >= 8, "espace : parcours étape par étape")
+            await ep.click("#cd-days button:nth-child(2)")
+            check("hier" in await ep.inner_text("#dr-title") and await ep.get_attribute("#cd-days button:nth-child(2)", "aria-pressed") == "true", "espace : choix d'un autre jour")
+            await ep.click("#cd-days button:nth-child(1)")
             # the jump menu: sticky bar, panel, each entry to its section (just under the bar, not hidden by it)
             check(await ep.is_visible("#jump") and await ep.inner_text("#jump-now") == "" and await ep.get_attribute("#jump-btn", "aria-expanded") == "false",
                   "menu : barre visible une fois connecté, aucune section nommée en haut de page")
@@ -359,14 +371,15 @@ async def main():
             check("E-mails\nà charger" in panel and "En erreur" not in panel and "Renvoyer à une adresse" not in panel and "Avis des familles testeuses\n0 avis" in panel
                   and "Copier les e-mails" not in panel and await ep.get_attribute("#jump-btn", "aria-expanded") == "true" and await ep.get_attribute("#jump-btn", "aria-controls") == "jump-panel",
                   "menu : sections dans l'ordre, E-mails « à charger », sans sous-entrées ni copie (aucun avis)")
-            check(await ep.evaluate("[...document.querySelectorAll('#jump-panel a')].map(a=>a.getAttribute('href')).join(' ')") == "#emails #frequentation #visites #provenance #parcours #jours #avis"
-                  and await ep.evaluate("[...document.querySelectorAll('#jump-panel a')].every(a=>a.getBoundingClientRect().height>=44)"), "menu : 7 entrées, cibles d'au moins 44 px")
+            check(await ep.evaluate("[...document.querySelectorAll('#jump-panel a')].map(a=>a.getAttribute('href')).join(' ')") == "#coupdoeil #deroule #ventes #parcours #emails #frequentation #visites #provenance #jours #avis"
+                  and await ep.evaluate("[...document.querySelectorAll('#jump-panel a')].every(a=>a.getBoundingClientRect().height>=44)"), "menu : 10 entrées, cibles d'au moins 44 px")
             check(await ep.evaluate("document.activeElement.closest('#jump-panel')!==null"), "menu : le focus va dans le panneau à l'ouverture")
             await ep.keyboard.press("Escape")
             check(await ep.is_hidden("#jump-panel") and await ep.get_attribute("#jump-btn", "aria-expanded") == "false" and await ep.evaluate("document.activeElement.id") == "jump-btn",
                   "menu : Échap ferme, le focus revient au bouton")
-            for href, sel, name in [("frequentation", "[data-sec=frequentation]", "Fréquentation"), ("visites", "[data-sec=visites]", "Visites par jour"),
-                                    ("provenance", "[data-sec=provenance]", "Provenance"), ("parcours", "[data-sec=parcours]", "Visiteur → diplôme"),
+            for href, sel, name in [("coupdoeil", "[data-sec=coupdoeil]", "Coup d'œil"), ("deroule", "[data-sec=deroule]", "Déroulé"), ("ventes", "[data-sec=ventes]", "Ventes"),
+                                    ("parcours", "[data-sec=parcours]", "Parcours"), ("frequentation", "[data-sec=frequentation]", "Fréquentation"),
+                                    ("visites", "[data-sec=visites]", "Visites par jour"), ("provenance", "[data-sec=provenance]", "Provenance"),
                                     ("jours", "[data-sec=jours]", "Jour par jour"), ("avis", "#avis-title", "Avis des familles")]:
                 await go(href)
                 check(await under(sel) and await ep.is_hidden("#jump-panel") and await ep.inner_text("#jump-now") == name, f"menu : « {name} » mène à sa section, titre visible sous la barre")

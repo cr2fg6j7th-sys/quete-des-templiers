@@ -11,6 +11,7 @@
      POST /api/espace   Nathan's private page (/espace): login + code -> counts and testers' answers
      POST /api/espace/mails   login + code -> the e-mails of the preview: requests kept here, crossed with Brevo's log
      POST /api/espace/renvoi  login + code + a request (or an address) -> the preview's e-mail sent again
+     POST /api/espace/ventes  login + code -> the Stripe payment pages of the last days, with the buyers of the paid ones
      POST /api/rappel   optional: e-mail the preview's link now, and one reminder 7 days later if still unpaid
      GET  /api/rappel/stop  the unsubscribe link of those e-mails (signed); POST too, for one-click unsubscribe
    And a daily cron (wrangler.toml [triggers]) that sends the reminders due (scheduled handler).
@@ -27,8 +28,9 @@ const MAX_BODY = 3000000;
 const refOf = b => String(b && b.ref || "").replace(/[^a-z0-9-]/gi, "").slice(0, 20);
 const log = (evt, data) => console.log(JSON.stringify(Object.assign({ evt }, data)));
 
-// Anonymous counts of the visit, one KV key per event: "day|event|ref|random", kept 400 days.
-// No IP address, no identifier, no cookie: only how many times each step happened, and the ref.
+// Anonymous counts of the visit, one KV key per event: "day|event|ref|random", kept 400 days, with the hour (UTC) of
+// the event in its metadata ({ h }, since 25/11/2026: the hour-by-hour view of /espace).
+// No IP address, no identifier, no cookie: only how many times each step happened, when (to the hour), and the ref.
 const EVENTS = new Set(["home", "setup", "preview", "few", "nodata", "neterr", "checkout", "unlock", "achat", "promo", "demo", "diploma",
   "invite", "diplome", "imprime", "share", "apercu", "apercu-ouvert", "horsligne", "geo-refus", "geo-echec", "testeur", "avis",
   "liens", "liens-site", "liens-instagram", "liens-tiktok", "liens-pinterest",
@@ -37,10 +39,10 @@ const EVENTS = new Set(["home", "setup", "preview", "few", "nodata", "neterr", "
   "mail-demande", "mail-rappel", "mail-mois", "mail-stop", "mail-retour"]);
 function count(env, ctx, evt, ref) {
   if (!env.STATS || !EVENTS.has(evt)) return;
-  const day = new Date().toISOString().slice(0, 10);
+  const now = new Date(), day = now.toISOString().slice(0, 10);
   const key = `${day}|${evt}|${ref || "-"}|${crypto.randomUUID().slice(0, 8)}`;
   // The free plan allows 1,000 writes a day: past that, counts are lost for the day, nothing breaks.
-  const p = env.STATS.put(key, "1", { expirationTtl: 400 * 86400 }).catch(() => {});
+  const p = env.STATS.put(key, "1", { expirationTtl: 400 * 86400, metadata: { h: now.getUTCHours() } }).catch(() => {});
   if (ctx && ctx.waitUntil) ctx.waitUntil(p);
 }
 async function statsKey(env) {
@@ -343,16 +345,25 @@ async function espace(request, env) {
   return reply(Object.assign({ ok: true, testeurs: testers(env) }, await collect(env, b.days || 28)));
 }
 
+// days: { "2026-11-25": { event: { ref: count } } }; hours, for the last 8 days only:
+// { "2026-11-25": { "14": { event: { ref: count } } } }, the hour in UTC, "?" for the counts made before it was kept.
+const HOUR_DAYS = 8;
 async function collect(env, nDays) {
-  const n = Math.max(1, Math.min(60, parseInt(nDays, 10) || 7)), days = {};
+  const n = Math.max(1, Math.min(60, parseInt(nDays, 10) || 7)), days = {}, hours = {};
   for (let i = 0; i < n; i++) {
     const day = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10), d = days[day] = {};
+    const hs = i < HOUR_DAYS ? (hours[day] = {}) : null;
     let cursor;
     do {
       const page = await env.STATS.list({ prefix: day + "|", cursor });
       for (const k of page.keys) {
         const [, evt, ref] = k.name.split("|");
         (d[evt] = d[evt] || {})[ref] = (d[evt][ref] || 0) + 1;
+        if (hs) {
+          const h = k.metadata && Number.isInteger(k.metadata.h) && k.metadata.h >= 0 && k.metadata.h < 24 ? String(k.metadata.h) : "?";
+          const he = hs[h] = hs[h] || {};
+          (he[evt] = he[evt] || {})[ref] = (he[evt][ref] || 0) + 1;
+        }
       }
       cursor = page.list_complete ? null : page.cursor;
     } while (cursor);
@@ -366,7 +377,63 @@ async function collect(env, nDays) {
     cur = page.list_complete ? null : page.cursor;
   } while (cur && answers.length < 500);
   answers.sort((x, y) => y.date.localeCompare(x.date));
-  return { days, avis: answers };
+  return { days, hours, avis: answers };
+}
+
+// POST /api/espace/ventes { id, code, days }: the Stripe payment pages of the last days (30 by default, 60 at most),
+// newest first, read from Stripe at each call (nothing kept here). The paid ones with their buyer (the e-mail and the
+// name given to Stripe, as its Dashboard shows them) and the quest bought; the others (opened, never paid) with what
+// the visitor had chosen only, never an address. A refund is read on the payment's charge when Stripe gives it.
+async function espaceSales(request, env) {
+  const [b, refused] = await espaceLogin(request, env);
+  if (refused) return refused;
+  if (!env.STRIPE_SECRET_KEY) return reply({ ok: true, on: false, ventes: [] });
+  const n = Math.max(1, Math.min(60, parseInt(b.days, 10) || 30)), since = Math.floor(Date.now() / 1000) - n * 86400;
+  const live = /^(sk|rk)_live_/.test(env.STRIPE_SECRET_KEY);
+  const get = async (after, expand) => {
+    const q = new URLSearchParams({ limit: "100", "created[gte]": String(since) });
+    if (expand) q.append("expand[]", "data.payment_intent.latest_charge");
+    if (after) q.set("starting_after", after);
+    const r = await fetch((env.STRIPE_API || "https://api.stripe.com") + "/v1/checkout/sessions?" + q,
+      { signal: AbortSignal.timeout(10000), headers: { authorization: "Bearer " + env.STRIPE_SECRET_KEY } });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error("Stripe " + r.status + (j.error && j.error.message ? " : " + j.error.message : "")), { status: r.status });
+    return j;
+  };
+  const ventes = [];
+  let after = "", more = false, expand = true;
+  try {
+    for (let page = 0; page < STRIPE_PAGES; page++) {
+      let j;
+      // without the refunds if Stripe refuses to unfold the payments (the list itself still comes)
+      try { j = await get(after, expand); } catch (e) { if (expand && e.status === 400) { expand = false; j = await get(after, false); } else throw e; }
+      const list = Array.isArray(j.data) ? j.data : [];
+      for (const s of list) ventes.push(await saleOf(env, s));
+      if (!j.has_more || !list.length) break;
+      after = String(list[list.length - 1].id || "");
+      if (page === STRIPE_PAGES - 1) more = true;
+    }
+  } catch (e) {
+    return reply({ ok: true, on: true, live, ventes, error: String(e && e.message || e).slice(0, 200) });
+  }
+  return reply({ ok: true, on: true, live, ventes, more, remboursements: expand, days: n });
+}
+async function saleOf(env, s) {
+  const m = s.metadata || {}, paid = s.payment_status === "paid";
+  let t = "", steps = null, indoor = null;
+  for (let i = 0; m["t" + i]; i++) t += m["t" + i];
+  try { const q = t ? questOf(await unseal(t, env)) : null; if (q) { steps = q.steps.length; indoor = !!q.indoorOnly; } } catch (e) {}
+  const pi = s.payment_intent && typeof s.payment_intent === "object" ? s.payment_intent : null;
+  const ch = pi && pi.latest_charge && typeof pi.latest_charge === "object" ? pi.latest_charge : null;
+  const cd = s.customer_details || {};
+  return {
+    at: Number(s.created) * 1000 || null, paid, status: String(s.status || ""),
+    amount: paid ? Number(s.amount_total) || 0 : null, discount: paid ? Number(s.total_details && s.total_details.amount_discount) || 0 : 0,
+    email: paid ? String(cd.email || "") : "", buyer: paid ? String(cd.name || "") : "",
+    child: String(m.n || ""), hero: m.h === "f" ? "f" : "m", kids: parseInt(m.k, 10) || null, town: String(m.v || ""), ref: String(m.ref || "") || "-",
+    steps, indoor, refund: ch ? (ch.refunded ? "total" : Number(ch.amount_refunded) > 0 ? "partiel" : "") : null,
+    id: String(s.id || "").slice(-8)
+  };
 }
 
 /* ---------- The preview by e-mail, and its reminders (on only with BREVO_API_KEY, MAIL_FROM and STATS) ----------
@@ -1049,6 +1116,7 @@ export default {
         if (url.pathname === "/api/espace") return await espace(request, env);
         if (url.pathname === "/api/espace/mails") return await espaceMails(request, env, ctx);
         if (url.pathname === "/api/espace/renvoi") return await espaceResend(request, env, ctx);
+        if (url.pathname === "/api/espace/ventes") return await espaceSales(request, env);
         if (url.pathname === "/api/testeur") return await testeur(request, env, ctx);
         if (url.pathname === "/api/avis") return await avis(request, env, ctx);
         if (url.pathname === "/api/rappel") return await askReminder(request, env, ctx);

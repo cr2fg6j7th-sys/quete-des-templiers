@@ -279,7 +279,7 @@ console.log("Adresses du site : tous les tests passent.");
       STRIPE_SECRET_KEY: "sk_test_unit", STRIPE_API: "https://stripe.test", MAIL_DAY_MAX: "200" });
     const login = { id: "test", code: "TEST-CODE-0000-0000" };
     const blog = [];   // what fake Brevo took: { mid, body, at, events: [[event, reason]] }
-    let brevoSend = "ok", brevoLog = "up", logCalls = 0, paidSessions = [];
+    let brevoSend = "ok", brevoLog = "up", logCalls = 0, paidSessions = [], stripeExpand = "ok";
     const chunks = t => { const m = {}; for (let i = 0; i * 490 < t.length; i++) m["t" + i] = t.slice(i * 490, (i + 1) * 490); return m; };
     globalThis.fetch = async (u, init) => {
       u = String(u);
@@ -303,6 +303,14 @@ console.log("Adresses du site : tous les tests passent.");
         return Response.json({ events: ev.slice(+q.get("offset"), +q.get("offset") + +q.get("limit")) });
       }
       if (u.startsWith("https://stripe.test/v1/checkout/sessions/")) return Response.json(paidSessions.find(s => u.endsWith(s.id)) || {}, { status: paidSessions.some(s => u.endsWith(s.id)) ? 200 : 404 });
+      if (u.startsWith("https://stripe.test/v1/checkout/sessions?")) {
+        const q = new URL(u).searchParams;
+        if (q.getAll("expand[]").length && stripeExpand === "refuse") return Response.json({ error: { message: "This property cannot be expanded" } }, { status: 400 });
+        if (stripeExpand === "down") return Response.json({ error: { message: "down" } }, { status: 500 });
+        // not unfolded: the payment is only its id, as Stripe gives it
+        const unfold = q.getAll("expand[]").includes("data.payment_intent.latest_charge");
+        return Response.json({ data: paidSessions.map(x => unfold ? x : Object.assign({}, x, { payment_intent: x.payment_intent ? "pi_test_1" : null })), has_more: false });
+      }
       if (u.startsWith("https://stripe.test/")) return Response.json({ data: paidSessions, has_more: false });
       if (u.startsWith("https://geo.api.gouv.fr/")) return Response.json([{ nom: "Obernai" }]);
       throw new Error("unexpected fetch " + u);
@@ -420,7 +428,43 @@ console.log("Adresses du site : tous les tests passent.");
     }
     assert.strictEqual((await call("/api/espace/renvoi", Object.assign({ rid: "1".repeat(16) + "." + "2".repeat(16) }, login), eenv))[0], 404);
     assert.strictEqual(sent.length, 0, "nothing sent to a request that is gone");
+
+    // the sales (Stripe): the paid ones with their buyer and the quest; the others without any address
+    Object.assign(paidSessions[0], { amount_total: 2241, total_details: { amount_discount: 249 }, customer_details: { email: "acheteur@exemple.fr", name: "Marie Martin" },
+      payment_intent: { latest_charge: { refunded: false, amount_refunded: 0 } } });
+    paidSessions[1].payment_intent = { latest_charge: { refunded: true, amount_refunded: 2490 } };
+    paidSessions.push({ id: "cs_test_" + "z".repeat(20), status: "expired", payment_status: "unpaid", created: Math.floor(Date.now() / 1000) - 3600,
+      customer_details: { email: "pas-paye@exemple.fr", name: "Pas Payé" }, metadata: Object.assign(chunks(tok.bizarre), { n: "Emma", v: "Obernai", k: "6", ref: "instagram" }) });
+    [st, r] = await call("/api/espace/ventes", Object.assign({ days: 30 }, login), eenv);
+    assert.ok(st === 200 && r.on && r.ventes.length === 3 && r.remboursements === true && !r.live, "sales: " + JSON.stringify(r).slice(0, 300));
+    const v0 = r.ventes[0], v1 = r.ventes[1], vx = r.ventes[2];
+    assert.ok(v0.paid && v0.email === "acheteur@exemple.fr" && v0.buyer === "Marie Martin" && v0.child === "Léo" && v0.amount === 2241 && v0.discount === 249
+      && v0.steps > 0 && v0.refund === "" && v0.at > 0, "a sale: its buyer and its quest " + JSON.stringify(v0));
+    assert.strictEqual(v1.refund, "total", "a refunded sale");
+    assert.ok(!vx.paid && vx.email === "" && vx.buyer === "" && vx.amount === null && vx.child === "Emma" && vx.town === "Obernai" && vx.kids === 6 && vx.ref === "instagram",
+      "an unpaid payment page: what was chosen, never an address " + JSON.stringify(vx));
+    assert.ok(!JSON.stringify(r).includes("pas-paye@") && !JSON.stringify(r).includes("t0"), "no address of an unpaid page, no token");
+    stripeExpand = "refuse";
+    [st, r] = await call("/api/espace/ventes", login, eenv);
+    assert.ok(st === 200 && r.ventes.length === 3 && r.remboursements === false && r.ventes[0].refund === null, "Stripe refuses to unfold the payments: the list still comes");
+    stripeExpand = "down";
+    [st, r] = await call("/api/espace/ventes", login, eenv);
+    assert.ok(st === 200 && r.on && r.ventes.length === 0 && /^Stripe 500/.test(r.error), "Stripe down: said, " + JSON.stringify(r));
+    stripeExpand = "ok";
+    assert.strictEqual((await call("/api/espace/ventes", { id: "test", code: "FAUX" }, eenv))[0], 403, "sales: the login is checked");
+    [st, r] = await call("/api/espace/ventes", login, Object.assign({}, eenv, { STRIPE_SECRET_KEY: "" }));
+    assert.ok(st === 200 && r.on === false, "sales: no Stripe key");
     paidSessions = [];
+
+    // the hour of each count (UTC, in the key's metadata), returned for the last 8 days; "?" for the older counts
+    const today = new Date().toISOString().slice(0, 10), hNow = String(new Date().getUTCHours());
+    assert.strictEqual((await worker.fetch(new Request("https://maquetelegendaire.fr/api/hit", { method: "POST", body: JSON.stringify({ e: "diploma", ref: "instagram" }) }), eenv, { waitUntil() {} })).status, 204);
+    await new Promise(ok => setTimeout(ok, 20));
+    kv.set(today + "|diploma|flyer|ancien00", { v: "1", meta: null });
+    [st, r] = await call("/api/espace", Object.assign({ days: 28 }, login), eenv);
+    assert.ok(st === 200 && r.hours && r.hours[today] && r.hours[today][hNow].diploma.instagram === 1 && r.hours[today]["?"].diploma.flyer === 1
+      && r.days[today].diploma.instagram === 1 && Object.keys(r.hours).length === 8, "hours: " + JSON.stringify(r.hours && r.hours[today]));
+    kv.delete(today + "|diploma|flyer|ancien00");
 
     // the cap of the day applies to the resends too
     const dayKey = "rappel-jour:" + new Date(Date.now()).toISOString().slice(0, 10), keepDay = kv.get(dayKey);

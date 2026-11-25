@@ -8,7 +8,8 @@
 <title>Mon espace</title>
 <link rel="icon" href="/favicon.ico">
 <style>
-/* Nathan's private dashboard: how many people come to the site, day by day, from where, and how far they go.
+/* Nathan's private dashboard: the day at a glance and hour by hour, the sales (from Stripe, with their buyers), every
+   step of the visit in the order of the journey, the e-mails of the preview, and the visits day by day, from where.
    Brand surfaces and type; the chart colours are a CVD-checked categorical set (blue, orange, aqua, yellow,
    magenta, in that fixed order), stepped separately for the dark surface. */
 @font-face{font-family:"UnifrakturMaguntia";src:url(/fonts/UnifrakturMaguntia-Book.woff) format("woff");font-display:swap}
@@ -18,7 +19,7 @@
 :root{
   --display:"UnifrakturMaguntia",Georgia,serif;--body:"Alegreya Sans",system-ui,-apple-system,sans-serif;--label:"Alegreya Sans SC","Alegreya Sans",system-ui,sans-serif;
   --stone:#eef0f5;--card:#ffffff;--ink:#1b2547;--muted:#5b6482;--rose:#b8505c;--rose-soft:#f6e3e5;--or:#a87a1f;--line:#d9dce8;--grid:#e8eaf1;--ok:#2f7a4f;--down:#b8505c;--on-rose:#fff;
-  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--funnel:#2a78d6;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;
   color-scheme:light}
 *{box-sizing:border-box;margin:0}
 body{background:var(--stone);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;-webkit-text-size-adjust:100%}
@@ -70,7 +71,7 @@ input[type=text],input[type=password]{font:inherit;font-family:var(--body);lette
 .tip i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:0}
 .two{display:grid;grid-template-columns:1fr;gap:16px}
 @media (min-width:760px){.two{grid-template-columns:repeat(2,minmax(0,1fr))}}
-/* horizontal bars (sources, funnel) */
+/* horizontal bars (sources) */
 .hb{display:flex;flex-direction:column;gap:9px}
 .hb .row{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:.95rem}
 .hb .row .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -165,6 +166,55 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
 .ji.bad>span:first-child{color:var(--rose)}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 #jump-end{height:1px}
+/* the day at a glance (25/11/2026) */
+.days{display:flex;gap:6px;overflow-x:auto;padding:2px 1px 4px;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.days button{font:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 13px;white-space:nowrap;cursor:pointer;min-height:40px;flex:none}
+.days button[aria-pressed=true]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.lead{font-size:1.08rem;line-height:1.5}
+.lead b{font-variant-numeric:tabular-nums}
+.t6{grid-template-columns:repeat(2,minmax(0,1fr))}.t6 .tile:last-child{grid-column:auto}
+@media (min-width:760px){.t6{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tile .from{font-size:.8rem;color:var(--muted);line-height:1.3}
+.tile.hi{border-color:var(--ink);box-shadow:inset 0 3px 0 var(--ink)}
+.tile.zero b{color:var(--muted)}
+.aside{background:var(--stone);border-radius:10px;padding:8px 12px;font-size:.88rem;color:var(--muted)}
+/* hour by hour */
+.tl{list-style:none;padding:0;display:flex;flex-direction:column}
+.tl>li{display:grid;grid-template-columns:3.4em minmax(0,1fr);gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.tl>li:first-child{border-top:0;padding-top:2px}
+.tl .hh{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;padding-top:1px;white-space:nowrap}
+.tl .hh.q{color:var(--muted);font-size:.85rem;line-height:1.2}
+.tl ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:5px;min-width:0}
+.ev{display:grid;grid-template-columns:2.2em minmax(0,1fr);gap:6px;align-items:baseline}
+.ev .n{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.ev .src{display:block;font-size:.82rem;color:var(--muted)}
+.ev.big .t{font-weight:700}
+.ev .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.who{border-radius:10px;padding:7px 10px;background:#eef6f1;border-left:4px solid var(--ok);display:flex;flex-direction:column;gap:1px;min-width:0}
+.who.open{background:#fbf5e8;border-left-color:var(--or)}
+.who .w1{font-weight:700}
+.who .w2{font-size:.88rem;color:var(--muted);word-break:break-word}
+.who a{color:var(--ink)}
+/* the journey, step by step */
+.pc{display:flex;flex-direction:column;min-width:0}
+.pc .row4{display:grid;grid-template-columns:minmax(0,1fr) repeat(4,2.4em);gap:4px 6px;align-items:center}
+@media (min-width:760px){.pc .row4{grid-template-columns:minmax(0,1fr) repeat(4,4.5em);gap:4px 10px}}
+.pc .hd{font-size:.78rem;color:var(--muted);padding:0 0 6px;position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--navh));background:var(--card);z-index:1}
+.pc .hd span{text-align:right}.pc .hd span:first-child{text-align:left}
+.pc .ph{font-family:var(--label);letter-spacing:.05em;color:var(--rose);font-size:.95rem;padding:14px 0 4px;border-bottom:1px solid var(--line)}
+.pc details{border-bottom:1px solid var(--grid)}
+.pc summary{list-style:none;cursor:pointer;padding:8px 0;min-height:44px}
+.pc summary::-webkit-details-marker{display:none}
+.pc summary .lab{min-width:0}
+.pc summary .lab::before{content:"›";display:inline-block;width:1em;color:var(--muted);transition:transform .15s}
+.pc details[open] summary .lab::before{transform:rotate(90deg)}
+.pc summary .c{text-align:right;font-variant-numeric:tabular-nums}
+.pc summary .c.z{color:var(--muted)}
+.pc .key .lab{font-weight:700}
+.pc .more{padding:0 0 10px 1em;font-size:.88rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.m4{grid-template-columns:repeat(2,minmax(0,1fr))}.m4 .tile:last-child{grid-column:auto}
+@media (min-width:760px){.m4{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (min-width:760px){.jt{flex:0 1 400px}.jp{right:auto;width:420px}.jbar{border-radius:0 0 14px 14px;border:1px solid var(--line);border-top:0}.jr{margin-right:auto}}
 </style>
 </head>
@@ -201,6 +251,37 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
         </div>
       </div>
       <p class="note" id="mode"></p>
+    </div>
+
+    <div class="card" data-sec="coupdoeil">
+      <div class="bar"><h2>En un coup d'œil</h2></div>
+      <div class="days" id="cd-days" role="group" aria-label="Jour affiché"></div>
+      <p class="lead" id="cd-lead"></p>
+      <div class="tiles t6" id="cd-tiles"></div>
+      <p class="aside" id="cd-tests" hidden></p>
+      <p class="note">Le site compte chaque étape sans savoir qui la fait : ni identifiant, ni cookie, ni adresse IP, comme le promet la page de confidentialité. Les seules personnes nommées ici sont celles qui ont payé (Ventes, d'après Stripe) ou demandé l'aperçu par e-mail (E-mails). Vos appareils (lien ?moi=nathan), la démo et les vérifications automatiques sont mis de côté.</p>
+    </div>
+
+    <div class="card" data-sec="deroule">
+      <div class="bar"><h2 id="dr-title">Le déroulé de la journée</h2><span class="note">heures de Paris</span></div>
+      <ol class="tl" id="dr"></ol>
+      <p class="note" id="dr-note"></p>
+    </div>
+
+    <div class="card" data-sec="ventes">
+      <div class="bar"><h2>Ventes</h2><span class="note" id="v-note">d'après Stripe · 30 derniers jours</span></div>
+      <p class="note" id="v-msg" role="status"></p>
+      <p class="warn" id="v-warn" hidden></p>
+      <div class="tiles m4" id="v-sum"></div>
+      <h3 id="v-paid-t">Achats</h3><div class="mlist" id="v-paid"></div>
+      <h3 id="v-open-t">Paiements commencés, pas terminés</h3><div class="mlist" id="v-open"></div>
+      <p class="note">Lu chez Stripe à chaque ouverture de la page, rien n'est gardé sur le site. Pour un paiement commencé mais pas terminé, seulement ce que la personne avait choisi : Stripe ne donne pas d'adresse, et on ne l'écrit pas.</p>
+    </div>
+
+    <div class="card" data-sec="parcours">
+      <div class="bar"><h2>Le parcours, étape par étape</h2></div>
+      <div class="pc" id="pc"></div>
+      <p class="note">Combien de fois chaque étape a eu lieu, dans l'ordre du parcours. Touchez une étape pour savoir ce qu'elle veut dire et d'où venaient les gens. Jours de minuit à minuit, heure universelle (1 h du matin à Paris).</p>
     </div>
 
     <details class="card fold" id="mails-box" data-sec="emails">
@@ -245,12 +326,8 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
       <p class="note">Touchez une barre pour le détail du jour. Visites de la page d'accueil, sans vos appareils (lien ?moi=nathan), la démo ni les vérifications automatiques. Jours comptés de minuit à minuit, heure universelle (1 h du matin à Paris).</p>
     </div>
 
-    <div class="two">
-      <div class="card" data-sec="provenance"><h3>D'où viennent les visites</h3><div class="hb" id="refs"></div>
-        <p class="note">« direct » : le lien n'avait pas de ?ref (adresse tapée, favori, lien en bio sans ?ref=…).</p></div>
-      <div class="card" data-sec="parcours"><h3>Du visiteur au diplôme</h3><div class="hb" id="funnel"></div>
-        <p class="note">En pourcentage des visites de la période.</p></div>
-    </div>
+    <div class="card" data-sec="provenance"><h3>D'où viennent les visites</h3><div class="hb" id="refs"></div>
+      <p class="note">« direct » : le lien n'avait pas de ?ref (adresse tapée, favori, lien en bio sans ?ref=…).</p></div>
 
     <div class="card" data-sec="jours">
       <div class="bar"><h3>Jour par jour</h3><button class="btn ghost" type="button" id="csv">Exporter (CSV)</button></div>
@@ -274,11 +351,12 @@ const KEY="espace-acces",NAVKEY="espace-section";   // NAVKEY: only the id of th
 const store={get(){try{return JSON.parse(localStorage.getItem(KEY)||sessionStorage.getItem(KEY)||"null");}catch(e){return null;}},
   set(v,keep){try{(keep?localStorage:sessionStorage).setItem(KEY,JSON.stringify(v));}catch(e){}},
   clear(){try{for(const k of[KEY,NAVKEY]){localStorage.removeItem(k);sessionStorage.removeItem(k);}}catch(e){}}};
-let data=null,period=14,loaded=0,creds=null,loadedAt=null;
+let data=null,period=14,loaded=0,creds=null,loadedAt=null,selDay=null,vdata=null,vbusy=false;
 
-// The server keeps 60 days at most; a period is compared with the one just before it, so load twice the period.
+// The server keeps 60 days at most; a period is compared with the one just before it, so load twice the period
+// (30 days at least: the journey shows 30 days).
 async function load(c,n){
-  const days=Math.min(60,Math.max(28,2*(n||period)));
+  const days=Math.min(60,Math.max(30,2*(n||period)));
   const r=await fetch("/api/espace",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id:c.id,code:c.code,days})});
   const j=await r.json().catch(()=>({}));
   if(r.status===403)throw new Error("login");
@@ -291,13 +369,13 @@ $("#login").addEventListener("submit",async e=>{
   e.preventDefault();
   const c={id:$("#id").value.trim(),code:$("#code").value.trim()};
   $("#go").disabled=true;$("#msg").className="note";$("#msg").textContent="Vérification…";
-  try{data=await load(c);creds=c;store.set(c,$("#keep").checked);show();}
+  try{data=await load(c);creds=c;store.set(c,$("#keep").checked);show();vload();}
   catch(err){$("#msg").className="note err";$("#msg").textContent=err.message==="login"?"Identifiant ou code incorrect.":"Le serveur ne répond pas. Réessayez dans un instant.";}
   $("#go").disabled=false;
 });
-$("#logout").addEventListener("click",()=>{store.clear();creds=null;data=null;mdata=null;$("#m-out").hidden=true;$("#m-msg").textContent="";$("#m-addr").value="";$("#m-addr-msg").textContent="";$("#m-choice").replaceChildren();$("#m-load").textContent="Charger les e-mails";navStop();$("#app").hidden=true;$("#login").hidden=false;$("#code").value="";$("#msg").textContent="";});
+$("#logout").addEventListener("click",()=>{store.clear();creds=null;data=null;mdata=null;vdata=null;selDay=null;$("#m-out").hidden=true;$("#m-msg").textContent="";$("#m-addr").value="";$("#m-addr-msg").textContent="";$("#m-choice").replaceChildren();$("#m-load").textContent="Charger les e-mails";navStop();$("#app").hidden=true;$("#login").hidden=false;$("#code").value="";$("#msg").textContent="";});
 async function reload(){const b=$("#refresh");b.disabled=true;b.textContent="…";
-  try{data=await load(creds);show();}catch(e){$("#stamp").textContent="Actualisation impossible, réessayez.";}b.disabled=false;b.textContent="Actualiser";}
+  try{data=await load(creds);show();vload();}catch(e){$("#stamp").textContent="Actualisation impossible, réessayez.";}b.disabled=false;b.textContent="Actualiser";}
 $("#refresh").addEventListener("click",reload);
 document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",async()=>{period=+b.dataset.n;
   document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
@@ -341,7 +419,8 @@ function render(){
   $("#mode").textContent=data.testeurs?"Avant-première active : la quête est offerte aux familles testeuses, aucun paiement possible.":"Vente ouverte : paiements actifs.";
   $("#stamp").textContent=loadedAt?"Mis à jour à "+loadedAt.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):"";
   const days=dayList(period),prev=loaded>=2*period?dayList(period,period):null;
-  tiles(days,prev);chart(days);sources(days);funnel(days);table(days);avis();navRefresh();
+  if(!selDay||!dayList(HOUR_DAYS).includes(selDay))selDay=iso(new Date());
+  glance();deroule();parcours();tiles(days,prev);chart(days);sources(days);table(days);avis();navRefresh();
 }
 
 // ---- KPI tiles, each compared with the period just before ----
@@ -409,7 +488,7 @@ function tip(r,fx,box){
   t.style.left=left+"px";t.style.top="-6px";
 }
 
-// ---- sources and funnel ----
+// ---- sources ----
 function hbar(label,v,max,color,extra){
   return el("div",{class:"row"},el("span",{class:"lab",title:label,text:label}),
     el("div",{class:"track"},el("div",{class:"fill",style:`width:${max&&v?Math.max(1,100*v/max):0}%;background:var(${color})`})),
@@ -419,14 +498,188 @@ function sources(days){
   const r=byRef(days),tot=r.reduce((t,[,c])=>t+c,0),max=r.length?r[0][1]:0;
   $("#refs").replaceChildren(...(r.length?r.slice(0,8).map(([ref,c])=>hbar(refName(ref),c,max,GROUPS.find(([g])=>g===groupOf(ref))[2],pct(c,tot))):[el("p",{class:"note",text:"Aucune visite sur la période."})]));
 }
-function funnel(days){
-  const v=sumDays(days,"home");
-  const steps=[["Visites",v],["Clics « Créer l'aperçu »",sumDays(days,"setup")],["Aperçus créés",sumDays(days,"preview")],["Quêtes jouées",days.reduce((t,d)=>t+played(d),0)],["Diplômes",sumDays(days,"diploma")]];
-  $("#funnel").replaceChildren(...steps.map(([k,n],i)=>hbar(k,n,v,"--funnel",i?pct(n,v):null)));
+
+// ---- every step of a visit, in the order of the journey: [event, name, what it means, main step] ----
+const PHASES=[
+  ["Arrivée",[["home","Visite de la page d'accueil","Une personne ouvre le site (comptée une fois par visite).",1],
+    ["demo","Film de démonstration lancé","Le film de la page d'accueil, touché pour être regardé."],
+    ["mail-retour","Retour par le lien d'un e-mail","Le bouton d'un e-mail d'aperçu ou de rappel."],
+    ["liens","Page de liens ouverte (bio des réseaux)","La page /liens, mise en bio d'Instagram ou TikTok."],
+    ["liens-site","→ clic vers le site depuis la page de liens",""]]],
+  ["Aperçu",[["setup","Formulaire ouvert","Clic sur « Créer l'aperçu » ou « Jouer à la maison ».",1],
+    ["commune-liste","Ville choisie dans la liste",""],["commune-tapee","Ville tapée à la main",""],["commune-proche","Ville la plus proche choisie",""],
+    ["localiser-ok","Position du téléphone trouvée",""],["localiser-echec","Position du téléphone introuvable",""],
+    ["geo-refus","Position refusée par la personne",""],["geo-echec","Position impossible (GPS)",""],
+    ["preview","Aperçu créé","La quête est calculée : la personne voit les étapes floutées et entend la voix.",1],
+    ["few","Peu de lieux trouvés autour","L'aperçu propose d'élargir ou de jouer à la maison."],["nodata","Aucun lieu trouvé",""],["neterr","Erreur de réseau","Le téléphone n'a pas pu joindre le site."]]],
+  ["Après l'aperçu",[["mail-demande","Aperçu demandé par e-mail","Adresse laissée sous l'aperçu : voir la section E-mails.",1],
+    ["apercu-garde","« M'envoyer l'aperçu » avec l'app e-mail","La personne s'envoie le lien elle-même : le site ne voit pas l'adresse."],
+    ["apercu","Aperçu partagé (lien copié ou envoyé)","Souvent à l'autre parent."],["apercu-ouvert","Aperçu partagé ouvert par quelqu'un d'autre",""],
+    ["apercu-retour","Retour sur son aperçu plus tard","Revenu sur le site, l'aperçu gardé dans le téléphone, sans avoir payé."],
+    ["mail-rappel","Rappel à 7 jours envoyé",""],["mail-mois","Dernier rappel à 1 mois envoyé",""],["mail-stop","Désinscription des e-mails",""]]],
+  ["Paiement",[["paybar","Bouton « Débloquer la quête » touché","Le bouton en bas de l'aperçu, qui descend jusqu'au prix."],
+    ["checkout","Page de paiement Stripe ouverte","Voir Ventes pour le détail de chaque page.",1],
+    ["annule","Revenu sans payer","Retour de la page de paiement par « Annuler » ou la flèche."],
+    ["achat","Quête achetée","Paiement réussi et retour sur le site : voir Ventes pour l'acheteur.",1],["promo","… dont avec un code promo",""]]],
+  ["La quête",[["unlock","Quête payée ouverte","À chaque ouverture : juste après l'achat, puis les jours de préparation et de fête."],
+    ["testeur","Quête offerte ouverte (avant-première)",""],["invite","Invitation créée",""],
+    ["horsligne","Quête enregistrée pour jouer sans réseau",""],["imprime","Impression (cartes des cachettes ou diplômes)",""],
+    ["prologue","Prologue écouté : la partie commence","La voix du Grand Maître lance la quête, le jour de la fête.",1],
+    ["diploma","Diplôme atteint : la quête est finie","Le mot final a été trouvé. Le site ne sait pas qui l'a trouvé.",1],
+    ["diplome","Diplôme créé en image",""],["share","Site partagé après la fête",""],["avis","Avis laissé (avant-première)",""]]]];
+const STEPS=PHASES.flatMap(([,l])=>l);
+const STEP=Object.fromEntries(STEPS.map(x=>[x[0],x]));
+const HOUR_DAYS=8;   // the server keeps the hour of each step for the last 8 days
+const TESTS={moi:"vos appareils",demo:"la démo",smoke:"les vérifications automatiques"};
+// [ref, count] of one step on some days (or one hour), the tests aside, most first
+function refsOf(obj){return Object.entries(obj||{}).filter(([r])=>!SKIP.has(r)).sort((a,b)=>b[1]-a[1]);}
+const refsLine=list=>list.map(([r,c])=>refName(r)+(c>1||list.length>1?" "+c:"")).join(", ");
+function refsDays(days,evt){const by={};for(const d of days)for(const[r,c]of Object.entries((((data.days||{})[d]||{})[evt])||{}))if(!SKIP.has(r))by[r]=(by[r]||0)+c;
+  return Object.entries(by).sort((a,b)=>b[1]-a[1]);}
+const euros=c=>(c/100).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+const sales=()=>(vdata&&vdata.on&&vdata.ventes)||[];   // newest first (sorted when read)
+const dayOf=t=>iso(new Date(t));
+
+// ---- the day at a glance: the chosen day (one of the last 8), its key steps and where people came from ----
+function dayName(d){const t=iso(new Date()),y=iso(new Date(Date.now()-864e5));
+  return d===t?"Aujourd'hui":d===y?"Hier":dayLabel(d,{weekday:"short",day:"numeric"}).replace(".","");}
+function glance(){
+  const box=$("#cd-days");
+  box.replaceChildren(...dayList(HOUR_DAYS).reverse().map(d=>{const b=el("button",{type:"button","aria-pressed":String(d===selDay),text:dayName(d)});
+    b.addEventListener("click",()=>{selDay=d;glance();deroule();navRefresh();});return b;}));
+  const d=selDay,today=d===iso(new Date());
+  const paid=sales().filter(v=>v.paid&&dayOf(v.at)===d);
+  const K=[["home","Visites"],["preview","Aperçus créés"],["mail-demande","Aperçus demandés par e-mail"],["checkout","Pages de paiement ouvertes"],["achat","Achats"],["diploma","Diplômes (quête finie)"]];
+  $("#cd-tiles").replaceChildren(...K.map(([evt,k])=>{const n=count(d,evt),r=refsOf(((data.days||{})[d]||{})[evt]);
+    return el("div",{class:"tile"+(n?"":" zero")+((evt==="achat"||evt==="diploma")&&n?" hi":"")},el("span",{class:"k",text:k}),el("b",{text:nf.format(n)}),
+      el("span",{class:"from",text:n?"venus de : "+refsLine(r):" "}));}));
+  const n=e=>count(d,e),parts=[[n("home"),"visite"],[n("preview"),"aperçu créé","aperçus créés"],[n("checkout"),"page de paiement ouverte","pages de paiement ouvertes"],
+    [n("achat"),"achat"],[n("prologue"),"quête commencée","quêtes commencées"],[n("diploma"),"diplôme","diplômes"]].filter(([c])=>c);
+  const lead=$("#cd-lead");lead.replaceChildren();
+  const title=dayLabel(d,{weekday:"long",day:"numeric",month:"long"});
+  lead.append(el("b",{text:title.charAt(0).toUpperCase()+title.slice(1)+(today?" (en cours)":"")+" : "}));
+  if(!parts.length)lead.append(document.createTextNode("personne n'est passé pour l'instant."));
+  else parts.forEach(([c,one,many],i)=>{lead.append(el("b",{text:nf.format(c)}),document.createTextNode(" "+(c>1?many||one+"s":one)+(i<parts.length-1?", ":"")));});
+  if(paid.length)lead.append(document.createTextNode(" — encaissé : "+euros(paid.reduce((t,v)=>t+(v.amount||0),0))+"."));
+  else if(parts.length)lead.append(document.createTextNode("."));
+  // the tests set aside that day, step by step, so a diploma of one's own is never a mystery
+  const dd=(data.days||{})[d]||{},tests={};
+  for(const[evt,by]of Object.entries(dd))for(const[r,c]of Object.entries(by))if(TESTS[r]){(tests[r]=tests[r]||[]).push([evt,c]);}
+  const t=$("#cd-tests"),keys=Object.keys(tests);
+  t.hidden=!keys.length;
+  t.textContent=keys.length?"Mis de côté ce jour-là : "+keys.map(r=>TESTS[r]+" ("+tests[r].sort((a,b)=>STEPS.findIndex(x=>x[0]===a[0])-STEPS.findIndex(x=>x[0]===b[0]))
+    .map(([e,c])=>c+" × "+((STEP[e]||[,e])[1]).toLowerCase()).join(", ")+")").join(" ; ")+".":"";
+}
+
+// ---- the day hour by hour: the steps (anonymous, by hour) and, from Stripe, each payment page to the minute ----
+const parisHour=(d,h)=>parseInt(new Intl.DateTimeFormat("fr-FR",{timeZone:"Europe/Paris",hour:"numeric",hourCycle:"h23"}).format(new Date(Date.UTC(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10),+h))),10)+" h";
+const hmP=t=>new Date(t).toLocaleTimeString("fr-FR",{timeZone:"Europe/Paris",hour:"2-digit",minute:"2-digit"});
+const PHASE_COL=["--s1","--s4","--s3","--s2","--s5"];
+const phaseOf=evt=>PHASES.findIndex(([,l])=>l.some(x=>x[0]===evt));
+function questText(v){return (v.child?"quête "+(/^[aeiouyéèêàâîïôœh]/i.test(v.child)?"d'":"de ")+v.child:"quête sans prénom")
+  +(v.steps?" · "+v.steps+" étapes":"")+(v.indoor?" à la maison":v.town?" à "+v.town:"")+(v.kids?" · "+v.kids+" enfants":"");}
+function saleLine(v){
+  if(v.paid)return el("li",{class:"who"},
+    el("span",{class:"w1",text:hmP(v.at)+" · Achat · "+euros(v.amount||0)+(v.discount?" (code promo −"+euros(v.discount)+")":"")+(v.refund?" · remboursé"+(v.refund==="partiel"?" en partie":""):"")}),
+    el("span",{class:"w2"},document.createTextNode((v.buyer?v.buyer+" · ":"")),v.email?el("a",{href:"mailto:"+v.email,text:v.email}):document.createTextNode("adresse non donnée")),
+    el("span",{class:"w2",text:questText(v)+" · venu par "+refName(v.ref||"-")}));
+  return el("li",{class:"who open"},
+    el("span",{class:"w1",text:hmP(v.at)+" · Paiement commencé, pas terminé"}),
+    el("span",{class:"w2",text:questText(v)+" · venu par "+refName(v.ref||"-")+(v.status==="open"?" · page encore ouverte":"")}));
+}
+function deroule(){
+  const d=selDay,H=(data.hours||{})[d]||null,today=d===iso(new Date());
+  const title=dayName(d);
+  $("#dr-title").textContent="Le déroulé de la journée"+(title==="Aujourd'hui"?"":" · "+(title==="Hier"?"hier":dayLabel(d,{weekday:"long",day:"numeric",month:"long"})));
+  const blocks=new Map();
+  const at=h=>{if(!blocks.has(h))blocks.set(h,{steps:[],sales:[]});return blocks.get(h);};
+  if(H)for(const[h,evts]of Object.entries(H))for(const[evt,by]of Object.entries(evts)){
+    const r=refsOf(by),n=r.reduce((t,[,c])=>t+c,0);if(n)at(h).steps.push({evt,n,r});}
+  for(const v of sales().filter(v=>v.at&&dayOf(v.at)===d))at(String(new Date(v.at).getUTCHours())).sales.push(v);
+  const order=[...blocks.keys()].sort((a,b)=>(a==="?")-(b==="?")||+a-+b);
+  const rank=e=>{const i=STEPS.findIndex(x=>x[0]===e);return i<0?999:i;};
+  $("#dr").replaceChildren(...(order.length?order.map(h=>{
+    const b=blocks.get(h);b.steps.sort((x,y)=>rank(x.evt)-rank(y.evt));b.sales.sort((x,y)=>x.at-y.at);
+    const st=STEP;
+    return el("li",null,el("span",{class:"hh"+(h==="?"?" q":""),text:h==="?"?"heure non notée":parisHour(d,h)}),
+      el("ul",null,...b.steps.map(({evt,n,r})=>{const s=st[evt]||[evt,evt];
+        return el("li",{class:"ev"+(s[3]?" big":"")},el("span",{class:"n",text:nf.format(n)}),
+          el("span",null,el("span",{class:"t"},el("i",{class:"dot",style:`background:var(${PHASE_COL[phaseOf(evt)]||"--s1"})`}),document.createTextNode(s[1])),
+            el("span",{class:"src",text:refsLine(r)})));}),
+        ...b.sales.map(saleLine)));
+  }):[el("li",null,el("span",{class:"hh",text:"—"}),el("p",{class:"note",text:today?"Personne n'est encore passé aujourd'hui.":"Personne n'est passé ce jour-là."}))]));
+  const notes=[];
+  if(order.includes("?"))notes.push("« heure non notée » : étapes comptées avant le 25 novembre 2026, quand le site ne gardait que le jour.");
+  if(!vdata)notes.push("Les paiements de Stripe s'ajoutent ici dès qu'ils sont lus.");
+  else if(!vdata.on)notes.push("Stripe n'est pas branché : pas de paiements dans le déroulé.");
+  else if(vdata.error)notes.push("Stripe n'a pas répondu : les paiements manquent dans le déroulé.");
+  notes.push("Les étapes ne disent pas qui les a faites : deux lignes à la même heure peuvent venir de deux personnes. Seuls les achats ont un nom.");
+  $("#dr-note").textContent=notes.join(" ");
+}
+
+// ---- the journey, step by step: today, yesterday, 7 and 30 days; a step opens on its meaning and its sources ----
+function parcours(){
+  const t=iso(new Date()),y=iso(new Date(Date.now()-864e5)),d7=dayList(7),d30=dayList(30);
+  const c=(days,evt)=>sumDays(days,evt);
+  const out=[el("div",{class:"row4 hd","aria-hidden":"true"},el("span",{text:"Étape"}),el("span",{text:"Auj."}),el("span",{text:"Hier"}),el("span",{text:"7 j"}),el("span",{text:"30 j"}))];
+  for(const[phase,list]of PHASES){
+    const rows=list.filter(([evt,,,key])=>key||c(d30,evt));
+    if(!rows.length)continue;
+    out.push(el("div",{class:"ph",text:phase}));
+    for(const[evt,name,what,key]of rows){
+      const v=[c([t],evt),c([y],evt),c(d7,evt),c(d30,evt)],r=refsDays(d30,evt),home=c(d30,"home");
+      const sum=el("summary",{class:"row4","aria-label":`${name} : aujourd'hui ${v[0]}, hier ${v[1]}, 7 jours ${v[2]}, 30 jours ${v[3]}`},
+        el("span",{class:"lab",text:name}),...v.map(n=>el("span",{class:"c"+(n?"":" z"),text:nf.format(n)})));
+      out.push(el("details",{class:key?"key":null},sum,el("div",{class:"more"},
+        what?el("span",{text:what}):null,
+        el("span",{text:v[3]?"Venus de (30 jours) : "+refsLine(r):"Rien sur 30 jours."}),
+        evt!=="home"&&home&&v[3]?el("span",{text:"Soit "+pct(v[3],home)+" des visites sur 30 jours."}):null)));
+    }
+  }
+  $("#pc").replaceChildren(...out);
+}
+
+// ---- the sales, read from Stripe (after the counts, never blocking them) ----
+async function vload(){
+  if(vbusy||!creds)return;vbusy=true;
+  const msg=$("#v-msg");msg.className="note";msg.textContent="Lecture des paiements chez Stripe…";
+  try{const j=await post("/api/espace/ventes",{days:30});if(!j.ok)throw new Error("server");
+    if(Array.isArray(j.ventes))j.ventes.sort((a,b)=>(b.at||0)-(a.at||0));vdata=j;msg.textContent="";}
+  catch(e){msg.className="note err";msg.textContent=e.message==="login"?"Identifiant ou code refusé : reconnectez-vous.":"Le serveur ne répond pas : les ventes n'ont pas pu être lues.";}
+  vbusy=false;vrender();if(data){glance();deroule();}navRefresh();
+}
+function vrender(){
+  const w=$("#v-warn");w.hidden=true;
+  if(!vdata){$("#v-sum").replaceChildren();$("#v-paid").replaceChildren();$("#v-open").replaceChildren();return;}
+  if(!vdata.on){$("#v-msg").textContent="Stripe n'est pas branché sur le site (pas de clé) : aucune vente à lire.";$("#v-sum").replaceChildren();
+    $("#v-paid-t").hidden=$("#v-open-t").hidden=true;$("#v-paid").replaceChildren();$("#v-open").replaceChildren();return;}
+  $("#v-paid-t").hidden=$("#v-open-t").hidden=false;
+  const warn=[];
+  if(vdata.error)warn.push("Stripe n'a pas répondu ("+vdata.error+") : la liste peut être incomplète.");
+  if(vdata.more)warn.push("Plus de 300 pages de paiement en 30 jours : seules les plus récentes sont lues.");
+  if(vdata.live===false)warn.push("Clé de test de Stripe : ce ne sont pas de vrais paiements.");
+  if(vdata.remboursements===false)warn.push("Stripe n'a pas donné les remboursements : regardez-les dans son tableau de bord.");
+  if(warn.length){w.hidden=false;w.textContent=warn.join(" ");}
+  const v=vdata.ventes||[],paid=v.filter(x=>x.paid),open=v.filter(x=>!x.paid),refunded=paid.filter(x=>x.refund);
+  const cash=paid.filter(x=>x.refund!=="total").reduce((t,x)=>t+(x.amount||0),0);
+  $("#v-sum").replaceChildren(...[["Achats",nf.format(paid.length),"30 jours"],["Encaissé",euros(cash),refunded.length?"hors remboursements":"30 jours"],
+    ["Commencés, pas payés",nf.format(open.length),v.length?pct(paid.length,v.length)+" des pages payées":"30 jours"],["Remboursés",nf.format(refunded.length),"30 jours"]]
+    .map(([k,b,d])=>el("div",{class:"tile"},el("span",{class:"k",text:k}),el("b",{text:b}),el("span",{class:"d",text:d}))));
+  $("#v-paid-t").textContent="Achats ("+paid.length+")";
+  $("#v-paid").replaceChildren(...(paid.length?paid.map(x=>el("article",{class:"mi"+(x.refund?" bad":" good")},
+    el("div",{class:"top"},el("span",{class:"addr",text:x.buyer||x.email||"Acheteur sans nom"}),el("span",{class:"when",text:when(x.at)})),
+    x.email?el("a",{href:"mailto:"+x.email,class:"sub",text:x.email}):null,
+    el("p",{class:"sub",text:questText(x).replace(/^q/,"Q")}),
+    el("p",{class:"state"+(x.refund?"":" good"),text:euros(x.amount||0)+(x.discount?" (code promo : −"+euros(x.discount)+")":"")+(x.refund?" · remboursé"+(x.refund==="partiel"?" en partie":""):" · payé")}),
+    el("p",{class:"sub",text:"Venu par "+refName(x.ref||"-")+" · paiement …"+x.id}))):[el("p",{class:"empty",text:"Aucun achat ces 30 derniers jours."})]));
+  $("#v-open-t").textContent="Paiements commencés, pas terminés ("+open.length+")";
+  $("#v-open").replaceChildren(...(open.length?open.map(x=>el("article",{class:"mi"},
+    el("div",{class:"top"},el("span",{class:"addr",text:questText(x).replace(/^q/,"Q")}),el("span",{class:"when",text:when(x.at)})),
+    el("p",{class:"sub",text:"Venu par "+refName(x.ref||"-")+" · "+(x.status==="open"?"page encore ouverte":"page abandonnée")}))):[el("p",{class:"empty",text:"Aucun paiement abandonné ces 30 derniers jours."})]));
 }
 
 // ---- day-by-day table (newest first) and CSV ----
-const COLS=[["Jour",null],["Visites","home"],["Aperçus","preview"],["Quêtes jouées","played"],["Paiements ouverts","checkout"],["Diplômes","diploma"],["Provenance",null]];
+const COLS=[["Jour",null],["Visites","home"],["Aperçus","preview"],["E-mails demandés","mail-demande"],["Paiements ouverts","checkout"],["Achats","achat"],["Quêtes jouées","played"],["Diplômes","diploma"],["Provenance",null]];
 const cell=(d,k)=>k==="played"?played(d):count(d,k);
 function refsText(d){return byRef([d]).map(([r,c])=>refName(r)+" "+c).join(", ");}
 function table(days){
@@ -588,11 +841,13 @@ $("#m-manual").addEventListener("submit",async e=>{
 
 // ---- jump menu: the bar names the section on screen; its panel reaches any section, with what is there ----
 // Nothing here calls the server: the panel only reads what the page has already loaded.
-const SECS=[["emails","E-mails"],["frequentation","Fréquentation du site","Fréquentation"],["visites","Visites par jour"],
-  ["provenance","D'où viennent les visites","Provenance"],["parcours","Du visiteur au diplôme","Visiteur → diplôme"],["jours","Jour par jour"],
+const SECS=[["coupdoeil","En un coup d'œil","Coup d'œil"],["deroule","Le déroulé de la journée","Déroulé"],["ventes","Ventes"],
+  ["parcours","Le parcours, étape par étape","Parcours"],["emails","E-mails"],["frequentation","Fréquentation du site","Fréquentation"],
+  ["visites","Visites par jour"],["provenance","D'où viennent les visites","Provenance"],["jours","Jour par jour"],
   ["avis","Avis des familles testeuses","Avis des familles"]];
 const SUBS={"emails-erreur":"#m-err-t","emails-partis":"#m-sent-t","emails-demandes":"#m-dem-t","emails-renvoi":"#m-manual"};
-const ALIAS={mails:"emails","e-mails":"emails",erreurs:"emails-erreur",renvoi:"emails-renvoi",sources:"provenance",diplome:"parcours",diplomes:"parcours",tableau:"jours",testeurs:"avis"};
+const ALIAS={mails:"emails","e-mails":"emails",erreurs:"emails-erreur",renvoi:"emails-renvoi",sources:"provenance",diplome:"parcours",diplomes:"parcours",tableau:"jours",testeurs:"avis",
+  achats:"ventes",stripe:"ventes",clients:"ventes",journee:"deroule",heures:"deroule",aujourdhui:"coupdoeil",resume:"coupdoeil"};
 const isSec=id=>SECS.some(s=>s[0]===id);
 const secName=id=>(SECS.find(s=>s[0]===id)||[])[1]||"";
 const secShort=id=>{const s=SECS.find(x=>x[0]===id);return s?s[2]||s[1]:"";};
@@ -610,11 +865,15 @@ function hashSec(){let h="";try{h=decodeURIComponent(location.hash.slice(1)).toL
 // what each entry says, from the data already on the page
 function secInfo(id){
   const days=dayList(period);
+  if(id==="coupdoeil")return{t:"aujourd'hui : "+plural(count(iso(new Date()),"home"),"visite")};
+  if(id==="deroule")return{t:selDay?dayName(selDay).toLowerCase():""};
+  if(id==="ventes"){if(!vdata)return{t:vbusy?"lecture…":"—"};if(!vdata.on)return{t:"Stripe non branché"};
+    const n=(vdata.ventes||[]).filter(v=>v.paid).length;return{t:plural(n,"achat")+" · 30 j"};}
   if(id==="emails")return moff?{t:"non activés"}:mcount?(mcount.err?{pill:mcount.err}:{t:"aucune erreur"}):{t:"à charger"};
   if(id==="frequentation")return{t:plural(sumDays(days,"home"),"visite")+" · "+period+" j"};
   if(id==="visites")return{t:"aujourd'hui : "+nf.format(count(iso(new Date()),"home"))};
   if(id==="provenance"){const r=byRef(days);return r.length?{t:"surtout : "+refName(r[0][0])}:null;}
-  if(id==="parcours")return{t:plural(sumDays(days,"diploma"),"diplôme")};
+  if(id==="parcours")return{t:plural(sumDays(dayList(30),"diploma"),"diplôme")+" · 30 j"};
   if(id==="jours")return{t:"tableau et CSV"};
   if(id==="avis")return{t:nf.format((data.avis||[]).length)+" avis"};
   return null;
@@ -754,7 +1013,7 @@ addEventListener("hashchange",()=>{const id=hashSec();if(navOn&&id)navGo(id);});
 let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(data&&!$("#app").hidden){chart(dayList(period));if(navOn)navWatch();}},150);});
 (async()=>{const c=store.get();if(!c)return;
   $("#id").value=c.id||"";$("#msg").textContent="Connexion…";
-  try{data=await load(c);creds=c;show();}catch(e){if(e.message==="login")store.clear();$("#msg").textContent="";}})();
+  try{data=await load(c);creds=c;show();vload();}catch(e){if(e.message==="login")store.clear();$("#msg").textContent="";}})();
 </script>
 </body>
 </html>
