@@ -206,7 +206,7 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
     <details class="card fold" id="mails-box" data-sec="emails">
       <summary><h2>E-mails</h2><span class="note">aperçus envoyés par Brevo</span></summary>
       <div class="foldin">
-        <p class="note">Les e-mails de l'aperçu des 10 derniers jours. Brevo n'est interrogé que lorsque vous touchez « Charger les e-mails ».</p>
+        <p class="note">Les e-mails de l'aperçu des 35 derniers jours. Brevo n'est interrogé que lorsque vous touchez « Charger les e-mails ».</p>
         <button class="btn" type="button" id="m-load">Charger les e-mails</button>
         <p class="note" id="m-msg" role="status"></p>
         <div id="m-out" class="mlist" hidden>
@@ -221,7 +221,7 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
           <button class="btn ghost" type="submit" id="m-addr-go">Renvoyer l'aperçu</button>
           <p class="note" id="m-addr-msg" role="status"></p>
           <div class="mlist" id="m-choice"></div>
-          <p class="note">Seulement à une adresse qui a demandé l'aperçu ces 10 derniers jours et n'a ni payé ni annulé : elle reçoit le même e-mail, avec le même lien. Jamais à une adresse qui n'a rien demandé.</p>
+          <p class="note">Seulement à une adresse qui a demandé l'aperçu, n'a ni payé ni annulé, et n'a pas encore reçu son dernier rappel : elle reçoit le même e-mail, avec le même lien. Jamais à une adresse qui n'a rien demandé.</p>
         </form>
       </div>
     </details>
@@ -477,7 +477,7 @@ const MS={"rebond-definitif":"Adresse inexistante ou refusée","rebond-temporair
   bloque:"Bloqué par Brevo",invalide:"Adresse invalide",erreur:"Erreur d'envoi chez Brevo",differe:"Envoi retardé : Brevo réessaie",spam:"Signalé comme indésirable par le destinataire",
   delivre:"Délivré",parti:"Parti, en attente de livraison",desinscrit:"Désinscrit chez Brevo",autre:"État inconnu"};
 const MKIND={"rebond-definitif":"rebond définitif","rebond-temporaire":"rebond temporaire"};
-const GONE="Demande introuvable : le parent a payé, s'est désinscrit, ou la demande a plus de 10 jours.";
+const GONE="Demande introuvable : le parent a payé, s'est désinscrit, ou la demande est terminée (dernier rappel envoyé, ou trop ancienne).";
 let mdata=null;
 const hm=t=>new Date(t).toLocaleTimeString("fr-FR",{timeZone:"Europe/Paris",hour:"2-digit",minute:"2-digit"});
 const dshort=t=>new Date(t).toLocaleDateString("fr-FR",{timeZone:"Europe/Paris",weekday:"short",day:"numeric",month:"short"});
@@ -561,7 +561,7 @@ function mrender(){
     el("div",{class:"top"},el("span",{class:"addr",text:m.email||"(adresse non donnée)"}),el("span",{class:"when",text:m.at?when(m.at):m.date})),
     el("p",{class:"sub"},document.createTextNode(m.subject||"(sans objet)"),m.tag?el("span",{class:"chip",text:m.tag}):null),
     el("p",{class:"state"+(m.state==="delivre"?" good":""),text:(m.state==="autre"?"État inconnu : « "+m.raw+" »":MS[m.state]||m.state)+(m.opened?" · ouvert":"")}))):
-    [el("p",{class:"empty",text:b.ok?"Aucun e-mail parti ces 10 derniers jours.":"Journal de Brevo indisponible."})]));
+    [el("p",{class:"empty",text:b.ok?"Aucun e-mail parti ces 35 derniers jours.":"Journal de Brevo indisponible."})]));
   // 3. requests kept by the site
   $("#m-dem-t").textContent="Demandes en cours ("+j.demandes.length+")";
   $("#m-dem").replaceChildren(...(j.demandes.length?j.demandes.map(d=>{
@@ -569,7 +569,7 @@ function mrender(){
     return el("article",{class:"mi"+(d.st==="echec"||["rebond-definitif","rebond-temporaire","rebond","bloque","invalide","erreur","differe"].includes(d.livraison)?" bad":"")},
       el("div",{class:"top"},el("span",{class:"addr",text:d.email}),el("span",{class:"when",text:when(d.created)})),
       el("p",{class:"sub",text:[d.name||"prénom non écrit",d.indoor?"à la maison":d.town||"commune inconnue"].join(" · ")}),
-      el("p",{class:"sub",text:"Rappel prévu le "+dshort(d.rappelLe)+(d.st==="echec"?" (ce sera son premier e-mail, s'il n'est pas renvoyé d'ici là)":"")}),
+      el("p",{class:"sub",text:(d.mois?"Rappel de la semaine envoyé · dernier rappel prévu le ":"Rappel prévu le ")+dshort(d.rappelLe)+(d.st==="echec"&&!d.mois?" (ce sera son premier e-mail, s'il n'est pas renvoyé d'ici là)":"")}),
       el("p",{class:"state"+(st==="Délivré"?" good":""),text:st}),lastResend(d));
   }):[el("p",{class:"empty",text:"Aucune demande en cours."})]));
   mcount={err:errs.length,sent:ok.length,dem:j.demandes.length};navRefresh();

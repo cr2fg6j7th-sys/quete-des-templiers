@@ -106,6 +106,7 @@ ${row("Aperçus envoyés à soi-même par e-mail (« M'envoyer l'aperçu »)", "
 ${row("Adresses laissées pour recevoir l'aperçu par e-mail (envoi par le site)", "mail-demande")}
 ${row("Aperçus rouverts depuis le lien de ces e-mails", "mail-retour")}
 ${row("Rappels envoyés (une semaine après, quête pas débloquée)", "mail-rappel")}
+${row("Derniers rappels envoyés (un mois après, quête pas débloquée)", "mail-mois")}
 ${row("Désinscriptions avant le rappel", "mail-stop")}
 ${row("Clics sur la barre de prix en bas de l'aperçu", "paybar")}
 ${row("Pas assez de lieux autour du départ", "few")}

@@ -112,7 +112,7 @@ async def main():
             check(await f.count() == 1 and await f.get_attribute("type") == "email" and await f.get_attribute("autocomplete") == "email"
                   and await f.get_attribute("inputmode") == "email" and await f.get_attribute("required") is None, "formulaire : champ e-mail facultatif (type, autocomplete, inputmode)")
             box = await pg.inner_text(".mailbox")
-            check("Recevoir mon aperçu par e-mail (facultatif)" in box and "puis un seul rappel une semaine plus tard si la quête n'est pas débloquée. Rien d'autre, et vous pouvez vous désinscrire en un clic." in box,
+            check("Recevoir mon aperçu par e-mail (facultatif)" in box and "puis au plus deux rappels si la quête n'est pas débloquée : une semaine, puis un mois plus tard. Rien d'autre, et vous pouvez vous désinscrire en un clic." in box,
                   "formulaire : libellé et information")
             check(await pg.get_attribute(".mailbox a", "href") == "legal/confidentialite", "formulaire : lien vers la confidentialité")
             check(await pg.evaluate("document.querySelector('form.town button[type=submit]').previousElementSibling.classList.contains('mailbox')"), "formulaire : champ placé juste avant le bouton (ville)")
@@ -138,7 +138,7 @@ async def main():
                   "aperçu : champ e-mail replié dans « Gardez cet aperçu », à côté des deux boutons")
             await pg.click(".keep button:has-text(\"M'envoyer l'aperçu\")")
             kp = await pg.inner_text(".keep")
-            check(await pg.locator("#mail-keep").is_visible() and "Recevoir l'aperçu par e-mail" in kp and "un seul rappel une semaine plus tard" in kp
+            check(await pg.locator("#mail-keep").is_visible() and "Recevoir l'aperçu par e-mail" in kp and "au plus deux rappels si la quête n'est pas débloquée : une semaine, puis un mois plus tard" in kp
                   and await pg.locator(".keep a[href^='mailto:']").count() == 1, "« M'envoyer l'aperçu » : le champ, l'information, et l'application e-mail en second choix")
             await ctx.close()
 
@@ -158,7 +158,7 @@ async def main():
             m1 = ms[0]
             link = link_of(m1)
             check("&n=Arthur&h=m&k=8&v=Bourg-Test&ref=mail" in link and link.startswith(BASE + "/?apercu="), "e-mail n°1 : le lien de l'aperçu " + link[-60:])
-            check("à Bourg-Test" in m1["text"] and "24,90 €" in m1["text"] and "une seule autre fois" in m1["text"] and m1["from"]["email"] == "bonjour@maquetelegendaire.fr"
+            check("à Bourg-Test" in m1["text"] and "24,90 €" in m1["text"] and "au plus deux autres fois, dans une semaine puis un mois après votre demande" in m1["text"] and m1["from"]["email"] == "bonjour@maquetelegendaire.fr"
                   and m1["replyTo"]["email"] == "maquetelegendaire@gmail.com", "e-mail n°1 : contenu, prix, expéditeur, réponse")
             check(not re.search(r"promo|NOEL", m1["html"] + m1["text"], re.I), "e-mail n°1 : aucun code promo")
             check(m1["headers"].get("List-Unsubscribe-Post") == "List-Unsubscribe=One-Click" and "/api/rappel/stop?id=" in stop_of(m1) and stop_of(m1) in m1["html"].replace("&amp;", "&"),
@@ -292,13 +292,29 @@ async def main():
             check("paye" not in got and "stop" not in got and "r5" not in got, "rappel : aucun après paiement ni désinscription")
             check("parti" not in got, "rappel : aucun après un paiement sans retour sur le site (vérifié auprès de Stripe)")
             rm = next(x for x in ms2 if x["to"] == ["r1@exemple.fr"])
-            check(rm["subject"] == "La quête de Léo vous attend" and "C'est le seul rappel que vous recevrez" in rm["text"] and "nous vous remboursons" in rm["text"]
+            check(rm["subject"] == "La quête de Léo vous attend" and "Nous vous écrirons une dernière fois dans trois semaines" in rm["text"] and "nous vous remboursons" in rm["text"]
                   and "Le lien de la quête, valable au moins douze mois" in rm["text"] and tokens["r1"] in rm["text"] and not re.search(r"promo|NOEL", rm["html"], re.I),
-                  "e-mail n°2 : objet, garanties, lien, seul rappel")
+                  "e-mail n°2 : objet, garanties, lien, annonce du dernier rappel")
             check(not [k for k in records()], "enregistrements supprimés après le rappel")
             check(call("/__cron")[1]["sent"] == 0, "rappel : jamais deux fois")
+            # 6a. the last reminder, a month after the request (requests made since 25/11/2026)
+            month = list(call("/__kv?prefix=rappel2:")[1])
+            check(len(month) == len(left), f"gardées pour le dernier rappel : {len(month)} sur {len(left)}")
+            call("/__mails?clear=1")
+            call("/__clock?days=29.9")
+            check(call("/__cron")[1]["sent"] == 0, "dernier rappel : rien avant 30 jours")
+            call("/__clock?days=30.05")
+            res = call("/__cron")[1]
+            ms4 = mails()
+            got4 = sorted(x["to"][0].split("@")[0] for x in ms4)
+            check(res["sent"] == len(left) and got4 == sorted(left), f"dernier rappel à 30 jours : un par demande restante {got4}")
+            r4 = next(x for x in ms4 if x["to"] == ["r1@exemple.fr"])
+            check(r4["subject"] == "La quête de Léo est toujours prête" and "C'est notre dernier message" in r4["text"] and tokens["r1"] in r4["text"]
+                  and "Un mois plus tard" in r4["html"] and "rappel-mois" in (r4.get("tags") or []), "e-mail n°4 : objet, dernier message, lien, étiquette")
+            check(not list(call("/__kv?prefix=rappel2:")[1]) and call("/__cron")[1]["sent"] == 0, "dernier rappel : supprimé ensuite, jamais deux fois")
             with open(ROOT / "dist" / "mail-1.html", "w", encoding="utf-8") as fh: fh.write(m1["html"])
             with open(ROOT / "dist" / "mail-2.html", "w", encoding="utf-8") as fh: fh.write(rm["html"])
+            with open(ROOT / "dist" / "mail-4.html", "w", encoding="utf-8") as fh: fh.write(r4["html"])
             call("/__clock?days=0")
 
             # 6b. the owner's private page: section « E-mails » (Brevo's log, faked by dev/serve.mjs)

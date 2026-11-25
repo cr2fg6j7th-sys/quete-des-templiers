@@ -135,13 +135,64 @@ console.log("Adresses du site : tous les tests passent.");
     && late[0].body.textContent.includes("C'est le seul message que vous recevrez") && !late[0].body.textContent.includes("seul rappel") && !late[0].body.textContent.includes("pour ne pas recevoir le rappel") && late[0].body.textContent.includes("?apercu=" + home.token),
     "the first e-mail never went: the 7th day's e-mail says so, with the link");
   sent.splice(sent.indexOf(late[0]), 1);
-  assert.ok(sent.every(x => / vous attend$/.test(x.body.subject) && x.body.textContent.includes("C'est le seul rappel que vous recevrez")), "reminder text");
+  assert.ok(sent.every(x => / vous attend$/.test(x.body.subject) && x.body.textContent.includes("Nous vous écrirons une dernière fois dans trois semaines")
+    && x.body.textContent.includes("Pour ne pas recevoir le dernier rappel") && !x.body.textContent.includes("seul rappel")), "reminder text (requests since 25/11: one more a month after)");
   assert.ok(sent.every(x => x.body.tags[0] === "rappel") && late[0].body.tags[0] === "apercu", "Brevo tags");
   sent.push(late[0]);
   assert.ok(sent.some(x => x.body.textContent.includes("S'il pleut")) && sent.some(x => !x.body.textContent.includes("S'il pleut")), "rain line only outdoors");
   assert.strictEqual(records().length, 0, "records deleted after the reminder");
   await worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
   assert.strictEqual(sent.length, 4, "never twice");
+
+  // the last reminder, 30 days after the request (requests since 25/11/2026), not after the late preview (kind 3)
+  const months = () => [...kv.keys()].filter(k => k.startsWith("rappel2:"));
+  const cron = () => worker.scheduled({ scheduledTime: Date.now() }, menv, { waitUntil() {} });
+  assert.strictEqual(months().length, 3, "kept for the month: the 3 reminded, not the late preview");
+  assert.ok(months().every(k => JSON.parse(kv.get(k).v).r === 1 && JSON.parse(kv.get(k).v).v === 2 && Object.keys(kv.get(k).meta).sort().join() === "c,n,x"), "month record");
+  sent.length = 0;
+  days = 29.9; await cron();
+  assert.strictEqual(sent.length, 0, "no last reminder before 30 days");
+  days = 30.01; await cron();
+  assert.strictEqual(sent.length, 3, "the last reminder at 30 days, one each");
+  assert.ok(sent.every(x => / est toujours prête$/.test(x.body.subject) && x.body.tags[0] === "rappel-mois" && x.body.textContent.includes("Il y a un mois")
+    && x.body.textContent.includes("C'est notre dernier message") && x.body.textContent.includes("Rien d'autre ne vous sera envoyé")
+    && x.body.htmlContent.includes("Un mois plus tard") && !x.body.htmlContent.includes("L&#39;aperçu de la quête") && !/promo|NOEL/i.test(x.body.textContent)), "last reminder: text");
+  assert.ok(sent.every(x => /^<https:\/\/maquetelegendaire\.fr\/api\/rappel\/stop\?id=[0-9a-f]{16}\.[0-9a-f]{16}&s=[0-9a-f]{32}>$/.test(x.body.headers["List-Unsubscribe"])), "last reminder: unsubscribe link");
+  assert.ok(sent.some(x => x.body.subject === "La quête de Léo est toujours prête") && sent.some(x => x.body.subject === "Votre quête d'anniversaire est toujours prête"), "last reminder: subjects");
+  assert.strictEqual(months().length, 0, "deleted after the last reminder");
+  await cron();
+  assert.strictEqual(sent.length, 3, "the last reminder never twice");
+  // a request made before 25/11/2026 (no "v"): one reminder only, as it was promised, with its old text
+  days = 0; sent.length = 0;
+  await call("/api/rappel", { email: "ancien@exemple.fr", apercu: home.token });
+  assert.ok(sent[0].body.textContent.includes("Nous vous écrirons au plus deux autres fois, dans une semaine puis un mois après votre demande")
+    && sent[0].body.textContent.includes("Pour ne pas recevoir les rappels"), "first e-mail: announces the two reminders");
+  { const e = kv.get(records()[0]), r = JSON.parse(e.v); delete r.v; e.v = JSON.stringify(r); }
+  days = 7.01; await cron();
+  assert.ok(sent.length === 2 && sent[1].body.textContent.includes("C'est le seul rappel que vous recevrez") && sent[1].body.textContent.includes("Rien d'autre ne vous sera envoyé"), "old request: its one reminder, as promised");
+  assert.ok(records().length === 0 && months().length === 0, "old request: nothing kept for the month");
+  // unsubscribe and payment after the 7th day: no last reminder
+  days = 0; sent.length = 0;
+  await call("/api/rappel", { email: "stopmois@exemple.fr", apercu: home.token });
+  await call("/api/rappel", { email: "payemois@exemple.fr", apercu: outdoor.token });
+  const stopMois = sent[0].body.headers["List-Unsubscribe"].slice(1, -1);
+  days = 7.01; await cron();
+  assert.strictEqual(months().length, 2, "both kept for the month");
+  const resend = sent.find(x => x.body.to[0].email === "stopmois@exemple.fr");
+  assert.strictEqual(resend.body.headers["List-Unsubscribe"].slice(1, -1), stopMois, "the same unsubscribe link in every e-mail");
+  const r1 = await worker.fetch(new Request(stopMois), menv, { waitUntil() {} });
+  assert.ok(r1.status === 200 && months().length === 1, "unsubscribe after the 7th day: the month's record deleted");
+  kv.set("rappel-paye:" + months()[0].slice("rappel2:".length).split(".")[0], { v: "1", meta: null });
+  sent.length = 0;
+  days = 30.2; await cron();
+  assert.ok(sent.length === 0 && months().length === 0, "paid (or unsubscribed) after the 7th day: no last reminder");
+  for (const k of [...kv.keys()]) if (k.startsWith("rappel-paye:")) kv.delete(k);
+  // the cron late by more than 10 days: the request has expired, nothing goes (and nothing is kept for the month)
+  days = 0; sent.length = 0;
+  await call("/api/rappel", { email: "tard@exemple.fr", apercu: home.token });
+  days = 10.5; await cron();
+  assert.ok(sent.length === 1 && records().length === 0 && months().length === 0, "expired request: no reminder, nothing kept");
+  days = 0; sent.length = 0;
 
   // unsubscribe: signed link only
   days = 0; sent.length = 0;
@@ -246,7 +297,7 @@ console.log("Adresses du site : tous les tests passent.");
         if (brevoLog === "net") throw new TypeError("fetch failed");
         if (brevoLog === "format") return Response.json({ events: "nope" });
         const q = new URL(u).searchParams;
-        assert.ok(+q.get("limit") <= 100 && q.get("days") === "10" && q.get("sort") === "desc", "Brevo's log: query " + u);
+        assert.ok(+q.get("limit") <= 100 && q.get("days") === "35" && q.get("sort") === "desc", "Brevo's log: query " + u);
         const ev = blog.flatMap(m => [{ email: m.body.to[0].email, date: new Date(m.at).toISOString(), subject: m.body.subject, messageId: m.mid, event: "requests", tag: m.body.tags[0], from: "x" },
           ...m.events.map(([event, reason], i) => Object.assign({ email: m.body.to[0].email, date: new Date(m.at + 1000 * (i + 1)).toISOString(), messageId: m.mid, event }, reason ? { reason } : {}))]).reverse();
         return Response.json({ events: ev.slice(+q.get("offset"), +q.get("offset") + +q.get("limit")) });
@@ -399,6 +450,16 @@ console.log("Adresses du site : tous les tests passent.");
     const n = sent.length;
     days = 7.6; await worker.scheduled({ scheduledTime: Date.now() }, eenv, { waitUntil() {} });
     assert.strictEqual(sent.length, n, "once only");
+    // waiting for the last reminder: listed with its date, and can be sent again (its text then announces one more e-mail)
+    j = await mails();
+    const wait = j.demandes.find(x => x.email.startsWith("refus@"));
+    assert.ok(wait && wait.mois === true && wait.rappelLe - wait.created === 30 * 86400000 && !j.demandes.some(x => x.email.startsWith("refus2@")),
+      "month stage listed: " + JSON.stringify(wait));
+    sent.length = 0;
+    [st, r] = await call("/api/espace/renvoi", Object.assign({ rid: wait.rid }, login), eenv);
+    assert.ok(st === 200 && sent.length === 1 && sent[0].body.textContent.includes("Nous vous écrirons une seule autre fois, un mois après votre demande"), "resend at the month stage: " + JSON.stringify(r));
+    const kept2 = kv.get("rappel2:" + wait.rid);
+    assert.ok(kept2 && Object.keys(kept2.meta).sort().join() === "c,n,x" && JSON.parse(kept2.v).last.ok === true && JSON.parse(kept2.v).r === 1, "resend: the month's record kept, its date unchanged");
     kv.clear(); sent.length = 0; days = 0;
 
     // a request written before the section « E-mails » (no st, mids, renvois, last; metadata { c, x, n }), as kept in
@@ -407,7 +468,7 @@ console.log("Adresses du site : tous les tests passent.");
       const t = (await call("/api/preview", { indoor: true }))[1].token;
       assert.strictEqual((await call("/api/rappel", { email: "ancien@exemple.fr", apercu: t, n: "Léo" }, eenv))[0], 200);
       const key = [...kv.keys()].find(k => k.startsWith("rappel:")), rec = JSON.parse(kv.get(key).v), meta = kv.get(key).meta;
-      for (const f of ["st", "err", "mids", "renvois", "last"]) delete rec[f];
+      for (const f of ["st", "err", "mids", "renvois", "last", "v"]) delete rec[f];
       assert.deepStrictEqual(Object.keys(rec).sort(), ["created", "count", "email", "hero", "indoor", "kids", "link", "minutes", "name", "ref", "town", "walkM"].sort(), "the former record's fields");
       kv.set(key, { v: JSON.stringify(rec), meta: { c: meta.c, x: meta.x, n: 0 } });
       j = await mails();

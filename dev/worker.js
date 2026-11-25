@@ -34,7 +34,7 @@ const EVENTS = new Set(["home", "setup", "preview", "few", "nodata", "neterr", "
   "liens", "liens-site", "liens-instagram", "liens-tiktok", "liens-pinterest",
   "prologue", "annule", "apercu-retour", "apercu-garde", "paybar",
   "commune-liste", "commune-tapee", "commune-proche", "localiser-ok", "localiser-echec",
-  "mail-demande", "mail-rappel", "mail-stop", "mail-retour"]);
+  "mail-demande", "mail-rappel", "mail-mois", "mail-stop", "mail-retour"]);
 function count(env, ctx, evt, ref) {
   if (!env.STATS || !EVENTS.has(evt)) return;
   const day = new Date().toISOString().slice(0, 10);
@@ -369,9 +369,10 @@ async function collect(env, nDays) {
   return { days, avis: answers };
 }
 
-/* ---------- The preview by e-mail, and one reminder (on only with BREVO_API_KEY, MAIL_FROM and STATS) ----------
+/* ---------- The preview by e-mail, and its reminders (on only with BREVO_API_KEY, MAIL_FROM and STATS) ----------
    The parent leaves an address on the preview: the link is sent at once, then one reminder 7 days later if the
-   quest is still not paid. The e-mails hold no text typed by the visitor: the quest comes from the sealed token,
+   quest is still not paid, and (requests made since 25/11/2026, "v": 2) a last one 30 days after the request.
+   The requests made before were promised one reminder only: they never get the one of the month. The e-mails hold no text typed by the visitor: the quest comes from the sealed token,
    the town from the State's API Géo (from the token's start point), the first name only if it is one of the
    1,000 most given in France (dev/prenoms.json); anything else reads « votre enfant ».
    Keys in the KV (binding STATS), next to the counts:
@@ -382,12 +383,15 @@ async function collect(env, nDays) {
                          Expires 10 days after the request; deleted after the reminder, on payment, on unsubscribe.
                          Kept even when the first e-mail could not go, so the owner can send it again from /espace;
                          then the e-mail of the 7th day says so (kind 3) instead of reading as a reminder.
+     rappel2:<t>.<e>     the same request after its reminder of the 7th day, for the last e-mail on the 30th day
+                         (only "v": 2, and "r": 1 in it); same metadata. Expires 33 days after the request; deleted
+                         after that e-mail, on payment, on unsubscribe. Never made after the e-mail of kind 3.
      rappel-n:<e>        times of the requests for one address, kept 24 hours (at most 3 per 24 hours)
      rappel-jour:<date>  e-mails sent that UTC day (the route stops at MAIL_DAY_MAX, 200 by default), kept 2 days
-     rappel-paye:<t>     this quest was paid: no reminder, kept 10 days
+     rappel-paye:<t>     this quest was paid: no reminder, kept 33 days
    <t> and <e> are HMACs of the token and of the address (key derived from QUEST_KEY, which itself never changes),
    cut to 16 hex characters: no address in a key name, and no key can be guessed from an address. */
-const DAY = 86400000, REMIND_AFTER = 7 * DAY, KEEP_DAYS = 10;
+const DAY = 86400000, REMIND_AFTER = 7 * DAY, KEEP_DAYS = 10, MONTH_AFTER = 30 * DAY, KEEP_MONTH = 33;
 const PER_ADDRESS = 3, MAX_SENDS_PER_RUN = 30, MAX_SEEN_PER_RUN = 400, STRIPE_PAGES = 3, RESEND_MAX = 3;
 const mailOn = env => !!(env.BREVO_API_KEY && env.MAIL_FROM && env.STATS && env.QUEST_KEY);
 const dayCap = env => parseInt(env.MAIL_DAY_MAX || "200", 10) || 200;
@@ -453,7 +457,8 @@ const ofName = n => /^h/i.test(n) ? "pour " + n : /^y[aeiouàâäéèêëîïô�
 const inTown = w => { const m = w.match(/^(les?)\s+(.+)$/i); return m ? (m[1].length === 3 ? "aux " : "au ") + m[2] : "à " + w; };
 
 // The e-mails (kind 1: the preview, at once, or sent again by the owner; kind 2: the reminder, 7 days later;
-// kind 3: on the 7th day when the first one never went: the preview, late, saying so, and the last message), HTML
+// kind 3: on the 7th day when the first one never went: the preview, late, saying so, and the last message;
+// kind 4: the last reminder, 30 days after the request, for the requests that accepted it, rec.v === 2), HTML
 // and plain text. Every value is escaped; the promises are those of the payment card of the preview (dev/app.template.html).
 function mailOf(env, rec, kind, stop) {
   const who = rec.name ? ofName(rec.name) : "", price = priceLabel(env), n = rec.count;
@@ -461,8 +466,11 @@ function mailOf(env, rec, kind, stop) {
   const quest = who ? `la quête d'anniversaire ${who}` : "votre quête d'anniversaire";
   const where = rec.indoor ? `${n} cachettes à la maison, environ ${rec.minutes} minutes de jeu`
     : `${n} étapes à pied ${rec.town ? inTown(rec.town) : "autour de votre point de départ"}, environ ${km} km et ${rec.minutes} minutes de jeu`;
-  const subject = kind !== 2 ? (who ? `L'aperçu de la quête ${who}` : "L'aperçu de votre quête d'anniversaire")
-    : (who ? `La quête ${who} vous attend` : "Votre quête d'anniversaire vous attend");
+  // v2: the request accepted the reminder of the month (the texts announce it); r: the reminder of the 7th day went
+  const v2 = rec.v === 2, after7 = !!rec.r;
+  const subject = kind === 2 ? (who ? `La quête ${who} vous attend` : "Votre quête d'anniversaire vous attend")
+    : kind === 4 ? (who ? `La quête ${who} est toujours prête` : "Votre quête d'anniversaire est toujours prête")
+    : (who ? `L'aperçu de la quête ${who}` : "L'aperçu de votre quête d'anniversaire");
   const steps = rec.indoor ? `Les ${n} cachettes et leurs cartes à imprimer, la voix du Grand Maître, les défis et les énigmes`
     : `Les ${n} étapes, la voix du Grand Maître, les défis et les énigmes`;
   const list = kind === 1 ? [steps, "Le guide de l'adulte, l'invitation et les diplômes"]
@@ -477,7 +485,10 @@ function mailOf(env, rec, kind, stop) {
     ["button"],
     ["list", "Dans la quête complète", list],
     `${price} pour tout le groupe, seulement si vous décidez de la débloquer ; l'aperçu, lui, est gratuit. Paiement sécurisé par Stripe.`,
-    "Nous vous écrirons une seule autre fois, dans une semaine, si la quête n'est pas débloquée. Une question ? Répondez simplement à ce message."
+    (!v2 ? "Nous vous écrirons une seule autre fois, dans une semaine, si la quête n'est pas débloquée."
+      : after7 ? "Nous vous écrirons une seule autre fois, un mois après votre demande, si la quête n'est pas débloquée."
+      : "Nous vous écrirons au plus deux autres fois, dans une semaine puis un mois après votre demande, si la quête n'est pas débloquée.")
+      + " Une question ? Répondez simplement à ce message."
   ] : kind === 3 ? [
     { t: `Il y a une semaine, vous avez demandé à recevoir l'aperçu de ${quest} par e-mail, mais notre envoi n'avait pas pu partir. Le voici : ${where}.`,
       h: `Il y a une semaine, vous avez demandé à recevoir l'aperçu de ${quest} par e-mail, mais notre envoi n'avait pas pu partir. Le voici.` },
@@ -494,11 +505,23 @@ function mailOf(env, rec, kind, stop) {
     ["button"],
     ["list", `Si vous la débloquez (${price} pour tout le groupe)`, list],
     "Paiement sécurisé par Stripe : carte, Apple Pay ou Google Pay. Un souci le jour J ? Nous vous aidons. Si la quête ne peut vraiment pas fonctionner, nous vous remboursons.",
-    "C'est le seul rappel que vous recevrez : nous effaçons votre adresse de notre serveur juste après l'envoi de ce message. Une question ? Répondez simplement à ce message."
+    (v2 ? "Nous vous écrirons une dernière fois dans trois semaines, si la quête n'est toujours pas débloquée."
+      : "C'est le seul rappel que vous recevrez : nous effaçons votre adresse de notre serveur juste après l'envoi de ce message.")
+      + " Une question ? Répondez simplement à ce message."
   ];
+  if (kind === 4) body.splice(0, body.length,
+    { t: `Il y a un mois, vous avez créé l'aperçu de ${quest} : ${where}. Il est toujours là :`,
+      h: `Il y a un mois, vous avez créé l'aperçu de ${quest}. Il est toujours là :` },
+    ["fiche"],
+    ["button"],
+    "La fête n'a pas encore de date ? Rien ne presse : une fois débloquée, la quête se joue le jour que vous choisissez.",
+    ["list", `Si vous la débloquez (${price} pour tout le groupe)`, list],
+    "Paiement sécurisé par Stripe : carte, Apple Pay ou Google Pay. Un souci le jour J ? Nous vous aidons. Si la quête ne peut vraiment pas fonctionner, nous vous remboursons.",
+    "C'est notre dernier message : nous effaçons votre adresse de notre serveur juste après son envoi. Une question ? Répondez simplement à ce message.");
   const seller = [IDENT.nom, "entrepreneur individuel", IDENT.adresse].filter(Boolean).join(", ");
   const why = `Ce message vous est envoyé par Ma Quête Légendaire${seller ? " (" + seller + ")" : ""}, parce que vous avez demandé à recevoir l'aperçu de votre quête par e-mail sur ${new URL(rec.link).host}.`;
-  const stopText = kind === 1 ? "Pour ne pas recevoir le rappel" : "Rien d'autre ne vous sera envoyé. Désinscription";
+  const stopText = kind === 1 ? (v2 && !after7 ? "Pour ne pas recevoir les rappels" : "Pour ne pas recevoir le rappel")
+    : kind === 2 && v2 ? "Pour ne pas recevoir le dernier rappel" : "Rien d'autre ne vous sera envoyé. Désinscription";
   const site = new URL(rec.link).origin, privacy = site + "/legal/confidentialite";
 
   const text = [ "Bonjour,", "",
@@ -514,8 +537,9 @@ function mailOf(env, rec, kind, stop) {
   const strong = s => esc(s).replace(esc(price), `<strong style="color:${ROSE};white-space:nowrap">${esc(price)}</strong>`);
   const P = s => `<p style="margin:0 0 16px">${strong(s)}</p>`;
   const named = rec.name ? esc(who.slice(0, who.length - rec.name.length)) + `<span style="color:${ROSE}">${esc(rec.name)}</span>` : "";
-  const h1 = !who ? esc(subject) : kind !== 2 ? esc("L'aperçu de la quête ") + named : esc("La quête ") + named + esc(" vous attend");
-  const kicker = kind === 2 ? "Petit rappel" : "Votre aperçu gratuit";
+  const h1 = !who ? esc(subject) : kind === 2 ? esc("La quête ") + named + esc(" vous attend")
+    : kind === 4 ? esc("La quête ") + named + esc(" est toujours prête") : esc("L'aperçu de la quête ") + named;
+  const kicker = kind === 2 ? "Petit rappel" : kind === 4 ? "Un mois plus tard" : "Votre aperçu gratuit";
   const tiles = rec.indoor ? [[n, "cachettes"], [rec.minutes, "minutes de jeu"]] : [[n, "étapes"], [km, "km à pied"], [rec.minutes, "minutes de jeu"]];
   const place = rec.indoor ? "À la maison, avec des cartes à imprimer" : "Autour de votre point de départ" + (rec.town ? ", " + inTown(rec.town) : "");
   const fiche = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:2px 0 8px"><tr>${tiles.map(([v, l], i) =>
@@ -537,7 +561,8 @@ function mailOf(env, rec, kind, stop) {
 <meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${esc(subject)}</title>
 <style>@media (max-width:480px){.px{padding-left:20px!important;padding-right:20px!important}.h1{font-size:25px!important}.tv{font-size:26px!important}}</style></head>
 <body style="margin:0;padding:0;background:#efe6d1">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(kind === 1 ? "Le lien de votre aperçu, à ouvrir sur n'importe quel appareil." : kind === 3 ? "Notre premier envoi n'avait pas pu partir : voici le lien de votre aperçu." : "Votre aperçu vous attend toujours. C'est notre seul rappel.")}</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(kind === 1 ? "Le lien de votre aperçu, à ouvrir sur n'importe quel appareil." : kind === 3 ? "Notre premier envoi n'avait pas pu partir : voici le lien de votre aperçu."
+  : kind === 4 ? "Votre aperçu est toujours là. C'est notre dernier message." : v2 ? "Votre aperçu vous attend toujours." : "Votre aperçu vous attend toujours. C'est notre seul rappel.")}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#efe6d1"><tr><td align="center" style="padding:24px 10px">
 <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#fffaf0;border:1px solid #e2d3ae;border-radius:16px">
@@ -557,7 +582,7 @@ ${body.map(p => p[0] === "fiche" ? fiche : p[0] === "button" ? button : p[0] ===
 </td></tr></table>
 <!--[if mso]></td></tr></table><![endif]-->
 </td></tr></table></body></html>`;
-  return { subject, html, text, stop, tag: kind === 2 ? "rappel" : "apercu" };
+  return { subject, html, text, stop, tag: kind === 2 ? "rappel" : kind === 4 ? "rappel-mois" : "apercu" };
 }
 
 // Any address in a text from Brevo, before it goes to the logs (kept by Cloudflare) or into a record.
@@ -621,7 +646,8 @@ async function askReminder(request, env, ctx) {
   const hero = b.h === "f" ? "f" : "m", kids = Math.max(2, Math.min(15, parseInt(b.k, 10) || 8));
   const town = t.i ? "" : await communeAt(env, t.a);
   const link = `${base}/?apercu=${token}&n=${encodeURIComponent(name)}&h=${hero}&k=${kids}&v=${encodeURIComponent(town)}&ref=mail`;
-  const rec = { email, link, name, hero, kids, town, indoor: !!quest.indoorOnly, count: p.count, walkM: p.walkM, minutes: p.minutes, created: now, ref };
+  // v: 2, the form announced two reminders at most (7 days, then a month after the request)
+  const rec = { email, link, name, hero, kids, town, indoor: !!quest.indoorOnly, count: p.count, walkM: p.walkM, minutes: p.minutes, created: now, ref, v: 2 };
   const key = "rappel:" + id, expiration = Math.floor(now / 1000) + KEEP_DAYS * 86400;
   const sent = await sendMail(env, email, mailOf(env, rec, 1, await stopLink(env, base, id)));
   // The request is kept either way (10 days at most, as always): when the e-mail could not go, the owner can send it
@@ -641,51 +667,68 @@ async function askReminder(request, env, ctx) {
   return reply({ ok: true });
 }
 
-// The daily cron: each request 7 days old or more, not paid, gets its one reminder, then is deleted.
+// The daily cron: each request 7 days old or more, not paid, gets its reminder; then it is deleted, or (v2, after the
+// e-mail of kind 2) moved to "rappel2:" for the last reminder, 30 days after the request, then deleted.
 // To never send twice, a record is marked before the send ("p": 1): a sure success deletes it; a sure refusal
 // (Brevo answered 4xx) clears the mark for one more try the next day; no answer leaves the mark, and a marked
-// record is deleted at the next run without a second send. Missing a reminder is better than sending two.
+// record is deleted at the next run without a second send (and without the reminder of the month either).
+// Missing a reminder is better than sending two.
 // At most 30 sends and 3 pages of Stripe a run (Workers allow 50 outgoing requests a run on the free plan) and 400
-// records read: the rest go the next day.
+// records read a stage: the rest go the next day.
+const STAGES = [["rappel:", REMIND_AFTER, KEEP_DAYS], ["rappel2:", MONTH_AFTER, KEEP_MONTH]];
 async function sendDueReminders(env, ctx, now) {
   if (!mailOn(env)) return { off: true };
-  // the list first, then the sends: deleting keys while paging through them could make the list skip some
-  const keys = [];
-  let sent = 0, later = 0, cursor, paid;
-  do {
-    const page = await env.STATS.list({ prefix: "rappel:", cursor });
-    keys.push(...page.keys);
-    cursor = page.list_complete ? null : page.cursor;
-  } while (cursor && keys.length < MAX_SEEN_PER_RUN);
-  if (cursor || keys.length > MAX_SEEN_PER_RUN) later++;
-  for (const k of keys.slice(0, MAX_SEEN_PER_RUN)) {
-    try {
-      const m = k.metadata || {};
-      if (Number(m.c) && now - Number(m.c) < REMIND_AFTER) continue;
-      if (sent >= MAX_SENDS_PER_RUN) { later++; continue; }   // the next day (and no KV operation spent on it now)
-      const ht = k.name.slice("rappel:".length).split(".")[0];
-      if (m.p || (Number(m.n) || 0) >= 2 || await env.STATS.get("rappel-paye:" + ht)) { await env.STATS.delete(k.name); continue; }
-      const raw = await env.STATS.get(k.name);
-      let rec = null;
-      try { rec = JSON.parse(raw); } catch (e) { rec = null; }
-      if (!rec || !cleanEmail(rec.email) || !rec.link) { await env.STATS.delete(k.name); continue; }
-      const created = Number(m.c) || Number(rec.created) || 0;
-      if (now - created < REMIND_AFTER) continue;
-      const exp = Number(m.x) || Math.floor(created / 1000) + KEEP_DAYS * 86400;
-      if (exp * 1000 - now < 120000) { await env.STATS.delete(k.name); continue; }   // about to expire anyway
-      // paid, but the page never came back from Stripe (no /api/unlock, so no "rappel-paye" mark): no reminder.
-      // Stripe is read once per run, only when a reminder is about to go; if it does not answer, none goes today.
-      if (paid === undefined) paid = await paidTokens(env, now);
-      if (paid === null) { later++; break; }
-      if (paid.has(tokenOf(rec.link))) { await env.STATS.delete(k.name); continue; }
-      const meta = { c: created, x: exp, n: (Number(m.n) || 0) + 1 };
-      await env.STATS.put(k.name, raw, { expiration: exp, metadata: Object.assign({ p: 1 }, meta) });
-      // the first e-mail never went (and was not sent again from /espace): this one is the preview, saying so
-      const kind = rec.st === "echec" ? 3 : 2;
-      const res = (await sendMail(env, rec.email, mailOf(env, rec, kind, await stopLink(env, new URL(rec.link).origin, k.name.slice("rappel:".length))))).res;
-      if (res === "ok") { sent++; await env.STATS.delete(k.name); count(env, ctx, "mail-rappel", rec.ref); }
-      else if (res === "refused") await env.STATS.put(k.name, raw, { expiration: exp, metadata: meta });
-    } catch (e) { console.log("reminder: " + String(e && e.message || e)); }
+  let sent = 0, later = 0, paid;
+  stages: for (const [prefix, after, keep] of STAGES) {
+    // the list first, then the sends: deleting keys while paging through them could make the list skip some
+    const keys = [];
+    let cursor;
+    do {
+      const page = await env.STATS.list({ prefix, cursor });
+      keys.push(...page.keys);
+      cursor = page.list_complete ? null : page.cursor;
+    } while (cursor && keys.length < MAX_SEEN_PER_RUN);
+    if (cursor || keys.length > MAX_SEEN_PER_RUN) later++;
+    for (const k of keys.slice(0, MAX_SEEN_PER_RUN)) {
+      try {
+        const m = k.metadata || {};
+        if (Number(m.c) && now - Number(m.c) < after) continue;
+        if (sent >= MAX_SENDS_PER_RUN) { later++; continue; }   // the next day (and no KV operation spent on it now)
+        const id = k.name.slice(prefix.length), ht = id.split(".")[0];
+        if (m.p || (Number(m.n) || 0) >= 2 || await env.STATS.get("rappel-paye:" + ht)) { await env.STATS.delete(k.name); continue; }
+        const raw = await env.STATS.get(k.name);
+        let rec = null;
+        try { rec = JSON.parse(raw); } catch (e) { rec = null; }
+        if (!rec || !cleanEmail(rec.email) || !rec.link) { await env.STATS.delete(k.name); continue; }
+        const created = Number(m.c) || Number(rec.created) || 0;
+        if (now - created < after) continue;
+        const exp = Number(m.x) || Math.floor(created / 1000) + keep * 86400;
+        if (exp * 1000 - now < 120000) { await env.STATS.delete(k.name); continue; }   // about to expire anyway
+        // paid, but the page never came back from Stripe (no /api/unlock, so no "rappel-paye" mark): no reminder.
+        // Stripe is read once per run, only when a reminder is about to go; if it does not answer, none goes today.
+        if (paid === undefined) paid = await paidTokens(env, now);
+        if (paid === null) { later++; break stages; }
+        if (paid.has(tokenOf(rec.link))) { await env.STATS.delete(k.name); continue; }
+        const meta = { c: created, x: exp, n: (Number(m.n) || 0) + 1 };
+        await env.STATS.put(k.name, raw, { expiration: exp, metadata: Object.assign({ p: 1 }, meta) });
+        // the first e-mail never went (and was not sent again from /espace): this one is the preview, saying so
+        const kind = prefix === "rappel2:" ? 4 : rec.st === "echec" ? 3 : 2;
+        const res = (await sendMail(env, rec.email, mailOf(env, rec, kind, await stopLink(env, new URL(rec.link).origin, id)))).res;
+        if (res === "ok") {
+          sent++;
+          // kept for the last reminder (a new key: never a second e-mail from this one). This one went between the 7th
+          // and the 10th day (the record expires then), so the last one comes 20 days later at least.
+          if (kind === 2 && rec.v === 2) {
+            const x = Math.floor(created / 1000) + KEEP_MONTH * 86400;
+            await env.STATS.put("rappel2:" + id, JSON.stringify(Object.assign({}, rec, { r: 1 })), { expiration: x, metadata: { c: created, x, n: 0 } })
+              .catch(e => console.log("reminder: month not kept " + String(e && e.message || e).slice(0, 200)));
+          }
+          await env.STATS.delete(k.name);
+          count(env, ctx, kind === 4 ? "mail-mois" : "mail-rappel", rec.ref);
+        }
+        else if (res === "refused") await env.STATS.put(k.name, raw, { expiration: exp, metadata: meta });
+      } catch (e) { console.log("reminder: " + String(e && e.message || e)); }
+    }
   }
   if (sent) {
     const dayKey = "rappel-jour:" + new Date(now).toISOString().slice(0, 10);
@@ -695,11 +738,11 @@ async function sendDueReminders(env, ctx, now) {
   return { sent, later };
 }
 
-// The tokens of the Checkout sessions completed in the last 11 days (a request lives 10 days), read from Stripe
+// The tokens of the Checkout sessions completed in the last 34 days (a request lives 33 days at most), read from Stripe
 // (read only, newest first, at most STRIPE_PAGES pages of 100). null when Stripe does not answer.
 async function paidTokens(env, now) {
   if (!env.STRIPE_SECRET_KEY) return new Set();   // no key, no payment possible
-  const tokens = new Set(), since = Math.floor(now / 1000) - (KEEP_DAYS + 1) * 86400;
+  const tokens = new Set(), since = Math.floor(now / 1000) - (KEEP_MONTH + 1) * 86400;
   let after = "";
   try {
     for (let page = 0; page < STRIPE_PAGES; page++) {
@@ -729,13 +772,15 @@ async function forgetReminders(env, token) {
   if (!mailOn(env) || !token) return;
   const ht = await mac(env, "t:" + token, 16), mark = "rappel-paye:" + ht;
   if (await env.STATS.get(mark)) return;   // already done at an earlier opening of this quest
-  await env.STATS.put(mark, "1", { expirationTtl: KEEP_DAYS * 86400 });
-  let cursor;
-  do {
-    const page = await env.STATS.list({ prefix: "rappel:" + ht + ".", cursor });
-    for (const k of page.keys) await env.STATS.delete(k.name);
-    cursor = page.list_complete ? null : page.cursor;
-  } while (cursor);
+  await env.STATS.put(mark, "1", { expirationTtl: KEEP_MONTH * 86400 });
+  for (const [prefix] of STAGES) {
+    let cursor;
+    do {
+      const page = await env.STATS.list({ prefix: prefix + ht + ".", cursor });
+      for (const k of page.keys) await env.STATS.delete(k.name);
+      cursor = page.list_complete ? null : page.cursor;
+    } while (cursor);
+  }
 }
 
 // GET (or one-click POST) /api/rappel/stop?id=<t>.<e>&s=<signature>: deletes the request, even if already gone.
@@ -744,13 +789,14 @@ async function stopReminder(request, env, ctx, url) {
   if (!env.QUEST_KEY || !/^[0-9a-f]{16}\.[0-9a-f]{16}$/.test(id) || !/^[0-9a-f]{32}$/.test(s) || !sameText(s, await mac(env, "stop:" + id, 32)))
     return stopPage("Ce lien de désinscription n'est pas valable : vérifiez qu'il est complet, ou écrivez-nous et nous effacerons votre adresse.", 403, env);
   if (env.STATS) {
-    const raw = await env.STATS.get("rappel:" + id);
-    if (raw) {
-      await env.STATS.delete("rappel:" + id);
-      let ref = "";
-      try { ref = JSON.parse(raw).ref || ""; } catch (e) {}
-      count(env, ctx, "mail-stop", ref);
+    let ref = null;
+    for (const [prefix] of STAGES) {
+      const raw = await env.STATS.get(prefix + id);
+      if (!raw) continue;
+      await env.STATS.delete(prefix + id);
+      try { ref = ref || JSON.parse(raw).ref || ""; } catch (e) { ref = ref || ""; }
     }
+    if (ref !== null) count(env, ctx, "mail-stop", ref);
   }
   log("rappel-stop", {});
   return stopPage("", 200, env);
@@ -853,29 +899,32 @@ async function brevoEvents(env, days) {
 
 // The requests kept here, newest first: [{ key, rid, meta, rec }] (400 at most, as the cron).
 async function keptRequests(env) {
-  const keys = [];
-  let cursor;
-  do {
-    const page = await env.STATS.list({ prefix: "rappel:", cursor });
-    keys.push(...page.keys);
-    cursor = page.list_complete ? null : page.cursor;
-  } while (cursor && keys.length < MAX_SEEN_PER_RUN);
   const out = [];
-  for (const k of keys.slice(0, MAX_SEEN_PER_RUN)) {
-    let rec = null;
-    try { rec = JSON.parse(await env.STATS.get(k.name)); } catch (e) { rec = null; }
-    if (rec && cleanEmail(rec.email)) out.push({ key: k.name, rid: k.name.slice("rappel:".length), meta: k.metadata || {}, rec });
+  for (const [prefix] of STAGES) {
+    const keys = [];
+    let cursor;
+    do {
+      const page = await env.STATS.list({ prefix, cursor });
+      keys.push(...page.keys);
+      cursor = page.list_complete ? null : page.cursor;
+    } while (cursor && keys.length < MAX_SEEN_PER_RUN);
+    for (const k of keys.slice(0, MAX_SEEN_PER_RUN)) {
+      let rec = null;
+      try { rec = JSON.parse(await env.STATS.get(k.name)); } catch (e) { rec = null; }
+      // mois: waiting for the last reminder (after the one of the 7th day)
+      if (rec && cleanEmail(rec.email)) out.push({ key: k.name, rid: k.name.slice(prefix.length), meta: k.metadata || {}, rec, mois: prefix === "rappel2:" });
+    }
   }
   return out.sort((a, b) => (Number(b.rec.created) || 0) - (Number(a.rec.created) || 0));
 }
 
-// POST /api/espace/mails { id, code }: the requests kept here and Brevo's log of the last 10 days, crossed.
+// POST /api/espace/mails { id, code }: the requests kept here and Brevo's log of the last 35 days, crossed.
 async function espaceMails(request, env, ctx) {
   const [, refused] = await espaceLogin(request, env);
   if (refused) return refused;
   if (!mailOn(env)) return reply({ ok: true, on: false });
   const now = Date.now(), kept = await keptRequests(env);
-  const brevo = await brevoEvents(env, KEEP_DAYS);
+  const brevo = await brevoEvents(env, KEEP_MONTH + 2);
   const byMid = new Map();
   for (const k of kept) for (const mid of k.rec.mids || []) byMid.set(midOf(mid), k);
   const forgotten = new Set();
@@ -890,9 +939,9 @@ async function espaceMails(request, env, ctx) {
   }
   if (brevo.ok) for (const m of brevo.messages) if (forgotten.has(m.rid)) m.rid = "";
   const day = 86400000, limit = renvois => (renvois || []).filter(t => now - t < day).length;
-  const demandes = kept.filter(k => !forgotten.has(k.rid)).map(({ rid, meta, rec, msgs }) => {
+  const demandes = kept.filter(k => !forgotten.has(k.rid)).map(({ rid, meta, rec, msgs, mois }) => {
     const created = Number(meta.c) || Number(rec.created) || 0;
-    return { rid, email: rec.email, name: rec.name || "", town: rec.town || "", indoor: !!rec.indoor, created, rappelLe: created + REMIND_AFTER,
+    return { rid, email: rec.email, name: rec.name || "", town: rec.town || "", indoor: !!rec.indoor, created, rappelLe: created + (mois ? MONTH_AFTER : REMIND_AFTER), mois: !!mois,
       expire: (Number(meta.x) || 0) * 1000, envoiEnCours: !!meta.p, st: rec.st || "envoye", err: rec.err || null,
       renvois: (rec.renvois || []).length, renvoisJour: limit(rec.renvois), last: rec.last || null,
       livraison: msgs && msgs.length ? msgs.sort((a, b) => b.at - a.at)[0].state : "" };
@@ -902,35 +951,41 @@ async function espaceMails(request, env, ctx) {
 }
 
 // POST /api/espace/renvoi { id, code, rid } or { id, code, email }: the preview's e-mail (kind 1: the same template,
-// link and unsubscribe link) sent again to the address of a request still kept. Never to an address that asked
-// nothing (no request, no consent, no link), nor once the request is gone (paid, unsubscribed, older than 10 days).
+// link and unsubscribe link) sent again to the address of a request still kept (before or after the reminder of the
+// 7th day). Never to an address that asked nothing (no request, no consent, no link), nor once the request is gone
+// (paid, unsubscribed, past its last reminder or its expiration).
 // The reminder's date does not move. At most RESEND_MAX a request per 24 hours, within the cap of the day.
 async function espaceResend(request, env, ctx) {
   const [b, refused] = await espaceLogin(request, env);
   if (refused) return refused;
   if (!mailOn(env)) return reply({ ok: false, reason: "off", message: "L'envoi par e-mail n'est pas activé sur le site." }, 503);
   const now = Date.now();
-  const gone = { ok: false, reason: "introuvable", message: "Demande introuvable : le parent a payé, s'est désinscrit, ou la demande a plus de 10 jours." };
+  const gone = { ok: false, reason: "introuvable", message: "Demande introuvable : le parent a payé, s'est désinscrit, ou la demande est terminée (dernier rappel envoyé, ou trop ancienne)." };
   let rid = String(b.rid || "");
   if (!rid) {
     const email = cleanEmail(b.email);
     if (!email) return reply({ ok: false, reason: "email", message: "Cette adresse e-mail n'est pas valable." }, 400);
     // the requests of this mailbox (its aliases too: the same fingerprint as the limits)
     const he = await mac(env, "e:" + mailbox(email), 16), found = (await keptRequests(env)).filter(k => k.rid.endsWith("." + he));
-    if (!found.length) return reply({ ok: false, reason: "introuvable", message: "Aucune demande en cours pour cette adresse : elle n'a rien demandé ces 10 derniers jours, ou le parent a payé ou s'est désinscrit. Impossible d'envoyer l'aperçu sans demande." }, 404);
+    if (!found.length) return reply({ ok: false, reason: "introuvable", message: "Aucune demande en cours pour cette adresse : elle n'a rien demandé récemment, ou le parent a payé, s'est désinscrit ou a reçu son dernier rappel. Impossible d'envoyer l'aperçu sans demande." }, 404);
     if (found.length > 1) return reply({ ok: false, reason: "plusieurs", message: "Plusieurs demandes pour cette adresse : choisissez laquelle renvoyer.",
       demandes: found.map(({ rid, rec }) => ({ rid, email: rec.email, name: rec.name || "", town: rec.town || "", indoor: !!rec.indoor, created: Number(rec.created) || 0 })) }, 409);
     rid = found[0].rid;
   }
   if (!/^[0-9a-f]{16}\.[0-9a-f]{16}$/.test(rid)) return reply({ ok: false, reason: "bad", message: "Demande non valable." }, 400);
-  const key = "rappel:" + rid, ht = rid.split(".")[0];
-  const page = await env.STATS.list({ prefix: key });
-  const entry = page.keys.find(k => k.name === key), raw = entry ? await env.STATS.get(key) : null;
+  // before the reminder of the 7th day ("rappel:"), else waiting for the one of the month ("rappel2:")
+  let key = "", entry = null, keep = KEEP_DAYS;
+  for (const [prefix, , days] of STAGES) {
+    const page = await env.STATS.list({ prefix: prefix + rid });
+    entry = page.keys.find(k => k.name === prefix + rid);
+    if (entry) { key = entry.name; keep = days; break; }
+  }
+  const ht = rid.split(".")[0], raw = entry ? await env.STATS.get(key) : null;
   let rec = null;
   try { rec = JSON.parse(raw); } catch (e) { rec = null; }
   if (!rec || !cleanEmail(rec.email) || !rec.link) return reply(gone, 404);
   const m = entry.metadata || {}, created = Number(m.c) || Number(rec.created) || now;
-  const exp = Number(m.x) || Math.floor(created / 1000) + KEEP_DAYS * 86400;
+  const exp = Number(m.x) || Math.floor(created / 1000) + keep * 86400;
   if (exp * 1000 - now < 120000) return reply(gone, 404);
   if (m.p) return reply({ ok: false, reason: "rappel", message: "Le rappel de cette demande est en cours d'envoi : pas de renvoi." }, 409);
   const renvois = (rec.renvois || []).filter(t => typeof t === "number");
@@ -948,7 +1003,7 @@ async function espaceResend(request, env, ctx) {
   if (paid.has(token)) return forget();
 
   const sent = await sendMail(env, rec.email, mailOf(env, rec, 1, await stopLink(env, new URL(rec.link).origin, rid)));
-  rec.renvois = renvois.filter(t => now - t < KEEP_DAYS * DAY).concat(now);
+  rec.renvois = renvois.filter(t => now - t < KEEP_MONTH * DAY).concat(now);
   rec.last = sent.res === "ok" ? { at: now, ok: true } : { at: now, ok: false, status: sent.status, code: sent.code || "", message: sent.message || "" };
   if (sent.res === "ok") { rec.st = "envoye"; if (sent.messageId) rec.mids = (rec.mids || []).concat(sent.messageId).slice(-6); }
   // the same expiration and metadata: the reminder's date does not move. Read again first: if the request was deleted

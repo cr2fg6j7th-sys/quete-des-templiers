@@ -2218,7 +2218,7 @@ function keepPreview(){
 const MAIL_RE=/^[A-Za-z0-9._%+-]{1,64}@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,24}$/;
 const mailValid=v=>v.length<=254&&MAIL_RE.test(v)&&!/^\.|\.\.|\.@/.test(v);
 let mailDraft="",mailState=null;   // mailState: {to, tok, st: "wait" | "ok" | "err", why: the server's reason}
-const MAIL_INFO="Nous vous envoyons le lien de votre aperçu, puis un seul rappel une semaine plus tard si la quête n'est pas débloquée. Rien d'autre, et vous pouvez vous désinscrire en un clic.";
+const MAIL_INFO="Nous vous envoyons le lien de votre aperçu, puis au plus deux rappels si la quête n'est pas débloquée : une semaine, puis un mois plus tard. Rien d'autre, et vous pouvez vous désinscrire en un clic.";
 function mailField(id,label){
   const input=h("input",{type:"email",id,name:"email",maxlength:"254",autocomplete:"email",inputmode:"email",autocapitalize:"off",spellcheck:"false",placeholder:"Ex. : prenom@exemple.fr",value:mailDraft});
   input.addEventListener("input",()=>{mailDraft=input.value.trim();});
