@@ -1,0 +1,85 @@
+{
+  "titre": "Oui, un jeu. Mais",
+  "sujet": "Frères et sœurs d'âges différents (8)",
+  "promesses": [
+    "ville",
+    "prix-par-groupe",
+    "apercu-gratuit"
+  ],
+  "musique": "chasse-au-tresor",
+  "rebours": "Réconciliation dans",
+  "scenes": [
+    {
+      "type": "probleme",
+      "badge": "REGARDEZ LA SUITE",
+      "l1": "Oui, un jeu. Mais",
+      "l2": "**pas le même jeu.**",
+      "image": "img/s1.jpg",
+      "prompt": "In a living room, a brother aged 10 holding a board game box and his little sister aged 7 holding a ball pull in opposite directions toward the door and the table, both pouting, while a tired but amused French parent stands between them with raised hands.",
+      "debut": 0,
+      "fin": 3.4
+    },
+    {
+      "type": "probleme",
+      "surtitre": "ENTRE GRAND ET PETIT…",
+      "l1": "« Trop bébé ! »",
+      "l2": "« Trop **dur !** »",
+      "stickers": [
+        "Trop bébé !",
+        "Trop dur !",
+        "Pas juste !",
+        "C'est nul !"
+      ],
+      "image": "img/s2.jpg",
+      "prompt": "Two siblings of different ages, a boy aged 10 and a girl aged 7, argue on a sofa: the older one rolls his eyes at a simple picture book, the younger one pouts in front of a big complicated puzzle, a French parent gently facepalms with a smile, a cat watches.",
+      "debut": 3.4,
+      "fin": 7.0
+    },
+    {
+      "type": "solution",
+      "surtitre": "LA SOLUTION",
+      "l1": "Une chasse au trésor",
+      "l2": "**à vivre ensemble.**",
+      "pastille": "DE 7 À 10 ANS",
+      "cta": "🗺️ Votre quête : **lien en bio**",
+      "image": "img/s3.jpg",
+      "prompt": "An older brother aged 10 and his younger sister aged 7 dressed as little knights with cardboard armor, golden paper crowns and a helmet with a red plume look at an old treasure map together, the older one holds the map, the younger one holds a magnifying glass, both smiling, sunny cobbled Alsatian lane with half-timbered houses and geraniums.",
+      "debut": 7.0,
+      "fin": 10.7
+    },
+    {
+      "type": "benefice",
+      "surtitre": "DANS VOTRE VILLE",
+      "l1": "Le grand lit l'énigme,",
+      "l2": "le petit **cherche.**",
+      "cta": "👀 La fin vaut **le détour**…",
+      "image": "img/s4.jpg",
+      "prompt": "In an Alsatian village street with half-timbered houses, an older sibling aged 10 dressed as a knight reads a rolled parchment riddle aloud while a younger sibling aged 7 dressed as a knight peeks behind a big flower pot and finds a hidden clue, geranium flower boxes, plain walls, no inscriptions.",
+      "debut": 10.7,
+      "fin": 14.4
+    },
+    {
+      "type": "benefice",
+      "surtitre": "PETIT PRIX",
+      "l1": "Toute la fratrie joue,",
+      "l2": "**sans supplément.**",
+      "cta": "📲 Créez la vôtre : **lien en bio**",
+      "image": "img/s5.jpg",
+      "prompt": "Siblings and cousins of different ages from 7 to 10 dressed as knights with crowns and red plumed helmets give each other high fives near a stone fountain in a sunny flowery Alsatian village square with half-timbered houses, joyful faces.",
+      "debut": 14.4,
+      "fin": 18.0
+    },
+    {
+      "type": "cta",
+      "surtitre": "MAQUETELEGENDAIRE.FR",
+      "l1": "Pour une fois,",
+      "l2": "**ils sont d'accord.**",
+      "bouton": "CRÉER MON APERÇU GRATUIT",
+      "sous_bouton": "Détails sur notre site · lien en bio",
+      "image": "img/s6.jpg",
+      "prompt": "A brother aged 10 and a sister aged 7 dressed as knights hug and proudly hold a small glowing treasure chest together, a kind old wise man with a long white beard and a burgundy cloak applauds, smiling parents behind, sunny Alsatian street with half-timbered houses, golden light.",
+      "debut": 18.0,
+      "fin": 22
+    }
+  ]
+}
