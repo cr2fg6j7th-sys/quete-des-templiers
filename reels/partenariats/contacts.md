@@ -38,3 +38,9 @@
 | @mama_assia_ | https://www.instagram.com/mama_assia_/ | Paris | 2026-11-24-3 | proposé | | Abonnés et activité à vérifier | 2026-11-24-3.md |
 | @papacube | https://www.instagram.com/papacube/ | à vérifier | 2026-11-24-3 | proposé | | Abonnés et activité à vérifier | 2026-11-24-3.md |
 | @papapositive | https://www.instagram.com/papapositive/ | à vérifier | 2026-11-24-3 | proposé | | Abonnés et activité à vérifier | 2026-11-24-3.md |
+| @tiphanya_blog | https://www.instagram.com/tiphanya_blog/ | Mulhouse, Alsace (à vérifier) | 2026-11-27 | proposé | | Abonnés et activité à vérifier | 2026-11-27.md |
+| @alsace.kids | https://www.instagram.com/alsace.kids/ | Alsace | 2026-11-27 | proposé | | Abonnés et activité à vérifier | 2026-11-27.md |
+| @julie.camelia | https://www.instagram.com/julie.camelia/ | Lille | 2026-11-27 | proposé | | Abonnés et activité à vérifier | 2026-11-27.md |
+| @graines_de_baroudeurs | https://www.instagram.com/graines_de_baroudeurs/ | à vérifier | 2026-11-27 | proposé | | Abonnés et activité à vérifier | 2026-11-27.md |
+| @mamanvoyage | https://www.instagram.com/mamanvoyage/ | à vérifier | 2026-11-27 | proposé | | Abonnés et activité à vérifier | 2026-11-27.md |
+| @three_vanlifers | https://www.instagram.com/three_vanlifers/ | France (en van) | 2026-11-27 | proposé | | Abonnés et activité à vérifier | 2026-11-27.md |
