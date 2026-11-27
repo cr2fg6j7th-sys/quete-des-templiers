@@ -44,3 +44,6 @@
 | @graines_de_baroudeurs | https://www.instagram.com/graines_de_baroudeurs/ | à vérifier | 2026-11-27 | proposé | | Abonnés et activité à vérifier | 2026-11-27.md |
 | @mamanvoyage | https://www.instagram.com/mamanvoyage/ | à vérifier | 2026-11-27 | proposé | | Abonnés et activité à vérifier | 2026-11-27.md |
 | @three_vanlifers | https://www.instagram.com/three_vanlifers/ | France (en van) | 2026-11-27 | proposé | | Abonnés et activité à vérifier | 2026-11-27.md |
+| @picou_bulle | https://www.instagram.com/picou_bulle/ | Lyon | 2026-11-27-2 | proposé | | Abonnés et activité à vérifier | 2026-11-27-2.md |
+| @chaloumar360 | https://www.instagram.com/chaloumar360/ | Hérault et Cannes | 2026-11-27-2 | proposé | | Abonnés et activité à vérifier | 2026-11-27-2.md |
+| @lessortiesdunelilloise | https://www.instagram.com/lessortiesdunelilloise/ | Lille et Hauts-de-France | 2026-11-27-2 | proposé | | Abonnés et activité à vérifier | 2026-11-27-2.md |

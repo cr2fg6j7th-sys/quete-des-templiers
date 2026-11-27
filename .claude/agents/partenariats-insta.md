@@ -24,7 +24,7 @@ Ma Quête Légendaire (maquetelegendaire.fr) : chasses au trésor / quêtes de c
 1. **Basé en France**, publie en français (bio, localisation, contenu). Écarter Belgique, Suisse, Québec, DOM-TOM seulement si le public n'est pas métropolitain.
 2. Thème central : idées d'activités enfants, anniversaires, DIY fêtes, sorties en famille, vie de parents, bons plans familles, éducation ludique.
 3. **Actif** : publication dans les 30 derniers jours.
-4. **Micro-influence : ~3 000 à 100 000 abonnés.** Au maximum 2 comptes plus gros, s'ils sont vraiment pertinents (le justifier).
+4. **Taille : à partir de 500 abonnés, sans limite haute.** On teste chez tout le monde, petits comme gros comptes : la taille n'est jamais une raison d'écarter un compte pertinent.
 5. Public : parents de 25-45 ans avec enfants d'environ 4 à 12 ans.
 6. Contenu familial, sans polémique.
 7. Absent de `contacts.md` (sauf si Nathan demande une relance).
