@@ -29,6 +29,13 @@ try {
     if (!r.ok) missing.push(`${f} (HTTP ${r.status} ${r.headers.get("content-type") || ""})`);
   }
   missing.length ? ko("fichiers : " + missing.join(", ")) : ok(`${files.length} fichiers (voix, musique, prénoms, polices, pages, image des liens, hors ligne)`);
+  // where the QR codes of the printed flyers lead: the links page (parchment) and the home page (night blue)
+  const liens = await fetch(site + "/liens/?ref=f-comptoir"), lh = await liens.text();
+  const socials = ["https://www.instagram.com/maquetelegendaire/", "https://www.tiktok.com/@maquetelegendaire", "https://www.pinterest.fr/maquetelegendaire/"];
+  liens.ok && lh.includes("Ma Quête Légendaire") && lh.includes('href="/?ref=') && socials.every(u => lh.includes(u))
+    ? ok("QR des flyers : page de liens (site, Instagram, TikTok, Pinterest)") : ko(`QR des flyers : page de liens (HTTP ${liens.status})`);
+  const fhome = await fetch(site + "/?ref=f-comptoir");
+  fhome.ok && (await fhome.text()).includes("Ma Quête Légendaire") ? ok("QR des flyers bleu nuit : accueil") : ko(`QR des flyers bleu nuit : accueil (HTTP ${fhome.status})`);
 
   // The pages are published without .html (canonical tags, sitemap, links): Cloudflare must serve them
   // there directly, without a redirect. Otherwise only a warning: the old .html links keep working.
