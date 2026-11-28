@@ -1,0 +1,64 @@
+{
+  "titre": "18 h 30, le sac posé",
+  "sujet": "Parents épuisés après le travail (10)",
+  "promesses": ["pret-2-minutes", "rien-a-preparer", "ville", "prix-par-groupe", "apercu-gratuit"],
+  "musique": "piste-99473",
+  "rebours": "Le plan dans",
+  "scenes": [
+    {
+      "type": "probleme", "debut": 0, "fin": 3.3,
+      "badge": "ÇA VA VOUS PARLER",
+      "l1": "18 h 30. Sac posé.",
+      "l2": "« **On joue ?** »",
+      "image": "img/s1.jpg",
+      "prompt": "Early evening in a French home: a mother just back from work, coat still on, slumps on the hallway bench with her bag dropped on the floor and a comically exhausted face, while two children aged 7 and 9 jump excitedly in front of her holding a board game and a toy sword."
+    },
+    {
+      "type": "probleme", "debut": 3.3, "fin": 6.9,
+      "surtitre": "ET L'IMAGINATION…",
+      "l1": "Inventer un jeu ?",
+      "l2": "**Plus de batterie.**",
+      "stickers": ["Réunion 18 h", "Lessive", "Dîner", "Inventer un jeu"],
+      "image": "img/s2.jpg",
+      "prompt": "In the evening, a tired French father sits on a sofa next to a laundry basket and a closed laptop, staring at the ceiling with a comically empty, drained face, while two children aged 7 and 9 sit in front of him with hopeful expectant eyes, warm lamp light, a cat asleep."
+    },
+    {
+      "type": "solution", "debut": 6.9, "fin": 10.6,
+      "surtitre": "LA SOLUTION",
+      "l1": "Le jeu est déjà prêt :",
+      "l2": "**en 2 minutes.**",
+      "pastille": "RIEN À ENVOYER",
+      "cta": "⏱️ 2 minutes : **lien en bio**",
+      "image": "img/s3.jpg",
+      "prompt": "A relaxed smiling French mother sits on a sofa holding a smartphone with a blank screen, while two children aged 7 and 9 already wearing cardboard knight armor, a golden paper crown and a helmet with a red plume cheer around her, warm lamp light."
+    },
+    {
+      "type": "benefice", "debut": 10.6, "fin": 14.2,
+      "surtitre": "DANS VOTRE VILLE",
+      "l1": "Vous lisez l'énigme,",
+      "l2": "**ils font le reste.**",
+      "cta": "👀 Jusqu'au **trésor final**…",
+      "image": "img/s4.jpg",
+      "prompt": "In a sunny Alsatian village square with half-timbered houses, a smiling parent reads from a smartphone with a blank screen while children aged 7 to 10 dressed as knights with crowns and a red plumed helmet run toward a stone fountain to look for a hidden clue, one with a magnifying glass."
+    },
+    {
+      "type": "benefice", "debut": 14.2, "fin": 18.0,
+      "surtitre": "PETIT PRIX",
+      "l1": "Toute la tribu joue,",
+      "l2": "**même prix.**",
+      "cta": "📲 Votre aperçu : **lien en bio**",
+      "image": "img/s5.jpg",
+      "prompt": "A big happy family group of children aged 7 to 10, siblings and cousins dressed as knights with crowns and red plumed helmets, cheer together in a flowery Alsatian street with half-timbered houses, golden hour light."
+    },
+    {
+      "type": "cta", "debut": 18.0, "fin": 22,
+      "surtitre": "MAQUETELEGENDAIRE.FR",
+      "l1": "Vous soufflez,",
+      "l2": "**ils deviennent héros.**",
+      "bouton": "CRÉER MON APERÇU GRATUIT",
+      "sous_bouton": "Détails sur notre site · lien en bio",
+      "image": "img/s6.jpg",
+      "prompt": "A relaxed parent sits on a wooden bench with a cup of tea, smiling peacefully, while children aged 7 to 10 dressed as knights raise a small glowing treasure chest triumphantly in front of a kind old wise man with a long white beard and a burgundy cloak, sunny Alsatian street with half-timbered houses at sunset."
+    }
+  ]
+}
