@@ -132,7 +132,7 @@ button{cursor:pointer}
 footer .me{color:var(--ok)}
 .ok{color:var(--ok);font-weight:700}
 .note{font-size:.85rem;color:var(--muted)}
-.letter{font-family:var(--display);font-size:3.2rem;color:var(--rose);line-height:1;text-align:center;letter-spacing:.15em}
+.letter{font-family:var(--body);font-weight:800;font-size:3.2rem;color:var(--rose);line-height:1;text-align:center;letter-spacing:.18em}
 .diploma{border:3px double var(--or);border-radius:6px;padding:22px 18px;text-align:center;gap:10px;background:var(--card)}
 .diploma .sign{font-family:var(--display);font-size:1.05rem;color:var(--or);margin-top:4px}
 .diploma .gm{display:flex;flex-direction:column;align-items:center;margin-top:6px;color:var(--ink)}
@@ -332,7 +332,7 @@ html,body{overflow-x:clip}
 .won:focus{outline:none}
 .won-l{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:14px;background:#f6e7bf;border:2px solid var(--gold);color:var(--ink)}
 .won-l p{line-height:1.45}
-.tile.big{flex:none;width:52px;height:60px;border-radius:10px;font-family:var(--display);font-weight:400;font-size:2.1rem}
+.tile.big{flex:none;width:52px;height:60px;border-radius:10px;font-family:var(--body);font-weight:800;font-size:2.1rem}
 @media (prefers-reduced-motion:no-preference){.won:not([hidden]) .tile.big{animation:won .5s cubic-bezier(.2,1.4,.4,1) both}@keyframes won{from{transform:scale(.4) rotate(-12deg);opacity:0}to{transform:none;opacity:1}}}
 .dsay{display:flex;align-items:flex-end;gap:10px}
 .dsay .dr{width:62px;flex:none}
@@ -987,7 +987,7 @@ function shieldRow(){
   const q=S.quest;const row=h("div",{class:"shields",role:"img","aria-label":`${S.solved.length} lettres sur ${q.steps.length} retrouvées`});
   q.steps.forEach((st,i)=>{const got=S.solved.includes(i);const w=h("div",{class:"shield"+(got&&S.lastSolved===i?" pop":"")});
     w.innerHTML=`<svg viewBox="0 0 40 46"><path d="M3 3h34v16c0 13-8 20-17 24C11 39 3 32 3 19z" fill="${got?"var(--rose)":"var(--card)"}" stroke="var(--or)" stroke-width="2.5"/>`+
-      (got?`<text x="20" y="27" text-anchor="middle" font-family="UnifrakturMaguntia, Georgia, serif" font-size="20" fill="var(--on-rose)">${st.letter}</text>`:`<text x="20" y="27" text-anchor="middle" font-family="Alegreya Sans SC, sans-serif" font-size="13" fill="var(--muted)">${i+1}</text>`)+`</svg>`;
+      (got?`<text x="20" y="27.5" text-anchor="middle" font-family="Alegreya Sans, system-ui, sans-serif" font-weight="800" font-size="21" fill="var(--on-rose)">${st.letter}</text>`:`<text x="20" y="27" text-anchor="middle" font-family="Alegreya Sans SC, sans-serif" font-size="13" fill="var(--muted)">${i+1}</text>`)+`</svg>`;
     row.append(w);});
   return row;
 }
