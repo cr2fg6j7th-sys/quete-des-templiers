@@ -1,0 +1,64 @@
+{
+  "titre": "Oui, on sort. Mais",
+  "sujet": "Balades où les enfants traînent des pieds (9)",
+  "promesses": ["ville", "pret-2-minutes", "prix-par-groupe", "apercu-gratuit"],
+  "musique": "le-coffre-dore",
+  "rebours": "On repart dans",
+  "scenes": [
+    {
+      "type": "probleme", "debut": 0, "fin": 3.5,
+      "badge": "LA SUITE VAUT LE COUP",
+      "l1": "Oui, on sort. Mais",
+      "l2": "ça **traîne des pieds.**",
+      "image": "img/s1.jpg",
+      "prompt": "A Sunday family walk on a country path near an Alsatian village: the two parents walk far ahead on the right and turn around smiling, while two children aged 7 and 9 stay far behind on the left, one sits sulking on a big stone with arms crossed, the other drags his feet with a long bored face, autumn trees, half-timbered houses in the distance. Nobody holds the children."
+    },
+    {
+      "type": "probleme", "debut": 3.5, "fin": 7.1,
+      "surtitre": "AU BOUT DE 10 MINUTES…",
+      "l1": "« On arrive quand ? »",
+      "l2": "« J'ai **mal aux pieds** »",
+      "stickers": ["J'ai faim", "C'est loin ?", "Mal aux pieds", "On rentre ?"],
+      "image": "img/s2.jpg",
+      "prompt": "On a forest path, a child aged 8 sits on the ground holding his foot with a dramatic face while his sister aged 9 hangs on a parent's arm, the French parent carries a backpack and laughs tiredly, an Alsatian village with half-timbered houses far in the distance, autumn leaves."
+    },
+    {
+      "type": "solution", "debut": 7.1, "fin": 10.8,
+      "surtitre": "LA SOLUTION",
+      "l1": "La promenade devient",
+      "l2": "**une quête.**",
+      "pastille": "DANS VOTRE VILLE",
+      "cta": "🧭 Votre parcours : **lien en bio**",
+      "image": "img/s3.jpg",
+      "prompt": "Children aged 7 to 10 dressed as little knights with cardboard armor, golden paper crowns and a helmet with a red plume run ahead full of energy on a sunny cobbled Alsatian lane with half-timbered houses, one waving a rolled treasure map, the surprised parents smile far behind."
+    },
+    {
+      "type": "benefice", "debut": 10.8, "fin": 14.3,
+      "surtitre": "PRÊTE EN 2 MINUTES",
+      "l1": "Ils marchent devant,",
+      "l2": "pour **trouver l'indice.**",
+      "cta": "👀 Le meilleur arrive **à la fin**…",
+      "image": "img/s4.jpg",
+      "prompt": "Children aged 7 to 10 dressed as knights with crowns and a red plumed helmet hurry ahead on a cobbled Alsatian lane, one points with a magnifying glass at a small hidden wooden token in an old stone wall, the parents far behind try to keep up, geranium flower boxes, plain walls, no inscriptions."
+    },
+    {
+      "type": "benefice", "debut": 14.3, "fin": 18.1,
+      "surtitre": "PETIT PRIX",
+      "l1": "Cousins, copains :",
+      "l2": "**personne ne traîne.**",
+      "cta": "📲 Testez l'aperçu : **lien en bio**",
+      "image": "img/s5.jpg",
+      "prompt": "A joyful group of cousins and friends aged 7 to 10 dressed as knights with crowns and red plumed helmets march energetically in a row along a vineyard path above an Alsatian village with half-timbered houses, sunny autumn colors."
+    },
+    {
+      "type": "cta", "debut": 18.1, "fin": 22,
+      "surtitre": "MAQUETELEGENDAIRE.FR",
+      "l1": "Cette fois, ce sont",
+      "l2": "**eux qui vous tirent.**",
+      "bouton": "CRÉER MON APERÇU GRATUIT",
+      "sous_bouton": "Détails sur notre site · lien en bio",
+      "image": "img/s6.jpg",
+      "prompt": "Children aged 7 to 10 dressed as knights pull their laughing parents by the hands toward a small glowing treasure chest near an old stone bridge in an Alsatian village, a kind old wise man with a long white beard and a burgundy cloak waits smiling, golden late afternoon light."
+    }
+  ]
+}
