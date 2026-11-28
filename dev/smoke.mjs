@@ -19,7 +19,7 @@ try {
   const home = await fetch(site + "/");
   const html = await home.text();
   home.ok && html.includes("Ma Quête Légendaire") && html.includes("QUEST_VOICE_KEYS") ? ok("page d'accueil") : ko(`page d'accueil (HTTP ${home.status})`);
-  const files = ["/audio/voix/prologue-dehors-m.mp3", "/audio/voix/maison-chaussure.mp3", "/audio/musique/accueil.mp3", "/audio/noms/lea.mp3", "/audio/noms.json", "/fonts/AlegreyaSans-Regular.woff", "/legal/cgv.html", "/anniversaire-chevalier.html",
+  const files = ["/audio/voix/prologue-dehors-m.mp3", "/audio/voix/maison-chaussure.mp3", "/audio/musique/accueil.mp3", "/audio/noms/lea.mp3", "/audio/noms.json", "/fonts/AlegreyaSans-Regular.woff", "/fonts/Cinzel-Bold.woff", "/legal/cgv.html", "/anniversaire-chevalier.html",
     "/sw.js", "/og.png", "/icon.svg", "/favicon.ico", "/apple-touch-icon.png", "/stripe-icon.png", "/stripe-logo.png", "/robots.txt", "/sitemap.xml"];
   const missing = [];
   for (const f of files) {
